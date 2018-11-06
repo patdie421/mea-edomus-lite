@@ -1,0 +1,42 @@
+SHELL = /bin/bash
+CC = gcc
+
+SOURCES=$(shell echo *.c)
+OBJECTS=$(SOURCES:.c=.o)
+
+MEAXPLINCLUDESDIR=../../src/xPLLib-mac
+MEAXPLLIB = ../../lib/meaxpllib/macosx/meaxpllib.a
+
+DEBUGFLAGS = -g \
+             -D__DEBUG_ON__
+CFLAGS = -std=c99 \
+         -std=gnu99 \
+         -O2 \
+         -D_BSD_SOURCE \
+         -I $(MEAXPLINCLUDESDIR) \
+         $(DEBUGFLAGS)
+
+LDFLAGS = -lpthread \
+          -lm \
+          -ldl
+          
+
+EXECUTABLE=mea-xpllogger
+
+all: .deps $(SOURCES) $(EXECUTABLE)
+
+.deps:
+	@mkdir -p .deps
+        
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) $(MEAXPLLIB) -o $@
+
+%.o: %.c
+	@$(CC) -c $(CFLAGS) -MM -MT $*.o $*.c > .deps/$*.dep
+	$(CC) -c $(CFLAGS) $*.c -o $@
+
+clean:
+	-rm -f $(OBJECTS)
+
+-include .deps/*.dep
+

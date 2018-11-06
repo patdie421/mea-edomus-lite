@@ -1,0 +1,131 @@
+SHELL = /bin/bash
+CC = gcc
+
+TECHNO=macosx
+DEBUGFLAGS = -g -D__DEBUG_ON__
+ASPLUGIN = 1
+
+#MYPATH=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+MYPATH=/Users/patrice/Developpement/Logiciels/mea-edomus
+
+SOURCES=$(shell echo src/*.c)
+# OBJECTS=$(SOURCES:.c=.o)
+OBJECTS=$(addprefix $(TECHNO).objects/, $(SOURCES:.c=.o))
+
+EXECUTABLE=mea-edomus.$(TECHNO)
+
+INTERFACES=type_001 type_002 type_003 type_004 type_005 type_006
+INTERFACES_NOTPLUGIN=type_001
+
+INTERFACES_PATH=$(addprefix src/interfaces/, $(INTERFACES))
+INTERFACES_NOTPLUGIN_PATH=$(addprefix src/interfaces/, $(INTERFACES_NOTPLUGIN))
+
+INTERFACES_CFLAGS=$(addprefix -I, $(INTERFACES_PATH))
+
+ifeq ($(ASPLUGIN), 1)
+INTERFACES_OBJECTS=$(addsuffix /$(TECHNO).objects/*.o, $(INTERFACES_NOTPLUGIN_PATH)) \
+src/interfaces/type_002/$(TECHNO).objects/xbee.o
+else
+$(shell rm $(MYPATH)/src/interfaces/type_*/$(TECHNO).objects/plugin.o)
+$(shell rm $(MYPATH)/src/interfaces/type_*/*.so)
+INTERFACES_OBJECTS=$(addsuffix /$(TECHNO).objects/*.o, $(INTERFACES_PATH))
+endif
+
+ifeq ($(ASPLUGIN), 1)
+ASPLUGIN_CFLAGS = -DASPLUGIN
+ASPLUGIN_LDFLAGS = -rdynamic
+else
+ASPLUGIN_CFLAGS =
+ASPLUGIN_LDFLAGS =
+endif
+
+CFLAGS      = -std=c99 \
+              -std=gnu99 \
+               $(DEBUGFLAGS) \
+              -O3 \
+              -D_BSD_SOURCE \
+              -I/usr/local/mysql/include \
+              -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
+              -I$(MYPATH)/src \
+               $(INTERFACES_CFLAGS) \
+               $(ASPLUGIN_CFLAGS)
+
+LDFLAGS     = -L/usr/local/mysql/lib \
+              -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
+              -lmysqlclient \
+              -lpthread \
+              -lm \
+              -ldl \
+              -lsqlite3 \
+              -lpython2.7 \
+              -lcurl \
+              $(ASPLUGIN_LDFLAGS)
+
+all: .deps $(TECHNO).objects interfaces $(SOURCES) $(EXECUTABLE)
+
+interfaces:
+	@for i in $(INTERFACES_PATH) ; \
+	do \
+	   $(MAKE) -C $$i -f build.mk TECHNO=$(TECHNO) BASEDIR=$(MYPATH) CC=$(CC) ASPLUGIN=$(ASPLUGIN); \
+	done
+
+$(TECHNO).objects/%.o: %.c
+	@$(CC) -c $(CFLAGS) -MM -MT $(TECHNO).objects/$*.o $*.c > .deps/$*.dep
+	$(CC) -c $(CFLAGS) $*.c -o $(TECHNO).objects/$*.o
+
+$(EXECUTABLE): $(OBJECTS) 
+	$(CC) $(LDFLAGS) $(OBJECTS) $(INTERFACES_OBJECTS) -o $@
+
+clean:
+	-rm -f $(OBJECTS) $(INTERFACES_OBJECTS) .deps/src/*
+	@for i in $(INTERFACES_PATH) ; \
+	do \
+	   $(MAKE) -C $$i -f build.mk TECHNO=$(TECHNO) BASEDIR=$(MYPATH) CC=$(CC) ASPLUGIN=$(ASPLUGIN) clean; \
+	done
+
+clean-all: clean
+	make -C commands -f commands.mk BASEDIR=$(MYPATH) TECHNO=$(TECHNO) clean
+	make -C src -f utilslib.mk BASEDIR=$(MYPATH) TECHNO=$(TECHNO) clean
+	make -C src/interfaces/drivers -f driverslib.mk BASEDIR=$(MYPATH) TECHNO=$(TECHNO) clean
+
+build-all: build-commands all
+
+build-php-cgi:
+	make -C complements/php-cgi -f php-cgi.mk SOURCE=$(MYPATH)
+
+build-nodejs:
+	make -C complements/nodejs  -f nodejs.mk  SOURCE=$(MYPATH)
+
+build-xplhub:
+	make -C complements/xplhub  -f xplhub.mk  SOURCE=$(MYPATH)
+
+build-xPL_Hub:
+	make -C complements/xPL_Hub -f xPL_Hub.mk SOURCE=$(MYPATH)
+
+build-package: build-all
+	package/build-package.sh $(MYPATH) $(TECHNO)
+
+build-commands: lib/mealib/$(TECHNO)/mealib.a
+	make -C commands -f commands.mk BASEDIR=$(MYPATH) TECHNO=$(TECHNO)
+  
+build-mealib: lib/mealib/$(TECHNO)/mealib.a
+
+lib/mealib/$(TECHNO)/mealib.a: lib/mealib/$(TECHNO)/utilslib.a lib/mealib/$(TECHNO)/driverslib.a
+	ar -rcT lib/mealib/$(TECHNO)/mealib.a lib/mealib/$(TECHNO)/utilslib.a lib/mealib/$(TECHNO)/driverslib.a
+
+lib/mealib/$(TECHNO)/utilslib.a:
+	make -C src -f utilslib.mk BASEDIR=$(MYPATH) TECHNO=$(TECHNO)
+
+lib/mealib/$(TECHNO)/driverslib.a:
+	make -C src/interfaces/drivers -f driverslib.mk BASEDIR=$(MYPATH) TECHNO=$(TECHNO)
+
+$(TECHNO).objects:
+	@mkdir -p $(TECHNO).objects
+	@mkdir -p $(TECHNO).objects/src
+
+.deps:
+	@mkdir -p .deps
+	@mkdir -p .deps/src
+	@rm .deps/src/*.dep
+
+-include .deps/src/*.dep

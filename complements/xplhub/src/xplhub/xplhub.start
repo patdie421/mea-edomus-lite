@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Startup script for xplhub
+#
+# chkconfig: 345 55 55
+# description: xplhub is av xPL Protocol hub.
+#
+# processname: xplhub
+# pidfile: /var/run/xplhub.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+xplhub=/usr/sbin/xplhub
+prog=xplhub
+RETVAL=0
+
+start() {
+        echo -n $"Starting $prog: "
+        daemon $xplhub
+        RETVAL=$?
+        echo
+        [ $RETVAL = 0 ] && touch /var/lock/subsys/ser
+        return $RETVAL
+}
+
+stop() {
+        echo -n $"Stopping $prog: "
+        killproc $xplhub
+        RETVAL=$?
+        echo
+        [ $RETVAL = 0 ] && rm -f /var/lock/subsys/xplhub /var/run/xplhub.pid
+}
+
+reload() {
+        echo -n $"Reloading $prog: "
+        killproc $xplhub -HUP
+        RETVAL=$?
+        echo
+}
+
+# See how we were called.
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status $xplhub
+        RETVAL=$?
+        ;;
+  restart)
+        stop
+        start
+        ;;
+  *)
+        echo $"Usage: $prog {start|stop|restart|status}"
+        exit 1
+esac
+
+exit $RETVAL
+

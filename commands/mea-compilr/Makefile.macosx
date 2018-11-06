@@ -1,0 +1,38 @@
+SHELL = /bin/bash
+CC = gcc
+YACC = yacc
+LEX = lex
+
+DEBUGFLAGS = -g 
+
+CFLAGS = -std=gnu99 \
+	 -O2 \
+         -I$(MEAINCLUDESDIR) \
+	 -D_BSD_SOURCE \
+	 $(DEBUGFLAGS)
+
+	LDFLAGS = -lm -ll
+
+MYPATH=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+
+EXECUTABLE=mea-compilr
+
+all: $(SOURCES) $(EXECUTABLE)
+
+$(EXECUTABLE): cJSON.o y.tab.o lex.yy.o
+	$(CC) cJSON.o lex.yy.o y.tab.o $(LDFLAGS) -o $@
+
+y.tab.c: mea-compilr2.yacc
+	$(YACC) -d mea-compilr2.yacc
+
+lex.yy.c: mea-compilr2.lex
+	$(LEX) mea-compilr2.lex
+
+y.tab.o: y.tab.c
+	$(CC) $(CFLAGS) y.tab.c -c -o $@
+
+lex.yy.o: lex.yy.c
+	$(CC) $(CFLAGS) lex.yy.c -c -o $@
+
+clean:
+	-rm -f *.o y.tab.c lex.yy.c y.tab.h

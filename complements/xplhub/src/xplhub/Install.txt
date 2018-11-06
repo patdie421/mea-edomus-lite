@@ -1,0 +1,11 @@
+
+xPL hub
+---------
+
+This is a simple xPL hub for Linux. The install files
+are for a standard RedHat installation. The C++ source
+can be compiled on almost and Linux distribution.
+
+If you have RedHat type ./install.sh and xplhub will be
+installed as a service and start on boot.
+

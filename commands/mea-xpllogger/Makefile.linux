@@ -1,0 +1,36 @@
+SHELL = /bin/bash
+CC = gcc
+MEAINCLUDESDIR=../../src
+MEALIB=../../lib/mealib/linux/mealib.a
+
+DEBUGFLAGS = -g \
+	-D__DEBUG_ON__
+
+CFLAGS = -std=c99 \
+	-std=gnu99 \
+	-O2 \
+        -I$(MEAINCLUDESDIR) \
+	-D_DEFAULT_SOURCE \
+	$(DEBUGFLAGS)
+
+	LDFLAGS = -lpthread \
+	-lm \
+	-ldl \
+	-lxPL
+
+MYPATH=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+
+SOURCES=$(shell echo *.c)
+OBJECTS=$(SOURCES:.c=.o)
+EXECUTABLE=mea-xpllogger mea-xpllogger2
+
+all: $(SOURCES) $(EXECUTABLE)
+
+mea-xpllogger: mea-xpllogger.o
+	$(CC) $(LDFLAGS) mea-xpllogger.o $(MEALIB) -o $@
+
+mea-xpllogger2: mea-xpllogger2.o
+	$(CC) $(LDFLAGS) mea-xpllogger2.o $(MEALIB) -o $@
+
+clean:
+	-rm -f $(OBJECTS)

@@ -1,0 +1,44 @@
+SHELL = /bin/bash
+CC = gcc
+
+SOURCES=$(shell echo *.c)
+OBJECTS=$(SOURCES:.c=.o)
+
+UTILSINCLUDESDIR=../../src
+DRIVERSINCLUDESDIR=../../src/interfaces/drivers
+
+MEALIB=../../lib/mealib/macosx/utilslib.a ../../lib/mealib/macosx/driverslib.a
+
+DEBUGFLAGS = -g \
+	-D__DEBUG_ON__
+	CFLAGS = -std=c99 \
+	-std=gnu99 \
+	-O2 \
+	-D_BSD_SOURCE \
+	-I$(UTILSINCLUDESDIR) \
+	-I$(DRIVERSINCLUDESDIR) \
+	$(DEBUGFLAGS)
+
+LDFLAGS = -lm -ldl -lpthread
+
+.DEFAULT_GOAL = all
+
+all: enoceanlogger enoceanpairing enoceanoutput
+
+.deps:
+	@mkdir -p .deps
+
+enoceanoutput: enocean_output.o $(MEALIB)
+	$(CC) $(LDFLAGS) enocean_output.o $(MEALIB) -o $@
+
+enoceanpairing: enocean_pairing.o $(MEALIB)
+	$(CC) $(LDFLAGS) enocean_pairing.o $(MEALIB) -o $@
+
+enoceanlogger: enocean_logger.o
+	$(CC) $(LDFLAGS) enocean_logger.o -o $@
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $*.c -o $@
+
+clean:
+	-rm -f $(OBJECTS)
