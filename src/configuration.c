@@ -12,7 +12,7 @@ char *appParameters_defaults =
    \"PHPCGIPATH\" : \"\", \
    \"PHPINIPATH\" : \"\", \
    \"GUIPATH\" : \"\", \
-   \"LOGPATH\" : \"\"\, \
+   \"LOGPATH\" : \"\", \
    \"PLUGINPATH\" : \"\", \
    \"DRIVERSPATH\" : \"\", \
    \"VENDORID\" : \"\", \
