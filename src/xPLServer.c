@@ -248,7 +248,9 @@ uint16_t mea_sendXPLMessage2(cJSON *xplMsgJson)
 
    if(deviceID[0]!=0 && strcmp(deviceID, INTERNAL_STR_C)==0) // source interne => dispatching sans passer par le réseau
    {
+      printf("ICI1\n");
       dispatchXPLMessageToInterfaces2(xplMsgJson);
+      printf("LA1\n");
       return 0;
    }
 

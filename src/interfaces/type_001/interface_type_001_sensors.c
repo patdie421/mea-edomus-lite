@@ -326,7 +326,7 @@ struct sensor_s *interface_type_001_sensors_valid_and_malloc_sensor(int16_t id_s
    else
    {
       VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s/%s invalid. Check parameters.\n",ERROR_STR, __func__, name, parameters);
+         mea_log_printf("%s (%s) : \"%s\"/\"%s\" invalid. Check parameters.\n",ERROR_STR, __func__, name, parameters);
       }
    }
    

@@ -584,12 +584,13 @@ int main(int argc, const char * argv[])
    // Contrôle et ouverture de la base de paramétrage
    //
    int16_t cause;
+/*
    if(checkParamsDb(appParameters_get("SQLITE3DBPARAMPATH", NULL), &cause))
    {
       VERBOSE(1) mea_log_printf("%s (%s) : checkParamsDb - parameters database error (%d)\n", ERROR_STR, __func__, cause);
       clean_all_and_exit();
    }
-
+*/
  
    // ouverture de la base de paramétrage
    ret = sqlite3_open_v2(appParameters_get("SQLITE3DBPARAMPATH", NULL), &sqlite3_param_db, SQLITE_OPEN_READWRITE, NULL);
@@ -740,7 +741,6 @@ int main(int argc, const char * argv[])
       VERBOSE(1) mea_log_printf("%s (%s) : can't start xpl server\n",ERROR_STR,__func__);
       clean_all_and_exit();
    }
-
 
    //
    // automatorServer

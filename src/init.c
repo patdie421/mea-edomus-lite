@@ -29,7 +29,6 @@
 #include "globals.h"
 #include "mea_verbose.h"
 #include "mea_string_utils.h"
-#include "sqlite3db_utils.h"
 #include "interfacesServer.h"
 #include "cJSON.h"
 #include "configuration.h"
@@ -716,9 +715,6 @@ int16_t interactiveInit(cJSON *params_list)
       VERBOSE(1) mea_log_printf("%s (%s) : no 'php.ini' exist, create one.\n",WARNING_STR,__func__);
       create_php_ini(appParameters_get("PHPINIPATH", params_list));
    }
-
-   // insertion des données dans la base
-   retcode=init_db(params_list)+11;
 
 interactiveInit_exit:
    return retcode;
