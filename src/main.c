@@ -703,6 +703,7 @@ int main(int argc, const char * argv[])
       VERBOSE(2) mea_log_printf("%s (%s) : can't start gui server\n",ERROR_STR,__func__);
    }
 
+
    //
    // pythonPluginServer
    //
@@ -713,14 +714,14 @@ int main(int argc, const char * argv[])
    process_set_watchdog_recovery(xplServer_monitoring_id, restart_pythonPluginServer, (void *)(&pythonPluginServer_start_stop_params));
    process_add_indicator(pythonPluginServer_monitoring_id, "PYCALL", 0);
    process_add_indicator(pythonPluginServer_monitoring_id, "PYCALLERR", 0);
-/*
    if(process_start(pythonPluginServer_monitoring_id, NULL, 0)<0)
    {
       VERBOSE(1) mea_log_printf("%s (%s) : can't start python plugin server\n",ERROR_STR,__func__);
       clean_all_and_exit();
    }
    sleep(1);
-*/
+
+
    //
    // xPLServer
    //
@@ -734,13 +735,13 @@ int main(int argc, const char * argv[])
    process_add_indicator(xplServer_monitoring_id, xpl_server_xplout_str, 0);
    process_add_indicator(xplServer_monitoring_id, xpl_server_senderr_str, 0);
    process_add_indicator(xplServer_monitoring_id, xpl_server_readerr_str, 0);
-/*
    if(process_start(xplServer_monitoring_id, NULL, 0)<0)
    {
       VERBOSE(1) mea_log_printf("%s (%s) : can't start xpl server\n",ERROR_STR,__func__);
       clean_all_and_exit();
    }
-*/
+
+
    //
    // automatorServer
    //
@@ -754,13 +755,13 @@ int main(int argc, const char * argv[])
    process_add_indicator(automatorServer_monitoring_id, automator_xplin_str, 0);
    process_add_indicator(automatorServer_monitoring_id, automator_xplout_str, 0);
    process_add_indicator(automatorServer_monitoring_id, automator_err_str, 0);
-/*
    if(process_start(automatorServer_monitoring_id, NULL, 0)<0)
    {
       VERBOSE(1) mea_log_printf("%s (%s) : can't start automator server\n",ERROR_STR,__func__);
       clean_all_and_exit();
    }
-*/
+
+
    //
    // interfacesServer
    //
@@ -768,15 +769,13 @@ int main(int argc, const char * argv[])
    interfacesServerData.params_list=getAppParameters();
    interfacesServerData.sqlite3_param_db=sqlite3_param_db;
 //   interfaces=start_interfaces(params_list, sqlite3_param_db); // démarrage des interfaces
-   printf("ICI\n");
    interfaces=start_interfaces(getAppParameters(), sqlite3_param_db); // démarrage des interfaces
-   printf("LA\n");
    int interfaces_reload_task_id=process_register("RELOAD"); // mise en place de la tâche de rechargement des paramètrages des interfaces
    process_set_group(interfaces_reload_task_id, 2);
    process_set_start_stop(interfaces_reload_task_id, restart_interfaces, NULL, (void *)(&interfacesServerData), 1);
    process_set_type(interfaces_reload_task_id, TASK);
 
-   sleep(20);
+
    //
    // batch rotation des log 1x par jour (0|0|*|*|* = à miniuit)
    // 
