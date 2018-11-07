@@ -727,7 +727,7 @@ int main(int argc, const char * argv[])
    //
    struct xplServer_start_stop_params_s xplServer_start_stop_params;
    xplServer_start_stop_params.params_list=getAppParameters();
-   xplServer_start_stop_params.sqlite3_param_db=sqlite3_param_db;
+   // xplServer_start_stop_params.sqlite3_param_db=sqlite3_param_db;
    xplServer_monitoring_id=process_register(xpl_server_name_str);
    process_set_start_stop(xplServer_monitoring_id, start_xPLServer, stop_xPLServer, (void *)(&xplServer_start_stop_params), 1);
    process_set_watchdog_recovery(xplServer_monitoring_id, restart_xPLServer, (void *)(&xplServer_start_stop_params));
