@@ -8,7 +8,6 @@
 #ifndef __interfacesServer_h
 #define __interfacesServer_h
 
-// #include <Python.h>
 #include <termios.h>
 #include <inttypes.h>
 #include <sqlite3.h>
@@ -16,7 +15,6 @@
 #include "xPLServer.h"
 
 #include "mea_queue.h"
-//DBSERVER #include "dbServer.h"
 #include "cJSON.h"
 
 #define INTERFACE_TYPE_001 100
@@ -31,22 +29,7 @@ extern char *sql_select_device_info;
 extern char *sql_select_interface_info;
 #endif
 
-/*
-sensors_actuators.id_sensor_actuator, \
-sensors_actuators.id_location, \
-sensors_actuators.state, \
-sensors_actuators.parameters, \
-types.parameters, \
-sensors_actuators.id_type, \
-lower(sensors_actuators.name), \
-lower(interfaces.name), \
-interfaces.id_type, \
-(SELECT lower(types.name) FROM types WHERE types.id_type = interfaces.id_type), \
-interfaces.dev, \
-sensors_actuators.todbflag, \
-types.typeoftype, \
-sensors_actuators.id_interface
-*/
+
 struct device_info_s
 {
    uint16_t id;
@@ -66,9 +49,8 @@ struct device_info_s
 
    uint16_t location_id;
    uint16_t todbflag;
-
-//   void *userdata;
 };
+
 
 typedef int16_t (*xpl2_f)(cJSON *xplMsgJson, struct device_info_s *device_info, void *userdata);
 
@@ -96,12 +78,12 @@ struct interfacesServer_interfaceFns_s {
    get_xPLCallback_f get_xPLCallback;
    set_xPLCallback_f set_xPLCallback;
    get_type_f get_type;
-//   get_interface_id_f get_interface_id;
 
    clean_f clean;
 
    api_f api;
 };
+
 
 #ifdef ASPLUGIN
 typedef int (*get_fns_interface_f)(void *, struct interfacesServer_interfaceFns_s *);
@@ -125,15 +107,12 @@ typedef struct interfaces_queue_elem_s
 
 struct interfacesServerData_s
 {
-//   char **params_list;
    cJSON *params_list;
    sqlite3 *sqlite3_param_db;
-//   dbServer_md_t *myd;
 };
 
 
 int16_t      interfacesServer_call_interface_api(int id_interface, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err);
-//mea_queue_t *start_interfaces(char **params_list, sqlite3 *sqlite3_param_db);
 mea_queue_t *start_interfaces(cJSON *params_list, sqlite3 *sqlite3_param_db);
 void         stop_interfaces(void);
 int          dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson);
