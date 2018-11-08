@@ -26,8 +26,10 @@
 #define INTERFACE_TYPE_005 455
 #define INTERFACE_TYPE_006 465
 
+#ifndef NOMORESQLITE3
 extern char *sql_select_device_info;
 extern char *sql_select_interface_info;
+#endif
 
 /*
 sensors_actuators.id_sensor_actuator, \
