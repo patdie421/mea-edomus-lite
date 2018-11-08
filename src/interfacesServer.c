@@ -614,12 +614,13 @@ int jsonTypesSave()
 */
  
  
-int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice)
+int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, cJSON *jsonInterface, cJSON *jsonType)
 {
    if(!device_info)
       return -1;
  
-   cJSON *jsonInterface = cJSON_GetObjectItem(jsonDevice, "interface");
+   if(!jsonInterface)
+      jsonInterface = cJSON_GetObjectItem(jsonDevice, "interface");
    if(!jsonInterface)
       return -1;
  
@@ -629,8 +630,11 @@ int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice)
    device_info->state             =    (int)cJSON_GetObjectItem(jsonDevice, "state")->valuedouble;
    device_info->type_id           =    (int)cJSON_GetObjectItem(jsonDevice, "id_type")->valuedouble;
  
-   cJSON *jsonType = findTypeByIdThroughIndex(types_index, device_info->id);
- 
+   if(!jsonType)
+      jsonType = findTypeByIdThroughIndex(types_index, device_info->id);
+   if(!jsonType)
+      return -1;
+   
    device_info->type_name         = (char *)jsonType->string;
    device_info->typeoftype_id     =    (int)cJSON_GetObjectItem(jsonType, "typeoftype")->valuedouble;
    device_info->parameters        = (char *)cJSON_GetObjectItem(jsonType, "parameters")->valuestring;
