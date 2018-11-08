@@ -71,7 +71,7 @@ int set_xPLCallback_interface_type_003(void *ixxx, xpl2_f cb);
 int set_monitoring_id_interface_type_003(void *ixxx, int id);
 int get_type_interface_type_003(void);
 
-interface_type_003_t *malloc_and_init_interface_type_003(int id_driver, cJSON *jsonInterface);
+// interface_type_003_t *malloc_and_init_interface_type_003(int id_driver, cJSON *jsonInterface);
 int clean_interface_type_003(void *ixxx);
 int16_t api_interface_type_003(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err);
 
