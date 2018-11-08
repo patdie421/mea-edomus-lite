@@ -55,7 +55,7 @@ struct device_info_s
 typedef int16_t (*xpl2_f)(cJSON *xplMsgJson, struct device_info_s *device_info, void *userdata);
 
 typedef void * (*malloc_and_init_f)(sqlite3 *, int, int, char *, char *, char *, char *);
-typedef void * (*malloc_and_init2_f)(cJSON *);
+typedef void * (*malloc_and_init2_f)(int, cJSON *);
 typedef int    (*get_monitoring_id_f)(void *);
 typedef int    (*set_monitoring_id_f)(void *, int);
 typedef xpl2_f (*get_xPLCallback_f)(void *);
