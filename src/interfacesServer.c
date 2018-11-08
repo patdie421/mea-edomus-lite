@@ -6,7 +6,7 @@
 //
 //
 #include <Python.h>
- 
+
 #include <stdio.h>
 #include <termios.h>
 #include <inttypes.h>
@@ -18,22 +18,22 @@
 #include <sqlite3.h>
 #endif 
 #include <dlfcn.h>
- 
+
 #include "globals.h"
 #include "configuration.h"
 #include "tokens.h"
 #include "tokens_da.h"
- 
+
 #include "mea_string_utils.h"
 #include "mea_queue.h"
 #include "mea_verbose.h"
 #include "consts.h"
- 
+
 #include "cJSON.h"
 #include "uthash.h"
- 
+
 #include "processManager.h"
- 
+
 #include "interfacesServer.h"
 #include "interface_type_001.h"
 #include "interface_type_002.h"
@@ -41,7 +41,7 @@
 #include "interface_type_004.h"
 #include "interface_type_005.h"
 #include "interface_type_006.h"
- 
+
 #ifndef NOMORESQLITE3
 char *sql_select_device_info="SELECT \
 sensors_actuators.id_sensor_actuator, \
@@ -60,24 +60,24 @@ types.typeoftype, \
 sensors_actuators.id_interface \
 FROM sensors_actuators INNER JOIN interfaces ON sensors_actuators.id_interface = interfaces.id_interface INNER JOIN types ON sensors_actuators.id_type = types.id_type" ;
 #endif
- 
+
 #define MAX_INTERFACES_PLUGINS 10 // au demarrage et pour les statics
- 
+
 struct interfacesServer_interfaceFns_s *interfacesFns;
 int interfacesFns_nb = 0;
 int interfacesFns_max = MAX_INTERFACES_PLUGINS;
- 
+
 mea_queue_t *_interfaces=NULL;
- 
+
 pthread_rwlock_t interfaces_queue_rwlock;
 pthread_rwlock_t jsonInterfaces_rwlock;
- 
+
 /*
 * New functions
 */
 cJSON *jsonInterfaces = NULL;
 cJSON *jsonTypes      = NULL;
- 
+
 struct devices_index_s
 {
    char name[41];
@@ -85,8 +85,8 @@ struct devices_index_s
    UT_hash_handle hh;
 };
 struct devices_index_s *devices_index = NULL;
- 
- 
+
+
 struct types_index_s
 {
    int id_type;
@@ -94,8 +94,8 @@ struct types_index_s
    UT_hash_handle hh;
 };
 struct types_index_s *types_index = NULL;
- 
- 
+
+
 struct devs_index_s
 {
    char devName[41];
@@ -103,9 +103,9 @@ struct devs_index_s
    UT_hash_handle hh;
 };
 struct devs_index_s *devs_index = NULL;
- 
- 
- 
+
+
+
 void deleteDevicesIndex(struct devices_index_s *devices_index)
 {
    struct devices_index_s *e = NULL, *tmp = NULL;
@@ -118,8 +118,8 @@ void deleteDevicesIndex(struct devices_index_s *devices_index)
    }
    devices_index = NULL;
 }
- 
- 
+
+
 void deleteTypesIndex(struct types_index_s *types_index)
 {
    struct types_index_s *e = NULL, *tmp = NULL;
@@ -132,7 +132,7 @@ void deleteTypesIndex(struct types_index_s *types_index)
    }
    types_index = NULL;
 }
- 
+
 
 void deleteDevsIndex(struct devs_index_s *devs_index)
 {
@@ -146,8 +146,8 @@ void deleteDevsIndex(struct devs_index_s *devs_index)
    }
    devs_index = NULL;
 }
- 
- 
+
+
 int createDevsIndex(struct devs_index_s *devs_index, cJSON *jsonInterfaces)
 {
    if(!jsonInterfaces)
@@ -167,8 +167,8 @@ int createDevsIndex(struct devs_index_s *devs_index, cJSON *jsonInterfaces)
  
    return 0;
 }
- 
- 
+
+
 int createDevicesIndex(struct devices_index_s *devices_index, cJSON *jsonInterfaces)
 {
    if(!jsonInterfaces)
@@ -195,8 +195,8 @@ int createDevicesIndex(struct devices_index_s *devices_index, cJSON *jsonInterfa
  
    return 0;
 }
- 
- 
+
+
 int createTypesIndex(struct types_index_s *types_index, cJSON *jsonTypes)
 {
    if(!jsonTypes)
@@ -215,9 +215,9 @@ int createTypesIndex(struct types_index_s *types_index, cJSON *jsonTypes)
  
    return 0;
 }
- 
- 
-cJSON *findInterfaceByDevNameThroughIndex(struct devs_index_s *devs_index, char *devName)
+
+
+cJSON *findInterfaceByDevNameThroughIndex_alloc(struct devs_index_s *devs_index, char *devName)
 {
    struct devs_index_s *e = NULL;
  
@@ -228,14 +228,14 @@ cJSON *findInterfaceByDevNameThroughIndex(struct devs_index_s *devs_index, char 
  
    HASH_FIND_STR(devs_index, devName, e);
    if(e) {
-      d=e->interface;
+      d=cJSON_Duplicate(e->interface,1);
    }
- 
+
    return d;
 }
- 
- 
-cJSON *findDeviceByNameThroughIndex(struct devices_index_s *devices_index, char *name)
+
+
+cJSON *findDeviceByNameThroughIndex_alloc(struct devices_index_s *devices_index, char *name)
 {
    struct devices_index_s *e = NULL;
  
@@ -246,14 +246,14 @@ cJSON *findDeviceByNameThroughIndex(struct devices_index_s *devices_index, char 
  
    HASH_FIND_STR(devices_index, name, e);
    if(e) {
-      d=e->device;
+      d=cJSON_Duplicate(e->device, 0);
    }
  
    return d;
 }
- 
- 
-cJSON *findTypeByIdThroughIndex(struct types_index_s *types_index, int id)
+
+
+cJSON *findTypeByIdThroughIndex_alloc(struct types_index_s *types_index, int id)
 {
    struct types_index_s *e = NULL;
  
@@ -264,29 +264,12 @@ cJSON *findTypeByIdThroughIndex(struct types_index_s *types_index, int id)
  
    HASH_FIND_INT(types_index, &id, e);
    if(e) {
-      t=e->type;
+      t=cJSON_Duplicate(e->type, 0);
    }
    return t;
 }
- 
- 
-cJSON *findInterfaceById(cJSON *jsonInterfaces, int id)
-{
-   if(!jsonInterfaces)
-      return NULL;
- 
-   cJSON *jsonInterface=jsonInterfaces->child;
-   while( jsonInterface ) {
-      int  id_interface=cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
-      if(id_interface == id)
-         return jsonInterface;
-      jsonInterface = jsonInterface->next;
-   }
- 
-   return NULL;
-}
- 
- 
+
+
 int checkJsonInterfaces(cJSON *jsonInterfaces)
 {
    if(!jsonInterfaces) {
@@ -316,6 +299,23 @@ int checkJsonTypes(cJSON *jsonTypes)
 
 
 #ifndef NOMORESQLITE3
+cJSON *findInterfaceById(cJSON *jsonInterfaces, int id)
+{
+   if(!jsonInterfaces)
+      return NULL;
+ 
+   cJSON *jsonInterface=jsonInterfaces->child;
+   while( jsonInterface ) {
+      int  id_interface=cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
+      if(id_interface == id)
+         return jsonInterface;
+      jsonInterface = jsonInterface->next;
+   }
+ 
+   return NULL;
+}
+
+
 void linkInterfacesDevices(cJSON *jsonInterfaces, cJSON *jsonDevices)
 {
    cJSON *jsonDevice=jsonDevices->child;
@@ -559,7 +559,7 @@ int resyncDevices(cJSON *jsonInterfaces, sqlite3 *sqlite3_param_db)
    return 0;
 }
  
- 
+
 cJSON *jsonInterfacesLoad(sqlite3 *sqlite3_param_db)
 {
    cJSON *_jsonInterfaces=interfacesTableToJson(sqlite3_param_db);
@@ -602,6 +602,13 @@ int jsonInterfacesSave()
 {
    return 0;
 }
+
+int jsonTypesSave()
+{
+   return 0;
+}
+
+
 /*
 * end new functions
 */
@@ -633,7 +640,7 @@ int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice)
    device_info->interface_type_id =    (int)cJSON_GetObjectItem(jsonInterface, "id_type")->valuedouble;
    device_info->interface_dev     = (char *)cJSON_GetObjectItem(jsonInterface, "dev")->valuestring;
  
-   device_info->location_id       = 1;
+   device_info->location_id       = 0;
    device_info->todbflag          = 0;
  
    return 0;
@@ -661,17 +668,20 @@ int dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson)
 
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
- 
-   jsonDevice=findDeviceByNameThroughIndex(devices_index, device->valuestring);
-   state=(int)cJSON_GetObjectItem(jsonDevice, "state")->valuedouble;
-   id_interface=(int)cJSON_GetObjectItem(jsonDevice, "id_interface")->valuedouble;
- 
+   jsonDevice=findDeviceByNameThroughIndex_alloc(devices_index, device->valuestring);
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
 
-
+   if(!jsonDevice) {
+      DEBUG_SECTION mea_log_printf("%s (%s) : unknown device\n", INFO_STR, __func__);
+      return -1;
+   }
+ 
+   state=(int)cJSON_GetObjectItem(jsonDevice, "state")->valuedouble;
+   id_interface=(int)cJSON_GetObjectItem(jsonDevice, "id_interface")->valuedouble;
    struct device_info_s device_info;
    device_info_from_json(&device_info, jsonDevice);
+   cJSON_Delete(jsonDevice);
 
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
    pthread_rwlock_rdlock(&interfaces_queue_rwlock);
@@ -687,9 +697,8 @@ int dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson)
                if(monitoring_id>-1 && process_is_running(monitoring_id)) {
                   xpl2_f xPL_callback2 = iq->fns->get_xPLCallback(iq->context);
                   if(xPL_callback2) {
-                     ret = xPL_callback2(xplMsgJson, &device_info, iq->context);
-                     if(ret == 1)
-                        break;
+                     xPL_callback2(xplMsgJson, &device_info, iq->context);
+                     break;
                   }
                }
                break;
@@ -806,7 +815,6 @@ int init_interfaces_list(cJSON *jsonInterfaces)
       int  id_type=cJSON_GetObjectItem(jsonInterface, "id_type")->valuedouble;
       char *parameters=cJSON_GetObjectItem(jsonInterface, "parameters")->valuestring;
 
-      printf("%s %d %d\n", parameters, id_type, state); 
       for(int i=0; i<next_int; i++) {
          if(plugins_list[i].type == id_type) {
             VERBOSE(2) mea_log_printf("%s (%s) : interface type %d allread loaded\n", INFO_STR, __func__, plugins_list[i].type);
@@ -857,7 +865,8 @@ int init_interfaces_list(cJSON *jsonInterfaces)
  
  
 #ifdef ASPLUGIN
-int load_interface(int type, cJSON *params_list)
+// int load_interface(int type, cJSON *params_list)
+int load_interface(int type, char *driversPath)
 {
    for(int i=0; interfacesFns[i].get_type; i++)
    {
@@ -873,7 +882,8 @@ int load_interface(int type, cJSON *params_list)
          get_fns_interface_f fn = NULL;
          char interface_so[256];
 
-         snprintf(interface_so, sizeof(interface_so)-1,"%s/%s", appParameters_get("DRIVERSPATH", params_list), plugins_list[i].name);
+//         snprintf(interface_so, sizeof(interface_so)-1,"%s/%s", appParameters_get("DRIVERSPATH", params_list), plugins_list[i].name);
+         snprintf(interface_so, sizeof(interface_so)-1,"%s/%s", driversPath, plugins_list[i].name);
 
          void *lib = dlopen(interface_so, RTLD_NOW | RTLD_GLOBAL);
          if(lib)
@@ -1038,7 +1048,12 @@ void stop_interfaces()
       deleteDevicesIndex(devices_index);
       devices_index=NULL;
    }
- 
+
+   if(devices_index) {
+      deleteDevsIndex(devs_index);
+      devs_index=NULL;
+   }
+
    if(types_index) {
       deleteTypesIndex(types_index);
       devices_index=NULL;
@@ -1132,7 +1147,6 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    pthread_rwlock_init(&interfaces_queue_rwlock, NULL);
    pthread_rwlock_init(&jsonInterfaces_rwlock, NULL);
  
- 
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
  
@@ -1189,6 +1203,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
  
+   char *driversPath=appParameters_get("DRIVERSPATH", params_list);
    cJSON *jsonInterface=jsonInterfaces->child;
    while( jsonInterface ) {
       char *name=jsonInterface->string;
@@ -1215,7 +1230,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
          int i=0;
  
 #ifdef ASPLUGIN
-         ret=load_interface(id_type, params_list);
+         ret=load_interface(id_type, driversPath);
          if(ret<0) {
             VERBOSE(2) mea_log_printf("%s (%s) : can't load interface type %d\n", ERROR_STR, __func__, id_type);
          }
