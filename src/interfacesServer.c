@@ -217,16 +217,16 @@ int createTypesIndex(struct types_index_s *types_index, cJSON *jsonTypes)
 }
 
 
-cJSON *findInterfaceByDevNameThroughIndex_alloc(struct devs_index_s *devs_index, char *devName)
+cJSON *findInterfaceByDevNameThroughIndex_alloc(struct devs_index_s *_devs_index, char *devName)
 {
    struct devs_index_s *e = NULL;
  
-   if(!devs_index)
-      return NULL;
+   if(!_devs_index)
+      _devs_index=devs_index;
  
    cJSON *d = NULL;
  
-   HASH_FIND_STR(devs_index, devName, e);
+   HASH_FIND_STR(_devs_index, devName, e);
    if(e) {
       d=cJSON_Duplicate(e->interface,1);
    }
