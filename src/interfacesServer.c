@@ -41,7 +41,7 @@
 #include "interface_type_005.h"
 #include "interface_type_006.h"
  
-
+#ifndef NOMORESQLITE3
 char *sql_select_device_info="SELECT \
 sensors_actuators.id_sensor_actuator, \
 sensors_actuators.id_location, \
@@ -58,7 +58,7 @@ sensors_actuators.todbflag, \
 types.typeoftype, \
 sensors_actuators.id_interface \
 FROM sensors_actuators INNER JOIN interfaces ON sensors_actuators.id_interface = interfaces.id_interface INNER JOIN types ON sensors_actuators.id_type = types.id_type" ;
-
+#endif
  
 #define MAX_INTERFACES_PLUGINS 10 // au demarrage et pour les statics
  
