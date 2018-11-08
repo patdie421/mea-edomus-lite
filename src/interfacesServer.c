@@ -684,7 +684,7 @@ int dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson)
    state=(int)cJSON_GetObjectItem(jsonDevice, "state")->valuedouble;
    id_interface=(int)cJSON_GetObjectItem(jsonDevice, "id_interface")->valuedouble;
    struct device_info_s device_info;
-   device_info_from_json(&device_info, jsonDevice);
+   device_info_from_json(&device_info, jsonDevice, NULL, NULL);
    cJSON_Delete(jsonDevice);
 
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
