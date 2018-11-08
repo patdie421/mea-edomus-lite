@@ -14,8 +14,9 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <signal.h>
+#ifndef NOMORESQLITE3
 #include <sqlite3.h>
- 
+#endif 
 #include <dlfcn.h>
  
 #include "globals.h"
@@ -298,8 +299,22 @@ int checkJsonInterfaces(cJSON *jsonInterfaces)
       return 0;
    }
 }
- 
- 
+
+
+int checkJsonTypes(cJSON *jsonTypes)
+{
+   if(!jsonTypes) {
+      return -1;
+   }
+   else {
+//
+// ajouter ici le controle de la structure et des types de données
+//
+      return 0;
+   }
+}
+
+
 #ifndef NOMORESQLITE3
 void linkInterfacesDevices(cJSON *jsonInterfaces, cJSON *jsonDevices)
 {
@@ -561,8 +576,24 @@ cJSON *jsonInterfacesLoad(sqlite3 *sqlite3_param_db)
       cJSON_Delete(_jsonInterfaces);
       return NULL;
    }
+
+   createDevicesIndex(devices_index, jsonInterfaces);
  
    return _jsonInterfaces;
+}
+
+cJSON *jsonTypesLoad(sqlite3 *sqlite3_param_db)
+{
+   cJSON *_jsonInterfaces=typesTableToJson(sqlite3_param_db);
+   if(_jsonTypes==NULL)
+      return NULL;
+ 
+   if(checkJsonTypes(_jsonTypes)==-1) {
+      cJSON_Delete(_jsonTypes);
+      return NULL;
+   }
+
+   return _jsonTypes;
 }
 #endif
  
@@ -732,7 +763,7 @@ struct plugin_info_s *plugins_list = NULL;
    #define DYN_EXT ".dylib"
 #endif
  
-struct plugin_info_s plugin_info_statics[] = {
+struct plugin_info_s plugin_info_defaults[] = {
    { "interface_type_002" DYN_EXT, INTERFACE_TYPE_002, 0 },
    { "interface_type_003" DYN_EXT, INTERFACE_TYPE_003, 0 },
    { "interface_type_004" DYN_EXT, INTERFACE_TYPE_004, 0 },
@@ -757,13 +788,14 @@ int init_interfaces_list(cJSON *jsonInterfaces)
       plugins_list = NULL;
    }
    int next_int=0;
-   plugins_list = (struct plugin_info_s *)realloc(plugins_list, sizeof(plugin_info_statics));
+   plugins_list = (struct plugin_info_s *)realloc(plugins_list, sizeof(plugin_info_defaults));
    while(plugin_info_statics[next_int].type!=-1) {
-      plugins_list[next_int].type = plugin_info_statics[next_int].type;
-      plugins_list[next_int].name = plugin_info_statics[next_int].name;
+      plugins_list[next_int].type = plugin_info_defaults[next_int].type;
+      plugins_list[next_int].name = plugin_info_defaults[next_int].name;
       plugins_list[next_int].free_flag = 0;
       next_int++;
    }
+ 
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
  
@@ -1096,28 +1128,37 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    int16_t ret;
    int sortie=0;
    interfaces_queue_elem_t *iq;
- 
+
    pthread_rwlock_init(&interfaces_queue_rwlock, NULL);
    pthread_rwlock_init(&jsonInterfaces_rwlock, NULL);
  
-
+ 
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
  
-   if(jsonInterfaces) {
+    if(jsonInterfaces) {
       cJSON_Delete(jsonInterfaces);
       jsonInterfaces=NULL;
    }
+
+   if(jsonTypes) {
+      cJSON_Delete(jsonTypes);
+      jsonTypes=NULL;
+   }
 #ifndef NOMORESQLITE3
    jsonInterfaces=jsonInterfacesLoad(sqlite3_param_db);
-   jsonTypes=typesTableToJson(sqlite3_param_db);
-#endif
    createDevicesIndex(devices_index, jsonInterfaces);
-   createTypesIndex(types_index, jsonTypes);
- 
+   jsonTypes=jsonTypesLoad(sqlite3_param_db);
+   createTypeIndex(types_index, jsonTypes);
+   createDevsIndex(devs_index, jsonInterfaces);
+#endif
+
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
- 
+
+   if(!jsonInterfaces || !jsonTypes)
+      return NULL;
+    
 #ifdef ASPLUGIN
    init_interfaces_list(jsonInterfaces);
 #endif
@@ -1125,7 +1166,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    interfacesFns_max = MAX_INTERFACES_PLUGINS;
    interfacesFns = (struct interfacesServer_interfaceFns_s *)malloc(sizeof(struct interfacesServer_interfaceFns_s) * interfacesFns_max);
    if(interfacesFns == NULL)
-      goto start_interfaces_clean_exit_1;
+      goto start_interfaces_clean_exit_S3;
  
    memset(interfacesFns, 0, sizeof(struct interfacesServer_interfaceFns_s)*interfacesFns_max);
    init_statics_interfaces_fns(interfacesFns, &interfacesFns_nb);
@@ -1140,7 +1181,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
          mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
          perror("");
       }
-      goto start_interfaces_clean_exit;
+      goto start_interfaces_clean_exit_S2;
    }
    mea_queue_init(_interfaces);
  
@@ -1166,7 +1207,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
                mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                perror("");
             }
-            goto start_interfaces_clean_exit_2;
+            goto start_interfaces_clean_exit_S1;
          }
          iq->context = NULL;
  
@@ -1226,7 +1267,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
                mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                perror("");
             }
-            goto start_interfaces_clean_exit_2;
+            goto start_interfaces_clean_exit_S1;
          }
          iq->context = NULL;
          iq->id=id_interface;
@@ -1241,21 +1282,19 @@ mea_queue_t *start_interfaces(cJSON *params_list)
       }
       jsonInterface = jsonInterface->next;
    }
- 
    sortie=1;
  
-start_interfaces_clean_exit_2:
+start_interfaces_clean_exit_S1:
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
  
-start_interfaces_clean_exit:
+start_interfaces_clean_exit_S2:
    pthread_rwlock_unlock(&interfaces_queue_rwlock);
    pthread_cleanup_pop(0);
  
-start_interfaces_clean_exit_1:
+start_interfaces_clean_exit_S3:
    if(sortie==0) {
       stop_interfaces(); // stop fait le free de interfaces.
- 
       return NULL;
    }
  
