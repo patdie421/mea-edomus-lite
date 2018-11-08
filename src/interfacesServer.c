@@ -1252,7 +1252,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
                ptr = iq->fns->malloc_and_init(sqlite3_param_db, i, id_interface, name, dev, parameters, description);
             }
             else {
-               ptr = iq->fns->malloc_and_init2(jsonInterface);
+               ptr = iq->fns->malloc_and_init2(i, jsonInterface);
             }
  
             if(ptr) {
