@@ -584,7 +584,7 @@ cJSON *jsonInterfacesLoad(sqlite3 *sqlite3_param_db)
 
 cJSON *jsonTypesLoad(sqlite3 *sqlite3_param_db)
 {
-   cJSON *_jsonInterfaces=typesTableToJson(sqlite3_param_db);
+   cJSON *_jsonTypes=typesTableToJson(sqlite3_param_db);
    if(_jsonTypes==NULL)
       return NULL;
  
@@ -629,9 +629,12 @@ int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, 
    device_info->parameters        = (char *)cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
    device_info->state             =    (int)cJSON_GetObjectItem(jsonDevice, "state")->valuedouble;
    device_info->type_id           =    (int)cJSON_GetObjectItem(jsonDevice, "id_type")->valuedouble;
- 
-   if(!jsonType)
-      jsonType = findTypeByIdThroughIndex(types_index, device_info->id);
+
+   int release_jsonType = 0; 
+   if(!jsonType) {
+      jsonType = findTypeByIdThroughIndex_alloc(types_index, device_info->id);
+      release_jsonType = 1;
+   }
    if(!jsonType)
       return -1;
    
@@ -646,7 +649,10 @@ int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, 
  
    device_info->location_id       = 0;
    device_info->todbflag          = 0;
- 
+
+   if(release_jsonType == 1)
+      cJSON_Delete(jsonType);
+
    return 0;
 }
  
@@ -802,7 +808,7 @@ int init_interfaces_list(cJSON *jsonInterfaces)
    }
    int next_int=0;
    plugins_list = (struct plugin_info_s *)realloc(plugins_list, sizeof(plugin_info_defaults));
-   while(plugin_info_statics[next_int].type!=-1) {
+   while(plugin_info_defaults[next_int].type!=-1) {
       plugins_list[next_int].type = plugin_info_defaults[next_int].type;
       plugins_list[next_int].name = plugin_info_defaults[next_int].name;
       plugins_list[next_int].free_flag = 0;
@@ -1167,7 +1173,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    jsonInterfaces=jsonInterfacesLoad(sqlite3_param_db);
    createDevicesIndex(devices_index, jsonInterfaces);
    jsonTypes=jsonTypesLoad(sqlite3_param_db);
-   createTypeIndex(types_index, jsonTypes);
+   createTypesIndex(types_index, jsonTypes);
    createDevsIndex(devs_index, jsonInterfaces);
 #endif
 
