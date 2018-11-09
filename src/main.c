@@ -715,12 +715,11 @@ int main(int argc, const char * argv[])
    process_add_indicator(xplServer_monitoring_id, xpl_server_xplout_str, 0);
    process_add_indicator(xplServer_monitoring_id, xpl_server_senderr_str, 0);
    process_add_indicator(xplServer_monitoring_id, xpl_server_readerr_str, 0);
-/*
    if(process_start(xplServer_monitoring_id, NULL, 0)<0) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't start xpl server\n",ERROR_STR,__func__);
       clean_all_and_exit();
    }
-*/
+
    //
    // automatorServer
    //
