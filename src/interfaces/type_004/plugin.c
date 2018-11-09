@@ -14,6 +14,8 @@ int get_fns_interface(void *lib, struct interfacesServer_interfaceFns_s *interfa
       if(!interfacesFns->malloc_and_init)
          fprintf(stderr,"malloc_and_init: %s\n", dlerror());
 
+      interfacesFns->malloc_and_init2 = NULL;
+
       interfacesFns->get_monitoring_id = (get_monitoring_id_f)dlsym(lib, "get_monitoring_id_interface_type_004_PLGN");
       if(!interfacesFns->get_monitoring_id)
          fprintf(stderr,"get_monitoring_id: %s\n", dlerror());
