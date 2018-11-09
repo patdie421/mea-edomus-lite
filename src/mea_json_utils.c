@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "mea_json_utils.h"
 
@@ -11,9 +12,6 @@ int writeJson(char *file, cJSON *j)
    int ret=-1;
 
    char *s = cJSON_Print(j);
-
-   printf("write %s\n", file);
-   printf("%s\n", s);
 
    fp=fopen(file, "w");
    if(fp) {
@@ -34,6 +32,8 @@ cJSON *loadJson(char *file)
    char *data;
 
    fp = fopen(file,"r");
+   if(!fp)
+      return NULL;
 
    fseek(fp, 0L, SEEK_END);
    uint32_t sz = (uint32_t)ftell(fp);
