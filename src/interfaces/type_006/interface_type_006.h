@@ -15,7 +15,7 @@
 #define NAME(f) f
 #endif
 */
-
+#include <signal.h>
 #include <Python.h>
 #include <sqlite3.h>
 

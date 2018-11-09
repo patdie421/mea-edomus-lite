@@ -8,6 +8,8 @@
 #ifndef __interface_type_003_h
 #define __interface_type_003_h
 
+#include <signal.h>
+
 #include "enocean.h"
 
 #include "interfacesServer.h"

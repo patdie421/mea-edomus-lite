@@ -18,7 +18,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include <signal.h>
-#include <sqlite3.h>
 #include <errno.h>
 #include <pthread.h>
 
@@ -94,8 +93,6 @@ void set_interface_type_010_isnt_running(void *data)
 
 int16_t _interface_type_010_xPL_callback2(cJSON *xplMsgJson, struct device_info_s *device_info, void *userValue)
 {
-//   char *device = NULL;
-//   int ret = -1;
    int err = 0;
 
    interface_type_010_t *i010=(interface_type_010_t *)userValue;
@@ -158,7 +155,6 @@ int16_t _interface_type_010_xPL_callback2(cJSON *xplMsgJson, struct device_info_
 
 static int init_interface_type_010_data_source_pipe(interface_type_010_t *i010)
 {
-//   int retour = 0;
    int ret = 0;
 
    i010->file_desc_in  = -1;
@@ -261,8 +257,6 @@ static int init_interface_type_010_data_source_pipe(interface_type_010_t *i010)
 
 static int init_interface_type_010_data_source(interface_type_010_t *i010)
 {
-//   int ret = 0;
-
    if(!i010->file_name)
       return -1;
 
@@ -466,6 +460,61 @@ int interface_type_010_data_preprocessor(interface_type_010_t *i010)
 }
 
 
+static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struct device_info_s *device_info)
+{
+   int err = 0;
+
+   parsed_parameters_t *plugin_params=NULL;
+   int nb_plugin_params;
+
+   plugin_params=alloc_parsed_parameters((char *)device_info->parameters, valid_plugin_010_params, &nb_plugin_params, &err, 0);
+   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s)
+   {
+      if(plugin_params)
+         release_parsed_parameters(&plugin_params);
+      return -1;
+   }
+
+   plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
+   if(plugin_elem)
+   {
+      plugin_elem->type_elem=DATAFROMSENSOR;
+      {
+         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+         PyEval_AcquireLock();
+         PyThreadState *tempState = PyThreadState_Swap(i010->myThreadState);
+
+         plugin_elem->aDict = mea_device_info_to_pydict_device(device_info);
+
+         mea_addLong_to_pydict(plugin_elem->aDict, "api_key", (long)i010->id_interface);
+         mea_addLong_to_pydict(plugin_elem->aDict, DEVICE_TYPE_ID_STR_C, device_info->id);
+
+         // les datas
+         PyObject *value = PyByteArray_FromStringAndSize((char *)i010->line_buffer, (long)i010->line_buffer_ptr);
+         PyDict_SetItemString(plugin_elem->aDict, "data", value);
+         Py_DECREF(value);
+         mea_addLong_to_pydict(plugin_elem->aDict, "l_data", (long)i010->line_buffer_ptr);
+
+         if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+         {
+            mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
+         }
+         PyThreadState_Swap(tempState);
+         PyEval_ReleaseLock();
+         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+      }
+   }
+   pythonPluginServer_add_cmd(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
+   i010->indicators.senttoplugin++;
+
+   free(plugin_elem);
+   plugin_elem=NULL;
+   
+   return 0;
+}
+
+
+/*
 static int _interface_type_010_data_to_plugin(interface_type_010_t *i010, sqlite3_stmt *stmt)
 {
    int err = 0;
@@ -517,74 +566,36 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010, sqlite
    
    return 0;
 }
+*/
 
-
-static int interface_type_010_data_to_plugin(interface_type_010_t *i010, sqlite3 *params_db)
+static int interface_type_010_data_to_plugin(interface_type_010_t *i010)
 {
-//   char *device = NULL;
-   int ret = -1;
-//   int err = 0;
-
-//   interface_type_010_t *interface=i010;
-   char sql[2048];
-   sqlite3_stmt * stmt;
-
-   ret=interface_type_010_data_preprocessor(i010);
+   int ret=interface_type_010_data_preprocessor(i010);
    if(ret==-1)
       return -1;
-   if(ret==1)
-   {
+
+   if(ret==1) {
    }
 
-   sprintf(sql,"%s WHERE sensors_actuators.deleted_flag <> 1 "
-                    "AND sensors_actuators.state='1' "
-                    "AND types.typeoftype='0' " // entrée
-                    "AND sensors_actuators.id_interface='%d';",
-           sql_select_device_info, i010->id_interface);
+   cJSON *jsonInterface = getInterfaceById_alloc(i010->id_interface);
+   if(jsonInterface) {
+      cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, "devices");
+      if(jsonDevices) {
+         cJSON *jsonDevice = jsonDevices->child;
+         while(jsonDevice) {
 
-   ret = sqlite3_prepare_v2(params_db, sql, (int)(strlen(sql)+1), &stmt, NULL);
-   if(ret)
-   {
-      VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR, __func__, sqlite3_errmsg (params_db));
-      return -1;
-   }
+            struct device_info_s device_info;
+            device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
 
-   while(1)
-   {
-      int s = sqlite3_step(stmt);
-      if (s == SQLITE_ROW)
-      {
-         // traiter ici le message en fonction des données des capteurs/actionneurs
-         
-/* contenue stmt
-0: sensors_actuators.id_sensor_actuator, \
-1: sensors_actuators.id_location, \
-2: sensors_actuators.state, \
-3: sensors_actuators.parameters, \
-4: types.parameters, \
-5: sensors_actuators.id_type, \
-6: lower(sensors_actuators.name), \
-7: lower(interfaces.name), \
-8: interfaces.id_type, \
-9: (SELECT lower(types.name) FROM types WHERE types.id_type = interfaces.id_type), \
-10: interfaces.dev, \
-11: sensors_actuators.todbflag, \
-12: types.typeoftype, \
-13: sensors_actuators.id_interface \
-*/
-         _interface_type_010_data_to_plugin(i010, stmt);
+            _interface_type_010_data_to_plugin(i010, &device_info);
+
+            jsonDevice=jsonDevice->next;
+         }
       }
-      else if (s == SQLITE_DONE)
-      {
-         sqlite3_finalize(stmt);
-         break;
-      }
-      else
-      {
-         sqlite3_finalize(stmt);
-         break;
-      }
-   }
+
+      cJSON_Delete(jsonInterface);
+   } 
+
    return 0;
 }
 
@@ -658,7 +669,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *
          if((i010->fduration > 0) && (i010->line_buffer_ptr))
          {
             i010->line_buffer[i010->line_buffer_ptr]=0;
-            interface_type_010_data_to_plugin(i010, params_db);
+            interface_type_010_data_to_plugin(i010);
             i010->line_buffer_ptr=0;
          }
          
@@ -721,7 +732,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *
                i010->line_buffer[i010->line_buffer_ptr]=0;
             }
 
-            interface_type_010_data_to_plugin(i010, params_db);
+            interface_type_010_data_to_plugin(i010);
             i010->line_buffer_ptr=0;
             break;
          }
@@ -734,7 +745,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *
             {
                i010->line_buffer_ptr-=b;
                i010->line_buffer[i010->line_buffer_ptr]=0;
-               interface_type_010_data_to_plugin(i010, params_db);
+               interface_type_010_data_to_plugin(i010);
                i010->line_buffer_ptr=0;
                break;
             }

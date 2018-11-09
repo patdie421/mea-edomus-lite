@@ -11,7 +11,7 @@ SHELL = /bin/bash
 ifeq ($(ASPLUGIN), 1)
 LINUX_SONAME           = interface_type_003.so
 MACOSX_SONAME          = interface_type_003.dylib
-LINUX_ASPLUGIN_CFLAGS  = -DASPLUGIN
+LINUX_ASPLUGIN_CFLAGS  = -DASPLUGIN -fPIC
 LINUX_ASPLUGIN_LDFLAGS = -shared -Wl,--export-dynamic
 MACOSX_ASPLUGIN_CFLAGS = -DASPLUGIN
 MACOSX_ASPLUGIN_LDFLAGS= -dynamiclib -undefined suppress -flat_namespace
@@ -65,7 +65,7 @@ OBJECTS=$(addprefix $(TECHNO).objects/, $(SOURCES:.c=.o))
 all: .deps $(TECHNO).objects $(OBJECTS) $(SONAME)
 
 $(SONAME): $(OBJECTS) 
-	@$(CC) $(LDFLAGS) $(OBJECTS) -o $(SONAME);
+	@$(CC) $(OBJECTS) $(LDFLAGS) -o $(SONAME);
 
 $(TECHNO).objects/%.o: $(SOURCES)
 	@$(CC) $(INCLUDES) -c $(CFLAGS) -MM -MT $(TECHNO).objects/$*.o $*.c > .deps/$*.dep

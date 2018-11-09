@@ -7,6 +7,8 @@
 //
 #ifndef __interface_type_010_h
 #define __interface_type_010_h
+
+#include <signal.h>
 #include <Python.h>
 #include <sqlite3.h>
 

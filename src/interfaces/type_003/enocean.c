@@ -126,7 +126,6 @@ int16_t enocean_init(enocean_ed_t *ed, char *dev)
    ed->in_buffer.err = 0;
 
    if(enocean_get_baseid(ed, &ed->id,&nerr)<0) // pas de reponse correct
-//   if(enocean_get_chipid(ed, &ed->id,&nerr)<0)
    {
       enocean_close(ed);
       free(ed->queue);
@@ -155,7 +154,6 @@ void enocean_clean_ed(enocean_ed_t *ed)
    {
       if(ed->queue)
       {
-         // clean_queue(ed->queue,_enocean_free_queue_elem);
          free(ed->queue);
          ed->queue=NULL;
       }

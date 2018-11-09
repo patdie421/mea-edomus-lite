@@ -30,6 +30,8 @@
 #include "consts.h"
 
 #include "cJSON.h"
+#include "mea_json_utils.h"
+
 #include "uthash.h"
 
 #include "processManager.h"
@@ -217,6 +219,42 @@ int createTypesIndex(struct types_index_s *types_index, cJSON *jsonTypes)
 }
 
 
+cJSON *findInterfaceByIdThroughLoop_alloc(cJSON *jsonInterfaces, int id)
+{
+   if(!jsonInterfaces)
+      return NULL;
+
+   cJSON *jsonInterface = jsonInterfaces->child;
+   while( jsonInterface ) {
+      int id_interface = (int)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
+
+      if(id_interface==id) {
+         return cJSON_Duplicate(jsonInterface, 1);
+      }
+
+      jsonInterface=jsonInterface->next;
+   }
+
+   return NULL;
+}
+
+
+cJSON *getInterfaceById_alloc(int id)
+{
+   cJSON *jsonInterface=NULL;
+
+   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
+   pthread_rwlock_rdlock(&interfaces_queue_rwlock);
+
+   jsonInterface=findInterfaceByIdThroughLoop_alloc(jsonInterfaces, id);
+
+   pthread_rwlock_unlock(&jsonInterfaces_rwlock);
+   pthread_cleanup_pop(0);
+
+   return jsonInterface;
+}
+
+
 cJSON *findInterfaceByDevNameThroughIndex_alloc(struct devs_index_s *_devs_index, char *devName)
 {
    struct devs_index_s *e = NULL;
@@ -232,6 +270,22 @@ cJSON *findInterfaceByDevNameThroughIndex_alloc(struct devs_index_s *_devs_index
    }
 
    return d;
+}
+
+
+cJSON *getInterfaceByDevName_alloc(char *devName)
+{
+   cJSON *jsonInterface=NULL;
+
+   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
+   pthread_rwlock_rdlock(&interfaces_queue_rwlock);
+
+   jsonInterface=findInterfaceByDevNameThroughIndex_alloc(devs_index, devName);
+
+   pthread_rwlock_unlock(&jsonInterfaces_rwlock);
+   pthread_cleanup_pop(0);
+
+   return jsonInterface;
 }
 
 
@@ -272,15 +326,38 @@ cJSON *findTypeByIdThroughIndex_alloc(struct types_index_s *types_index, int id)
 
 int checkJsonInterfaces(cJSON *jsonInterfaces)
 {
+   return 0;
+}
+
+
+int relinkInterfacesDevices(cJSON *jsonInterfaces)
+{
    if(!jsonInterfaces) {
       return -1;
    }
    else {
-//
-// ajouter ici le controle de la structure et des types de données
-//
-      return 0;
+      cJSON *jsonInterface=jsonInterfaces->child;
+      while(jsonInterface) {
+         int id_interface=(double)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
+         cJSON *jsonDevices=cJSON_GetObjectItem(jsonInterface, "devices");
+         if(jsonDevices) {
+            cJSON *jsonDevice=jsonDevices->child;
+            while(jsonDevice) {
+               cJSON *json_id_interface = cJSON_GetObjectItem(jsonDevice,"id_interface");
+               if(!json_id_interface) {
+                  json_id_interface=cJSON_CreateNumber((double)id_interface);
+                  cJSON_AddItemToObject(jsonDevice, "id_interface", json_id_interface);
+               }
+               else {
+                  cJSON_SetNumberValue(json_id_interface, (double)id_interface);
+               }
+               jsonDevice=jsonDevice->next;
+            }
+         }
+         jsonInterface=jsonInterface->next;
+      }
    }
+   return 0;
 }
 
 
@@ -298,7 +375,6 @@ int checkJsonTypes(cJSON *jsonTypes)
 }
 
 
-#ifndef NOMORESQLITE3
 cJSON *findInterfaceById(cJSON *jsonInterfaces, int id)
 {
    if(!jsonInterfaces)
@@ -316,6 +392,8 @@ cJSON *findInterfaceById(cJSON *jsonInterfaces, int id)
 }
 
 
+// #ifndef NOMORESQLITE3
+#ifdef SQLITE3_ON
 void linkInterfacesDevices(cJSON *jsonInterfaces, cJSON *jsonDevices)
 {
    cJSON *jsonDevice=jsonDevices->child;
@@ -577,8 +655,6 @@ cJSON *jsonInterfacesLoad(sqlite3 *sqlite3_param_db)
       return NULL;
    }
 
-   createDevicesIndex(devices_index, jsonInterfaces);
- 
    return _jsonInterfaces;
 }
 
@@ -597,11 +673,50 @@ cJSON *jsonTypesLoad(sqlite3 *sqlite3_param_db)
 }
 #endif
  
+
+cJSON *jsonInterfacesLoad(char *file)
+{
+   cJSON *_jsonInterfaces=loadJson(file);
+   if(_jsonInterfaces==NULL)
+      return NULL;
+
+   if(checkJsonInterfaces(_jsonInterfaces)==-1) {
+      cJSON_Delete(_jsonInterfaces);
+      return NULL;
+   }
+
+   relinkInterfacesDevices(jsonInterfaces);
+
+   return _jsonInterfaces;
+}
+
+
+cJSON *jsonTypesLoad(char *file)
+{
+   cJSON *_jsonTypes=loadJson(file);
+   if(_jsonTypes==NULL)
+      return NULL;
+
+   if(checkJsonTypes(_jsonTypes)==-1) {
+      cJSON_Delete(_jsonTypes);
+      return NULL;
+   }
+
+   return _jsonTypes;
+}
+
+
+int resyncDevices(cJSON *jsonInterfaces, char *file)
+{
+   return 0;
+}
+
  
 int jsonInterfacesSave()
 {
    return 0;
 }
+
 
 int jsonTypesSave()
 {
@@ -840,7 +955,7 @@ int init_interfaces_list(cJSON *jsonInterfaces)
             if(p[strlen(lib_name)+1]==']') {
                int l=strlen(mea_strtrim(lib_name));
                if(l>0) {
-                  plugins_list = (struct plugin_info_s *)realloc(plugins_list, sizeof(struct plugin_info_s)*(next_int+1));
+                  plugins_list = (struct plugin_info_s *)realloc(plugins_list, sizeof(struct plugin_info_s)*(next_int+2));
                   plugins_list[next_int].name = malloc(l+1);
                   strcpy(plugins_list[next_int].name, mea_strtrim(lib_name));
                   plugins_list[next_int].type = id_type;
@@ -868,7 +983,9 @@ int init_interfaces_list(cJSON *jsonInterfaces)
    plugins_list[next_int].type = -1;
    plugins_list[next_int].name = NULL;
    plugins_list[next_int].free_flag  = -1;
- 
+
+   for(int i=0; plugins_list[i].type!=-1; i++)
+      printf("%s %d %d\n", plugins_list[i].name, plugins_list[i].type, plugins_list[i].free_flag);
    return 0;
 }
 #endif
@@ -945,7 +1062,6 @@ int load_interface(int type, char *driversPath)
 int16_t interfacesServer_call_interface_api(int id_interface, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
 {
    int ret;
-//   void *context = NULL;
    interfaces_queue_elem_t *iq;
    int found=0;
  
@@ -1154,6 +1270,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    int sortie=0;
    interfaces_queue_elem_t *iq;
 
+
    pthread_rwlock_init(&interfaces_queue_rwlock, NULL);
    pthread_rwlock_init(&jsonInterfaces_rwlock, NULL);
  
@@ -1170,11 +1287,14 @@ mea_queue_t *start_interfaces(cJSON *params_list)
       jsonTypes=NULL;
    }
 #ifndef NOMORESQLITE3
-   jsonInterfaces=jsonInterfacesLoad(sqlite3_param_db);
+//   jsonInterfaces=jsonInterfacesLoad(sqlite3_param_db);
+   jsonInterfaces=jsonInterfacesLoad("/users/dietschp/verySimpleScheduler/mea-edomus-lite/etc/interfaces.json");
    createDevicesIndex(devices_index, jsonInterfaces);
-   jsonTypes=jsonTypesLoad(sqlite3_param_db);
-   createTypesIndex(types_index, jsonTypes);
    createDevsIndex(devs_index, jsonInterfaces);
+
+//   jsonTypes=jsonTypesLoad(sqlite3_param_db);
+   jsonTypes=jsonTypesLoad("/users/dietschp/verySimpleScheduler/mea-edomus-lite/etc/types.json");
+   createTypesIndex(types_index, jsonTypes);
 #endif
 
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
@@ -1191,7 +1311,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    interfacesFns = (struct interfacesServer_interfaceFns_s *)malloc(sizeof(struct interfacesServer_interfaceFns_s) * interfacesFns_max);
    if(interfacesFns == NULL)
       goto start_interfaces_clean_exit_S3;
- 
+
    memset(interfacesFns, 0, sizeof(struct interfacesServer_interfaceFns_s)*interfacesFns_max);
    init_statics_interfaces_fns(interfacesFns, &interfacesFns_nb);
  
@@ -1240,6 +1360,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
          int i=0;
  
 #ifdef ASPLUGIN
+         printf("%d %s\n", id_type, driversPath);
          ret=load_interface(id_type, driversPath);
          if(ret<0) {
             VERBOSE(2) mea_log_printf("%s (%s) : can't load interface type %d\n", ERROR_STR, __func__, id_type);

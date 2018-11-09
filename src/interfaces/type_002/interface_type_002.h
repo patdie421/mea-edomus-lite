@@ -8,6 +8,7 @@
 #ifndef __interface_type_002_h
 #define __interface_type_002_h
 
+#include <signal.h>
 #include <Python.h>
 #include <sqlite3.h>
 

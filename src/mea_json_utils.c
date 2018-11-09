@@ -13,11 +13,17 @@ int writeJson(char *file, cJSON *j)
 
    char *s = cJSON_Print(j);
 
+   printf("write %s\n", file);
+   printf("%s\n", s);
+
    fp=fopen(file, "w");
    if(fp) {
       fwrite(s, strlen(s), 1, fp);
       fclose(fp);
       ret=0;
+   }
+   else {
+      perror(file);
    }
 
    free(s);

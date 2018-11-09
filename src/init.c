@@ -451,6 +451,7 @@ int _read_path(cJSON *params_list, char *key, char *base_path, char *dir_name, c
 
    if(str) {
       appParameters_set(key, str, params_list);
+      appParameters_print(params_list);
       free(str);
       str=NULL;
    }
@@ -542,7 +543,6 @@ int16_t autoInit(cJSON *params_list)
    char *sessions_str;
    int16_t retcode=0;
    int n;
-   
    char *meaPath=appParameters_get("MEAPATH", params_list);
 
    if(strcmp(usr_str, meaPath)==0) {
@@ -624,6 +624,17 @@ int16_t autoInit(cJSON *params_list)
       VERBOSE(1) mea_log_printf("%s : no 'cgi-bin', gui will not start.\n", WARNING_STR);
    }
 
+   char cfgfile[256];
+   n=snprintf(cfgfile, sizeof(to_check), "%s/etc/mea-edomus.json", meaPath);
+   if(n<0 || n==sizeof(to_check)) {
+      VERBOSE(2) {
+            mea_log_printf ("%s (%s) : snprintf - ", ERROR_STR,__func__);
+            perror("");
+      }
+      retcode=11; goto autoInit_exit;
+   }
+   retcode=writeJson(cfgfile, params_list);
+   
 autoInit_exit:
    return retcode;
 }
@@ -715,6 +726,17 @@ int16_t interactiveInit(cJSON *params_list)
       VERBOSE(1) mea_log_printf("%s (%s) : no 'php.ini' exist, create one.\n",WARNING_STR,__func__);
       create_php_ini(appParameters_get("PHPINIPATH", params_list));
    }
+
+   char cfgfile[256];
+   n=snprintf(cfgfile, sizeof(to_check), "%s/etc/mea-edomus.json", meaPath);
+   if(n<0 || n==sizeof(to_check)) {
+      VERBOSE(2) {
+            mea_log_printf ("%s (%s) : snprintf - ", ERROR_STR,__func__);
+            perror("");
+      }
+      retcode=11; goto interactiveInit_exit;
+   }
+   retcode=writeJson(cfgfile, params_list);
 
 interactiveInit_exit:
    return retcode;
