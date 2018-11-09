@@ -141,12 +141,10 @@ int logfile_rotation_job(int my_id, void *data, char *errmsg, int l_errmsg)
 {
    char *log_file_name=(char *)data;
 
-   if(log_file_name)
-   {
+   if(log_file_name) {
       mea_log_printf("%s (%s) : log file rotation job start\n", INFO_STR, __func__);
 
-      if(mea_rotate_open_log_file(log_file_name, 6)<0)
-      {
+      if(mea_rotate_open_log_file(log_file_name, 6)<0) {
          VERBOSE(2) fprintf (MEA_STDERR, "%s (%s) : can't rotate %s - ", ERROR_STR, __func__, log_file_name);
          perror("");
          return -1;
@@ -208,41 +206,35 @@ int16_t read_all_application_parameters(char *cfgfile)
 
 void clean_all_and_exit()
 {
-   if(xplServer_monitoring_id!=-1)
-   {
+   if(xplServer_monitoring_id!=-1) {
       process_stop(xplServer_monitoring_id, NULL, 0);
       process_unregister(xplServer_monitoring_id);
       xplServer_monitoring_id=-1;
    }
 
-   if(httpServer_monitoring_id!=-1)
-   {
+   if(httpServer_monitoring_id!=-1) {
       process_stop(httpServer_monitoring_id, NULL, 0);
       process_unregister(httpServer_monitoring_id);
       httpServer_monitoring_id=-1;
    }
   
-   if(interfaces)
-   {
+   if(interfaces) {
       stop_interfaces();
    }
 
-   if(pythonPluginServer_monitoring_id!=-1)
-   {
+   if(pythonPluginServer_monitoring_id!=-1) {
       process_stop(pythonPluginServer_monitoring_id, NULL, 0);
       process_unregister(pythonPluginServer_monitoring_id);
       pythonPluginServer_monitoring_id=-1;
    }
 
-   if(httpServer_monitoring_id!=-1)
-   {
+   if(httpServer_monitoring_id!=-1) {
       process_stop(httpServer_monitoring_id, NULL, 0);
       process_unregister(httpServer_monitoring_id);
       httpServer_monitoring_id=-1;
    }
 
-   if(automatorServer_monitoring_id!=-1)
-   {
+   if(automatorServer_monitoring_id!=-1) {
       process_stop(automatorServer_monitoring_id, NULL, 0);
       process_unregister(automatorServer_monitoring_id);
       automatorServer_monitoring_id=-1;
@@ -286,14 +278,12 @@ static void error_handler(int signal_number)
    ++sigsegv_indicator;
 
    fprintf(stderr, "Error: signal %d:\n", signal_number);
-   if((_xPLServer_thread_id!=NULL) && pthread_equal(*_xPLServer_thread_id, pthread_self())!=0)
-   {
+   if((_xPLServer_thread_id!=NULL) && pthread_equal(*_xPLServer_thread_id, pthread_self())!=0) {
       fprintf(stderr, "Error: in xPLServer, try to recover\n");
 //      longjmp(xPLServer_JumpBuffer, 1);
    }
 /*
-   else if((_automatorServer_thread_id!=NULL) && pthread_equal(*_automatorServer_thread_id, pthread_self())!=0)
-   {
+   else if((_automatorServer_thread_id!=NULL) && pthread_equal(*_automatorServer_thread_id, pthread_self())!=0) {
       fprintf(stderr, "Error: in automator.c/automatorServer.c\n");
    }
 */
@@ -323,8 +313,7 @@ static void _signal_SIGCHLD(int signal_number)
    /* Wait for all dead processes.
     * We use a non-blocking call to be sure this signal handler will not
     * block if a child was cleaned up in another part of the program. */
-    while (waitpid(-1, NULL, WNOHANG) > 0)
-    {
+    while (waitpid(-1, NULL, WNOHANG) > 0) {
     }
 }
 
@@ -422,8 +411,7 @@ int main(int argc, const char * argv[])
 
    while ((c = getopt_long(argc, (char * const *)argv, "hiaup:d:C:H:s:G:L:A:V:E:S:v:g:I:x:", long_options, &option_index)) != -1)
    {
-      switch (c)
-      {
+      switch (c) {
          case 'h':
             usage((char *)argv[0]);
             exit(0);
@@ -533,8 +521,7 @@ int main(int argc, const char * argv[])
       }
 
 
-      if(c>'!') // parametre non attendu trouvé (! = premier caractère imprimable).
-      {
+      if(c>'!') { // parametre non attendu trouvé (! = premier caractère imprimable).
          VERBOSE(1) mea_log_printf("%s (%s) : Paramètre \"%s\" inconnu.\n",ERROR_STR,__func__,optarg);
          usage((char *)argv[0]);
          clean_all_and_exit();
@@ -544,8 +531,7 @@ int main(int argc, const char * argv[])
    //
    // Contrôle des parametres
    //
-   if((_i+_a+_u)>1)
-   {
+   if((_i+_a+_u)>1) {
       VERBOSE(1) mea_log_printf("%s (%s) : --init (-i), --autoinit (-a), et --update (-u) incompatible\n",ERROR_STR,__func__);
       usage((char *)argv[0]);
       clean_all_and_exit();
@@ -554,27 +540,23 @@ int main(int argc, const char * argv[])
    if(_v > 0 && _v < 10)
          set_verbose_level(_v);
 
-   if(!_d) // si pas de db en parametre on construit un chemin vers le nom "théorique" de la db
-   {
+   if(!_d) { // si pas de db en parametre on construit un chemin vers le nom "théorique" de la db
       char tmp[256];
       snprintf(tmp,sizeof(tmp)-1,"%s/var/db/params.db",appParameters_get("MEAPATH", NULL));
       appParameters_set("SQLITE3DBPARAMPATH", tmp, NULL);
    }
    
-   if(_i || _a)
-   {
+   if(_i || _a) {
       initMeaEdomus(_a, getAppParameters());
       clean_all_and_exit();
    }
    
-   if(_u)
-   {
+   if(_u) {
 //      updateMeaEdomus(params_list, params_names);
       clean_all_and_exit();
    }
 /*
-   if(_o)
-   {
+   if(_o) {
       VERBOSE(1) mea_log_printf("%s (%s) : options complémentaires uniquement utilisable avec --init (-i), --autoinit (-a), et --update (-u)\n", ERROR_STR, __func__);
       usage((char *)argv[0]);
       clean_all_and_exit();
@@ -585,8 +567,7 @@ int main(int argc, const char * argv[])
    //
    int16_t cause;
 /*
-   if(checkParamsDb(appParameters_get("SQLITE3DBPARAMPATH", NULL), &cause))
-   {
+   if(checkParamsDb(appParameters_get("SQLITE3DBPARAMPATH", NULL), &cause)) {
       VERBOSE(1) mea_log_printf("%s (%s) : checkParamsDb - parameters database error (%d)\n", ERROR_STR, __func__, cause);
       clean_all_and_exit();
    }
@@ -594,8 +575,7 @@ int main(int argc, const char * argv[])
  
    // ouverture de la base de paramétrage
    ret = sqlite3_open_v2(appParameters_get("SQLITE3DBPARAMPATH", NULL), &sqlite3_param_db, SQLITE_OPEN_READWRITE, NULL);
-   if(ret)
-   {
+   if(ret) {
       VERBOSE(1) mea_log_printf("%s (%s) : sqlite3_open - %s\n", ERROR_STR,__func__,sqlite3_errmsg (sqlite3_param_db));
       clean_all_and_exit();
    }
@@ -630,8 +610,7 @@ int main(int argc, const char * argv[])
    }
 
    n=snprintf(log_file,sizeof(log_file),"%s/mea-edomus.log", appParameters_get("LOGPATH",NULL));
-   if(n<0 || n==sizeof(log_file))
-   {
+   if(n<0 || n==sizeof(log_file)) {
       VERBOSE(1) {
          mea_log_printf("%s (%s) : snprintf - ", ERROR_STR,__func__);
          perror("");
@@ -640,8 +619,7 @@ int main(int argc, const char * argv[])
    }
 
    int fd=open(log_file, O_CREAT | O_APPEND | O_RDWR,  S_IWUSR | S_IRUSR);
-   if(fd<0)
-   {
+   if(fd<0) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't open log file - ",ERROR_STR,__func__);
       perror("");
       clean_all_and_exit();
@@ -699,8 +677,7 @@ int main(int argc, const char * argv[])
    process_set_watchdog_recovery(httpServer_monitoring_id, restart_guiServer, (void *)(&httpServer_start_stop_params));
    process_add_indicator(httpServer_monitoring_id, "HTTPIN", 0);
    process_add_indicator(httpServer_monitoring_id, "HTTPOUT", 0);
-   if(process_start(httpServer_monitoring_id, NULL, 0)<0)
-   {
+   if(process_start(httpServer_monitoring_id, NULL, 0)<0) {
       VERBOSE(2) mea_log_printf("%s (%s) : can't start gui server\n",ERROR_STR,__func__);
    }
 
@@ -715,8 +692,7 @@ int main(int argc, const char * argv[])
    process_set_watchdog_recovery(xplServer_monitoring_id, restart_pythonPluginServer, (void *)(&pythonPluginServer_start_stop_params));
    process_add_indicator(pythonPluginServer_monitoring_id, "PYCALL", 0);
    process_add_indicator(pythonPluginServer_monitoring_id, "PYCALLERR", 0);
-   if(process_start(pythonPluginServer_monitoring_id, NULL, 0)<0)
-   {
+   if(process_start(pythonPluginServer_monitoring_id, NULL, 0)<0) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't start python plugin server\n",ERROR_STR,__func__);
       clean_all_and_exit();
    }
@@ -736,8 +712,7 @@ int main(int argc, const char * argv[])
    process_add_indicator(xplServer_monitoring_id, xpl_server_xplout_str, 0);
    process_add_indicator(xplServer_monitoring_id, xpl_server_senderr_str, 0);
    process_add_indicator(xplServer_monitoring_id, xpl_server_readerr_str, 0);
-   if(process_start(xplServer_monitoring_id, NULL, 0)<0)
-   {
+   if(process_start(xplServer_monitoring_id, NULL, 0)<0) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't start xpl server\n",ERROR_STR,__func__);
       clean_all_and_exit();
    }
@@ -755,8 +730,7 @@ int main(int argc, const char * argv[])
    process_add_indicator(automatorServer_monitoring_id, automator_xplin_str, 0);
    process_add_indicator(automatorServer_monitoring_id, automator_xplout_str, 0);
    process_add_indicator(automatorServer_monitoring_id, automator_err_str, 0);
-   if(process_start(automatorServer_monitoring_id, NULL, 0)<0)
-   {
+   if(process_start(automatorServer_monitoring_id, NULL, 0)<0) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't start automator server\n",ERROR_STR,__func__);
       clean_all_and_exit();
    }
@@ -793,11 +767,9 @@ int main(int argc, const char * argv[])
    start_time = time(NULL);
    int guiport = atoi(appParameters_get("GUIPORT",NULL));
 
-   while(1) // boucle principale
-   {
+   while(1) { // boucle principale
       // supervision "externe" des process
-      if(process_is_running(httpServer_monitoring_id)==RUNNING)
-      {
+      if(process_is_running(httpServer_monitoring_id)==RUNNING) {
          char response[512];
          // interrogation du serveur HTTP Interne pour heartbeat ... (voir le passage d'un parametre pour sécuriser ...)
          gethttp(localhost_const, guiport, "/CMD/ping.php", response, sizeof(response)); // a remplacer par un guiServer_ping();
