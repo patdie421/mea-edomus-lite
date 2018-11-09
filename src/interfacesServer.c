@@ -938,7 +938,8 @@ int init_interfaces_list(cJSON *jsonInterfaces)
  
       int  state=cJSON_GetObjectItem(jsonInterface, "state")->valuedouble;
       int  id_type=cJSON_GetObjectItem(jsonInterface, "id_type")->valuedouble;
-      char *parameters=cJSON_GetObjectItem(jsonInterface, "parameters")->valuestring;
+      cJSON *jsonType=findTypeByIdThroughIndex_alloc(types_index, id_type);
+      char *type_parameters=cJSON_GetObjectItem(jsonType, "parameters")->valuestring;
 
       for(int i=0; i<next_int; i++) {
          if(plugins_list[i].type == id_type) {
@@ -947,7 +948,7 @@ int init_interfaces_list(cJSON *jsonInterfaces)
          }
       }
  
-      char *p = mea_strltrim((char *)parameters);
+      char *p = mea_strltrim((char *)type_parameters);
       if(p) {
          char lib_name[255];
          ret=sscanf(p, "[%[^]]]%*[^\n]", lib_name);
@@ -966,14 +967,17 @@ int init_interfaces_list(cJSON *jsonInterfaces)
             }
             else {
                VERBOSE(2) mea_log_printf("%s (%s) : interface parameter error - %s\n", WARNING_STR, __func__, p);
-               continue;
+               goto next;
             }
          }
       }
       else {
-         VERBOSE(2) mea_log_printf("%s (%s) : interface parameter error - %s\n", WARNING_STR, __func__, (char *)parameters);
-        continue;
+         VERBOSE(2) mea_log_printf("%s (%s) : interface parameter error - %s\n", WARNING_STR, __func__, (char *)type_parameters);
+        goto next;
       }
+
+next:
+      cJSON_Delete(jsonType);
       jsonInterface = jsonInterface->next;
    }
  
