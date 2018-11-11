@@ -1,0 +1,23 @@
+{
+   "I010" : {
+      "id_type":3010,
+      "description":"",
+      "dev":"PIPE://tmp/meapipe",
+      "parameters":"PLUGIN=mea_text_inout;FSTARTSTR={{{;FENDSTR=}}};DIRECTION=BOTH",
+      "state":1,
+      "devices": {
+         "I010S001": {
+            "id_type":1,
+            "description":"",
+            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:TOTO",
+            "state":1
+         },
+         "I010S002": {
+            "id_type":1,
+            "description":"",
+            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:TITI",
+            "state":1
+         }
+      }
+   }
+}

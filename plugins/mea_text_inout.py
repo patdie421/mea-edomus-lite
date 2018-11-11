@@ -18,7 +18,7 @@ from mea_utils import verbose
 
 def mea_dataPreprocessor(data):
    fn_name= __name__ + "/" + str(sys._getframe().f_code.co_name)
-#   verbose(9, "DEBUG (", fn_name, ") data = ", data)
+   verbose(9, "DEBUG (", fn_name, ") data = ", data)
  
    return data['data']
  

@@ -1,0 +1,16 @@
+{
+   "TYP010": {
+      "id_type":3010,
+      "description":"",
+      "parameters":"[interface_type_010.so]",
+      "flag":0,
+      "typeoftype":1
+   },
+   "INPUT": {
+      "id_type":1,
+      "description":"",
+      "parameters":"",
+      "flag":0,
+      "typeoftype":0
+   }
+}

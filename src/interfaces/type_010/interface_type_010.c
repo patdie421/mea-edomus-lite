@@ -35,9 +35,7 @@
 #include "parameters_utils.h"
 #include "cJSON.h"
 
-//DBSERVER #include "dbServer.h"
 #include "processManager.h"
-//#include "notify.h"
 #include "pythonPluginServer.h"
 #include "interfacesServer.h"
 
@@ -58,7 +56,7 @@ char *valid_interface_010_params[]={"S:FSTARTSTR","S:FENDSTR","I:FSIZE","I:FDURA
 #define INTERFACE_PARAMS_IN_EXT            7
 #define INTERFACE_PARAMS_OUT_EXT           8
 
-char *valid_plugin_010_params[]={"S:PLUGIN","S:PARAMETERS", NULL};
+char *valid_plugin_010_params[]={"S:PLUGIN","S:PLUGIN_PARAMETERS", NULL};
 #define PLUGIN_PARAMS_PLUGIN       0
 #define PLUGIN_PARAMS_PARAMETERS   1
 
@@ -394,11 +392,10 @@ int interface_type_010_data_preprocessor(interface_type_010_t *i010)
             PyDict_SetItemString(aDict, "plugin_paramters", i010->pParams);
 
          PyObject *res=NULL;
-         
+       
          mea_call_python_function3(i010->pFunc, aDict, &res);
 
-         if(!res)
-         {
+         if(!res) {
             retour=0;
          }
          else
@@ -440,8 +437,7 @@ int interface_type_010_data_preprocessor(interface_type_010_t *i010)
                   PyBuffer_Release(&py_packet);
                }
             }
-            else if(PyNumber_Check(res))
-            {
+            else if(PyNumber_Check(res)) {
                retour = (int)PyLong_AsLong(res);
             }
 
@@ -476,6 +472,7 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
    }
 
    plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
+
    if(plugin_elem)
    {
       plugin_elem->type_elem=DATAFROMSENSOR;
@@ -495,78 +492,25 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
          Py_DECREF(value);
          mea_addLong_to_pydict(plugin_elem->aDict, "l_data", (long)i010->line_buffer_ptr);
 
-         if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
-         {
+         if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
             mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
          }
+
          PyThreadState_Swap(tempState);
          PyEval_ReleaseLock();
          pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
       }
    }
+
    pythonPluginServer_add_cmd(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
    i010->indicators.senttoplugin++;
 
    free(plugin_elem);
    plugin_elem=NULL;
-   
+  
    return 0;
 }
 
-
-/*
-static int _interface_type_010_data_to_plugin(interface_type_010_t *i010, sqlite3_stmt *stmt)
-{
-   int err = 0;
-
-   parsed_parameters_t *plugin_params=NULL;
-   int nb_plugin_params;
-
-   plugin_params=alloc_parsed_parameters((char *)sqlite3_column_text(stmt, 3), valid_plugin_010_params, &nb_plugin_params, &err, 0);
-   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s)
-   {
-      if(plugin_params)
-         release_parsed_parameters(&plugin_params);
-      return -1;
-   }
-
-   plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-   if(plugin_elem)
-   {
-      plugin_elem->type_elem=DATAFROMSENSOR;
-      {
-         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-         PyEval_AcquireLock();
-         PyThreadState *tempState = PyThreadState_Swap(i010->myThreadState);
-
-         plugin_elem->aDict=mea_stmt_to_pydict_device(stmt);
-         mea_addLong_to_pydict(plugin_elem->aDict, "api_key", (long)i010->id_interface);
-         mea_addLong_to_pydict(plugin_elem->aDict, DEVICE_TYPE_ID_STR_C, sqlite3_column_int(stmt, 5));
-
-         // les datas
-         PyObject *value = PyByteArray_FromStringAndSize((char *)i010->line_buffer, (long)i010->line_buffer_ptr);
-         PyDict_SetItemString(plugin_elem->aDict, "data", value);
-         Py_DECREF(value);
-         mea_addLong_to_pydict(plugin_elem->aDict, "l_data", (long)i010->line_buffer_ptr);
-
-         if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
-         {
-            mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
-         }
-         PyThreadState_Swap(tempState);
-         PyEval_ReleaseLock();
-         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-      }
-   }
-   pythonPluginServer_add_cmd(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-   i010->indicators.senttoplugin++;
-
-   free(plugin_elem);
-   plugin_elem=NULL;
-   
-   return 0;
-}
-*/
 
 static int interface_type_010_data_to_plugin(interface_type_010_t *i010)
 {
@@ -576,23 +520,21 @@ static int interface_type_010_data_to_plugin(interface_type_010_t *i010)
 
    if(ret==1) {
    }
-
    cJSON *jsonInterface = getInterfaceById_alloc(i010->id_interface);
    if(jsonInterface) {
       cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, "devices");
       if(jsonDevices) {
          cJSON *jsonDevice = jsonDevices->child;
          while(jsonDevice) {
-
             struct device_info_s device_info;
-            device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
-
-            _interface_type_010_data_to_plugin(i010, &device_info);
+            ret=device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
+            if(ret==0) {
+               _interface_type_010_data_to_plugin(i010, &device_info);
+            }
 
             jsonDevice=jsonDevice->next;
          }
       }
-
       cJSON_Delete(jsonInterface);
    } 
 
@@ -1199,10 +1141,9 @@ interface_type_010_t *malloc_and_init_interface_type_010(sqlite3 *sqlite3_param_
          }
       }
 
-
       if(interface_params->parameters[INTERFACE_PARAMS_PLUGIN].label)
       {
-         init_interface_type_010_data_preprocessor(i010, interface_params->parameters[INTERFACE_PARAMS_PLUGIN].value.s, interface_params->parameters[INTERFACE_PARAMS_PLUGIN_PARAMETERS].value.s);
+         int ret=init_interface_type_010_data_preprocessor(i010, interface_params->parameters[INTERFACE_PARAMS_PLUGIN].value.s, interface_params->parameters[INTERFACE_PARAMS_PLUGIN_PARAMETERS].value.s);
       }
 
       release_parsed_parameters(&interface_params);
@@ -1279,20 +1220,20 @@ void *_thread_interface_type_010(void *args)
 
    if(params->i010->pModule)
    {
-//      mea_python_lock(); // attention python_lock / python_unlock définissent un block ({ }) les variables déclérées restent locales au bloc
       pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
       PyEval_AcquireLock();
       PyThreadState *tempState = PyThreadState_Swap(params->i010->myThreadState);
 
       PyObject *plugin_params_dict=PyDict_New();
       mea_addLong_to_pydict(plugin_params_dict, INTERFACE_ID_STR_C, params->i010->id_interface);
-      PyDict_SetItemString(plugin_params_dict, INTERFACE_PARAMETERS_STR_C, params->i010->pParams);
+      if(params->i010->pParams) {
+         PyDict_SetItemString(plugin_params_dict, INTERFACE_PARAMETERS_STR_C, params->i010->pParams);
+      }
 
       mea_call_python_function_from_module(params->i010->pModule, "mea_init", plugin_params_dict);
 
       Py_DECREF(plugin_params_dict);
 
-//      mea_python_unlock();
       PyThreadState_Swap(tempState);
       PyEval_ReleaseLock();
       pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
