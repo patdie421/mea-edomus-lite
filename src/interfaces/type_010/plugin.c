@@ -10,11 +10,15 @@ int get_fns_interface(void *lib, struct interfacesServer_interfaceFns_s *interfa
 {
    if(lib)
    {
+      interfacesFns->malloc_and_init = NULL;
+/*
       interfacesFns->malloc_and_init = (malloc_and_init_f)dlsym(lib, "malloc_and_init_interface_type_010");
       if(!interfacesFns->malloc_and_init)
          fprintf(stderr,"malloc_and_init: %s\n", dlerror());
-
-      interfacesFns->malloc_and_init2 = NULL;
+*/
+      interfacesFns->malloc_and_init2 = (malloc_and_init2_f)dlsym(lib, "malloc_and_init2_interface_type_010");
+      if(!interfacesFns->malloc_and_init2)
+         fprintf(stderr,"malloc_and_init2: %s\n", dlerror());
 
       interfacesFns->get_monitoring_id = (get_monitoring_id_f)dlsym(lib, "get_monitoring_id_interface_type_010");
       if(!interfacesFns->get_monitoring_id)

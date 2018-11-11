@@ -15,7 +15,6 @@
 #include <errno.h>
 #include <string.h>
 #include <getopt.h>
-#include <sqlite3.h>
 #include <termios.h>
 
 #include "globals.h"
@@ -31,12 +30,9 @@
 #include "comio2.h"
 #include "arduino_pins.h"
 
-//NOTIFY #include "notify.h"
-
 #include "tokens.h"
 #include "parameters_utils.h"
 
-//DBSERVER #include "dbServer.h"
 #include "xPLServer.h"
 
 #include "processManager.h"
@@ -81,8 +77,7 @@ int16_t interface_type_001_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
    j = cJSON_GetObjectItem(xplMsgJson, XPLSCHEMA_STR_C); 
    if(j)
       schema = j->valuestring;
-   else
-   {
+   else {
       VERBOSE(5) mea_log_printf("%s (%s) : xPL message no schema\n", INFO_STR, __func__);
       return 0;
    }
@@ -90,39 +85,34 @@ int16_t interface_type_001_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
    j = cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_DEVICE_ID)); 
    if(j)
       device=j->valuestring;
+
    j = cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_TYPE_ID)); 
    if(j)
       type=j->valuestring;
 
    VERBOSE(9) mea_log_printf("%s (%s) : xPL Message to process : %s\n", INFO_STR, __func__, schema);
 
-   if(mea_strcmplower(schema, XPL_CONTROLBASIC_STR_C) == 0)
-   {
-      if(!device)
-      {
+   if(mea_strcmplower(schema, XPL_CONTROLBASIC_STR_C) == 0) {
+      if(!device) {
          VERBOSE(5) mea_log_printf("%s (%s) : xPL message no device\n", INFO_STR, __func__);
          return 0;
       }
-      if(!type)
-      {
+      if(!type) {
          VERBOSE(5) mea_log_printf("%s (%s) : xPL message no type\n", INFO_STR, __func__);
          return 0;
       }
       return xpl_actuator2(i001, xplMsgJson, device, type);
    }
-   else if(mea_strcmplower(schema, XPL_SENSORREQUEST_STR_C) == 0)
-   {
+   else if(mea_strcmplower(schema, XPL_SENSORREQUEST_STR_C) == 0) {
       char *request = NULL;
       j = cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_REQUEST_ID)); 
       if(j)
          request = j->valuestring;
-      if(!request)
-      {
+      if(!request) {
          VERBOSE(5) mea_log_printf("%s (%s) : xPL message no request\n", INFO_STR, __func__);
          return 0;
       }
-      if(mea_strcmplower(request, get_token_string_by_id(XPL_CURRENT_ID))!=0)
-      {
+      if(mea_strcmplower(request, get_token_string_by_id(XPL_CURRENT_ID))!=0) {
          VERBOSE(5) mea_log_printf("%s (%s) : xPL message request!=current\n", INFO_STR, __func__);
          return 0;
       }
@@ -135,16 +125,15 @@ int16_t interface_type_001_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
 }
 
 
-int load_interface_type_001(interface_type_001_t *i001, int interface_id, sqlite3 *db)
+int load_interface_type_001(interface_type_001_t *i001, cJSON *jsonInterface)
 {
-   sqlite3_stmt * stmt;
    int16_t nb_sensors_actuators=0;
-   char sql_request[255];
    int ret;
-   
+  
+   int interface_id=(int)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
+ 
    // préparation des éléments de contexte de l'interface
    i001->interface_id=interface_id;
-//   i001->xPL_callback=NULL;
    i001->xPL_callback2=NULL;
    i001->counters_list=NULL;
    i001->sensors_list=NULL;
@@ -153,8 +142,7 @@ int load_interface_type_001(interface_type_001_t *i001, int interface_id, sqlite
 
    // initialisation de la liste des capteurs de type compteur
    i001->counters_list=(mea_queue_t *)malloc(sizeof(mea_queue_t));
-   if(!i001->counters_list)
-   {
+   if(!i001->counters_list) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
          perror("");
@@ -166,8 +154,7 @@ int load_interface_type_001(interface_type_001_t *i001, int interface_id, sqlite
    
    // initialisation de la liste des actionneurs (sorties logiques de l'arduino)
    i001->actuators_list=(mea_queue_t *)malloc(sizeof(mea_queue_t));
-   if(!i001->actuators_list)
-   {
+   if(!i001->actuators_list) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
          perror(""); }
@@ -178,8 +165,7 @@ int load_interface_type_001(interface_type_001_t *i001, int interface_id, sqlite
 
    // initialisation de la liste des autres capteurs (entrees logiques et analogiques)
    i001->sensors_list=(mea_queue_t *)malloc(sizeof(mea_queue_t));
-   if(!i001->sensors_list)
-   {
+   if(!i001->sensors_list) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
          perror(""); }
@@ -187,41 +173,22 @@ int load_interface_type_001(interface_type_001_t *i001, int interface_id, sqlite
    }
    mea_queue_init(i001->sensors_list);
 
-   
-   // préparation de la requete permettant d'obtenir les capteurs associés à l'interface
-   
-   // /!\ on ne tient pas compte de l'état du capteur => à ajouter ...
-   //     essayer "SELECT * FROM sensors_actuators WHERE id_interface=%d" and sensors_actuators.state='1'"
-   sprintf(sql_request,"SELECT * FROM sensors_actuators WHERE id_interface=%d AND sensors_actuators.deleted_flag <> 1 AND sensors_actuators.state='1'", interface_id);
-   
-   ret = (int)sqlite3_prepare_v2(db,sql_request,(int)(strlen(sql_request)+1),&stmt,NULL);
-   if(ret)
-   {
-      VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s (%s)\n", ERROR_STR,__func__,sqlite3_errmsg(db), sql_request);
-      goto load_interface_type_001_clean_exit;
-   }
-   
-   // récupération des parametrages des capteurs dans la base
-   while (1) // boucle de traitement du résultat de la requete
-   {
-      int s=sqlite3_step(stmt);
-      if (s==SQLITE_ROW)
-      {
-         // les valeurs dont ont a besoin
-         int id_sensor_actuator=sqlite3_column_int(stmt, 1);
-         int id_type=sqlite3_column_int(stmt, 2);
-         const unsigned char *name=sqlite3_column_text(stmt, 4);
-         const unsigned char *parameters=sqlite3_column_text(stmt, 7);
-         int todbflag=sqlite3_column_int(stmt, 9);
-         
-         switch (id_type)
-         {
+   cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface,"devices");
+   if(jsonDevices) {
+      cJSON *jsonDevice=jsonDevices->child;
+      while(jsonDevice) {
+         int id_sensor_actuator=(int)cJSON_GetObjectItem(jsonDevice,"id_sensor_actuator")->valuedouble;
+         int id_type=(int)cJSON_GetObjectItem(jsonDevice,"id_type")->valuedouble;
+         char *name=jsonDevice->string;
+         char *parameters=cJSON_GetObjectItem(jsonDevice,"parameters")->valuestring;
+         int todbflag = 0;
+
+         switch (id_type) {
             case 1000: // capteur de type compteur
             {
                struct electricity_counter_s *counter;
                counter=interface_type_001_sensors_valid_and_malloc_counter(id_sensor_actuator, (char *)name, (char *)parameters);
-               if(counter)
-               {
+               if(counter) {
                   counter->power=0.0;
                   counter->counter=0;
                   counter->last_power=0.0;
@@ -238,8 +205,7 @@ int load_interface_type_001(interface_type_001_t *i001, int interface_id, sqlite
             {
                struct actuator_s *actuator;
                actuator=interface_type_001_valid_and_malloc_actuator(id_sensor_actuator, (char *)name, (char *)parameters);
-               if(actuator)
-               {
+               if(actuator) {
                   actuator->todbflag = todbflag;
                   mea_queue_in_elem(i001->actuators_list, actuator);
                   nb_sensors_actuators++;
@@ -252,8 +218,7 @@ int load_interface_type_001(interface_type_001_t *i001, int interface_id, sqlite
             {
                struct sensor_s *sensor;
                sensor=interface_type_001_sensors_valid_and_malloc_sensor(id_sensor_actuator, (char *)name, (char *)parameters);
-               if(sensor)
-               {
+               if(sensor) {
                   sensor->todbflag = todbflag;
                   mea_queue_in_elem(i001->sensors_list, sensor);
                   nb_sensors_actuators++;
@@ -264,24 +229,16 @@ int load_interface_type_001(interface_type_001_t *i001, int interface_id, sqlite
             default:
                break;
          }
+
+         jsonDevice=jsonDevice->next;
       }
-      else if (s==SQLITE_DONE)
-      {
-         sqlite3_finalize(stmt);
-         break;
-      }
-      else
-      {
-         // traitement d'erreur à faire ici
-         sqlite3_finalize(stmt);
-         goto load_interface_type_001_clean_exit;
-      }
+      i001->loaded=1;
+      return nb_sensors_actuators;
    }
-   i001->loaded=1;
-   return nb_sensors_actuators;
 
 load_interface_type_001_clean_exit:
    clean_interface_type_001(i001);
+
    return -1;
 }
 
@@ -292,8 +249,7 @@ int set_xPLCallback_interface_type_001(void *ixxx, xpl2_f cb)
 
    if(i001 == NULL)
       return -1;
-   else
-   {
+   else {
       i001->xPL_callback2 = cb;
       return 0;
    }
@@ -317,8 +273,7 @@ int set_monitoring_id_interface_type_001(void *ixxx, int id)
 
    if(i001 == NULL)
       return -1;
-   else
-   {
+   else {
       i001->monitoring_id = id;
       return 0;
    }
@@ -342,14 +297,13 @@ int get_type_interface_type_001()
 }
 
 
-interface_type_001_t *malloc_and_init_interface_type_001(sqlite3 *sqlite3_param_db, int id_driver, int id_interface, char *name, char *dev, char *parameters, char *description)
+interface_type_001_t *malloc_and_init2_interface_type_001(int id_driver, cJSON *jsonInterface)
 {
    interface_type_001_t *i001;
                  
    // allocation du contexte de l'inteface
    i001=(interface_type_001_t *)malloc(sizeof(interface_type_001_t));
-   if(!i001)
-   {
+   if(!i001) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
          perror("");
@@ -360,8 +314,7 @@ interface_type_001_t *malloc_and_init_interface_type_001(sqlite3 *sqlite3_param_
    // initialisation contexte de l'interface
    i001->thread_is_running=0;
    struct interface_type_001_start_stop_params_s *i001_start_stop_params=(struct interface_type_001_start_stop_params_s *)malloc(sizeof(struct interface_type_001_start_stop_params_s));
-   if(!i001_start_stop_params)
-   {
+   if(!i001_start_stop_params) {
       free(i001);
       i001=NULL;
       VERBOSE(2) {
@@ -370,7 +323,13 @@ interface_type_001_t *malloc_and_init_interface_type_001(sqlite3 *sqlite3_param_
       }
       return NULL;
    }
-   
+
+   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,"id_interface")->valuedouble;
+   char *name=jsonInterface->string;
+   char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
+   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
+   char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
+ 
    // initialisation contexte de l'interface
    i001->thread_is_running=0;
 
@@ -399,12 +358,10 @@ interface_type_001_t *malloc_and_init_interface_type_001(sqlite3 *sqlite3_param_
    i001->counters_list=NULL;
    i001->actuators_list=NULL;
    i001->sensors_list=NULL;
-//   i001->xPL_callback=NULL;
    i001->xPL_callback2=NULL;
 
    // initialisation du process
    i001_start_stop_params->i001=i001;
-   i001_start_stop_params->sqlite3_param_db = sqlite3_param_db;
    strncpy(i001_start_stop_params->dev, (char *)dev, sizeof(i001_start_stop_params->dev)-1);
    i001->monitoring_id=process_register((char *)name);
 
@@ -431,7 +388,7 @@ interface_type_001_t *malloc_and_init_interface_type_001(sqlite3 *sqlite3_param_
    process_add_indicator(i001->monitoring_id, I001_CNBREADSERR, 0);
    process_add_indicator(i001->monitoring_id, I001_CNBXPLOUT, 0);
    process_add_indicator(i001->monitoring_id, I001_CNBXPLIN, 0);
-   
+
    return i001;
 }
 
@@ -441,12 +398,10 @@ int clean_interface_type_001(interface_type_001_t *i001)
    if(i001==NULL)
       return 0;
 
-   if(i001->counters_list)
-   {
+   if(i001->counters_list) {
       struct counter_s *counter;
       mea_queue_first(i001->counters_list);
-      while(i001->counters_list->nb_elem)
-      {
+      while(i001->counters_list->nb_elem) {
          mea_queue_out_elem(i001->counters_list, (void **)&counter);
          free(counter);
          counter=NULL;
@@ -455,12 +410,10 @@ int clean_interface_type_001(interface_type_001_t *i001)
       i001->counters_list=NULL;
    }
 
-   if(i001->sensors_list)
-   {
+   if(i001->sensors_list) {
       struct sensor_s *sensor;
       mea_queue_first(i001->sensors_list);
-      while(i001->sensors_list->nb_elem)
-      {
+      while(i001->sensors_list->nb_elem) {
          mea_queue_out_elem(i001->sensors_list, (void **)&sensor);
          free(sensor);
          sensor=NULL;
@@ -469,12 +422,10 @@ int clean_interface_type_001(interface_type_001_t *i001)
       i001->sensors_list=NULL;
    }
 
-   if(i001->actuators_list)
-   {
+   if(i001->actuators_list) {
       struct actuator_s *actuator;
       mea_queue_first(i001->actuators_list);
-      while(i001->actuators_list->nb_elem)
-      {
+      while(i001->actuators_list->nb_elem) {
          mea_queue_out_elem(i001->actuators_list, (void **)&actuator);
          free(actuator);
          actuator=NULL;
@@ -505,8 +456,7 @@ void *_thread_interface_type_001(void *args)
    interface_type_001_sensors_init(i001);
 
    uint32_t cntr=0;
-   while(1)
-   {
+   while(1) {
       // maj indicateurs process
       process_heartbeat(i001->monitoring_id);
 
@@ -528,15 +478,12 @@ void *_thread_interface_type_001(void *args)
       process_update_indicator(i001->monitoring_id, I001_CNBXPLOUT,  i001->indicators.nbcountersxplsent);
       process_update_indicator(i001->monitoring_id, I001_CNBXPLIN,   i001->indicators.nbcountersxplrecv);
 
-
-      if(interface_type_001_counters_poll_inputs2(i001)<0)
-      {
+      if(interface_type_001_counters_poll_inputs2(i001)<0) {
          VERBOSE(2) mea_log_printf("%s (%s) : %s - thread goes down.\n", ERROR_STR, __func__, i001->name);
          pthread_exit(NULL);
       }
       
-      if(interface_type_001_sensors_poll_inputs2(i001)<0)
-      {
+      if(interface_type_001_sensors_poll_inputs2(i001)<0) {
          VERBOSE(2) mea_log_printf("%s (%s) : %s - thread goes down.\n", ERROR_STR, __func__, i001->name);
          pthread_exit(NULL);
       }
@@ -565,20 +512,15 @@ int stop_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
 
    struct interface_type_001_start_stop_params_s *start_stop_params=(struct interface_type_001_start_stop_params_s *)data;
 
-   if(start_stop_params->i001->thread_id)
-   {
+   if(start_stop_params->i001->thread_id) {
       pthread_cancel(*start_stop_params->i001->thread_id);
       int counter=100;
-//      int stopped=-1;
-      while(counter--)
-      {
-         if(start_stop_params->i001->thread_is_running)
-         {  // pour éviter une attente "trop" active
+      while(counter--) {
+         if(start_stop_params->i001->thread_is_running) {
+            // pour éviter une attente "trop" active
             usleep(100); // will sleep for 10 ms
          }
-         else
-         {
-//            stopped=0;
+         else {
             break;
          }
       }
@@ -588,14 +530,12 @@ int stop_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
       start_stop_params->i001->thread_id=NULL;
    }
    
-   if(start_stop_params->i001->ad)
-   {
+   if(start_stop_params->i001->ad) {
       comio2_close(start_stop_params->i001->ad);
       comio2_free_ad(start_stop_params->i001->ad);
       start_stop_params->i001->ad=NULL;
    }
    VERBOSE(2) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, start_stop_params->i001->name, stopped_successfully_str);
-//NOTIFY   mea_notify_printf('S', "%s %s.", start_stop_params->i001->name, stopped_successfully_str);
 
    return 0;
 }
@@ -617,70 +557,62 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
    struct interface_type_001_thread_params_s *interface_type_001_thread_params=NULL; // parametre à transmettre au thread
    struct interface_type_001_start_stop_params_s *start_stop_params=(struct interface_type_001_start_stop_params_s *)data;
 
-   if(start_stop_params->i001->loaded!=1)
-   {
-      ret=load_interface_type_001(start_stop_params->i001, start_stop_params->i001->interface_id, start_stop_params->sqlite3_param_db);
-      if(ret<0)
-      {
-         VERBOSE(2) mea_log_printf("%s (%s) : can not load sensors/actuators.\n", ERROR_STR,__func__);
-//NOTIFY         mea_notify_printf('E', "%s can't be launched - can't load sensors/actuators.", start_stop_params->i001->name);
+   if(start_stop_params->i001->loaded!=1) {
+      cJSON *jsonInterface = getInterfaceById_alloc(start_stop_params->i001->interface_id);
+      if(jsonInterface) {
+         ret=load_interface_type_001(start_stop_params->i001, jsonInterface);
+         if(ret<0) {
+            VERBOSE(2) mea_log_printf("%s (%s) : can not load sensors/actuators.\n", ERROR_STR,__func__);
+            return -1;
+         }
+      }
+      else {
+         VERBOSE(2) mea_log_printf("%s (%s) : can not find interface.\n", ERROR_STR,__func__);
          return -1;
       }
    }
 
    // si on a trouvé une config
-   if(start_stop_params->i001->loaded==1)
-   {
+   if(start_stop_params->i001->loaded==1) {
       ret=get_dev_and_speed((char *)start_stop_params->dev, buff, sizeof(buff), &speed);
-      if(!ret)
-      {
+      if(!ret) {
          int n=snprintf(dev,sizeof(buff)-1,"/dev/%s",buff);
-         if( n<0 || n==(sizeof(buff)-1) )
-         {
+         if( n<0 || n==(sizeof(buff)-1) ) {
             strerror_r(errno, err_str, sizeof(err_str));
             VERBOSE(2) {
                mea_log_printf("%s (%s) : snprintf - %s\n", ERROR_STR, __func__, err_str);
                perror("");
             }
-//NOTIFY            mea_notify_printf('E', "%s can't be launched - %s.", start_stop_params->i001->name, err_str);
             goto start_interface_type_001_clean_exit;
          }
       }
-      else
-      {
+      else {
          VERBOSE(2) mea_log_printf("%s (%s) : unknow interface device - %s\n", ERROR_STR,__func__, start_stop_params->dev);
-//NOTIFY         mea_notify_printf('E', "%s can't be launched - unknow interface device (%s).", start_stop_params->i001->name, start_stop_params->dev);
          goto start_interface_type_001_clean_exit;
       }
 
       ad=(comio2_ad_t *)malloc(sizeof(comio2_ad_t));
-      if(!ad)
-      {
+      if(!ad) {
          strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(2) {
             mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
             perror("");
          }
-//NOTIFY         mea_notify_printf('E', "%s can't be launched - %s.", start_stop_params->i001->name, err_str);
          goto start_interface_type_001_clean_exit;
       }
       
       fd = comio2_init(ad, dev, speed);
-      if (fd == -1)
-      {
+      if (fd == -1) {
          VERBOSE(2) {
             mea_log_printf("%s (%s) : init_arduino - Unable to open serial port (%s) - ",ERROR_STR,__func__,start_stop_params->dev);
             perror("");
          }
-//NOTIFY         mea_notify_printf('E', "%s can't be launched - unable to open serial port (%s).", start_stop_params->i001->name, start_stop_params->dev);
          fd=0;
          goto start_interface_type_001_clean_exit;
       }
    }
-   else
-   {
+   else {
       VERBOSE(5) mea_log_printf("%s (%s) : no sensor/actuator active for this interface (%d) - ",ERROR_STR,__func__,start_stop_params->i001->interface_id);
-//NOTIFY      mea_notify_printf('E', "%s can't be launched - no sensor/actuator active for this interface.", start_stop_params->i001->name);
 
       goto start_interface_type_001_clean_exit;
    }
@@ -699,8 +631,7 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
    
    start_stop_params->i001->xPL_callback2=interface_type_001_xPL_callback2;
 
-   if(pthread_create (interface_type_001_thread_id, NULL, _thread_interface_type_001, (void *)interface_type_001_thread_params))
-   {
+   if(pthread_create (interface_type_001_thread_id, NULL, _thread_interface_type_001, (void *)interface_type_001_thread_params)) {
       VERBOSE(2) mea_log_printf("%s (%s) : pthread_create - can't start thread\n",ERROR_STR,__func__);
       goto start_interface_type_001_clean_exit;
    }
@@ -711,25 +642,21 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
    pthread_detach(*interface_type_001_thread_id);
    
    VERBOSE(2) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, start_stop_params->i001->name, launched_successfully_str);
-//NOTIFY   mea_notify_printf('S', "%s %s", start_stop_params->i001->name, launched_successfully_str);
    
    return 0;
    
 start_interface_type_001_clean_exit:
-   if(interface_type_001_thread_params)
-   {
+   if(interface_type_001_thread_params) {
       free(interface_type_001_thread_params);
       interface_type_001_thread_params=NULL;
    }
-   if(interface_type_001_thread_id)
-   {
+   if(interface_type_001_thread_id) {
       free(interface_type_001_thread_id);
       interface_type_001_thread_id=NULL;
    }
    if(fd)
       comio2_close(ad);
-   if(ad)
-   {
+   if(ad) {
       free(ad);
       ad=NULL;
    }
@@ -740,7 +667,8 @@ start_interface_type_001_clean_exit:
 
 int get_fns_interface_type_001(struct interfacesServer_interfaceFns_s *interfacesFns)
 {
-   interfacesFns->malloc_and_init = (malloc_and_init_f)&malloc_and_init_interface_type_001;
+   interfacesFns->malloc_and_init = NULL;
+   interfacesFns->malloc_and_init2 = (malloc_and_init2_f)&malloc_and_init2_interface_type_001;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_001;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_001;
    interfacesFns->clean = (clean_f)&clean_interface_type_001;

@@ -9,18 +9,16 @@
 #ifndef __interface_type_001_h
 #define __interface_type_001_h
 
-#include <sqlite3.h>
 #include <inttypes.h>
 #include <string.h>
 #include <signal.h>
 
-//#include "error.h"
+#include "cJSON.h"
 #include "mea_verbose.h"
 #include "mea_queue.h"
 #include "comio2.h"
 
 #include "interfacesServer.h"
-//DBSERVER #include "dbServer.h"
 #include "xPLServer.h"
 
 #define INTERFACE_TYPE_001 100
@@ -72,7 +70,6 @@ typedef struct interface_type_001_s
    mea_queue_t *counters_list; // counter sensors attach to interface
    mea_queue_t *actuators_list;
    mea_queue_t *sensors_list;
-//   xpl_f xPL_callback;
    xpl2_f xPL_callback2;
    
    struct interface_type_001_indicators_s indicators;
@@ -83,7 +80,6 @@ typedef struct interface_type_001_s
 struct interface_type_001_start_stop_params_s
 {
    interface_type_001_t *i001;
-   sqlite3 *sqlite3_param_db;
    char dev[81];
 };
 
@@ -100,7 +96,7 @@ int    get_monitoring_id_interface_type_001(void *ixxx);
 int    set_monitoring_id_interface_type_001(void *ixxx, int id);
 int    get_type_interface_type_001(void);
 
-interface_type_001_t *malloc_and_init_interface_type_001(sqlite3 *sqlite3_param_db, int id_driver, int id_interface, char *name, char *dev, char *parameters, char *description);
+interface_type_001_t *malloc_and_init_interface_type_001(int id_driver, cJSON *jsonInterface);
 int clean_interface_type_001(interface_type_001_t *i001);
 
 int get_fns_interface_type_001(struct interfacesServer_interfaceFns_s *interfacesFns);

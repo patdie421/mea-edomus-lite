@@ -1301,7 +1301,6 @@ int clean_interface_type_004(void *ixxx)
       i004->parameters=NULL;
    }
    
-//   i004->xPL_callback=NULL;
    i004->xPL_callback2=NULL;
    
    if(i004->thread)
@@ -1353,7 +1352,6 @@ int stop_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg)
       pthread_cancel(*(start_stop_params->i004->thread));
       
       int counter=100;
-//      int stopped=-1;
       while(counter--)
       {
          if(start_stop_params->i004->thread_is_running)
@@ -1368,8 +1366,6 @@ int stop_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg)
       free(start_stop_params->i004->thread);
       start_stop_params->i004->thread=NULL;
    }
-   
-//NOTIFY   mea_notify_printf('S', "%s %s", start_stop_params->i004->name, stopped_successfully_str);
    
    return 0;
 }
@@ -1407,33 +1403,27 @@ int start_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg)
    struct interface_type_004_start_stop_params_s *start_stop_params=(struct interface_type_004_start_stop_params_s *)data; // données pour la gestion des arrêts/relances
    struct thread_interface_type_004_args_s *interface_type_004_thread_args=NULL; // parametre à transmettre au thread
    
-   if(start_stop_params->i004->loaded!=1) // les données sont elles déjà chargées ?
-   {
+   if(start_stop_params->i004->loaded!=1) {
+      // les données sont elles déjà chargées ?
       ret=load_interface_type_004(start_stop_params->i004, start_stop_params->sqlite3_param_db);
-      if(ret<0)
-      {
+      if(ret<0) {
          VERBOSE(2) mea_log_printf("%s (%s) : can not load lights.\n", ERROR_STR,__func__);
-//NOTIFY         mea_notify_printf('E', "%s can't be launched - can't load lights.", start_stop_params->i004->name);
          return -1;
       }
    }
    
    // si on a trouvé une config
-   if(start_stop_params->i004->loaded==1)
-   {
+   if(start_stop_params->i004->loaded==1) {
       // avec dev qui doit contenir "HTTP://<server>:<port>@<user>" ou "HTTP://<server>@<user>"
       ret=get_huesystem_connection_parameters((char *)start_stop_params->i004->dev, server, sizeof(server), &port, user, sizeof(user));
-      if(ret==-1)
-      {
+      if(ret==-1) {
          VERBOSE(2) mea_log_printf("%s (%s) : unknow interface device - %s\n", ERROR_STR,__func__, start_stop_params->i004->dev);
-//NOTIFY         mea_notify_printf('E', "%s can't be launched - unknow interface device (%s).", start_stop_params->i004->name, start_stop_params->i004->dev);
          goto start_interface_type_004_clean_exit;
       }
    }
    
    interface_type_004_thread_args=malloc(sizeof(struct thread_interface_type_004_args_s));
-   if(!interface_type_004_thread_args)
-   {
+   if(!interface_type_004_thread_args) {
       VERBOSE(2) mea_log_printf("%s (%s) : malloc - %s\n", ERROR_STR,__func__);
       perror("");
       goto start_interface_type_004_clean_exit;
@@ -1450,14 +1440,12 @@ int start_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg)
    start_stop_params->i004->xPL_callback2=interface_type_004_xPL_callback2;
    
    interface_type_004_thread_id=(pthread_t *)malloc(sizeof(pthread_t));
-   if(!interface_type_004_thread_id)
-   {
+   if(!interface_type_004_thread_id) {
       VERBOSE(2) mea_log_printf("%s (%s) : malloc - %s\n", ERROR_STR,__func__);
       goto start_interface_type_004_clean_exit;
    }
    
-   if(pthread_create (interface_type_004_thread_id, NULL, _thread_interface_type_004, (void *)interface_type_004_thread_args))
-   {
+   if(pthread_create (interface_type_004_thread_id, NULL, _thread_interface_type_004, (void *)interface_type_004_thread_args)) {
       VERBOSE(2) mea_log_printf("%s (%s) : pthread_create - can't start thread\n",ERROR_STR,__func__);
       goto start_interface_type_004_clean_exit;
    }
@@ -1468,18 +1456,15 @@ int start_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg)
    pthread_detach(*interface_type_004_thread_id);
 
    VERBOSE(2) mea_log_printf("%s  (%s) : %s %s.\n", INFO_STR, __func__, start_stop_params->i004->name, launched_successfully_str);
-//NOTIFY   mea_notify_printf('S', "%s %s", start_stop_params->i004->name, launched_successfully_str);
    
    return 0;
    
 start_interface_type_004_clean_exit:
-   if(interface_type_004_thread_args)
-   {
+   if(interface_type_004_thread_args) {
       free(interface_type_004_thread_args);
       interface_type_004_thread_args=NULL;
    }
-   if(interface_type_004_thread_id)
-   {
+   if(interface_type_004_thread_id) {
       free(interface_type_004_thread_id);
       interface_type_004_thread_id=NULL;
    }

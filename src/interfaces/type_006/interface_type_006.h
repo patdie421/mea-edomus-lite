@@ -17,10 +17,8 @@
 */
 #include <signal.h>
 #include <Python.h>
-#include <sqlite3.h>
 
 #include "interfacesServer.h"
-//DBSERVER #include "dbServer.h"
 #include "xPLServer.h"
 #include "pythonPluginServer.h"
 

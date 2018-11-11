@@ -328,6 +328,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
 
          char interfaceName[41];
          sprintf(interfaceName,"%s://%02x-%02x-%02x-%02x", params->i003->name, a, b, c, d);
+         mea_strtolower(interfaceName);
 
          cJSON *jsonInterface = getInterfaceByDevName_alloc(interfaceName);
          if(jsonInterface) {
@@ -398,6 +399,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
                      pthread_exit(PTHREAD_CANCELED);
                   }
                   release_parsed_parameters(&(params->plugin_params));
+                  jsonDevice=jsonDevice->next;
                }
             }
             cJSON_Delete(jsonInterface);
@@ -576,8 +578,7 @@ int set_xPLCallback_interface_type_003(void *ixxx, xpl2_f cb)
 
    if(i003 == NULL)
       return -1;
-   else
-   {
+   else {
       i003->xPL_callback2 = cb;
       return 0;
    }
@@ -590,8 +591,7 @@ int set_monitoring_id_interface_type_003(void *ixxx, int id)
 
    if(i003 == NULL)
       return -1;
-   else
-   {
+   else {
       i003->monitoring_id = id;
       return 0;
    }
@@ -739,6 +739,7 @@ interface_type_003_t *malloc_and_init_interface_type_003(int id_driver, cJSON *j
    i003->id_driver=id_driver;
    i003->parameters=(char *)malloc(strlen((char *)parameters)+1);
    strcpy(i003->parameters,(char *)parameters);
+
    i003->indicators.senttoplugin=0;
    i003->indicators.xplin=0;
    i003->indicators.enoceandatain=0;

@@ -858,6 +858,7 @@ int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, 
    device_info->type_id           = type_id;
 
    device_info->type_name         = (char *)jsonType->string;
+   device_info->type_parameters   = (char *)cJSON_GetObjectItem(jsonType, "parameters")->valuestring;;
    device_info->typeoftype_id     =    (int)cJSON_GetObjectItem(jsonType, "typeoftype")->valuedouble;
  
    device_info->interface_name    = (char *)jsonInterface->string;
@@ -1274,8 +1275,6 @@ void stop_interfaces()
       interfacesFns=NULL;
    }
  
-   printf("##\n"); 
-
    pthread_rwlock_unlock(&interfaces_queue_rwlock);
    pthread_cleanup_pop(0);
  

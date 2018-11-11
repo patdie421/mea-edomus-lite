@@ -92,32 +92,17 @@ PyObject *mea_device_info_to_pydict_device(struct device_info_s *device_info)
    data_dict=PyDict_New();
    if(!data_dict)
       return NULL;
-/*
-   char *parameters;
-   char *interface_dev;
-   uint16_t interface_type_id;
-*/
-   //uint16_t id;
+
    mea_addLong_to_pydict(data_dict, get_token_string_by_id(DEVICE_ID_ID), device_info->id);
-   //char *name;
    mea_addString_to_pydict(data_dict, get_token_string_by_id(DEVICE_NAME_ID), device_info->name);
-   //uint16_t state;
    mea_addLong_to_pydict(data_dict, get_token_string_by_id(DEVICE_STATE_ID), device_info->state);
-   //uint16_t type_id;
    mea_addLong_to_pydict(data_dict, get_token_string_by_id(DEVICE_TYPE_ID_ID), device_info->type_id);
-   //uint16_t location_id;
    mea_addLong_to_pydict(data_dict, get_token_string_by_id(DEVICE_LOCATION_ID_ID), device_info->location_id);
-   //uint16_t interface_id;
    mea_addLong_to_pydict(data_dict, get_token_string_by_id(INTERFACE_ID_ID), device_info->interface_id);
-   //char *interface_name;
    mea_addString_to_pydict(data_dict, get_token_string_by_id(DEVICE_INTERFACE_NAME_ID), device_info->interface_name);
-   //char *type_name;
    mea_addString_to_pydict(data_dict, get_token_string_by_id(DEVICE_INTERFACE_TYPE_NAME_ID), device_info->type_name);
-   //char *type_parameters;
    mea_addString_to_pydict(data_dict, get_token_string_by_id(DEVICE_TYPE_PARAMETERS_ID), device_info->type_parameters);
-   //uint16_t todbflag;
    mea_addLong_to_pydict(data_dict, get_token_string_by_id(TODBFLAG_ID), device_info->todbflag);
-   //uint16_t typeoftype_id;
    mea_addLong_to_pydict(data_dict, get_token_string_by_id(TYPEOFTYPE_ID), device_info->typeoftype_id);
 
    return data_dict;

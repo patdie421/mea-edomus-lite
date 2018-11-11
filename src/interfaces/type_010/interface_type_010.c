@@ -63,7 +63,6 @@ char *valid_plugin_010_params[]={"S:PLUGIN","S:PLUGIN_PARAMETERS", NULL};
 
 struct thread_params_s
 {
-   sqlite3 *param_db;
    interface_type_010_t *i010;
 };
 
@@ -102,16 +101,14 @@ int16_t _interface_type_010_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    int nb_plugin_params;
 
    plugin_params=alloc_parsed_parameters(device_info->parameters, valid_plugin_010_params, &nb_plugin_params, &err, 0);
-   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s)
-   {
+   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(plugin_params)
          release_parsed_parameters(&plugin_params);
       return -1;
    }
 
    plugin_queue_elem_t *plugin_qelem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-   if(plugin_qelem)
-   {
+   if(plugin_qelem) {
       plugin_qelem->type_elem=XPLMSG;
       {
          pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
@@ -158,26 +155,22 @@ static int init_interface_type_010_data_source_pipe(interface_type_010_t *i010)
    i010->file_desc_in  = -1;
    i010->file_desc_out = -1;
    
-   if(i010->direction == DIR_IN || i010->direction == DIR_BOTH)
-   {
+   if(i010->direction == DIR_IN || i010->direction == DIR_BOTH) {
       char *fname = alloca(strlen(i010->file_name)+strlen(i010->in_ext)+1);
       sprintf(fname,"%s%s", i010->file_name, i010->in_ext);
 
       unlink(fname);
 
       ret = mkfifo(fname, 0666);
-      if(ret != 0)
-      {
+      if(ret != 0) {
          VERBOSE(5) {
             mea_log_printf("%s (%s) : mkfifo in - ", ERROR_STR, __func__);
             perror("");
          }
       }
-      else
-      {
+      else {
          int p=open(fname, O_RDWR | O_NONBLOCK);
-         if(p==-1)
-         {
+         if(p==-1) {
             VERBOSE(5) {
                mea_log_printf("%s (%s) : open in - ", ERROR_STR, __func__);
                perror("");
@@ -189,41 +182,35 @@ static int init_interface_type_010_data_source_pipe(interface_type_010_t *i010)
 
             return -1;
          }
-         else
-         {
+         else {
             i010->file_desc_in=p; 
          }
       }
    }
 
 
-   if(i010->direction == DIR_OUT || i010->direction == DIR_BOTH)
-   {
+   if(i010->direction == DIR_OUT || i010->direction == DIR_BOTH) {
       char *fname = alloca(strlen(i010->file_name)+strlen(i010->out_ext)+1);
       sprintf(fname,"%s%s", i010->file_name, i010->out_ext);
 
       unlink(fname);
 
       ret = mkfifo(fname, 0666);
-      if(ret != 0)
-      {
+      if(ret != 0) {
          VERBOSE(5) {
             mea_log_printf("%s (%s) : mkfifo out - ", ERROR_STR, __func__);
             perror("");
          }
       }
-      else
-      {
+      else {
          int p=open(fname, O_RDWR | O_NONBLOCK);
-         if(p==-1)
-         {
+         if(p==-1) {
             VERBOSE(5) {
                mea_log_printf("%s (%s) : open out - ", ERROR_STR, __func__);
                perror("");
             }
 
-            if(i010->file_desc_in != -1)
-            {
+            if(i010->file_desc_in != -1) {
                close(i010->file_desc_in);
                i010->file_desc_in = -1;
             }
@@ -234,15 +221,13 @@ static int init_interface_type_010_data_source_pipe(interface_type_010_t *i010)
 
             return -1;
          }
-         else
-         {
+         else {
             i010->file_desc_out=p;
          }
       }
    }
 
-   if(i010->file_desc_out == -1 && i010->file_desc_in == -1)
-   {
+   if(i010->file_desc_out == -1 && i010->file_desc_in == -1) {
       VERBOSE(5) {
          mea_log_printf("%s (%s) : no fifo opend", ERROR_STR, __func__);
       }
@@ -269,8 +254,7 @@ static int init_interface_type_010_data_source(interface_type_010_t *i010)
    i010->file_desc_in = -1;
    i010->file_desc_out = -1;
 
-   switch(i010->file_type)
-   {
+   switch(i010->file_type) {
       case FT_PIPE:
       {
          int p=init_interface_type_010_data_source_pipe(i010);
@@ -293,58 +277,48 @@ int init_interface_type_010_data_preprocessor(interface_type_010_t *i010, char *
    mea_python_lock();
       
    PyObject *pName = PyString_FromString(plugin_name);
-   if(!pName)
-   {
+   if(!pName) {
       ret=-1;
       goto init_interface_type_010_data_preprocessor_clean_exit;
    }
-   else
-   {
-      if(!i010->pModule)
-      {
+   else {
+      if(!i010->pModule) {
          i010->pModule =  PyImport_Import(pName);
-         if(!i010->pModule)
-         {
+         if(!i010->pModule) {
             ret=-1;
             goto init_interface_type_010_data_preprocessor_clean_exit;
          }
       }
-      else
-      {
+      else {
          PyObject *m = NULL;
          m=i010->pModule;
          i010->pModule=PyImport_ReloadModule(m); // on force le rechargement (c'est pour simplifier)
          Py_DECREF(m);
-         if(!i010->pModule)
-         {
+         if(!i010->pModule) {
             ret=-1;
             goto init_interface_type_010_data_preprocessor_clean_exit;
          }
       }
 
-      if(i010->pFunc)
-      {
+      if(i010->pFunc) {
          Py_DECREF(i010->pFunc);
          i010->pFunc=NULL;
       }
 
       i010->pFunc = PyObject_GetAttrString(i010->pModule, "mea_dataPreprocessor");
-      if(!i010->pFunc)
-      {
+      if(!i010->pFunc) {
          ret=-1;
          goto init_interface_type_010_data_preprocessor_clean_exit;
       }
       
-      if(PyCallable_Check(i010->pFunc))
-      {
+      if(PyCallable_Check(i010->pFunc)) {
          if(plugin_parameters)
             i010->pParams=PyString_FromString(plugin_parameters);
          else
             i010->pParams=NULL;
          ret = 0;
       }
-      else
-      {
+      else {
          VERBOSE(5) mea_log_printf("%s (%s) : no mea_dataPreprocessor entry point\n", ERROR_STR, __func__);
 
          Py_XDECREF(i010->pFunc);
@@ -358,8 +332,7 @@ int init_interface_type_010_data_preprocessor(interface_type_010_t *i010, char *
    }
 
 init_interface_type_010_data_preprocessor_clean_exit:
-   if(pName)
-   {
+   if(pName) {
       Py_XDECREF(pName);
       pName=NULL;      
    }
@@ -372,15 +345,13 @@ init_interface_type_010_data_preprocessor_clean_exit:
 int interface_type_010_data_preprocessor(interface_type_010_t *i010)
 {
    int retour=-1;
-   if(i010->pFunc)
-   {
+   if(i010->pFunc) {
       pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
       PyEval_AcquireLock();
       PyThreadState *tempState = PyThreadState_Swap(i010->myThreadState);
 
       PyObject *aDict=PyDict_New();
-      if(aDict)
-      {
+      if(aDict) {
          PyObject *value = PyByteArray_FromStringAndSize((char *)i010->line_buffer, (long)i010->line_buffer_ptr);
          PyDict_SetItemString(aDict, "data", value);
          Py_DECREF(value);
@@ -398,32 +369,26 @@ int interface_type_010_data_preprocessor(interface_type_010_t *i010)
          if(!res) {
             retour=0;
          }
-         else
-         {
-            if(PyObject_CheckBuffer(res))
-            {
+         else {
+            if(PyObject_CheckBuffer(res)) {
                Py_buffer py_packet;
                int ret=PyObject_GetBuffer(res, &py_packet, PyBUF_SIMPLE);
-               if(ret<0)
-               {
+               if(ret<0) {
                   VERBOSE(5) mea_log_printf("%s (%s) : python buffer error\n", ERROR_STR, __func__);
                   retour = -1;
                }
                else
                {
-                  if(py_packet.len >= i010->line_buffer_l)
-                  {
+                  if(py_packet.len >= i010->line_buffer_l) {
                      int n=(int)(((py_packet.len / INC_LINE_BUFFER_SIZE) + 1) * INC_LINE_BUFFER_SIZE);
                      char *tmp = realloc(i010->line_buffer, n);
-                     if(!tmp)
-                     {
+                     if(!tmp) {
                         VERBOSE(5) {
                            mea_log_printf("%s (%s) : realloc error - ", ERROR_STR, __func__);
                            perror("");
                         }
                      }
-                     else
-                     {
+                     else {
                         i010->line_buffer = tmp;
                         i010->line_buffer_l=n;
                      }
@@ -464,8 +429,7 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
    int nb_plugin_params;
 
    plugin_params=alloc_parsed_parameters((char *)device_info->parameters, valid_plugin_010_params, &nb_plugin_params, &err, 0);
-   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s)
-   {
+   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(plugin_params)
          release_parsed_parameters(&plugin_params);
       return -1;
@@ -473,8 +437,7 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
 
    plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
 
-   if(plugin_elem)
-   {
+   if(plugin_elem) {
       plugin_elem->type_elem=DATAFROMSENSOR;
       {
          pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
@@ -569,14 +532,13 @@ int haveFrameEndStr(interface_type_010_t *i010)
 }
 
 
-static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *params_db)
+static int process_interface_type_010_data(interface_type_010_t *i010)
 {
    if(i010->file_desc_in == -1)
       return -1;
 
    fd_set set;
    struct timeval timeout;
-//   char buffer[255];
 
    mea_timer_t timer;
    mea_init_timer(&timer, 10, 1);
@@ -586,30 +548,24 @@ static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *
    FD_ZERO(&set);
    FD_SET(i010->file_desc_in, &set);
    int ret = 0;
-   do
-   {
-      if(mea_test_timer(&timer)==0)
-      {
+   do {
+      if(mea_test_timer(&timer)==0) {
          break;
       }
 
       /* Initialize the timeout data structure. */
-      if(i010->fduration <= 0)
-      {
+      if(i010->fduration <= 0) {
          timeout.tv_sec = 5;
          timeout.tv_usec = 0;
       }
-      else
-      {
+      else {
          timeout.tv_sec = i010->fduration / 1000;
          timeout.tv_usec = (i010->fduration % 1000)*1000;
       }
 
       ret = select(FD_SETSIZE, &set, NULL, NULL, &timeout);
-      if(ret == 0)
-      {
-         if((i010->fduration > 0) && (i010->line_buffer_ptr))
-         {
+      if(ret == 0) {
+         if((i010->fduration > 0) && (i010->line_buffer_ptr)) {
             i010->line_buffer[i010->line_buffer_ptr]=0;
             interface_type_010_data_to_plugin(i010);
             i010->line_buffer_ptr=0;
@@ -617,8 +573,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *
          
          break;
       }
-      else if(ret < 0)
-      {
+      else if(ret < 0) {
          // erreur de select
          VERBOSE(5) {
             mea_log_printf("%s (%s) : select error - ", ERROR_STR, __func__);
@@ -626,15 +581,12 @@ static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *
          }
          break;
       }
-      else
-      {
+      else {
          char c;
 
          int r=(int)read(i010->file_desc_in, &c, 1);
-         if(r<1)
-         {
-            if(r<0)
-            {
+         if(r<1) {
+            if(r<0) {
                VERBOSE(5) {
                   mea_log_printf("%s (%s) : select error - ", ERROR_STR, __func__);
                   perror("");
@@ -644,8 +596,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *
          }
 
          i010->line_buffer[i010->line_buffer_ptr++]=c;
-         if(i010->line_buffer_ptr>=i010->line_buffer_l)
-         {
+         if(i010->line_buffer_ptr>=i010->line_buffer_l) {
             char *tmp = realloc(i010->line_buffer, i010->line_buffer_l + INC_LINE_BUFFER_SIZE);
             if(!tmp)
             {
@@ -663,13 +614,11 @@ static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *
             }
          }
 
-         if(i010->fsize>0 && i010->line_buffer_ptr==i010->fsize)
-         {
+         if(i010->fsize>0 && i010->line_buffer_ptr==i010->fsize) {
             i010->line_buffer[i010->line_buffer_ptr]=0;
             
             int b = haveFrameEndStr(i010);
-            if(b>0)
-            {
+            if(b>0) {
                i010->line_buffer_ptr-=b;
                i010->line_buffer[i010->line_buffer_ptr]=0;
             }
@@ -679,12 +628,10 @@ static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *
             break;
          }
 
-         if(i010->fendstr && i010->fendstr[0])
-         {
+         if(i010->fendstr && i010->fendstr[0]) {
             int b = 0;
             b = haveFrameEndStr(i010);
-            if(b>0)
-            {
+            if(b>0) {
                i010->line_buffer_ptr-=b;
                i010->line_buffer[i010->line_buffer_ptr]=0;
                interface_type_010_data_to_plugin(i010);
@@ -693,8 +640,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010, sqlite3 *
             }
          }
 
-         if(i010->fstartstr && i010->fstartstr[0] && haveFrameStartStr(i010)==0)
-         {
+         if(i010->fstartstr && i010->fstartstr[0] && haveFrameStartStr(i010)==0) {
             i010->line_buffer_ptr=0;
             break;
          }
@@ -733,8 +679,7 @@ int clean_interface_type_010(void *ixxx)
 {
    interface_type_010_t *i010 = (interface_type_010_t *)ixxx;
 
-   if(i010->parameters)
-   {
+   if(i010->parameters) {
       free(i010->parameters);
       i010->parameters=NULL;
    }
@@ -742,38 +687,32 @@ int clean_interface_type_010(void *ixxx)
    if(i010->xPL_callback2)
       i010->xPL_callback2=NULL;
 
-   if(i010->thread)
-   {
+   if(i010->thread) {
       free(i010->thread);
       i010->thread=NULL;
    }
 
-   if(i010->file_name)
-   {
+   if(i010->file_name) {
       free(i010->file_name);
       i010->file_name=NULL;
    }
 
-   if(i010->in_ext)
-   {
+   if(i010->in_ext) {
       free(i010->in_ext);
       i010->in_ext=NULL;
    }
 
-   if(i010->out_ext)
-   {
+   if(i010->out_ext) {
       free(i010->out_ext);
       i010->out_ext=NULL;
    }
 
-   if(i010->fstartstr)
-   {
+   if(i010->fstartstr) {
       free(i010->fstartstr);
       i010->fstartstr=NULL;
    }
 
-   if(i010->fendstr)
-   {
+   if(i010->fendstr) {
       free(i010->fendstr);
       i010->fendstr=NULL;
    }
@@ -781,26 +720,22 @@ int clean_interface_type_010(void *ixxx)
    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
    PyEval_AcquireLock();
 
-   if(i010->pFunc)
-   {
+   if(i010->pFunc) {
       Py_XDECREF(i010->pFunc);
       i010->pFunc=NULL;
    }
 
-   if(i010->pModule)
-   {
+   if(i010->pModule) {
       Py_XDECREF(i010->pModule);
       i010->pModule=NULL;
    }
 
-   if(i010->pParams)
-   {
+   if(i010->pParams) {
       Py_XDECREF(i010->pParams);
       i010->pParams=NULL;
    }
  
-   if(i010->myThreadState)
-   {
+   if(i010->myThreadState) {
       PyThreadState_Clear(i010->myThreadState);
       PyThreadState_Delete(i010->myThreadState);
       i010->myThreadState=NULL;
@@ -819,8 +754,7 @@ xpl2_f get_xPLCallback_interface_type_010(void *ixxx)
 
    if(i010 == NULL)
       return NULL;
-   else
-   {
+   else {
       return i010->xPL_callback2;
    }
 }
@@ -843,8 +777,7 @@ int set_xPLCallback_interface_type_010(void *ixxx, xpl2_f cb)
 
    if(i010 == NULL)
       return -1;
-   else
-   {
+   else {
       i010->xPL_callback2 = cb;
       return 0;
    }
@@ -857,8 +790,7 @@ int set_monitoring_id_interface_type_010(void *ixxx, int id)
 
    if(i010 == NULL)
       return -1;
-   else
-   {
+   else {
       i010->monitoring_id = id;
       return 0;
    }
@@ -884,8 +816,7 @@ int get_interface_id_interface_type_010(void *ixxx)
 
 static int api_write_data(interface_type_010_t *ixxx, PyObject *args, PyObject **res, int16_t *nerr, char *err, int l_err)
 {
-   if(ixxx->file_desc_out == -1)
-   {
+   if(ixxx->file_desc_out == -1) {
       *nerr=253;
       return -253;
    }
@@ -900,8 +831,7 @@ static int api_write_data(interface_type_010_t *ixxx, PyObject *args, PyObject *
 
    Py_buffer py_packet;
    arg=PyTuple_GetItem(args, 2);
-   if(PyObject_CheckBuffer(arg))
-   {
+   if(PyObject_CheckBuffer(arg)) {
       ret=PyObject_GetBuffer(arg, &py_packet, PyBUF_SIMPLE);
       if(ret<0)
       return -255;
@@ -910,8 +840,7 @@ static int api_write_data(interface_type_010_t *ixxx, PyObject *args, PyObject *
       return -255;
 
    ret=write(ixxx->file_desc_out, py_packet.buf, py_packet.len);
-   if(ret<0)
-   {
+   if(ret<0) {
       VERBOSE(5) {
          mea_log_printf("%s (%s) : write - ", ERROR_STR, __func__);
          perror("");
@@ -933,16 +862,13 @@ int16_t api_interface_type_010(void *ixxx, char *cmnd, void *args, int nb_args, 
    PyObject *pyArgs = (PyObject *)args;
    PyObject **pyRes = (PyObject **)res;
    
-   if(strcmp(cmnd, "mea_writeData") == 0)
-   {
+   if(strcmp(cmnd, "mea_writeData") == 0) {
       int ret=api_write_data(ixxx, pyArgs, pyRes, nerr, err, l_err);
-      if(ret<0)
-      {
+      if(ret<0) {
          strncpy(err, "error", l_err);
          return -1;
       }
-      else
-      {
+      else {
          strncpy(err, "no error", l_err);
          *nerr=0;
          return 0;
@@ -958,8 +884,7 @@ int16_t api_interface_type_010(void *ixxx, char *cmnd, void *args, int nb_args, 
       return 0;
    }
 */
-   else
-   {
+   else {
       strncpy(err, "unknown function", l_err);
 
       return -254;
@@ -969,24 +894,12 @@ int16_t api_interface_type_010(void *ixxx, char *cmnd, void *args, int nb_args, 
 }
 
 
-void *_thread_interface_type_010_cleanup(void *args)
-{
-   struct thread_params_s *params=(struct thread_params_s *)args;
-
-   if(!params)
-      return NULL;
-
-   return NULL;
-}
-
-
-interface_type_010_t *malloc_and_init_interface_type_010(sqlite3 *sqlite3_param_db, int id_driver, int id_interface, char *name, char *dev, char *parameters, char *description)
+interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *jsonInterface)
 {
    interface_type_010_t *i010;
                   
    i010=(interface_type_010_t *)malloc(sizeof(interface_type_010_t));
-   if(!i010)
-   {
+   if(!i010) {
       VERBOSE(2) {
         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
         perror("");
@@ -998,8 +911,7 @@ interface_type_010_t *malloc_and_init_interface_type_010(sqlite3 *sqlite3_param_
 
                   
    struct interface_type_010_data_s *i010_start_stop_params=(struct interface_type_010_data_s *)malloc(sizeof(struct interface_type_010_data_s));
-   if(!i010_start_stop_params)
-   {
+   if(!i010_start_stop_params) {
       free(i010);
       i010=NULL;
 
@@ -1009,6 +921,12 @@ interface_type_010_t *malloc_and_init_interface_type_010(sqlite3 *sqlite3_param_
       }  
       return NULL;
    }
+
+   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,"id_interface")->valuedouble;
+   char *name=jsonInterface->string;
+   char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
+   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
+   char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
 
    strncpy(i010->dev, (char *)dev, sizeof(i010->dev)-1);
    strncpy(i010->name, (char *)name, sizeof(i010->name)-1);
@@ -1045,66 +963,52 @@ interface_type_010_t *malloc_and_init_interface_type_010(sqlite3 *sqlite3_param_
    int nb_interface_params;
    int err;
    interface_params=alloc_parsed_parameters(parameters, valid_interface_010_params, &nb_interface_params, &err, 0);
-   if(!interface_params)
-   {
+   if(!interface_params) {
       VERBOSE(5) {
          mea_log_printf("%s (%s) : alloc_parsed_parameters error\n", ERROR_STR, __func__);
       }
    }
-   else
-   {
-      if(interface_params->parameters[INTERFACE_PARAMS_IN_EXT].label)
-      {
+   else {
+      if(interface_params->parameters[INTERFACE_PARAMS_IN_EXT].label) {
          char *tmp = realloc(i010->in_ext, strlen(interface_params->parameters[INTERFACE_PARAMS_IN_EXT].value.s)+1);
-         if(tmp)
-         {
+         if(tmp) {
             i010->in_ext=tmp;
             strcpy(i010->in_ext, interface_params->parameters[INTERFACE_PARAMS_IN_EXT].value.s);
          } 
       }
 
-      if(interface_params->parameters[INTERFACE_PARAMS_OUT_EXT].label)
-      {
+      if(interface_params->parameters[INTERFACE_PARAMS_OUT_EXT].label) {
          char *tmp = realloc(i010->out_ext, strlen(interface_params->parameters[INTERFACE_PARAMS_OUT_EXT].value.s)+1);
-         if(tmp)
-         {
+         if(tmp) {
             i010->out_ext=tmp;
             strcpy(i010->out_ext, interface_params->parameters[INTERFACE_PARAMS_OUT_EXT].value.s);
          } 
       }
 
-      if(interface_params->parameters[INTERFACE_PARAMS_FSIZE].label)
-      {
+      if(interface_params->parameters[INTERFACE_PARAMS_FSIZE].label) {
          if(interface_params->parameters[INTERFACE_PARAMS_FSIZE].value.i>0)
             i010->fsize=interface_params->parameters[INTERFACE_PARAMS_FSIZE].value.i;
       }
 
-      if(interface_params->parameters[INTERFACE_PARAMS_DIRECTION].label)
-      {
-         if(mea_strcmplower(interface_params->parameters[INTERFACE_PARAMS_DIRECTION].value.s, "IN")==0)
-         {
+      if(interface_params->parameters[INTERFACE_PARAMS_DIRECTION].label) {
+         if(mea_strcmplower(interface_params->parameters[INTERFACE_PARAMS_DIRECTION].value.s, "IN")==0) {
             i010->direction=DIR_IN;
          }
-         else if(mea_strcmplower(interface_params->parameters[INTERFACE_PARAMS_DIRECTION].value.s, "OUT")==0)
-         {
+         else if(mea_strcmplower(interface_params->parameters[INTERFACE_PARAMS_DIRECTION].value.s, "OUT")==0) {
             i010->direction=DIR_OUT;
          }
-         else if(mea_strcmplower(interface_params->parameters[INTERFACE_PARAMS_DIRECTION].value.s, "BOTH")==0)
-         {
+         else if(mea_strcmplower(interface_params->parameters[INTERFACE_PARAMS_DIRECTION].value.s, "BOTH")==0) {
             i010->direction=DIR_BOTH;
          }
-         else
-         {
+         else {
             VERBOSE(5) {
                mea_log_printf("%s (%s) : direction parameter error - \"%s\" unknown and not used\n", ERROR_STR, __func__, interface_params->parameters[INTERFACE_PARAMS_DIRECTION].value.s);
             }
          }
       }
 
-      if(interface_params->parameters[INTERFACE_PARAMS_FDURATION].label)
-      {
-         if(interface_params->parameters[INTERFACE_PARAMS_FDURATION].value.i>0)
-         {
+      if(interface_params->parameters[INTERFACE_PARAMS_FDURATION].label) {
+         if(interface_params->parameters[INTERFACE_PARAMS_FDURATION].value.i>0) {
             i010->fduration=interface_params->parameters[INTERFACE_PARAMS_FDURATION].value.i;
             if(i010->fduration<0)
                i010->fduration=0;
@@ -1113,37 +1017,31 @@ interface_type_010_t *malloc_and_init_interface_type_010(sqlite3 *sqlite3_param_
          }
       }
 
-      if(interface_params->parameters[INTERFACE_PARAMS_FSTARTSTR].label)
-      {
+      if(interface_params->parameters[INTERFACE_PARAMS_FSTARTSTR].label) {
          int l=(int)strlen(interface_params->parameters[INTERFACE_PARAMS_FSTARTSTR].value.s);
-         if(l>0)
-         {
+         if(l>0) {
             i010->fstartstr=malloc(l+1);
-            if(i010->fstartstr)
-            {
+            if(i010->fstartstr) {
                mea_unescape(i010->fstartstr, interface_params->parameters[INTERFACE_PARAMS_FSTARTSTR].value.s);
                i010->fstartstr = realloc(i010->fstartstr, strlen(i010->fstartstr)+1);
             }
          }
       }
 
-      if(interface_params->parameters[INTERFACE_PARAMS_FENDSTR].label)
-      {
+      if(interface_params->parameters[INTERFACE_PARAMS_FENDSTR].label) {
          int l=(int)strlen(interface_params->parameters[INTERFACE_PARAMS_FENDSTR].value.s);
-         if(l>0)
-         {
+         if(l>0) {
             i010->fendstr=malloc(l+1);
-            if(i010->fendstr)
-            {
+            if(i010->fendstr) {
                mea_unescape(i010->fendstr, interface_params->parameters[INTERFACE_PARAMS_FENDSTR].value.s);
                i010->fendstr = realloc(i010->fendstr, strlen(i010->fendstr)+1);
             }
          }
       }
 
-      if(interface_params->parameters[INTERFACE_PARAMS_PLUGIN].label)
-      {
-         int ret=init_interface_type_010_data_preprocessor(i010, interface_params->parameters[INTERFACE_PARAMS_PLUGIN].value.s, interface_params->parameters[INTERFACE_PARAMS_PLUGIN_PARAMETERS].value.s);
+
+      if(interface_params->parameters[INTERFACE_PARAMS_PLUGIN].label) {
+         init_interface_type_010_data_preprocessor(i010, interface_params->parameters[INTERFACE_PARAMS_PLUGIN].value.s, interface_params->parameters[INTERFACE_PARAMS_PLUGIN_PARAMETERS].value.s);
       }
 
       release_parsed_parameters(&interface_params);
@@ -1154,13 +1052,10 @@ interface_type_010_t *malloc_and_init_interface_type_010(sqlite3 *sqlite3_param_
    char *tmpstr2=alloca(strlen(dev)+1);
    i010->file_type=0;
    int n=sscanf(i010->dev, "%[^:]://%[^\n]", tmpstr1, tmpstr2);
-   if(n==2)
-   {
+   if(n==2) {
       i010->file_name=(char *)malloc(strlen(tmpstr2)+1+1);
-      if(i010->file_name)
-      {
-         if(strcmp(tmpstr1,"PIPE")==0)
-         {
+      if(i010->file_name) {
+         if(strcmp(tmpstr1,"PIPE")==0) {
             sprintf(i010->file_name, "/%s", tmpstr2);
             i010->file_type=FT_PIPE;
          }
@@ -1182,7 +1077,6 @@ interface_type_010_t *malloc_and_init_interface_type_010(sqlite3 *sqlite3_param_
    i010->xPL_callback_data=NULL;
    i010->monitoring_id=process_register((char *)name);
 
-   i010_start_stop_params->sqlite3_param_db = sqlite3_param_db;
    i010_start_stop_params->i010=i010;
                   
    process_set_group(i010->monitoring_id, 1);
@@ -1195,6 +1089,17 @@ interface_type_010_t *malloc_and_init_interface_type_010(sqlite3 *sqlite3_param_
    process_add_indicator(i010->monitoring_id, interface_type_010_senttoplugin_str, 0);
 
    return i010;
+}
+
+
+void *_thread_interface_type_010_cleanup(void *args)
+{
+   struct thread_params_s *params=(struct thread_params_s *)args;
+
+   if(!params)
+      return NULL;
+
+   return NULL;
 }
 
 
@@ -1218,8 +1123,7 @@ void *_thread_interface_type_010(void *args)
    PyEval_ReleaseLock();
    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 
-   if(params->i010->pModule)
-   {
+   if(params->i010->pModule) {
       pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
       PyEval_AcquireLock();
       PyThreadState *tempState = PyThreadState_Swap(params->i010->myThreadState);
@@ -1247,7 +1151,7 @@ void *_thread_interface_type_010(void *args)
 
       // traiter les données en provenance des périphériques
       if(params->i010->file_desc_in != -1)
-         process_interface_type_010_data(params->i010, params->param_db);
+         process_interface_type_010_data(params->i010);
       else
          sleep(1);
 
@@ -1259,15 +1163,13 @@ void *_thread_interface_type_010(void *args)
 }
 
 
-pthread_t *start_interface_type_010_thread(interface_type_010_t *i010, void *fd, sqlite3 *db, thread_f thread_function)
+pthread_t *start_interface_type_010_thread(interface_type_010_t *i010, void *fd, thread_f thread_function)
 {
    pthread_t *thread=NULL;
    struct thread_params_s *thread_params=NULL;
-//   struct callback_data_s *callback_data=NULL;
 
    thread_params=malloc(sizeof(struct thread_params_s));
-   if(!thread_params)
-   {
+   if(!thread_params) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
          perror("");
@@ -1275,12 +1177,10 @@ pthread_t *start_interface_type_010_thread(interface_type_010_t *i010, void *fd,
       goto clean_exit;
    }
 
-   thread_params->param_db=db;
    thread_params->i010=(void *)i010;
 
    thread=(pthread_t *)malloc(sizeof(pthread_t));
-   if(!thread)
-   {
+   if(!thread) {
       VERBOSE(2) mea_log_printf("%s (%s) : %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR);
       goto clean_exit;
    }
@@ -1293,14 +1193,12 @@ pthread_t *start_interface_type_010_thread(interface_type_010_t *i010, void *fd,
    return thread;
 
 clean_exit:
-   if(thread)
-   {
+   if(thread) {
       free(thread);
       thread=NULL;
    }
 
-   if(thread_params)
-   {
+   if(thread_params) {
       free(thread_params);
       thread_params=NULL;
    }
@@ -1320,13 +1218,11 @@ int stop_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
    if(start_stop_params->i010->xPL_callback2)
       start_stop_params->i010->xPL_callback2=NULL;
       
-   if(start_stop_params->i010->xPL_callback_data)
-   {
+   if(start_stop_params->i010->xPL_callback_data) {
       struct callback_xpl_data_s *data = (struct callback_xpl_data_s *)start_stop_params->i010->xPL_callback_data;
       PyEval_AcquireLock(); 
      
-      if(data->myThreadState)
-      { 
+      if(data->myThreadState) { 
          PyThreadState_Clear(data->myThreadState); 
          PyThreadState_Delete(data->myThreadState); 
          data->myThreadState=NULL; 
@@ -1339,15 +1235,12 @@ int stop_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
 
    clean_interface_type_010_data_source(start_stop_params->i010);
 
-   if(start_stop_params->i010->thread)
-   {
+   if(start_stop_params->i010->thread) {
       pthread_cancel(*(start_stop_params->i010->thread));
 
       int counter=100;
-      while(counter--)
-      {
-         if(start_stop_params->i010->thread_is_running)
-         {
+      while(counter--) {
+         if(start_stop_params->i010->thread_is_running) {
             usleep(100);
          }
          else
@@ -1358,8 +1251,6 @@ int stop_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
       free(start_stop_params->i010->thread);
       start_stop_params->i010->thread=NULL;
    }
-
-//NOTIFY   mea_notify_printf('S', "%s %s", start_stop_params->i010->name, stopped_successfully_str);
 
    return 0;
 }
@@ -1379,26 +1270,23 @@ int start_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
    struct callback_xpl_data_s *xpl_callback_params=NULL;
    struct interface_type_010_data_s *start_stop_params=(struct interface_type_010_data_s *)data;
 
-   if(init_interface_type_010_data_source(start_stop_params->i010)<0)
-   {
+   if(init_interface_type_010_data_source(start_stop_params->i010)<0) {
       VERBOSE(1) mea_log_printf("%s (%s) : cant'open start interface %s, initialisation error", INFO_STR, __func__, start_stop_params->i010->name);
       return -1;
    }
 
    xpl_callback_params=(struct callback_xpl_data_s *)malloc(sizeof(struct callback_xpl_data_s));
-   if(!xpl_callback_params)
-   {
+   if(!xpl_callback_params) {
        strerror_r(errno, err_str, sizeof(err_str));
        VERBOSE(2) {
           mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
        }
-//NOTIFY       mea_notify_printf('E', "%s can't be launched - %s.\n", start_stop_params->i010->name, err_str);
        goto clean_exit;
    }
    xpl_callback_params->mainThreadState=NULL;
    xpl_callback_params->myThreadState=NULL;
 
-   start_stop_params->i010->thread=start_interface_type_010_thread(start_stop_params->i010, NULL, start_stop_params->sqlite3_param_db, (thread_f)_thread_interface_type_010);
+   start_stop_params->i010->thread=start_interface_type_010_thread(start_stop_params->i010, NULL, (thread_f)_thread_interface_type_010);
 
    start_stop_params->i010->xPL_callback_data=NULL;
    start_stop_params->i010->xPL_callback2=_interface_type_010_xPL_callback2;
@@ -1406,8 +1294,7 @@ int start_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
    return 0;
 
 clean_exit:
-   if(start_stop_params->i010->xPL_callback_data)
-   {
+   if(start_stop_params->i010->xPL_callback_data) {
       free(start_stop_params->i010->xPL_callback_data);
       start_stop_params->i010->xPL_callback_data=NULL;
    }
@@ -1421,7 +1308,8 @@ clean_exit:
 #ifndef ASPLUGIN
 int get_fns_interface_type_010(struct interfacesServer_interfaceFns_s *interfacesFns)
 {
-   interfacesFns->malloc_and_init = (malloc_and_init_f)&malloc_and_init_interface_type_010;
+   interfacesFns->malloc_and_init2 = (malloc_and_init2_f)&malloc_and_init2_interface_type_010;
+   interfacesFns->malloc_and_init = NULL;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_010;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_010;
    interfacesFns->clean = (clean_f)&clean_interface_type_010;
