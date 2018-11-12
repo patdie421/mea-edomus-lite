@@ -247,7 +247,7 @@ static int _data_type_from_json_to_flags(cJSON *data_type)
       return -1;
 }
 
-/*
+
 static void print_netatmo_data(struct netatmo_data_s *data)
 {
    int flag=1;
@@ -261,7 +261,7 @@ static void print_netatmo_data(struct netatmo_data_s *data)
       flag=flag << 1;
    }
 }
-*/
+
 
 static int _netatmo_get_data_from_dashboard_json(cJSON *dashboard, int dataTypeFlags, struct netatmo_data_s *data)
 {
@@ -686,6 +686,7 @@ int netatmo_get_thermostat_data(char *access_token, char *relay_id, char *thermo
 {
    CURL *curl;
    char *api="https://api.netatmo.net/api/getthermostatsdata";
+   //char *api="https://api.netatmo.net/api/homesdata";
 
    char url[1024];
 
@@ -726,6 +727,7 @@ int netatmo_get_thermostat_data(char *access_token, char *relay_id, char *thermo
       }
       else
       {
+         printf("ICI1: %s\n",cr.p);
          ret=_netatmo_parse_thermostat_data_json(cr.p, thermostat_id, thermostat_data, err, l_err);
          if(ret<0)
          {

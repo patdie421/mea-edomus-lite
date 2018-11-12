@@ -33,11 +33,8 @@
 
 #include "parameters_utils.h"
 
-//NOTIFY #include "notify.h"
-
 #include "xbee.h"
 #include "serial.h"
-//DBSERVER #include "dbServer.h"
 #include "pythonPluginServer.h"
 #include "python_utils.h"
 
@@ -269,6 +266,54 @@ void addr_64_char_array_to_int(char *h, char *l, uint32_t *addr_64_h, uint32_t *
 }
 
 
+int get_local_xbee_addr(xbee_xd_t *xd, xbee_host_t *local_xbee)
+{
+   int ret=0;
+   int16_t nerr;
+
+   // récupération de l'adresse de l'xbee connecter au PC (pas forcement le coordinateur).
+   uint32_t addr_64_h;
+   uint32_t addr_64_l;
+
+   unsigned char at_cmd[2];
+   uint16_t l_reg_val;
+   char addr_l[4];
+   char addr_h[4];
+
+   memset(addr_l,0,4);
+   memset(addr_h,0,4);
+
+   // lecture de l'adresse de l'xbee local (ie connecté au port serie)
+   uint8_t localAddrFound=0;
+   for(int i=0;i<5;i++) {
+      at_cmd[0]='S';at_cmd[1]='H';
+      ret=at_get_local_char_array_reg(xd, at_cmd, (char *)addr_h, &l_reg_val, &nerr);
+      if(ret!=-1) {
+         at_cmd[0]='S';at_cmd[1]='L';
+         ret=at_get_local_char_array_reg(xd, at_cmd, (char *)addr_l, &l_reg_val, &nerr);
+         if(ret!=-1) {
+            localAddrFound=1;
+            break;
+         }
+      }
+      VERBOSE(9) mea_log_printf("%s  (%s) : can't get local xbee address (try %d/5)\n", INFO_STR, __func__, i+1);
+      sleep(1);
+   }
+   if(localAddrFound)
+      addr_64_char_array_to_int(addr_h, addr_l, &addr_64_h, &addr_64_l);
+   else {
+      VERBOSE(9) mea_log_printf("%s  (%s) : can't read local xbee address. Device probably not an xbee, check it.\n", INFO_STR, __func__);
+      return -1;
+   }
+
+   VERBOSE(9) mea_log_printf("%s  (%s) : local address is : %02x-%02x\n", INFO_STR, __func__, addr_64_h, addr_64_l);
+
+   xbee_get_host_by_addr_64(xd, local_xbee, addr_64_h, addr_64_l, &nerr);
+
+   return 0;
+}
+
+
 PyObject *stmt_to_pydict_device(sqlite3_stmt * stmt)
 {
    PyObject *data_dict=NULL;
@@ -354,11 +399,9 @@ int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    char sql[2048];
    sqlite3_stmt * stmt;
    
-//   sprintf(sql,"%s WHERE sensors_actuators.deleted_flag <> 1 AND lower(sensors_actuators.name)='%s' AND sensors_actuators.state='1';", sql_select_device_info, device);
    sprintf(sql,"%s WHERE sensors_actuators.deleted_flag <> 1 AND lower(sensors_actuators.name)='%s' AND sensors_actuators.state='1' AND lower(interfaces.dev) LIKE \'%s://%%';", sql_select_device_info, device, interface->name);
    ret = sqlite3_prepare_v2(params_db, sql, (int)(strlen(sql)+1), &stmt, NULL);
-   if(ret)
-   {
+   if(ret) {
       VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR, __func__, sqlite3_errmsg (params_db));
       return ERROR;
    }
@@ -1041,8 +1084,7 @@ int clean_interface_type_002(interface_type_002_t *i002)
       i002->xd->io_callback_data=NULL;
       i002->xd->dataflow_callback_data=NULL;
    }
-   else
-   {
+   else {
       if(i002->xd && i002->xd->dataflow_callback_data) {
          DBG_FREE(i002->xd->dataflow_callback_data);
          i002->xd->dataflow_callback_data=NULL;
@@ -1092,13 +1134,11 @@ int stop_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
 
    VERBOSE(1) mea_log_printf("%s  (%s) : %s shutdown thread ... ", INFO_STR, __func__, start_stop_params->i002->name);
 
-   if(start_stop_params->i002->xPL_callback_data)
-   {
+   if(start_stop_params->i002->xPL_callback_data) {
       struct callback_xpl_data_s *data = (struct callback_xpl_data_s *)start_stop_params->i002->xPL_callback_data;
       
       PyEval_AcquireLock();
-      if(data->myThreadState)
-      {
+      if(data->myThreadState) {
          PyThreadState_Clear(data->myThreadState);
          PyThreadState_Delete(data->myThreadState);
          data->myThreadState=NULL;
@@ -1242,8 +1282,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
          goto clean_exit;
       }
    }
-   else
-   {
+   else {
       VERBOSE(2) mea_log_printf("%s (%s) : incorrect device/speed interface - %s\n", ERROR_STR,__func__,start_stop_params->i002->dev);
       goto clean_exit;
    }
@@ -1282,46 +1321,15 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    // récupération de l'adresse de l'xbee connecter au PC (pas forcement le coordinateur).
    uint32_t addr_64_h;
    uint32_t addr_64_l;
-   {
-      unsigned char at_cmd[2];
-      uint16_t l_reg_val;
-      char addr_l[4];
-      char addr_h[4];
       
-      memset(addr_l,0,4);
-      memset(addr_h,0,4);
-      
-      // lecture de l'adresse de l'xbee local (ie connecté au port serie)
-      uint8_t localAddrFound=0;
-      for(int i=0;i<5;i++) {
-         at_cmd[0]='S';at_cmd[1]='H';
-         ret=at_get_local_char_array_reg(xd, at_cmd, (char *)addr_h, &l_reg_val, &nerr);
-         if(ret!=-1) {
-            at_cmd[0]='S';at_cmd[1]='L';
-            ret=at_get_local_char_array_reg(xd, at_cmd, (char *)addr_l, &l_reg_val, &nerr);
-            if(ret!=-1) {
-               localAddrFound=1;
-               break;
-            }
-         }
-         VERBOSE(9) mea_log_printf("%s  (%s) : can't get local xbee address (try %d/5)\n", INFO_STR, __func__, i+1);
-         sleep(1);
-      }
-      if(localAddrFound)
-         addr_64_char_array_to_int(addr_h, addr_l, &addr_64_h, &addr_64_l);
-      else {
-         VERBOSE(9) mea_log_printf("%s  (%s) : can't read local xbee address. Device on \"%s\" probably not an xbee, check it.\n", INFO_STR, __func__,dev);
-         goto clean_exit;
-      }
-   }
-   VERBOSE(9) mea_log_printf("%s  (%s) : local address is : %02x-%02x\n", INFO_STR, __func__, addr_64_h, addr_64_l);
- 
-   xbee_get_host_by_addr_64(xd, local_xbee, addr_64_h, addr_64_l, &nerr);
+   ret=get_local_xbee_addr(xd, local_xbee);
+   if(ret==-1)
+      goto clean_exit;
 
    start_stop_params->i002->local_xbee=local_xbee;
  
    /*
-    * exécution du plugin de paramétrage
+    * exécution du plugin de l'interface
     */
    interface_parameters=alloc_parsed_parameters(start_stop_params->i002->parameters, valid_xbee_plugin_params, &interface_nb_parameters, &err, 0);
    if(!interface_parameters || !interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {

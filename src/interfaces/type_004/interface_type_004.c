@@ -22,12 +22,10 @@
 #include "mea_verbose.h"
 #include "macros.h"
 #include "mea_string_utils.h"
-//DBSERVER #include "dbServer.h"
 #include "parameters_utils.h"
 #include "philipshue.h"
 #include "mea_sockets_utils.h"
 #include "processManager.h"
-//NOTIFY #include "notify.h"
 
 #include "cJSON.h"
 #include "uthash.h"
@@ -78,21 +76,12 @@ int16_t sendXPLLightState2(interface_type_004_t *i004, char *xplMsgType, char *d
    char *high=get_token_string_by_id(HIGH_ID);
    char *low=get_token_string_by_id(LOW_ID);
    
-//   char xplBodyStr[2048]="";
-//   int xplBodyStrPtr=0;
-//   char source[32];
-//   char schema[32];
-//   int n=0;
-//   char *msgtype=XPL_CMND_STR_C;
-//   int l=8;
- 
    if(newState)
       current_state_str = high;
    else
       current_state_str = low;
       
-   if(last!=-1)
-   {
+   if(last!=-1) {
       if(last)
          last_state_str = low;
       else
@@ -108,8 +97,6 @@ int16_t sendXPLLightState2(interface_type_004_t *i004, char *xplMsgType, char *d
       reachable_str=TRUE_STR_C;
    else
       reachable_str=FALSE_STR_C;
-
-//   cJSON *msg = NULL;
 
    char str[256];
    cJSON *xplMsgJson = cJSON_CreateObject();
@@ -143,8 +130,7 @@ int16_t sendAllxPLTrigger(interface_type_004_t *i004)
       return -1;
    
    cJSON *currentLight=current->child;
-   while(currentLight)
-   {
+   while(currentLight) {
       struct lightsListElem_s *e = NULL /*, *tmp = NULL */;
       
       char *huename = my_cJSON_GetItemByName(currentLight, NAME_STR_C)->valuestring;
@@ -154,16 +140,13 @@ int16_t sendAllxPLTrigger(interface_type_004_t *i004)
       if(e && e->sensorname)
          deviceName = (char *)e->sensorname;
       
-      if(deviceName)
-      {
+      if(deviceName) {
          cJSON *stateCurrent = my_cJSON_GetItemByName(currentLight, STATE_STR_C);
-         if(stateCurrent)
-         {
+         if(stateCurrent) {
             cJSON *onCurrent        = my_cJSON_GetItemByName(stateCurrent, ON_STR_C);
             cJSON *reachableCurrent = my_cJSON_GetItemByName(stateCurrent, REACHABLE_STR_C);
             int16_t state = 1;
-            if(e->reachable_use == 1)
-            {
+            if(e->reachable_use == 1) {
                state = reachableCurrent->valueint;
             }
             state = state & onCurrent->valueint;
@@ -188,8 +171,7 @@ int16_t whatChange(interface_type_004_t *i004)
    
    cJSON *currentLight=current->child;
    cJSON *lastLight = NULL;
-   while(currentLight)
-   {
+   while(currentLight) {
       struct lightsListElem_s *e = NULL /*, *tmp = NULL */;
       
       char *_id = currentLight->string;
@@ -201,24 +183,20 @@ int16_t whatChange(interface_type_004_t *i004)
          deviceName = (char *)e->sensorname;
       
       lastLight = cJSON_GetObjectItem(last, _id);
-      if(deviceName && lastLight != NULL)
-      {
+      if(deviceName && lastLight != NULL) {
          cJSON *stateCurrent = my_cJSON_GetItemByName(currentLight, STATE_STR_C);
          cJSON *stateLast    = my_cJSON_GetItemByName(lastLight,    STATE_STR_C);
-         if(stateCurrent && stateLast)
-         {
+         if(stateCurrent && stateLast) {
             cJSON *onCurrent        = my_cJSON_GetItemByName(stateCurrent, ON_STR_C);
             cJSON *onLast           = my_cJSON_GetItemByName(stateLast,    ON_STR_C);
             cJSON *reachableCurrent = my_cJSON_GetItemByName(stateCurrent, REACHABLE_STR_C);
             cJSON *reachableLast    = my_cJSON_GetItemByName(stateLast,    REACHABLE_STR_C);
             int16_t newState = -1;
-            if(e->reachable_use == 1)
-            {
+            if(e->reachable_use == 1) {
                if(reachableCurrent->valueint != reachableLast->valueint)
                   newState = reachableCurrent->valueint;
             }
-            if( (onCurrent->valueint != onLast->valueint) || newState != -1)
-            {
+            if( (onCurrent->valueint != onLast->valueint) || newState != -1) {
                if(e->reachable_use == 1)
                   newState = newState & onCurrent->valueint;
                else
@@ -282,8 +260,7 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
    }
 
    HASH_FIND(hh_actuatorname, i004->lightsListByActuatorName, device, strlen(device), e);
-   if(e)
-   {
+   if(e) {
       reachable_use = e->reachable_use;
       id_sensor = e->id_sensor;
       
@@ -300,28 +277,23 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
             state=0;
             break;
          default:
-            if(type_id == COLOR_ID)
-            {
+            if(type_id == COLOR_ID) {
                int n=0,l=0;
                
                n=sscanf(color_str,"#%6x%n",&color, &l);
-               if(n==1 && l==strlen(color_str))
-               {
-                  if(color==0) // off => on envoie low
-                  {
+               if(n==1 && l==strlen(color_str)) {
+                  if(color==0) { // off => on envoie low
                      ret=setLightStateByName(i004->currentHueLightsState, (char *)e->huename, 0, i004->server, i004->port, i004->user);
                      DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s  (%s) : setLightStateByName(%s, low) => ret = %d\n", DEBUG_STR, __func__, (char *)e->huename, ret);
                      state=0;
                   }
-                  else // on envoie la couleur
-                  {
+                  else { // on envoie la couleur
                      ret=setLightColorByName(i004->currentHueLightsState, (char *)e->huename, color, i004->server, i004->port, i004->user);
                      DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s  (%s) : setLightColorByName(%s, %d) => ret = %d\n", DEBUG_STR, __func__, (char *)e->huename, color, ret);
                      state=1;
                   }
                }
-               else
-               {
+               else {
                   color=0xFFFFFFFF;
                }
             }
@@ -329,20 +301,17 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
                ret=-1;
             break;
       }
-      if(ret!=-1)
-      {
+      if(ret!=-1) {
          if(state != ret)
             (i004->indicators.lightschanges)++;
       }
    }
-   else
-   {
+   else {
       DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s  (%s) : device %s not found in lights list, try in groups list\n", DEBUG_STR, __func__, device);
 
       struct groupsListElem_s *g = NULL;
       HASH_FIND(hh_groupname, i004->groupsListByGroupName, device, strlen(device), g);
-      if(g)
-      {
+      if(g) {
          // traiter
          switch(current_value_id)
          {
@@ -353,24 +322,19 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
                ret=setGroupStateByName(i004->allGroups, (char *)g->huegroupname, 0, i004->server, i004->port, i004->user);
                break;
             default:
-               if(type_id == COLOR_ID)
-               {
+               if(type_id == COLOR_ID) {
                   int n=0,l=0;
                   
                   n=sscanf(color_str,"#%6x%n",&color, &l);
-                  if(n==1 && l==strlen(color_str))
-                  {
-                     if(color==0) // off => on envoie low
-                     {
+                  if(n==1 && l==strlen(color_str)) {
+                     if(color==0) { // off => on envoie low
                         ret=setGroupStateByName(i004->allGroups, (char *)g->huegroupname, 0, i004->server, i004->port, i004->user);
                      }
-                     else // on envoie la couleur
-                     {
+                     else { // on envoie la couleur
                         ret=setGroupColorByName(i004->allGroups, (char *)g->huegroupname, color, i004->server, i004->port, i004->user);
                      }
                   }
-                  else
-                  {
+                  else {
                      color=0xFFFFFFFF;
                   }
                }
@@ -408,8 +372,7 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
          }
       }
 */
-      else
-      {
+      else {
          DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s  (%s) : device %s not found !!!\n", DEBUG_STR, __func__, device);
          ret = -1;
       }
@@ -418,8 +381,7 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
    if(ret!=-1 && id_sensor>0) // si aussi un capteur, on récupère les info avec de libérer le verrou
    {
       getLightStateByName(i004->currentHueLightsState, (char *)e->huename, &on, &reachable);
-      if(e->sensorname)
-      {
+      if(e->sensorname) {
          sensor = (char *)malloc(strlen(e->sensorname)+1);
          strcpy(sensor,e->sensorname);
       }
@@ -428,10 +390,8 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
    pthread_mutex_unlock(&(i004->lock));
    pthread_cleanup_pop(0);
    
-   if(ret != -1 && id_sensor>0)
-   {
-      if( (on!=-1 && type_id == XPL_OUTPUT_ID) || color != 0xFFFFFFFF) // si on a des info (on != -1), c'est donc qu'on doit envoyer un message xpl
-      {
+   if(ret != -1 && id_sensor>0) {
+      if( (on!=-1 && type_id == XPL_OUTPUT_ID) || color != 0xFFFFFFFF) { // si on a des info (on != -1), c'est donc qu'on doit envoyer un message xpl
          if(reachable_use==1)
             state = state & reachable;
          sendXPLLightState2(i004, XPL_TRIG_STR_C, sensor, state, reachable, on, -1);
@@ -478,10 +438,8 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
    pthread_mutex_lock(&(i004->lock));
    
    HASH_FIND(hh_sensorname, i004->lightsListBySensorName, device, strlen(device), e);
-   if(e && i004->currentHueLightsState)
-   {
-      if(getLightStateByName(i004->currentHueLightsState, (char *)e->huename, &on, &reachable)!=NULL)
-      {
+   if(e && i004->currentHueLightsState) {
+      if(getLightStateByName(i004->currentHueLightsState, (char *)e->huename, &on, &reachable)!=NULL) {
          state = on;
          if(e->reachable_use == 1)
             state = state & reachable;
@@ -535,10 +493,8 @@ int16_t interface_type_004_xPL_sensor2(interface_type_004_t *i004, cJSON *xplMsg
    pthread_mutex_lock(&(i004->lock));
    
    HASH_FIND(hh_sensorname, i004->lightsListBySensorName, device, strlen(device), e);
-   if(e && i004->currentHueLightsState)
-   {
-      if(getLightStateByName(i004->currentHueLightsState, (char *)e->huename, &on, &reachable)!=NULL)
-      {
+   if(e && i004->currentHueLightsState) {
+      if(getLightStateByName(i004->currentHueLightsState, (char *)e->huename, &on, &reachable)!=NULL) {
          state = on;
          if(e->reachable_use == 1)
             state = state & reachable;
@@ -569,8 +525,7 @@ int16_t interface_type_004_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
    j = cJSON_GetObjectItem(xplMsgJson, XPLSCHEMA_STR_C);
    if(j)
       schema = j->valuestring;
-   else
-   {
+   else {
       VERBOSE(9) mea_log_printf("%s (%s) : xPL message no schema\n", INFO_STR, __func__);
       return 0;
    }
@@ -589,34 +544,28 @@ int16_t interface_type_004_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
    
    VERBOSE(9) mea_log_printf("%s  (%s) : xPL Message to process : %s\n",INFO_STR,__func__,schema);
    
-   if(mea_strcmplower(schema, XPL_CONTROLBASIC_STR_C) == 0)
-   {
-      if(!device)
-      {
+   if(mea_strcmplower(schema, XPL_CONTROLBASIC_STR_C) == 0) {
+      if(!device) {
          VERBOSE(5) mea_log_printf("%s  (%s) : xPL message no device\n",INFO_STR,__func__);
          return -1;
       }
-      if(!type)
-      {
+      if(!type) {
          VERBOSE(5) mea_log_printf("%s  (%s) : xPL message no type\n",INFO_STR,__func__);
          return -1;
       }
       return interface_type_004_xPL_actuator2(i004, xplMsgJson, device, type);
    }
-   else if(mea_strcmplower(schema, XPL_SENSORREQUEST_STR_C) == 0)
-   {
+   else if(mea_strcmplower(schema, XPL_SENSORREQUEST_STR_C) == 0) {
       char *request = NULL;
       j = cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_REQUEST_ID));
       if(j)
          request = j->valuestring;
-      if(!request)
-      {
+      if(!request) {
          VERBOSE(5) mea_log_printf("%s (%s) : xPL message no request\n", INFO_STR, __func__);
          return 0;
       }
 
-      if(mea_strcmplower(request, get_token_string_by_id(XPL_CURRENT_ID))!=0)
-      {
+      if(mea_strcmplower(request, get_token_string_by_id(XPL_CURRENT_ID))!=0) {
          VERBOSE(5) mea_log_printf("%s  (%s) : xPL message request!=current\n",INFO_STR,__func__);
          return -1;
       }
@@ -651,8 +600,7 @@ void *_thread_interface_type_004(void *thread_data)
    pthread_cleanup_push( (void *)set_interface_type_004_isnt_running, (void *)i004 );
    i004->thread_is_running=1;
    
-   if(i004->allGroups)
-   {
+   if(i004->allGroups) {
       cJSON_Delete(i004->allGroups);
       i004->allGroups=NULL;
    }
@@ -666,8 +614,7 @@ void *_thread_interface_type_004(void *thread_data)
    mea_start_timer(&getAllGroupsAndScenesTimer);
    pthread_t *me = i004->thread;
  
-   while(1)
-   {
+   while(1) {
       pthread_testcancel();
       
       process_heartbeat(i004->monitoring_id);
@@ -679,14 +626,12 @@ void *_thread_interface_type_004(void *thread_data)
       if(me != i004->thread)
          pthread_exit(NULL);
 
-      if(!allLights)
-      {
+      if(!allLights) {
          VERBOSE(2) {
             mea_log_printf("%s (%s) : can't load lights stats list\n", ERROR_STR,__func__);
          }
       }
-      else
-      {
+      else {
          cJSON *tmp;
          
          pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&(i004->lock) );
@@ -696,12 +641,10 @@ void *_thread_interface_type_004(void *thread_data)
          i004->lastHueLightsState = i004->currentHueLightsState;
          i004->currentHueLightsState = allLights;
          
-         if(mea_test_timer(&sendAllxPLTriggerTimer)==0)
-         {
+         if(mea_test_timer(&sendAllxPLTriggerTimer)==0) {
             sendAllxPLTrigger(i004);
          }
-         else if(i004->lastHueLightsState && i004->currentHueLightsState)
-         {
+         else if(i004->lastHueLightsState && i004->currentHueLightsState) {
             whatChange(i004);
          }
          
@@ -720,8 +663,7 @@ void *_thread_interface_type_004(void *thread_data)
          cJSON *allGroups = getAllGroups(server, port, user);
          if(me != i004->thread)
             pthread_exit(NULL);
-         if(allGroups)
-         {
+         if(allGroups) {
             pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&(i004->lock) );
             pthread_mutex_lock(&(i004->lock));
             
@@ -737,8 +679,7 @@ void *_thread_interface_type_004(void *thread_data)
 /*         
          tmp = NULL;
          cJSON *allScenes = getAllScenes(server, port, user);
-         if(allScenes)
-         {
+         if(allScenes) {
             pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&(i004->lock) );
             pthread_mutex_lock(&(i004->lock));
             
@@ -767,28 +708,23 @@ _thread_interface_type_004_clean_exit:
 
 int _interface_type_004_clean_configs_lists(interface_type_004_t *i004)
 {
-   if(i004->lightsListByHueName)
-   {
+   if(i004->lightsListByHueName) {
       struct lightsListElem_s *e = NULL, *te = NULL;
       
       HASH_CLEAR(hh_sensorname, i004->lightsListBySensorName);
       HASH_CLEAR(hh_actuatorname, i004->lightsListByActuatorName);
       
-      HASH_ITER(hh_huename, i004->lightsListByHueName, e, te)
-      {
+      HASH_ITER(hh_huename, i004->lightsListByHueName, e, te) {
          HASH_DELETE(hh_huename, i004->lightsListByHueName, e);
-         if(e->sensorname)
-         {
+         if(e->sensorname) {
             free((void *)(e->sensorname));
             e->sensorname=NULL;
          }
-         if(e->sensorname)
-         {
+         if(e->sensorname) {
             free((void *)(e->actuatorname));
             e->actuatorname=NULL;
          }
-         if(e->huename)
-         {
+         if(e->huename) {
             free((void *)(e->huename));
             e->huename=NULL;
          }
@@ -800,15 +736,12 @@ int _interface_type_004_clean_configs_lists(interface_type_004_t *i004)
       i004->lightsListByActuatorName=NULL;
    }
    
-   if(i004->groupsListByGroupName)
-   {
+   if(i004->groupsListByGroupName) {
       struct groupsListElem_s *g = NULL, *tg = NULL;
       
-      HASH_ITER(hh_groupname, i004->groupsListByGroupName, g, tg)
-      {
+      HASH_ITER(hh_groupname, i004->groupsListByGroupName, g, tg) {
          HASH_DELETE(hh_groupname, i004->groupsListByGroupName, g);
-         if(g->groupname)
-         {
+         if(g->groupname) {
             free((void *)(g->groupname));
             g->groupname=NULL;
          }
@@ -822,10 +755,8 @@ int _interface_type_004_clean_configs_lists(interface_type_004_t *i004)
    {
       struct scenesListElem_s *s = NULL, *ts = NULL;
       
-      HASH_ITER(hh_scenename, i004->scenesListBySceneName, s, ts)
-      {
-         if(s->scenename)
-         {
+      HASH_ITER(hh_scenename, i004->scenesListBySceneName, s, ts) {
+         if(s->scenename) {
             free((void *)(s->scenename));
             s->scenename=NULL;
          }
@@ -859,8 +790,7 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
    sprintf(sql_request,"SELECT * FROM sensors_actuators WHERE sensors_actuators.deleted_flag <> 1 AND id_interface=%d AND sensors_actuators.state='1'", i004->id_interface);
    
    ret = sqlite3_prepare_v2(db,sql_request,(int)(strlen(sql_request)+1),&stmt,NULL);
-   if(ret)
-   {
+   if(ret) {
       VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR,__func__,sqlite3_errmsg (db));
       goto load_interface_type_004_clean_exit;
    }
@@ -869,8 +799,7 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
    while (1) // boucle de traitement du résultat de la requete
    {
       int s=sqlite3_step(stmt);
-      if (s==SQLITE_ROW)
-      {
+      if (s==SQLITE_ROW) {
          // les valeurs dont on a besoin
          int id_sensor_actuator=sqlite3_column_int(stmt, 1);
          int id_type=sqlite3_column_int(stmt, 2);
@@ -879,25 +808,21 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
          int todbflag=sqlite3_column_int(stmt, 9);
          
          hue_params=alloc_parsed_parameters((char *)parameters, valid_hue_params, &nb_hue_params, &nerr, 0);
-         if(hue_params && nb_hue_params>0)
-         {
+         if(hue_params && nb_hue_params>0) {
 //            int params_test = (hue_params->parameters[PARAMS_HUELIGH].value.s != NULL) + (hue_params->parameters[PARAMS_HUEGROUP].value.s != NULL) + (hue_params->parameters[PARAMS_HUESCENE].value.s != NULL);
             int params_test = (hue_params->parameters[PARAMS_HUELIGH].value.s != NULL) + (hue_params->parameters[PARAMS_HUEGROUP].value.s != NULL);
             
-            if(params_test != 1)
-            {
+            if(params_test != 1) {
                VERBOSE(2) {
                   mea_log_printf("%s (%s) : a HUELIGHT, HUEGROUP or HUESCENE parameter is mandatory and only one ... (device %s skipped)", WARNING_STR, __func__, name);
                }
                continue;
             }
             
-            if(hue_params->parameters[PARAMS_HUELIGH].value.s) // c'est une lampe ?
-            {
+            if(hue_params->parameters[PARAMS_HUELIGH].value.s) { // c'est une lampe ?
                struct lightsListElem_s *e = NULL;
                
-               if(id_type != 500 && id_type != 501)
-               {
+               if(id_type != 500 && id_type != 501) {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : incorrect type (INPUT or OUTPUT only allowed) ... (device %s skipped)", WARNING_STR, __func__, name);
                      continue;
@@ -905,13 +830,11 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                }
                // on cherche dans la liste si elle existe déjà
                HASH_FIND(hh_huename, i004->lightsListByHueName, hue_params->parameters[PARAMS_HUELIGH].value.s, strlen(hue_params->parameters[PARAMS_HUELIGH].value.s), e);
-               if (e == NULL)
-               {
+               if (e == NULL) {
                   // elle n'existe pas on va la créer
                   e = (struct lightsListElem_s *)malloc(sizeof(struct lightsListElem_s));
                   char *_huename=malloc(strlen(hue_params->parameters[PARAMS_HUELIGH].value.s)+1);
-                  if(_huename==NULL)
-                  {
+                  if(_huename==NULL) {
                      VERBOSE(2) {
                         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                         perror("");
@@ -932,8 +855,7 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                
                char *_name=NULL;
                _name=malloc(strlen((char *)name)+1);
-               if(_name==NULL)
-               {
+               if(_name==NULL) {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                      perror("");
@@ -946,12 +868,10 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                switch(id_type)
                {
                   case 500: // c'est une entrée
-                     if(e->id_sensor != -1)
-                     {
+                     if(e->id_sensor != -1) {
                         // warning déjà initialisé comme capteur
                      }
-                     else
-                     {
+                     else {
                         e->sensorname = _name;
                         e->id_sensor = id_sensor_actuator;
                         e->todbflag_sensor=todbflag;
@@ -960,12 +880,10 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                      }
                      break;
                   case 501:
-                     if(e->id_actuator != -1)
-                     {
+                     if(e->id_actuator != -1) {
                         // erreur déjà initialisé comme actionneur
                      }
-                     else
-                     {
+                     else {
                         e->actuatorname = _name;
                         e->id_actuator = id_sensor_actuator;
                         e->todbflag_actuator=todbflag;
@@ -981,10 +899,8 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                }
                
             }
-            else if(hue_params->parameters[PARAMS_HUEGROUP].value.s) // c'est un groupe ?
-            {
-               if(id_type != 501)
-               {
+            else if(hue_params->parameters[PARAMS_HUEGROUP].value.s) { // c'est un groupe ?
+               if(id_type != 501) {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : group is output only (device %s skipped)", WARNING_STR, __func__, name);
                   }
@@ -993,13 +909,11 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                
                struct groupsListElem_s *g = NULL;
                HASH_FIND(hh_groupname, i004->groupsListByGroupName, (char *)name, strlen((char *)name), g);
-               if (g == NULL)
-               {
+               if (g == NULL) {
                   // il n'existe pas on va le créer
                   g = (struct groupsListElem_s *)malloc(sizeof(struct groupsListElem_s));
                   char *_groupname=malloc(strlen((char *)name)+1);
-                  if(_groupname==NULL)
-                  {
+                  if(_groupname==NULL) {
                      VERBOSE(2) {
                         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                         perror("");
@@ -1007,8 +921,7 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                      goto load_interface_type_004_clean_exit;
                   }
                   char *_huegroupname=malloc(strlen(hue_params->parameters[PARAMS_HUEGROUP].value.s)+1);
-                  if(_huegroupname==NULL)
-                  {
+                  if(_huegroupname==NULL) {
                      VERBOSE(2) {
                         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                         perror("");
@@ -1025,18 +938,15 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                   
                   HASH_ADD_KEYPTR( hh_groupname, i004->groupsListByGroupName, g->groupname, strlen(g->groupname), g );
                }
-               else
-               {
+               else {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : group already defined, skipped",WARNING_STR,__func__);
                   }
                }
             }
 /*
-            else if(hue_params->parameters[PARAMS_HUESCENE].value.s) // c'est une scene ?
-            {
-               if(id_type != 501)
-               {
+            else if(hue_params->parameters[PARAMS_HUESCENE].value.s) { // c'est une scene ?
+               if(id_type != 501) {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : scene is output only (device %s skipped)", WARNING_STR, __func__, name);
                   }
@@ -1045,13 +955,11 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                
                struct scenesListElem_s *s = NULL;
                HASH_FIND(hh_scenename, i004->scenesListBySceneName, (char *)name, strlen((char *)name), s);
-               if (s == NULL)
-               {
+               if (s == NULL) {
                   // il n'existe pas on va le créer
                   s = (struct scenesListElem_s *)malloc(sizeof(struct scenesListElem_s));
                   char *_scenename=malloc(strlen((char *)name)+1);
-                  if(_scenename==NULL)
-                  {
+                  if(_scenename==NULL) {
                      VERBOSE(2) {
                         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                         perror("");
@@ -1059,8 +967,7 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                      goto load_interface_type_004_clean_exit;
                   }
                   char *_huescenename=malloc(strlen(hue_params->parameters[PARAMS_HUESCENE].value.s)+1);
-                  if(_huescenename==NULL)
-                  {
+                  if(_huescenename==NULL) {
                      VERBOSE(2) {
                         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                         perror("");
@@ -1077,8 +984,7 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
                   
                   HASH_ADD_KEYPTR( hh_scenename, i004->scenesListBySceneName, s->scenename, strlen(s->scenename), s );
                }
-               else
-               {
+               else {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : scene already defined, skipped",WARNING_STR,__func__);
                   }
@@ -1087,20 +993,17 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
 */
             release_parsed_parameters(&hue_params);
          }
-         else
-         {
+         else {
             VERBOSE(2) {
                mea_log_printf("%s (%s) : parameter error ... (device %s skipped)", WARNING_STR, __func__, name);
             }
          }
       }
-      else if (s==SQLITE_DONE)
-      {
+      else if (s==SQLITE_DONE) {
          sqlite3_finalize(stmt);
          break;
       }
-      else
-      {
+      else {
          // traitement d'erreur à faire ici
          sqlite3_finalize(stmt);
          goto load_interface_type_004_clean_exit;
@@ -1113,8 +1016,7 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
 load_interface_type_004_clean_exit:
    _interface_type_004_clean_configs_lists(i004);
    i004->xPL_callback2=NULL;
-   if(hue_params)
-   {
+   if(hue_params) {
       release_parsed_parameters(&hue_params);
       hue_params=NULL;
    }
@@ -1133,8 +1035,7 @@ int16_t get_huesystem_connection_parameters(char *device, char *server, uint16_t
    
    // on recherche "HTTP://<server>:<port>@<user>" ou "HTTP://<server>@<user>"
    n=sscanf(_device,"HTTP://%40[^:]:%d@%40s%n",_server,&_port,_user, &r);
-   if(n!=3)
-   {
+   if(n!=3) {
       _port=80;
       n=sscanf(_device,"HTTP://%40[^@]@%40s%n",_server,_user, &r);
       if(n!=2)
@@ -1182,8 +1083,7 @@ int set_xPLCallback_interface_type_004(void *ixxx, xpl2_f cb)
 
    if(i004 == NULL)
       return -1;
-   else
-   {
+   else {
       i004->xPL_callback2 = cb;
       return 0;
    }
@@ -1196,8 +1096,7 @@ int set_monitoring_id_interface_type_004(void *ixxx, int id)
 
    if(i004 == NULL)
       return -1;
-   else
-   {
+   else {
       i004->monitoring_id = id;
       return 0;
    }
@@ -1215,8 +1114,7 @@ interface_type_004_t *malloc_and_init_interface_type_004(sqlite3 *sqlite3_param_
    interface_type_004_t *i004=NULL;
    
    i004=(interface_type_004_t *)malloc(sizeof(interface_type_004_t));
-   if(!i004)
-   {
+   if(!i004) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
          perror("");
@@ -1226,8 +1124,7 @@ interface_type_004_t *malloc_and_init_interface_type_004(sqlite3 *sqlite3_param_
    i004->thread_is_running=0;
    pthread_mutex_init(&i004->lock,NULL);
    struct interface_type_004_start_stop_params_s *i004_start_stop_params=(struct interface_type_004_start_stop_params_s *)malloc(sizeof(struct interface_type_004_start_stop_params_s));
-   if(!i004_start_stop_params)
-   {
+   if(!i004_start_stop_params) {
       free(i004);
       i004=NULL;
       VERBOSE(2) {
@@ -1240,8 +1137,7 @@ interface_type_004_t *malloc_and_init_interface_type_004(sqlite3 *sqlite3_param_
    strncpy(i004->name, (char *)name, sizeof(i004->name)-1);
    i004->id_interface=id_interface;
    i004->parameters=(char *)malloc(strlen((char *)parameters)+1);
-   if(!i004->parameters)
-   {
+   if(!i004->parameters) {
       free(i004);
       i004=NULL;
       free(i004_start_stop_params);
@@ -1295,36 +1191,31 @@ int clean_interface_type_004(void *ixxx)
 {
    interface_type_004_t *i004 = (interface_type_004_t *)ixxx;
 
-   if(i004->parameters)
-   {
+   if(i004->parameters) {
       free(i004->parameters);
       i004->parameters=NULL;
    }
    
    i004->xPL_callback2=NULL;
    
-   if(i004->thread)
-   {
+   if(i004->thread) {
       free(i004->thread);
       i004->thread=NULL;
    }
 
    _interface_type_004_clean_configs_lists(i004);
 
-   if(i004->lastHueLightsState)
-   {
+   if(i004->lastHueLightsState) {
       cJSON_Delete(i004->lastHueLightsState);
       i004->lastHueLightsState=NULL;
    }
    
-   if(i004->currentHueLightsState)
-   {
+   if(i004->currentHueLightsState) {
       cJSON_Delete(i004->currentHueLightsState);
       i004->lastHueLightsState=NULL;
    }
    
-   if(i004->allGroups)
-   {
+   if(i004->allGroups) {
       cJSON_Delete(i004->allGroups);
       i004->allGroups=NULL;
    }
@@ -1342,20 +1233,16 @@ int stop_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg)
    
    VERBOSE(1) mea_log_printf("%s  (%s) : %s shutdown thread ...\n", INFO_STR, __func__, start_stop_params->i004->name);
    
-   if(start_stop_params->i004->xPL_callback2)
-   {
+   if(start_stop_params->i004->xPL_callback2) {
       start_stop_params->i004->xPL_callback2=NULL;
    }
   
-   if(start_stop_params->i004->thread)
-   {
+   if(start_stop_params->i004->thread) {
       pthread_cancel(*(start_stop_params->i004->thread));
       
       int counter=100;
-      while(counter--)
-      {
-         if(start_stop_params->i004->thread_is_running)
-         {  // pour éviter une attente "trop" active
+      while(counter--) {
+         if(start_stop_params->i004->thread_is_running) {  // pour éviter une attente "trop" active
             usleep(100); // will sleep for 10 ms
          }
          else

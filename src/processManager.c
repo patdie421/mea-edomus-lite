@@ -1300,7 +1300,7 @@ int _managed_processes_processes_check_heartbeats(int doRecovery)
          }
          else if(managed_processes.processes_table[i]->wdonoff==0)
          {
-            VERBOSE(5) mea_log_printf("%s  (%s) : watchdog process for %s\n",INFO_STR,__func__,managed_processes.processes_table[i]->name);
+            VERBOSE(5) mea_log_printf("%s (%s) : watchdog process for %s\n",INFO_STR,__func__,managed_processes.processes_table[i]->name);
             managed_processes.processes_table[i]->heartbeat_counter++;
             managed_processes.processes_table[i]->heartbeat_status=0;
             if(doRecovery)
@@ -1317,11 +1317,11 @@ int _managed_processes_processes_check_heartbeats(int doRecovery)
                      pthread_cleanup_push( (void *)pthread_rwlock_wrlock, (void *)&managed_processes.rwlock ); // /!\ inversion par rapport à l'habitude ... lock en cas de fin de thread d'abord.
                      pthread_rwlock_unlock(&managed_processes.rwlock); // on delock
                      
-                     VERBOSE(5) mea_log_printf("%s  (%s) : watchdog recovery started for %s\n", INFO_STR, __func__, managed_processes.processes_table[i]->name);
+                     VERBOSE(5) mea_log_printf("%s (%s) : watchdog recovery started for %s\n", INFO_STR, __func__, managed_processes.processes_table[i]->name);
 
                      ret=managed_processes.processes_table[i]->heartbeat_recovery(i, managed_processes.processes_table[i]->heartbeat_recovery_data, errmsg, sizeof(errmsg));
 
-                     VERBOSE(5) mea_log_printf("%s  (%s) : watchdog recovery done for %s (ret=%d)\n", INFO_STR, __func__, managed_processes.processes_table[i]->name, ret);
+                     VERBOSE(5) mea_log_printf("%s (%s) : watchdog recovery done for %s (ret=%d)\n", INFO_STR, __func__, managed_processes.processes_table[i]->name, ret);
 
                      pthread_rwlock_wrlock(&managed_processes.rwlock); // on relock
                      pthread_cleanup_pop(0);
@@ -1329,15 +1329,14 @@ int _managed_processes_processes_check_heartbeats(int doRecovery)
                      managed_processes.processes_table[i]->last_heartbeat = time(NULL);
                      managed_processes.processes_table[i]->forced_watchdog_recovery_flag=0;
                   }
-                  else
-                  {
-                     VERBOSE(5) mea_log_printf("%s  (%s) : no watchdog recovery procedure for %s\n", INFO_STR, __func__, managed_processes.processes_table[i]->name);
+                  else {
+                     VERBOSE(5) mea_log_printf("%s (%s) : no watchdog recovery procedure for %s\n", INFO_STR, __func__, managed_processes.processes_table[i]->name);
                   }
                }
                else
                {
                   // traiter l'erreur
-                  VERBOSE(5) mea_log_printf("%s  (%s) : watchdog recovery not started for %s, too mush restart\n", INFO_STR, __func__, managed_processes.processes_table[i]->name);
+                  VERBOSE(5) mea_log_printf("%s (%s) : watchdog recovery not started for %s, too mush restart\n", INFO_STR, __func__, managed_processes.processes_table[i]->name);
                   managed_processes.processes_table[i]->heartbeat_status=RECOVERY_ERROR;
                }
             }

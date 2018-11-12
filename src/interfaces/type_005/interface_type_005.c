@@ -8,7 +8,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include <signal.h>
-#include <sqlite3.h>
 #include <errno.h>
 #include <pthread.h>
 
@@ -30,14 +29,11 @@
 #include "tokens_da.h"
 
 #include "macros.h"
-//DBSERVER #include "dbServer.h"
 #include "parameters_utils.h"
 #include "processManager.h"
 
-//NOTIFY #include "notify.h"
 
 #include "netatmo.h"
-
 
 
 enum device_type_e { THERMOSTAT, STATION };
@@ -133,14 +129,11 @@ static struct type005_sensor_actuator_queue_elem_s *_find_sensor_actuator(mea_qu
    struct type005_sensor_actuator_queue_elem_s *sa;
 
    mea_queue_first(q);
-   while(mea_queue_current(q,(void **)&d)==0)
-   {
+   while(mea_queue_current(q,(void **)&d)==0) {
       mea_queue_first(&(d->modules_list));
-      while(mea_queue_current(&(d->modules_list),(void **)&m)==0)
-      {
+      while(mea_queue_current(&(d->modules_list),(void **)&m)==0) {
          mea_queue_first(&(m->sensors_actuators_list));
-         while(mea_queue_current(&(m->sensors_actuators_list),(void **)&sa)==0)
-         {
+         while(mea_queue_current(&(m->sensors_actuators_list),(void **)&sa)==0) {
             if(mea_strcmplower(sa->name, device)==0)
                return sa;
  
@@ -210,8 +203,7 @@ int16_t interface_type_005_current_last(struct type005_sensor_actuator_queue_ele
          if(v1>100.0) v1=100.0;
          if(v1<0.0) v1=0.0;
          sprintf(str_current, "%3.0f", v1);
-         if(e->module->last->thermostat.battery_vp>0)
-         {
+         if(e->module->last->thermostat.battery_vp>0) {
             v2=(e->module->last->thermostat.battery_vp-3000.0)/1500.0*100.0;
             if(v2>100.0) v2=100.0;
             if(v2<0.0) v2=0.0;
@@ -243,8 +235,7 @@ int16_t interface_type_005_current_last(struct type005_sensor_actuator_queue_ele
          break;
 
       case _TEMPERATURE:
-         if(e->module->current->station.dataTypeFlags & TEMPERATURE_BIT)
-         {
+         if(e->module->current->station.dataTypeFlags & TEMPERATURE_BIT) {
             sprintf(str_current, "%4.1f", e->module->current->station.data[TEMPERATURE]);
             if(e->module->last->station.data[TEMPERATURE]>0.0)
                sprintf(str_last, "%4.1f", e->module->last->station.data[TEMPERATURE]);
@@ -256,8 +247,7 @@ int16_t interface_type_005_current_last(struct type005_sensor_actuator_queue_ele
          break;
 
       case _CO2:
-         if(e->module->current->station.dataTypeFlags & CO2_BIT)
-         {
+         if(e->module->current->station.dataTypeFlags & CO2_BIT) {
             sprintf(str_current, "%4.0f", e->module->current->station.data[CO2]);
             if(e->module->last->station.data[CO2]>0.0)
                sprintf(str_last, "%4.0f", e->module->last->station.data[CO2]);
@@ -269,8 +259,7 @@ int16_t interface_type_005_current_last(struct type005_sensor_actuator_queue_ele
          break;
 
       case _HUMIDITY:
-         if(e->module->current->station.dataTypeFlags & HUMIDITY_BIT)
-         {
+         if(e->module->current->station.dataTypeFlags & HUMIDITY_BIT) {
             sprintf(str_current, "%4.2f", e->module->current->station.data[HUMIDITY]);
             if(e->module->last->station.data[HUMIDITY]>0.0)
                sprintf(str_last, "%4.2f", e->module->last->station.data[HUMIDITY]);
@@ -282,8 +271,7 @@ int16_t interface_type_005_current_last(struct type005_sensor_actuator_queue_ele
          break;
 
       case _NOISE:
-         if(e->module->current->station.dataTypeFlags & NOISE_BIT)
-         {
+         if(e->module->current->station.dataTypeFlags & NOISE_BIT) {
             sprintf(str_current, "%4.0f", e->module->current->station.data[NOISE]);
             if(e->module->last->station.data[NOISE]>0.0)
                sprintf(str_last, "%4.0f", e->module->last->station.data[NOISE]);
@@ -295,8 +283,7 @@ int16_t interface_type_005_current_last(struct type005_sensor_actuator_queue_ele
          break;
 
       case _PRESSURE:
-         if(e->module->current->station.dataTypeFlags & PRESSURE_BIT)
-         {
+         if(e->module->current->station.dataTypeFlags & PRESSURE_BIT) {
             sprintf(str_current, "%6.2f", e->module->current->station.data[PRESSURE]);
             if(e->module->last->station.data[PRESSURE]>0.0)
                sprintf(str_last, "%6.2f", e->module->last->station.data[PRESSURE]);
@@ -308,8 +295,7 @@ int16_t interface_type_005_current_last(struct type005_sensor_actuator_queue_ele
          break;
 
       case _RAIN:
-         if(e->module->current->station.dataTypeFlags & RAIN_BIT)
-         {
+         if(e->module->current->station.dataTypeFlags & RAIN_BIT) {
             format_float_current_last(str_current, str_last, "%4.0f", e->module->current->station.data[RAIN], e->module->last->station.data[RAIN], d1);
             strcpy(type, "rain");
          }
@@ -317,8 +303,7 @@ int16_t interface_type_005_current_last(struct type005_sensor_actuator_queue_ele
             return -1;
 
       case _WINDANGLE:
-         if(e->module->current->station.dataTypeFlags & WINDANGLE_BIT)
-         {
+         if(e->module->current->station.dataTypeFlags & WINDANGLE_BIT) {
             format_float_current_last(str_current, str_last, "%4.0f", e->module->current->station.data[WINDANGLE], e->module->last->station.data[WINDANGLE], d1);
             strcpy(type, "angle");
          }
@@ -326,8 +311,7 @@ int16_t interface_type_005_current_last(struct type005_sensor_actuator_queue_ele
             return -1;
 
       case _WINDSTRENGTH:
-         if(e->module->current->station.dataTypeFlags & WINDSTRENGTH_BIT)
-         {
+         if(e->module->current->station.dataTypeFlags & WINDSTRENGTH_BIT) {
             format_float_current_last(str_current, str_last, "%4.0f", e->module->current->station.data[WINDSTRENGTH], e->module->last->station.data[WINDSTRENGTH], d1);
             strcpy(type, "speed");
          }
@@ -374,36 +358,27 @@ int16_t interface_type_005_xPL_actuator2(interface_type_005_t *i005,
       if(j)
          expire=j->valuestring;
 
-//      char *mode     = xPL_getNamedValue(ListNomsValeursPtr, "mode");
-//      char *setpoint = xPL_getNamedValue(ListNomsValeursPtr, "setpoint");
-//      char *expire   = xPL_getNamedValue(ListNomsValeursPtr, "expire");
-      
       char *pEnd;
   
       long int _mode=-1L;
       long int _expire=0L;
       double _setpoint=0.0;
       
-      if(mode)
-      {
-         if(expire)
-         {
+      if(mode) {
+         if(expire) {
             _expire=strtol(expire, &pEnd, 10);
             if(*pEnd>0)
                return -1;
          }
       
-         if(setpoint)
-         {
+         if(setpoint) {
             _setpoint=strtod(setpoint, &pEnd);
             if(*pEnd>0)
                return -1;
          }
 
-         for(int i=0;netatmo_thermostat_mode[i];i++)
-         {
-            if(strcmp(netatmo_thermostat_mode[i],mode)==0)
-            {
+         for(int i=0;netatmo_thermostat_mode[i];i++) {
+            if(strcmp(netatmo_thermostat_mode[i],mode)==0) {
                _mode=i;
                break;
             }
@@ -444,8 +419,7 @@ int16_t interface_type_005_xPL_sensor2(interface_type_005_t *i005,
 
       if(interface_type_005_current_last(e, ntype, str_value, str_last, NULL, NULL, NULL)<0)
          return -1;
-      else
-      {
+      else {
          _interface_type_005_send_xPL_sensor_basic2(i005, XPL_STAT_STR_C, e->name, ntype, str_value, str_last);
          return 0;
       }
@@ -457,7 +431,6 @@ int16_t interface_type_005_xPL_sensor2(interface_type_005_t *i005,
 }
 
 
-//int16_t interface_type_005_xPL_callback2(cJSON *xplMsgJson, xPL_ObjectPtr userValue)
 int16_t interface_type_005_xPL_callback2(cJSON *xplMsgJson, struct device_info_s *device_info, void *userValue)
 {
    char *schema = NULL, *device = NULL; //, *type = NULL;
@@ -468,8 +441,7 @@ int16_t interface_type_005_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
    j=cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_DEVICE_ID));
    if(j)
       device=j->valuestring;
-   if(!device)
-   {
+   if(!device) {
       VERBOSE(5) mea_log_printf("%s (%s) : xPL message no device\n", INFO_STR, __func__);
       return -1;
    }
@@ -489,16 +461,14 @@ int16_t interface_type_005_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
    j=cJSON_GetObjectItem(xplMsgJson, XPLSCHEMA_STR_C);
    if(j)
       schema=j->valuestring;
-   if(!schema)
-   {
+   if(!schema) {
       VERBOSE(5) mea_log_printf("%s (%s) : xPL message no schema\n", INFO_STR, __func__);
       return -1;
    }
    mea_strtolower(schema);
 
    struct type005_sensor_actuator_queue_elem_s *elem=_find_sensor_actuator(&(i005->devices_list), device);
-   if(elem==NULL)
-   {
+   if(elem==NULL) {
       DEBUG_SECTION mea_log_printf("%s (%s) : %s not for me\n", INFO_STR, __func__, device);
       return -1;
    } 
@@ -506,24 +476,20 @@ int16_t interface_type_005_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
    
    VERBOSE(9) mea_log_printf("%s (%s) : xPL Message to process : %s\n", INFO_STR, __func__, schema);
    
-   if(mea_strcmplower(schema, XPL_CONTROLBASIC_STR_C) == 0)
-   {
+   if(mea_strcmplower(schema, XPL_CONTROLBASIC_STR_C) == 0) {
       return interface_type_005_xPL_actuator2(i005, xplMsgJson, device, elem);
    }
-   else if(mea_strcmplower(schema, XPL_SENSORREQUEST_STR_C) == 0)
-   {
+   else if(mea_strcmplower(schema, XPL_SENSORREQUEST_STR_C) == 0) {
       char *request = NULL;
       j = cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_REQUEST_ID));
       if(j)
          request = j->valuestring;
-      if(!request)
-      {
+      if(!request) {
          VERBOSE(5) mea_log_printf("%s (%s) : xPL message no request\n", INFO_STR, __func__);
          return 0;
       }
 
-      if(mea_strcmplower(request,get_token_string_by_id(XPL_CURRENT_ID))!=0 && mea_strcmplower(request,get_token_string_by_id(XPL_LAST_ID))!=0)
-      {
+      if(mea_strcmplower(request,get_token_string_by_id(XPL_CURRENT_ID))!=0 && mea_strcmplower(request,get_token_string_by_id(XPL_LAST_ID))!=0) {
          VERBOSE(5) mea_log_printf("%s (%s) : xPL message request!=current or request!=last\n", INFO_STR, __func__);
          return -1;
       }
@@ -542,14 +508,11 @@ int clean_queues(mea_queue_t *q)
    struct type005_sensor_actuator_queue_elem_s *sa;
   
    mea_queue_first(q);
-   while(mea_queue_current(q,(void **)&d)==0)
-   {
+   while(mea_queue_current(q,(void **)&d)==0) {
       mea_queue_first(&(d->modules_list));
-      while(mea_queue_current(&(d->modules_list),(void **)&m)==0)
-      {
+      while(mea_queue_current(&(d->modules_list),(void **)&m)==0) {
          mea_queue_first(&(m->sensors_actuators_list));
-         while(mea_queue_current(&(m->sensors_actuators_list),(void **)&sa)==0)
-         {
+         while(mea_queue_current(&(m->sensors_actuators_list),(void **)&sa)==0) {
             free(sa);
             sa=NULL;
             mea_queue_remove_current(&(m->sensors_actuators_list));
@@ -566,6 +529,286 @@ int clean_queues(mea_queue_t *q)
 }
 
 
+int load_interface_type_005(interface_type_005_t *i005, cJSON *jsonInterface)
+{
+   parsed_parameters_t *netatmo_sa_params=NULL;
+   int nb_netatmo_sa_params=0;
+   int nerr=0;
+   int ret;
+
+   if(mea_queue_nb_elem(&(i005->devices_list))!=0) {
+      clean_queues(&(i005->devices_list));
+   }
+
+   struct type005_device_queue_elem_s *d_elem=NULL;
+   struct type005_module_queue_elem_s *m_elem=NULL;
+   struct type005_sensor_actuator_queue_elem_s *sa_elem=NULL;
+  
+   // récupération des parametrages des capteurs dans la base
+   cJSON *jsonDevices=cJSON_GetObjectItem(jsonInterface, "devices");
+
+   if(jsonDevices==NULL)
+      goto load_interface_type_005_clean_exit;
+
+   cJSON *jsonDevice=jsonDevices->child;
+   while (jsonDevice) {
+
+      int new_d_elem_flag=0;
+      int new_m_elem_flag=0;
+
+      // les valeurs dont on a besoin
+      char *name=jsonDevice->string;
+      int id_sensor_actuator=(int)cJSON_GetObjectItem(jsonDevice, "id_sensor_actuator")->valuedouble;
+      int id_type=(int)cJSON_GetObjectItem(jsonDevice, "id_type")->valuedouble;
+      char *parameters=(char*)cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
+      int todbflag=0;
+
+      netatmo_sa_params=alloc_parsed_parameters((char *)parameters, valid_netatmo_sa_params, &nb_netatmo_sa_params, &nerr, 0);
+      if(netatmo_sa_params &&
+         netatmo_sa_params->parameters[PARAMS_DEVICE_ID].value.s &&
+         netatmo_sa_params->parameters[PARAMS_MODULE_ID].value.s &&
+         netatmo_sa_params->parameters[PARAMS_DEVICE_TYPE].value.s)
+      { // les trois parametres sont obligatoires
+         char *device_id=netatmo_sa_params->parameters[PARAMS_DEVICE_ID].value.s;
+         char *module_id=netatmo_sa_params->parameters[PARAMS_MODULE_ID].value.s;
+         char *devicetype = netatmo_sa_params->parameters[PARAMS_DEVICE_TYPE].value.s;
+         enum device_type_e device_type = -1;
+
+         if(mea_strcmplower(devicetype, "thermostat") == 0)
+            device_type = THERMOSTAT;
+         else if(mea_strcmplower(devicetype, "station") == 0)
+            device_type = STATION;
+         else {
+            VERBOSE(2) mea_log_printf("%s (%s) : %s, configuration error - DEVICE_TYPE is not THERMOSTAT or STATION\n", ERROR_STR, __func__, name);
+            release_parsed_parameters(&netatmo_sa_params);
+            continue;
+         }
+
+         d_elem=NULL;
+         mea_queue_first(&(i005->devices_list));
+         for(int i=0; i<i005->devices_list.nb_elem; i++) { // on commence par chercher si le device existe déjà
+            mea_queue_current(&(i005->devices_list), (void **)&d_elem);
+            if(strcmp(d_elem->device_id, device_id)==0)
+               break;
+            else
+               d_elem=NULL;
+            mea_queue_next(&(i005->devices_list));
+         }
+         if(d_elem==NULL) { // il n'existe pas, on va le créer
+            d_elem=(struct type005_device_queue_elem_s *)malloc(sizeof(struct type005_device_queue_elem_s));
+            if(d_elem==NULL) {
+               VERBOSE(2) {
+                  mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
+                  perror("");
+               }
+               release_parsed_parameters(&netatmo_sa_params);
+               continue; // on à pas encore fait d'autre malloc on boucle direct
+            }
+            strncpy(d_elem->device_id, device_id, sizeof(d_elem->device_id)-1);
+            d_elem->device_type = device_type;
+            mea_queue_init(&(d_elem->modules_list));
+            new_d_elem_flag=1; // on signale qu'on a créé un device
+         }
+
+         m_elem=NULL;
+         mea_queue_first(&(d_elem->modules_list));
+         for(int i=0; i<d_elem->modules_list.nb_elem; i++) { // on cherche si le module est déjà associé au device
+            mea_queue_current(&(d_elem->modules_list), (void **)&m_elem);
+            if(strcmp(m_elem->module_id, module_id)==0)
+               break;
+            else
+               m_elem=NULL;
+            mea_queue_next(&(d_elem->modules_list));
+         }
+         if(m_elem==NULL) { // pas encore associé on le créé
+            m_elem=(struct type005_module_queue_elem_s *)malloc(sizeof(struct type005_module_queue_elem_s));
+            if(m_elem==NULL) {
+               VERBOSE(2) {
+                  mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
+                  perror("");
+               }
+               goto load_interface_type_005_clean_queues; // cette fois on a peut-être déjà fait un malloc, on branche sur la section de clean
+            }
+            strncpy(m_elem->module_id, module_id, sizeof(m_elem->module_id)-1);
+            mea_queue_init(&(m_elem->sensors_actuators_list));
+           
+            // initialisation des données associées au module 
+            switch(device_type)
+            {
+               case THERMOSTAT:
+                  m_elem->d1.thermostat.battery_vp=-1;
+                  m_elem->d1.thermostat.setpoint=-1;
+                  m_elem->d1.thermostat.setpoint_temp=0.0;
+                  m_elem->d1.thermostat.temperature=0.0;
+                  m_elem->d1.thermostat.therm_relay_cmd=-1;
+
+                  m_elem->d2.thermostat.battery_vp=-1;
+                  m_elem->d2.thermostat.setpoint=-1;
+                  m_elem->d2.thermostat.setpoint_temp=0.0;
+                  m_elem->d2.thermostat.temperature=0.0;
+                  m_elem->d2.thermostat.therm_relay_cmd=-1;
+                  break;
+               case STATION:
+                  memset(&(m_elem->d1.station), 0, sizeof(struct netatmo_data_s));
+                  memset(&(m_elem->d2.station), 0, sizeof(struct netatmo_data_s));
+                  break;
+            }
+
+            m_elem->last=&(m_elem->d1);
+            m_elem->current=&(m_elem->d2);
+
+            m_elem->device=d_elem;
+
+            new_m_elem_flag=1; // on signale qu'on a créé un module
+         }
+
+         sa_elem=(struct type005_sensor_actuator_queue_elem_s *)malloc(sizeof(struct type005_sensor_actuator_queue_elem_s));
+         if(sa_elem==NULL) {
+            VERBOSE(2) {
+               mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
+               perror("");
+            }
+            goto load_interface_type_005_clean_queues;
+         }
+
+         char *sensor=netatmo_sa_params->parameters[PARAMS_SENSOR].value.s;
+         char *actuator=netatmo_sa_params->parameters[PARAMS_ACTUATOR].value.s;
+
+         if(sensor && actuator) {
+            VERBOSE(2) mea_log_printf("%s (%s) : parameter errors - SENSOR and ACUTATOR are incompatible\n", ERROR_STR,__func__,sensor);
+            goto load_interface_type_005_clean_queues;
+         }
+
+         sa_elem->sensor=-1;
+         sa_elem->actuator=-1;
+         if(id_type==500) {
+            if(sensor) {
+               mea_strtolower(sensor);
+               switch(device_type)
+               {
+                  case THERMOSTAT:
+                     if(strcmp(sensor, "temperature")==0)
+                        sa_elem->sensor=_TEMP;
+                     else if(strcmp(sensor, "relay_cmd")==0)
+                        sa_elem->sensor=_RELAY_CMD;
+                     else if(strcmp(sensor, "battery")==0)
+                        sa_elem->sensor=_BATTERY;
+                     else if(strcmp(sensor, "setpoint")==0)
+                        sa_elem->sensor=_SETPOINT;
+                     else if(strcmp(sensor, "mode")==0)
+                        sa_elem->sensor=_MODE;
+                     else {
+                        VERBOSE(2) mea_log_printf("%s (%s) : %s, incorrect sensor type error - %s\n", ERROR_STR, __func__, name, sensor);
+                        goto load_interface_type_005_clean_queues;
+                     }
+                     break;
+                   
+                  case STATION:
+                     if(strcmp(sensor, "temperature")==0)
+                        sa_elem->sensor=_TEMPERATURE;
+                     else if(strcmp(sensor, "co2")==0)
+                        sa_elem->sensor=_CO2;
+                     else if(strcmp(sensor, "humidity")==0)
+                        sa_elem->sensor=_HUMIDITY;
+                     else if(strcmp(sensor, "noise")==0)
+                        sa_elem->sensor=_NOISE;
+                     else if(strcmp(sensor, "pressure")==0)
+                        sa_elem->sensor=_PRESSURE;
+                     else if(strcmp(sensor, "rain")==0)
+                        sa_elem->sensor=_RAIN;
+                     else if(strcmp(sensor, "windangle")==0)
+                        sa_elem->sensor=_WINDANGLE;
+                     else if(strcmp(sensor, "windstrength")==0)
+                        sa_elem->sensor=_WINDSTRENGTH;
+                     else {
+                        VERBOSE(2) mea_log_printf("%s (%s) : %s, incorrect sensor type error - %s\n", ERROR_STR, __func__, name, sensor);
+                        goto load_interface_type_005_clean_queues;
+                     }
+                     break;
+               }
+            }
+            else {
+               VERBOSE(2) mea_log_printf("%s (%s) : %s, INPUT type need SENSOR parameter - %s\n", ERROR_STR, __func__, name, sensor);
+               goto load_interface_type_005_clean_queues;
+            }
+         }
+         else if(id_type==501) {
+            if(device_type == STATION) {
+                VERBOSE(2) mea_log_printf("%s (%s) : %s, no actuator available for station - %s\n", ERROR_STR, __func__, name, actuator);
+               goto load_interface_type_005_clean_queues;
+            }
+            if(actuator) {
+               mea_strtolower(actuator);
+               if(strcmp(actuator, "setpoint")==0)
+                  sa_elem->actuator=1;
+               else {
+                  VERBOSE(2) mea_log_printf("%s (%s) : %s, incorrect actuator type error - %s\n", ERROR_STR, __func__, name, actuator);
+                  goto load_interface_type_005_clean_queues;
+               }
+            }
+            else {
+               VERBOSE(2) mea_log_printf("%s (%s) : %s, OUTPUT type need ACTUATOR parameter - %s\n", ERROR_STR, __func__, name, sensor);
+               goto load_interface_type_005_clean_queues;
+            }
+         }
+         else {
+            VERBOSE(2) mea_log_printf("%s (%s) : %s, configuration error - incorrect (INPUT or OUPUT only allowed) type\n", ERROR_STR,__func__, name);
+            goto load_interface_type_005_clean_queues;
+         }
+
+         sa_elem->id=id_sensor_actuator;
+         sa_elem->type=id_type;
+         strncpy(sa_elem->name, (const char *)name, sizeof(sa_elem->name)-1);
+         mea_strtolower(sa_elem->name);
+         sa_elem->todbflag=todbflag;
+         sa_elem->module=m_elem;
+
+         mea_queue_in_elem(&(m_elem->sensors_actuators_list), (void *)sa_elem);
+         if(new_m_elem_flag==1) {
+            mea_queue_in_elem(&(d_elem->modules_list), (void *)m_elem);
+         }
+         if(new_d_elem_flag==1) {
+            mea_queue_in_elem(&(i005->devices_list), (void *)d_elem);
+         }
+
+         release_parsed_parameters(&netatmo_sa_params);
+         continue;
+
+load_interface_type_005_clean_queues:
+         if(netatmo_sa_params)
+            release_parsed_parameters(&netatmo_sa_params);
+         if(sa_elem) {
+            free(sa_elem);
+            sa_elem=NULL;
+         }
+         if(new_d_elem_flag==1) {
+            if(d_elem) {
+               free(d_elem);
+               d_elem=NULL;
+            }
+         }
+         if(new_m_elem_flag==1) {
+            if(m_elem) {
+               free(m_elem);
+               m_elem=NULL;
+            }
+         }
+      }
+      else {
+         VERBOSE(2) mea_log_printf("%s (%s) : %s, configuration error - DEVICE_ID, MODULE_ID and DEVICE_TYPE parameters are mandatory\n", ERROR_STR, __func__, name);
+         release_parsed_parameters(&netatmo_sa_params);
+      }
+   }
+
+   return 0;
+
+load_interface_type_005_clean_exit:
+   clean_queues(&(i005->devices_list));
+   return -1;
+}
+
+
+/*
 int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
 {
    sqlite3_stmt * stmt = NULL;
@@ -575,16 +818,14 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
    int nerr=0;
    int ret;
 
-   if(mea_queue_nb_elem(&(i005->devices_list))!=0)
-   {
+   if(mea_queue_nb_elem(&(i005->devices_list))!=0) {
       clean_queues(&(i005->devices_list));
    }
 
    sprintf(sql_request,"SELECT * FROM sensors_actuators WHERE id_interface=%d AND sensors_actuators.deleted_flag <> 1 AND sensors_actuators.state='1'", i005->id_interface);
 
    ret = sqlite3_prepare_v2(db,sql_request,(int)(strlen(sql_request)+1),&stmt,NULL);
-   if(ret)
-   {
+   if(ret) {
       VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR,__func__,sqlite3_errmsg (db));
       goto load_interface_type_005_clean_exit;
    }
@@ -594,13 +835,11 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
    struct type005_sensor_actuator_queue_elem_s *sa_elem=NULL;
    
    // récupération des parametrages des capteurs dans la base
-   while (1) // boucle de traitement du résultat de la requete
-   {
+   while (1) { // boucle de traitement du résultat de la requete
       int new_d_elem_flag=0;
       int new_m_elem_flag=0;
       int s=sqlite3_step(stmt);
-      if (s==SQLITE_ROW)
-      {
+      if (s==SQLITE_ROW) {
          // les valeurs dont on a besoin
          int id_sensor_actuator=sqlite3_column_int(stmt, 1);
          int id_type=sqlite3_column_int(stmt, 2);
@@ -612,8 +851,8 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
          if(netatmo_sa_params &&
             netatmo_sa_params->parameters[PARAMS_DEVICE_ID].value.s &&
             netatmo_sa_params->parameters[PARAMS_MODULE_ID].value.s &&
-            netatmo_sa_params->parameters[PARAMS_DEVICE_TYPE].value.s) // les trois parametres sont obligatoires
-         {
+            netatmo_sa_params->parameters[PARAMS_DEVICE_TYPE].value.s)
+         { // les trois parametres sont obligatoires
             char *device_id=netatmo_sa_params->parameters[PARAMS_DEVICE_ID].value.s;
             char *module_id=netatmo_sa_params->parameters[PARAMS_MODULE_ID].value.s;
             char *devicetype = netatmo_sa_params->parameters[PARAMS_DEVICE_TYPE].value.s;
@@ -623,8 +862,7 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
                device_type = THERMOSTAT;
             else if(mea_strcmplower(devicetype, "station") == 0)
                device_type = STATION;
-            else
-            {
+            else {
                VERBOSE(2) mea_log_printf("%s (%s) : %s, configuration error - DEVICE_TYPE is not THERMOSTAT or STATION\n", ERROR_STR, __func__, name);
                release_parsed_parameters(&netatmo_sa_params);
                continue;
@@ -632,8 +870,7 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
 
             d_elem=NULL;
             mea_queue_first(&(i005->devices_list));
-            for(int i=0; i<i005->devices_list.nb_elem; i++) // on commence par chercher si le device existe déjà
-            {
+            for(int i=0; i<i005->devices_list.nb_elem; i++) { // on commence par chercher si le device existe déjà
                mea_queue_current(&(i005->devices_list), (void **)&d_elem);
                if(strcmp(d_elem->device_id, device_id)==0)
                   break;
@@ -641,11 +878,9 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
                   d_elem=NULL;
                mea_queue_next(&(i005->devices_list));
             }
-            if(d_elem==NULL) // il n'existe pas, on va le créer
-            {
+            if(d_elem==NULL) { // il n'existe pas, on va le créer
                d_elem=(struct type005_device_queue_elem_s *)malloc(sizeof(struct type005_device_queue_elem_s));
-               if(d_elem==NULL)
-               {
+               if(d_elem==NULL) {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
                      perror("");
@@ -661,8 +896,7 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
 
             m_elem=NULL;
             mea_queue_first(&(d_elem->modules_list));
-            for(int i=0; i<d_elem->modules_list.nb_elem; i++) // on cherche si le module est déjà associé au device
-            {
+            for(int i=0; i<d_elem->modules_list.nb_elem; i++) { // on cherche si le module est déjà associé au device
                mea_queue_current(&(d_elem->modules_list), (void **)&m_elem);
                if(strcmp(m_elem->module_id, module_id)==0)
                   break;
@@ -670,11 +904,9 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
                   m_elem=NULL;
                mea_queue_next(&(d_elem->modules_list));
             }
-            if(m_elem==NULL) // pas encore associé on le créé
-            {
+            if(m_elem==NULL) { // pas encore associé on le créé
                m_elem=(struct type005_module_queue_elem_s *)malloc(sizeof(struct type005_module_queue_elem_s));
-               if(m_elem==NULL)
-               {
+               if(m_elem==NULL) {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
                      perror("");
@@ -715,8 +947,7 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
             }
 
             sa_elem=(struct type005_sensor_actuator_queue_elem_s *)malloc(sizeof(struct type005_sensor_actuator_queue_elem_s));
-            if(sa_elem==NULL)
-            {
+            if(sa_elem==NULL) {
                VERBOSE(2) {
                   mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
                   perror("");
@@ -727,18 +958,15 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
             char *sensor=netatmo_sa_params->parameters[PARAMS_SENSOR].value.s;
             char *actuator=netatmo_sa_params->parameters[PARAMS_ACTUATOR].value.s;
 
-            if(sensor && actuator)
-            {
+            if(sensor && actuator) {
                VERBOSE(2) mea_log_printf("%s (%s) : parameter errors - SENSOR and ACUTATOR are incompatible\n", ERROR_STR,__func__,sensor);
                goto load_interface_type_005_clean_queues;
             }
 
             sa_elem->sensor=-1;
             sa_elem->actuator=-1;
-            if(id_type==500)
-            {
-               if(sensor)
-               {
+            if(id_type==500) {
+               if(sensor) {
                   mea_strtolower(sensor);
                   switch(device_type)
                   {
@@ -753,8 +981,7 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
                            sa_elem->sensor=_SETPOINT;
                         else if(strcmp(sensor, "mode")==0)
                            sa_elem->sensor=_MODE;
-                        else
-                        {
+                        else {
                            VERBOSE(2) mea_log_printf("%s (%s) : %s, incorrect sensor type error - %s\n", ERROR_STR, __func__, name, sensor);
                            goto load_interface_type_005_clean_queues;
                         }
@@ -777,46 +1004,38 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
                            sa_elem->sensor=_WINDANGLE;
                         else if(strcmp(sensor, "windstrength")==0)
                            sa_elem->sensor=_WINDSTRENGTH;
-                        else
-                        {
+                        else {
                            VERBOSE(2) mea_log_printf("%s (%s) : %s, incorrect sensor type error - %s\n", ERROR_STR, __func__, name, sensor);
                            goto load_interface_type_005_clean_queues;
                         }
                         break;
                   }
                }
-               else
-               {
+               else {
                   VERBOSE(2) mea_log_printf("%s (%s) : %s, INPUT type need SENSOR parameter - %s\n", ERROR_STR, __func__, name, sensor);
                   goto load_interface_type_005_clean_queues;
                }
             }
-            else if(id_type==501)
-            {
-               if(device_type == STATION)
-               {
+            else if(id_type==501) {
+               if(device_type == STATION) {
                   VERBOSE(2) mea_log_printf("%s (%s) : %s, no actuator available for station - %s\n", ERROR_STR, __func__, name, actuator);
                   goto load_interface_type_005_clean_queues;
                }
-               if(actuator)
-               {
+               if(actuator) {
                   mea_strtolower(actuator);
                   if(strcmp(actuator, "setpoint")==0)
                      sa_elem->actuator=1;
-                  else
-                  {
+                  else {
                      VERBOSE(2) mea_log_printf("%s (%s) : %s, incorrect actuator type error - %s\n", ERROR_STR, __func__, name, actuator);
                      goto load_interface_type_005_clean_queues;
                   }
                }
-               else
-               {
+               else {
                   VERBOSE(2) mea_log_printf("%s (%s) : %s, OUTPUT type need ACTUATOR parameter - %s\n", ERROR_STR, __func__, name, sensor);
                   goto load_interface_type_005_clean_queues;
                }
             }
-            else
-            {
+            else {
                VERBOSE(2) mea_log_printf("%s (%s) : %s, configuration error - incorrect (INPUT or OUPUT only allowed) type\n", ERROR_STR,__func__, name);
                goto load_interface_type_005_clean_queues;
             }
@@ -829,12 +1048,10 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
             sa_elem->module=m_elem;
 
             mea_queue_in_elem(&(m_elem->sensors_actuators_list), (void *)sa_elem);
-            if(new_m_elem_flag==1)
-            {
+            if(new_m_elem_flag==1) {
                mea_queue_in_elem(&(d_elem->modules_list), (void *)m_elem);
             }
-            if(new_d_elem_flag==1)
-            {
+            if(new_d_elem_flag==1) {
                mea_queue_in_elem(&(i005->devices_list), (void *)d_elem);
             }
 
@@ -844,41 +1061,33 @@ int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
 load_interface_type_005_clean_queues:
             if(netatmo_sa_params)
                release_parsed_parameters(&netatmo_sa_params);
-            if(sa_elem)
-            {
+            if(sa_elem) {
                free(sa_elem);
                sa_elem=NULL;
             }
-            if(new_d_elem_flag==1)
-            {
-               if(d_elem)
-               {
+            if(new_d_elem_flag==1) {
+               if(d_elem) {
                   free(d_elem);
                   d_elem=NULL;
                }
             }
-            if(new_m_elem_flag==1)
-            {
-               if(m_elem)
-               {
+            if(new_m_elem_flag==1) {
+               if(m_elem) {
                   free(m_elem);
                   m_elem=NULL;
                }
             }
          }
-         else
-         {
+         else {
             VERBOSE(2) mea_log_printf("%s (%s) : %s, configuration error - DEVICE_ID, MODULE_ID and DEVICE_TYPE parameters are mandatory\n", ERROR_STR, __func__, name);
             release_parsed_parameters(&netatmo_sa_params);
          }
       }
-      else if (s==SQLITE_DONE)
-      {
+      else if (s==SQLITE_DONE) {
          sqlite3_finalize(stmt);
          break;
       }
-      else
-      {
+      else {
          // traitement d'erreur à faire ici
          sqlite3_finalize(stmt);
          goto load_interface_type_005_clean_exit;
@@ -890,6 +1099,7 @@ load_interface_type_005_clean_exit:
    clean_queues(&(i005->devices_list));
    return -1;
 }
+*/
 
 
 void set_interface_type_005_isnt_running(void *data)
@@ -912,11 +1122,6 @@ static int interface_type_005_sendData(interface_type_005_t *i005, struct type00
    if(ret==1)
    {
       _interface_type_005_send_xPL_sensor_basic2(i005, XPL_TRIG_STR_C, sa_elem->name, type, str_value, str_last);
-/* DBSERVER
-      if(sa_elem->todbflag==1)
-         dbServer_add_data_to_sensors_values(sa_elem->id, data4db, 0, data4db2, data4dbComp);
-*/
-//      VERBOSE(9) mea_log_printf("%s (%s) : sendData done\n", ERROR_STR, __func__);
       return 0;
    }
    else
@@ -1049,8 +1254,7 @@ void *_thread_interface_type_005(void *thread_data)
    struct thread_interface_type_005_args_s *args = (struct thread_interface_type_005_args_s *)thread_data;
    interface_type_005_t *i005=NULL;
 
-   if(thread_data)
-   {   
+   if(thread_data) {   
       i005=args->i005;
       free(thread_data);
    } 
@@ -1076,8 +1280,7 @@ void *_thread_interface_type_005(void *thread_data)
 //   mea_init_timer(&getdata_timer,5,1); // pour debug
    mea_start_timer(&getdata_timer); 
 
-   while(1)
-   {
+   while(1) {
       pthread_testcancel();
      
       process_heartbeat(i005->monitoring_id);
@@ -1086,12 +1289,10 @@ void *_thread_interface_type_005(void *thread_data)
       process_update_indicator(i005->monitoring_id, I005_NBREADERROR, i005->indicators.nbreaderror);
       process_update_indicator(i005->monitoring_id, I005_NBREAD, i005->indicators.nbread);
 
-      if(auth_flag==0)
-      {
+      if(auth_flag==0) {
          VERBOSE(9) mea_log_printf("%s (%s) : start authentification\n", ERROR_STR, __func__);
          ret=netatmo_get_token(client_id, client_secret, i005->user, i005->password, "read_thermostat write_thermostat read_station", &(i005->token), err, sizeof(err)-1);
-         if(ret!=0)
-         {
+         if(ret!=0) {
             VERBOSE(5) {
                mea_log_printf("%s (%s) : authentification error - ", ERROR_STR, __func__);
                if(ret<0)
@@ -1100,8 +1301,7 @@ void *_thread_interface_type_005(void *thread_data)
                   fprintf(MEA_STDERR, "%s (%d)\n", err, ret);
             }
          }
-         else
-         {
+         else {
             VERBOSE(9) {
                mea_log_printf("%s (%s) : authentification done - %s\n", INFO_STR, __func__, i005->token.access);
             }
@@ -1112,27 +1312,23 @@ void *_thread_interface_type_005(void *thread_data)
          }
       }
 
-      if(mea_test_timer(&refresh_timer)==0)
-      {
+      if(mea_test_timer(&refresh_timer)==0) {
          VERBOSE(9) mea_log_printf("%s (%s) : start refresh", ERROR_STR, __func__);
          ret=netatmo_refresh_token(client_id, client_secret, &(i005->token), err, sizeof(err)-1);
-         if(ret!=0)
-         {
+         if(ret!=0) {
             VERBOSE(9) {
                mea_log_printf("%s (%s) : authentification error\n", INFO_STR, __func__);
             }
             auth_flag=0;
             continue;
          }
-         else
-         {
+         else {
             mea_init_timer(&refresh_timer,(int)((float)i005->token.expire_in*0.95), 0);
             mea_start_timer(&refresh_timer);
          }
       }
 
-      if(auth_flag!=0 && mea_test_timer(&getdata_timer)==0)
-      {
+      if(auth_flag!=0 && mea_test_timer(&getdata_timer)==0) {
          interface_type_005_getData(i005);
       }
 
@@ -1174,8 +1370,7 @@ int set_xPLCallback_interface_type_005(void *ixxx, xpl2_f cb)
 
    if(i005 == NULL)
       return -1;
-   else
-   {
+   else {
       i005->xPL_callback2 = cb;
       return 0;
    }
@@ -1188,8 +1383,7 @@ int set_monitoring_id_interface_type_005(void *ixxx, int id)
 
    if(i005 == NULL)
       return -1;
-   else
-   {
+   else {
       i005->monitoring_id = id;
       return 0;
    }
@@ -1202,13 +1396,12 @@ int get_type_interface_type_005()
 }
 
 
-interface_type_005_t *malloc_and_init_interface_type_005(sqlite3 *sqlite3_param_db, int id_driver, int id_interface, char *name, char *dev, char *parameters, char *description)
+interface_type_005_t *malloc_and_init2_interface_type_005(int id_driver, cJSON *jsonInterface)
 {
    interface_type_005_t *i005=NULL;
-   
+
    i005=(interface_type_005_t *)calloc(1, sizeof(interface_type_005_t));
-   if(!i005)
-   {
+   if(!i005) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
          perror("");
@@ -1218,8 +1411,7 @@ interface_type_005_t *malloc_and_init_interface_type_005(sqlite3 *sqlite3_param_
    i005->thread_is_running=0;
    
    struct interface_type_005_start_stop_params_s *i005_start_stop_params=(struct interface_type_005_start_stop_params_s *)malloc(sizeof(struct interface_type_005_start_stop_params_s));
-   if(!i005_start_stop_params)
-   {
+   if(!i005_start_stop_params) {
       free(i005);
       i005=NULL;
       VERBOSE(2) {
@@ -1229,9 +1421,14 @@ interface_type_005_t *malloc_and_init_interface_type_005(sqlite3 *sqlite3_param_
       return NULL;
    }
 
+   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,"id_interface")->valuedouble;
+   char *name=jsonInterface->string;
+   char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
+   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
+   char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
+
    i005->parameters=(char *)malloc(strlen((char *)parameters)+1);
-   if(i005->parameters==NULL)
-   {
+   if(i005->parameters==NULL) {
       free(i005);
       i005=NULL;
       free(i005_start_stop_params);
@@ -1257,7 +1454,6 @@ interface_type_005_t *malloc_and_init_interface_type_005(sqlite3 *sqlite3_param_
    i005->thread=NULL;
    
    i005->monitoring_id=process_register((char *)name);
-   i005_start_stop_params->sqlite3_param_db = sqlite3_param_db;
    i005_start_stop_params->i005=i005;
    
    process_set_group(i005->monitoring_id, 1);
@@ -1279,16 +1475,14 @@ int clean_interface_type_005(interface_type_005_t *i005)
 {
    clean_queues(&(i005->devices_list));
 
-   if(i005->parameters)
-   {
+   if(i005->parameters) {
       free(i005->parameters);
       i005->parameters=NULL;
    }
    
    i005->xPL_callback2=NULL;
    
-   if(i005->thread)
-   {
+   if(i005->thread) {
       free(i005->thread);
       i005->thread=NULL;
    }
@@ -1308,20 +1502,17 @@ int stop_interface_type_005(int my_id, void *data, char *errmsg, int l_errmsg)
    
    start_stop_params->i005->xPL_callback2=NULL;
    
-   if(start_stop_params->i005->thread)
-   {
+   if(start_stop_params->i005->thread) {
       pthread_cancel(*(start_stop_params->i005->thread));
       
       int counter=100;
 //      int stopped=-1;
-      while(counter--)
-      {
-         if(start_stop_params->i005->thread_is_running)
-         {  // pour éviter une attente "trop" active
+      while(counter--) {
+         if(start_stop_params->i005->thread_is_running) {
+            // pour éviter une attente "trop" active
             usleep(100); // will sleep for 10 ms
          }
-         else
-         {
+         else {
 //            stopped=0;
             break;
          }
@@ -1330,8 +1521,6 @@ int stop_interface_type_005(int my_id, void *data, char *errmsg, int l_errmsg)
 
       clean_interface_type_005(start_stop_params->i005);
    }
-   
-//NOTIFY   mea_notify_printf('S', "%s %s", start_stop_params->i005->name, stopped_successfully_str);
    
    return 0;
 }
@@ -1356,7 +1545,7 @@ int16_t check_status_interface_type_005(interface_type_005_t *it005)
 }
 
 
-int start_interface_type_005(int my_id, void *data, char *errmsg, int l_errmsg)
+int start_interface_type_005(int driver_id, void *data, char *errmsg, int l_errmsg)
 {
    pthread_t *interface_type_005_thread_id=NULL; // descripteur du thread
    struct thread_interface_type_005_args_s *interface_type_005_thread_args=NULL; // parametre à transmettre au thread
@@ -1365,12 +1554,18 @@ int start_interface_type_005(int my_id, void *data, char *errmsg, int l_errmsg)
 
    start_stop_params->i005->xPL_callback2=NULL;
 
-   if(load_interface_type_005(start_stop_params->i005, start_stop_params->sqlite3_param_db)<0)
+   cJSON *jsonInterface = getInterfaceById_alloc(start_stop_params->i005->id_interface);
+
+   int ret=load_interface_type_005(start_stop_params->i005, jsonInterface);
+
+   cJSON_Delete(jsonInterface);
+
+   if(ret<0) 
       return -1;
+
  
    interface_type_005_thread_args=malloc(sizeof(struct thread_interface_type_005_args_s));
-   if(!interface_type_005_thread_args)
-   {
+   if(!interface_type_005_thread_args) {
       VERBOSE(2) mea_log_printf("%s (%s) : malloc - %s\n", ERROR_STR,__func__);
       perror("");
       goto start_interface_type_005_clean_exit;
@@ -1381,22 +1576,19 @@ int start_interface_type_005(int my_id, void *data, char *errmsg, int l_errmsg)
    start_stop_params->i005->user[0]=0;
    start_stop_params->i005->password[0]=0;
    sscanf(start_stop_params->i005->dev, "NETATMO://%80[^/]/%80[^\n]", start_stop_params->i005->user, start_stop_params->i005->password);
-   if(start_stop_params->i005->user[0]==0 || start_stop_params->i005->password[0]==0)
-   {
+   if(start_stop_params->i005->user[0]==0 || start_stop_params->i005->password[0]==0) {
       VERBOSE(2) mea_log_printf("%s (%s) : bad netatmo dev - incorrect user/password%s\n", ERROR_STR, __func__, start_stop_params->i005->dev);
       goto start_interface_type_005_clean_exit;
    }
 
    // préparation du lancement du thread   
    interface_type_005_thread_id=(pthread_t *)malloc(sizeof(pthread_t));
-   if(!interface_type_005_thread_id)
-   {
+   if(!interface_type_005_thread_id) {
       VERBOSE(2) mea_log_printf("%s (%s) : malloc - %s\n", ERROR_STR,__func__);
       goto start_interface_type_005_clean_exit;
    }
 
-   if(pthread_create (interface_type_005_thread_id, NULL, _thread_interface_type_005, (void *)interface_type_005_thread_args))
-   {
+   if(pthread_create (interface_type_005_thread_id, NULL, _thread_interface_type_005, (void *)interface_type_005_thread_args)) {
       VERBOSE(2) mea_log_printf("%s (%s) : pthread_create - can't start thread\n",ERROR_STR,__func__);
       goto start_interface_type_005_clean_exit;
    }
@@ -1408,18 +1600,15 @@ int start_interface_type_005(int my_id, void *data, char *errmsg, int l_errmsg)
    pthread_detach(*interface_type_005_thread_id);
  
    VERBOSE(2) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, start_stop_params->i005->name, launched_successfully_str);
-//NOTIFY   mea_notify_printf('S', "%s %s", start_stop_params->i005->name, launched_successfully_str);
  
    return 0;
 
 start_interface_type_005_clean_exit:
-   if(interface_type_005_thread_id)
-   {
+   if(interface_type_005_thread_id) {
       free(interface_type_005_thread_id);
       interface_type_005_thread_id=NULL;
    }
-   if(interface_type_005_thread_args)
-   {
+   if(interface_type_005_thread_args) {
       free(interface_type_005_thread_args);
       interface_type_005_thread_args=NULL;
    }
@@ -1432,7 +1621,8 @@ start_interface_type_005_clean_exit:
 #else
 int get_fns_interface_type_005(struct interfacesServer_interfaceFns_s *interfacesFns)
 {
-   interfacesFns->malloc_and_init = (malloc_and_init_f)&malloc_and_init_interface_type_005;
+   interfacesFns->malloc_and_init = NULL;
+   interfacesFns->malloc_and_init2 = (malloc_and_init2_f)&malloc_and_init2_interface_type_005;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_005;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_005;
    interfacesFns->clean = (clean_f)&clean_interface_type_005;

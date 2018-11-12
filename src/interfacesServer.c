@@ -458,7 +458,7 @@ int relinkInterfacesDevices(cJSON *jsonInterfaces)
          jsonInterface=jsonInterface->next;
       }
    }
-   { char *s=cJSON_Print(jsonInterfaces); printf("%s\n",s); free(s); }
+//   { char *s=cJSON_Print(jsonInterfaces); printf("%s\n",s); free(s); }
    return 0;
 }
 
@@ -1268,7 +1268,6 @@ void stop_interfaces()
       _interfaces=NULL;
    }
 
-   printf("#\n"); 
    if(interfacesFns) {
       unload_interfaces_fns(interfacesFns);
       free(interfacesFns);
@@ -1376,7 +1375,47 @@ int link_delegates(mea_queue_t *interfaces_list)
 }
  
  
- 
+int start_interfaces_load_json(cJSON *params_list)
+{
+    if(jsonInterfaces) {
+      cJSON_Delete(jsonInterfaces);
+      jsonInterfaces=NULL;
+   }
+
+   if(jsonTypes) {
+      cJSON_Delete(jsonTypes);
+      jsonTypes=NULL;
+   }
+
+   if(1) {
+      char jsonInterfacesFile[256];
+      snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", appParameters_get("MEAPATH", params_list));
+      jsonInterfaces=jsonInterfacesLoad(jsonInterfacesFile);
+      if(!jsonInterfaces) {
+         VERBOSE(1) {
+            mea_log_printf("%s (%s) : can't load interfaces descriptions\n",ERROR_STR,__func__);
+         }
+         return -1;
+      }
+      createDevicesIndex(&devices_index, jsonInterfaces);
+      createDevsIndex(&devs_index, jsonInterfaces);
+   }
+
+   if(1) {
+      char jsonTypesFile[256];
+      snprintf(jsonTypesFile, sizeof(jsonTypesFile)-1, "%s/etc/types.json", appParameters_get("MEAPATH", params_list));
+      jsonTypes=jsonTypesLoad(jsonTypesFile);
+      if(!jsonTypes) {
+         VERBOSE(1) {
+            mea_log_printf("%s (%s) : can't load types descriptions",ERROR_STR,__func__);
+         }
+         return -1;
+      }
+      createTypesIndex(&types_index, jsonTypes);
+   }
+}
+
+
 #ifndef NOMORESQLITE3
 mea_queue_t *start_interfaces(cJSON *params_list, sqlite3 *sqlite3_param_db)
 #else
@@ -1397,50 +1436,13 @@ mea_queue_t *start_interfaces(cJSON *params_list)
  
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
- 
-    if(jsonInterfaces) {
-      cJSON_Delete(jsonInterfaces);
-      jsonInterfaces=NULL;
-   }
 
-   if(jsonTypes) {
-      cJSON_Delete(jsonTypes);
-      jsonTypes=NULL;
-   }
-
-#ifndef NOMORESQLITE3
-   if(1) {
-      char jsonInterfacesFile[256];
-      snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", appParameters_get("MEAPATH", params_list));
-      jsonInterfaces=jsonInterfacesLoad(jsonInterfacesFile);
-      if(!jsonInterfaces) {
-         VERBOSE(1) {
-            mea_log_printf("%s (%s) : can't load interfaces descriptions\n",ERROR_STR,__func__);
-         }
-         goto start_interfaces_clean_exit_S3;
-      }
-      createDevicesIndex(&devices_index, jsonInterfaces);
-      createDevsIndex(&devs_index, jsonInterfaces);
-   }
-
-   if(1) {
-      char jsonTypesFile[256];
-      snprintf(jsonTypesFile, sizeof(jsonTypesFile)-1, "%s/etc/types.json", appParameters_get("MEAPATH", params_list));
-      jsonTypes=jsonTypesLoad(jsonTypesFile);
-      if(!jsonTypes) {
-         VERBOSE(1) {
-            mea_log_printf("%s (%s) : can't load types descriptions",ERROR_STR,__func__);
-         }
-         goto start_interfaces_clean_exit_S3;
-      }
-      createTypesIndex(&types_index, jsonTypes);
-   }
-#endif
+   ret=start_interfaces_load_json(params_list);
 
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
 
-   if(!jsonInterfaces || !jsonTypes) {
+   if(ret==-1 || !jsonInterfaces || !jsonTypes) {
       goto start_interfaces_clean_exit_S3;
    }
     
@@ -1477,6 +1479,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    char *driversPath=appParameters_get("DRIVERSPATH", params_list);
    cJSON *jsonInterface=jsonInterfaces->child;
    while( jsonInterface ) {
+
       char *name=jsonInterface->string;
       int  state=cJSON_GetObjectItem(jsonInterface, "state")->valuedouble;
       int  id_interface=cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
@@ -1520,6 +1523,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
          if(iq->fns) {
             void *ptr = NULL;
             if(iq->fns->malloc_and_init != NULL) {
+               printf("@@ %s\n", name);
                ptr = iq->fns->malloc_and_init(sqlite3_param_db, i, id_interface, name, dev, parameters, description);
             }
             else {
@@ -1566,6 +1570,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
      else {
          VERBOSE(9) mea_log_printf("%s (%s) : %s not activated (state = %d)\n", INFO_STR, __func__, dev, state);
       }
+
       jsonInterface = jsonInterface->next;
    }
    sortie=1;
