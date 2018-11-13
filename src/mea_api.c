@@ -8,11 +8,9 @@
 #include <stdio.h>
 
 #include "globals.h"
-// #include "xPL.h"
 #include "xPLServer.h"
 #include "tokens.h"
 #include "tokens_da.h"
-//DBSERVER #include "dbServer.h"
 #include "xbee.h"
 #include "enocean.h"
 #include "mea_verbose.h"
@@ -38,8 +36,6 @@ static PyObject *mea_xplGetDeviceID();
 static PyObject *mea_xplGetInstanceID();
 static PyObject *mea_xplSendMsg2(PyObject *self, PyObject *args);
 static PyObject *mea_addDataToSensorsValuesTable(PyObject *self, PyObject *args);
-//static PyObject *mea_write(PyObject *self, PyObject *args);
-//static PyObject *mea_read(PyObject *self, PyObject *args);
 static PyObject *mea_interface_api(PyObject *self, PyObject *args);
 
 
@@ -81,48 +77,6 @@ static PyObject *mea_api_getMemory(PyObject *self, PyObject *args)
    return mea_getMemory(self, args, mea_memory);
 }
 
-/* DBSERVER
-static int16_t _check_todbflag(sqlite3 *db, uint16_t sensor_id)
-{
-   char sql[255];
-   sqlite3_stmt * stmt;
-   int ret;
-   
-   DEBUG_SECTION mea_log_printf("%s (%s) : check loggin for sensor n#%d.\n", DEBUG_STR ,__func__,sensor_id);
-   snprintf(sql,sizeof(sql),"SELECT id,todbflag,id_sensor_actuator FROM sensors_actuators WHERE id_sensor_actuator = %d AND deleted_flag <> 1",sensor_id);
-   ret = sqlite3_prepare_v2(db, sql, (int)(strlen(sql)+1), &stmt, NULL);
-   if(ret)
-   {
-      VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR, __func__, sqlite3_errmsg (db));
-      return -1;
-   }
-   DEBUG_SECTION mea_log_printf("%s (%s) : query = %s\n", DEBUG_STR ,__func__, sql);
-   
-   while(1)
-   {
-      int s = sqlite3_step(stmt);
-      if (s == SQLITE_ROW)
-      {
-         int val=sqlite3_column_int(stmt, 1);
-         DEBUG_SECTION mea_log_printf("%s (%s) : %d == %d\n", DEBUG_STR ,__func__, sqlite3_column_int(stmt,2),sensor_id);
-         
-         if(sqlite3_column_int(stmt,2)==sensor_id)
-         {
-            sqlite3_finalize(stmt);
-            DEBUG_SECTION mea_log_printf("%s (%s) : sensor found, flag = %d\n", DEBUG_STR ,__func__, val);
-            return val;
-         }
-      }
-      else
-      {
-         sqlite3_finalize(stmt);
-         DEBUG_SECTION mea_log_printf("%s (%s) : sensor not found\n", DEBUG_STR ,__func__);
-         return -1;
-      }
-   }
-   return -1;
-}
-*/
 
 static uint32_t _indianConvertion(uint32_t val_x86)
 {
@@ -771,166 +725,5 @@ mea_atCmdSend_arg_err:
 
 static PyObject *mea_addDataToSensorsValuesTable(PyObject *self, PyObject *args)
 {
-   uint16_t sensor_id;
-   double value1, value2;
-   uint16_t unit;
-   char *complement;
-
-   PyObject *arg;
-   
-   // récupération des paramètres et contrôle des types
-   if(PyTuple_Size(args)!=5)
-      goto mea_addDataToSensorsValuesTable_arg_err;
-   
-   arg=PyTuple_GetItem(args, 0);
-   if(PyNumber_Check(arg))
-      sensor_id=(uint16_t)PyLong_AsLong(arg);
-   else
-      goto mea_addDataToSensorsValuesTable_arg_err;
-   
-   arg=PyTuple_GetItem(args, 1);
-   if(PyNumber_Check(arg))
-      value1=PyFloat_AsDouble(arg);
-   else
-      goto mea_addDataToSensorsValuesTable_arg_err;
-
-   arg=PyTuple_GetItem(args, 2);
-   if(PyNumber_Check(arg))
-      unit=(uint16_t)PyLong_AsLong(arg);
-   else
-      goto mea_addDataToSensorsValuesTable_arg_err;
-   
-   arg=PyTuple_GetItem(args, 3);
-   if(PyNumber_Check(arg))
-      value2=PyFloat_AsDouble(arg);
-   else
-      goto mea_addDataToSensorsValuesTable_arg_err;
-   
-   arg=PyTuple_GetItem(args, 4);
-   if(PyString_Check(arg))
-      complement=(char *)PyString_AsString(arg);
-   else
-      goto mea_addDataToSensorsValuesTable_arg_err;
-/* DBSERVER
-   sqlite3 *db=get_sqlite3_param_db();
-   if(db)
-   {
-      if(_check_todbflag(db, sensor_id)==1)
-      {
-         dbServer_add_data_to_sensors_values(sensor_id, value1, unit, value2, complement);
-      }
-      else
-      {
-      }
-   }
-*/   
-   return PyLong_FromLong(1L); // True
-   
-mea_addDataToSensorsValuesTable_arg_err:
-   DEBUG_SECTION mea_log_printf("%s (%s) : arguments error\n", DEBUG_STR,__func__);
-   PyErr_BadArgument();
-   return NULL;
+   return PyLong_FromLong(1L);
 }
-
-/*
-static PyObject *mea_read(PyObject *self, PyObject *args)
-{
-   PyObject *arg;
-
-   int fd=-1;
-   char *data=NULL;
-   int l_data=0;
-
-   // récupération des paramètres et contrôle des types
-   if(PyTuple_Size(args)!=2)
-      goto mea_write_arg_err;
-
-   arg=PyTuple_GetItem(args, 0);
-   if(PyNumber_Check(arg))
-      fd=(int)PyLong_AsLong(arg);
-   else
-      goto mea_write_arg_err;
-
-   arg=PyTuple_GetItem(args, 1);
-   if(PyNumber_Check(arg))
-      l_data=PyLong_AsLong(arg);
-   else
-      goto mea_write_arg_err;
-
-   data=malloc(l_data);
-   if(data==NULL)
-   {
-      PyErr_SetString(PyExc_RuntimeError, "malloc error");
-      return NULL;
-   }
- 
-   int ret=read(fd, data, l_data);
-   if(ret<0)
-   {
-      if(data)
-      {
-         free(data);
-         data=NULL;
-      }
-      
-      PyErr_SetString(PyExc_RuntimeError, strerror(errno));
-      return NULL;
-   }
-   else
-   {
-      PyObject *_ret;
-      _ret=PyByteArray_FromStringAndSize(data, ret);
-      
-      free(data);
-      data=NULL;
-      
-      return _ret;
-   }
-
-mea_write_arg_err:
-   PyErr_BadArgument();
-   return NULL;
-}
-
-
-static PyObject *mea_write(PyObject *self, PyObject *args)
-{
-   PyObject *arg;
-
-   int fd=-1;
-   char *data=NULL;
-   int l_data=0;
-
-   // récupération des paramètres et contrôle des types
-   if(PyTuple_Size(args)!=2)
-      goto mea_write_arg_err;
-
-   arg=PyTuple_GetItem(args, 0);
-   if(PyNumber_Check(arg))
-      fd=(int)PyLong_AsLong(arg);
-   else
-      goto mea_write_arg_err;
-
-   arg=PyTuple_GetItem(args, 1);
-   if(PyByteArray_Check(arg))
-   {
-      data=PyByteArray_AsString(arg);
-      l_data=PyByteArray_Size(arg);
-   }
-   else
-      goto mea_write_arg_err;
-
-   int ret=write(fd,data,l_data);
-   if(ret<0)
-   {
-      PyErr_SetString(PyExc_RuntimeError, strerror(errno));
-      return NULL; // False
-   }
-   else
-      return PyLong_FromLong(1L); // True
-
-mea_write_arg_err:
-   PyErr_BadArgument();
-   return NULL;
-}
-*/

@@ -40,7 +40,6 @@ LIBDIR=$(BASEDIR)/lib/mealib/$(TECHNO)
 SOURCES= cJSON.c \
 consts.c \
 processManager.c  \
-sqlite3db_utils.c  \
 parameters_utils.c  \
 python_utils.c  \
 mea_queue.c  \

@@ -9,8 +9,6 @@
 #ifndef __globals_h
 #define __globals_h
 
-#include <sqlite3.h>
-
 #include "mea_queue.h"
 
 #define __MEA_EDOMUS_VERSION__ "0.0-lite"
@@ -40,7 +38,6 @@
 #define MAX_LIST_SIZE         21
 
 #define CURRENT_PARAMS_DB_VERSION 0
-sqlite3 *get_sqlite3_param_db(void);
 
 // voir ou mettre
 #define UNIT_WH 1 // Watt/Heure
@@ -50,7 +47,5 @@ sqlite3 *get_sqlite3_param_db(void);
 #define UNIT_H  5 // pourcentage humidité
 
 #define NOPTHREADJOIN 1
-
-// extern FILE *dbgfd;
 
 #endif

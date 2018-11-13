@@ -21,7 +21,6 @@
 #include <getopt.h>
 #include <libgen.h>
 #include <sys/wait.h>
-#include <sqlite3.h>
 #include <execinfo.h>
 #include <sys/resource.h>
 
@@ -61,22 +60,14 @@ int log_rotation_id=-1;
 int main_monitoring_id = -1;
 
 mea_queue_t *interfaces=NULL;              /*!< liste (file) des interfaces. Variable globale car doit être accessible par les gestionnaires de signaux. */
-sqlite3 *sqlite3_param_db=NULL;            /*!< descripteur pour la base sqlite de paramétrage. */
 pthread_t *monitoringServer_thread=NULL;   /*!< Adresse du thread de surveillance interne. Variable globale car doit être accessible par les gestionnaires de signaux.*/
 
 long sigsegv_indicator = 0;
 
 uint16_t params_db_version=0;
-char *params_names[MAX_LIST_SIZE];         /*!< liste des noms (chaines) de paramètres dans la base sqlite3 de paramétrage.*/
+char *params_names[MAX_LIST_SIZE];         /*!< liste des noms (chaines) de paramètres */
 
 pid_t automator_pid = 0;
-
-
-sqlite3 *get_sqlite3_param_db()
-{
-   return sqlite3_param_db;
-}
-
 
 void usage(char *cmd)
 /**
@@ -391,8 +382,6 @@ int main(int argc, const char * argv[])
    // process handle SIGPIPE -n true -p true -s false
    // cocher ensuite "Automatically continue after evaluating"
    
-   sqlite3_config(SQLITE_CONFIG_SERIALIZED); // pour le multithreading
-   
    // initialisation des noms des parametres
    init_param_names(params_names);
    
@@ -574,13 +563,6 @@ int main(int argc, const char * argv[])
    }
 */
  
-   // ouverture de la base de paramétrage
-   ret = sqlite3_open_v2(appParameters_get("SQLITE3DBPARAMPATH", NULL), &sqlite3_param_db, SQLITE_OPEN_READWRITE, NULL);
-   if(ret) {
-      VERBOSE(1) mea_log_printf("%s (%s) : sqlite3_open - %s\n", ERROR_STR,__func__,sqlite3_errmsg (sqlite3_param_db));
-//      clean_all_and_exit();
-   }
-
    
    // lecture de tous les paramètres de l'application
 #ifdef __linux__
@@ -707,7 +689,6 @@ int main(int argc, const char * argv[])
    //
    struct xplServer_start_stop_params_s xplServer_start_stop_params;
    xplServer_start_stop_params.params_list=getAppParameters();
-   // xplServer_start_stop_params.sqlite3_param_db=sqlite3_param_db;
    xplServer_monitoring_id=process_register(xpl_server_name_str);
    process_set_start_stop(xplServer_monitoring_id, start_xPLServer, stop_xPLServer, (void *)(&xplServer_start_stop_params), 1);
    process_set_watchdog_recovery(xplServer_monitoring_id, restart_xPLServer, (void *)(&xplServer_start_stop_params));
@@ -744,9 +725,7 @@ int main(int argc, const char * argv[])
    //
    struct interfacesServerData_s interfacesServerData;
    interfacesServerData.params_list=getAppParameters();
-   interfacesServerData.sqlite3_param_db=sqlite3_param_db;
-//   interfaces=start_interfaces(params_list, sqlite3_param_db); // démarrage des interfaces
-   interfaces=start_interfaces(getAppParameters(), sqlite3_param_db); // démarrage des interfaces
+   interfaces=start_interfaces(getAppParameters()); // démarrage des interfaces
    int interfaces_reload_task_id=process_register("RELOAD"); // mise en place de la tâche de rechargement des paramètrages des interfaces
    process_set_group(interfaces_reload_task_id, 2);
    process_set_start_stop(interfaces_reload_task_id, restart_interfaces, NULL, (void *)(&interfacesServerData), 1);

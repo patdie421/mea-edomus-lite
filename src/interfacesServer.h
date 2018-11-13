@@ -10,7 +10,6 @@
 
 #include <termios.h>
 #include <inttypes.h>
-#include <sqlite3.h>
 
 #include "xPLServer.h"
 
@@ -23,11 +22,6 @@
 #define INTERFACE_TYPE_004 400
 #define INTERFACE_TYPE_005 455
 #define INTERFACE_TYPE_006 465
-
-#ifndef NOMORESQLITE3
-extern char *sql_select_device_info;
-extern char *sql_select_interface_info;
-#endif
 
 
 struct device_info_s
@@ -54,7 +48,6 @@ struct device_info_s
 
 typedef int16_t (*xpl2_f)(cJSON *xplMsgJson, struct device_info_s *device_info, void *userdata);
 
-typedef void * (*malloc_and_init_f)(sqlite3 *, int, int, char *, char *, char *, char *);
 typedef void * (*malloc_and_init2_f)(int, cJSON *);
 typedef int    (*get_monitoring_id_f)(void *);
 typedef int    (*set_monitoring_id_f)(void *, int);
@@ -71,7 +64,6 @@ struct interfacesServer_interfaceFns_s {
    int type;
    int plugin_flag;
 
-   malloc_and_init_f malloc_and_init;
    malloc_and_init2_f malloc_and_init2;
    get_monitoring_id_f get_monitoring_id;
    set_monitoring_id_f set_monitoring_id;
@@ -108,12 +100,11 @@ typedef struct interfaces_queue_elem_s
 struct interfacesServerData_s
 {
    cJSON *params_list;
-   sqlite3 *sqlite3_param_db;
 };
 
 
 int16_t      interfacesServer_call_interface_api(int id_interface, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err);
-mea_queue_t *start_interfaces(cJSON *params_list, sqlite3 *sqlite3_param_db);
+mea_queue_t *start_interfaces(cJSON *params_list);
 void         stop_interfaces(void);
 int          dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson);
 int          restart_interfaces(int my_id, void *data, char *errmsg, int l_errmsg);
@@ -122,5 +113,4 @@ int          device_info_from_json(struct device_info_s *device_info, cJSON *jso
 // wrapper
 cJSON       *getInterfaceByDevName_alloc(char *devName);
 cJSON       *getInterfaceById_alloc(int id);
-
 #endif

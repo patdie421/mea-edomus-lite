@@ -18,7 +18,6 @@
 #include <string.h>
 #include <pthread.h>
 
-//#include "debug.h"
 #include "mea_verbose.h"
 #include "globals.h"
 #include "comio2.h"
@@ -29,7 +28,6 @@
 #include "tokens.h"
 #include "tokens_da.h"
 #include "mea_timer.h"
-//DBSERVER #include "dbServer.h"
 #include "xPLServer.h"
 
 #include "interface_type_001.h"
@@ -43,15 +41,6 @@ uint16_t counters_mem[2][4]={
 };
 
 uint16_t counters_trap[2]={1,2};
-
-/*
-char *valid_counter_params[]={"I:M1","I:M2","I:M3","I:M4","I:TRAP",NULL};
-#define COUNTER_PARAMS_M1       0
-#define COUNTER_PARAMS_M2       1
-#define COUNTER_PARAMS_M3       2
-#define COUNTER_PARAMS_M4       3
-#define COUNTER_PARAMS_TRAP     4
-*/
 
 char *valid_counter_params[]={"I:COUNTER", "I:POLLING_PERIODE", NULL};
 #define COUNTER_PARAMS_COUNTER   0
@@ -207,7 +196,6 @@ valid_and_malloc_counter_clean_exit:
 
 void counter_to_xpl2(interface_type_001_t *i001, struct electricity_counter_s *counter)
 {
-//   char value[20];
    char str[256];
 
    cJSON *xplMsgJson = cJSON_CreateObject();
@@ -227,12 +215,6 @@ void counter_to_xpl2(interface_type_001_t *i001, struct electricity_counter_s *c
    cJSON_Delete(xplMsgJson);
 }
 
-/* DBSERVER
-int16_t counter_to_db(struct electricity_counter_s *counter)
-{
-   return dbServer_add_data_to_sensors_values(counter->sensor_id, (double)counter->wh_counter, UNIT_WH, (double)counter->kwh_counter, "WH");
-}
-*/
 
 int16_t counter_read(interface_type_001_t *i001, struct electricity_counter_s *counter)
 {
@@ -287,70 +269,6 @@ int16_t counter_read(interface_type_001_t *i001, struct electricity_counter_s *c
 }
 
 
-/*
-mea_error_t interface_type_001_counters_process_xpl_msg(interface_type_001_t *i001, xPL_ServicePtr theService, xPL_MessagePtr msg, char *device, char *type)
-{
-   mea_queue_t *counters_list=i001->counters_list;
-   struct electricity_counter_s *counter;
-   int type_id;
-
-   (i001->indicators.nbcountersxplrecv)++;
-   if(type)
-      type_id=get_token_id_by_string(type);
-   else
-   {
-      type_id=XPL_ENERGY_ID; // pas de type précisé => type par défaut compteur kw/h
-      type=get_token_string_by_id(XPL_ENERGY_ID);
-   }
-
-   mea_queue_first(counters_list);
-   for(int i=0; i<counters_list->nb_elem; i++)
-   {
-      mea_queue_current(counters_list, (void **)&counter);
-
-      if(!device || mea_strcmplower(device,counter->name)==0)
-      {
-         xPL_MessagePtr cntrMessageStat ;
-         char value[20];
-         char *unit;
-         
-         if(type_id==XPL_ENERGY_ID)
-         {
-            sprintf(value,"%d", counter->kwh_counter);
-            unit="kWh";
-         }
-         else if(type_id==XPL_POWER_ID)
-         {
-            sprintf(value,"%f", counter->power);
-            unit="W";
-         }
-         else
-            break;
-           
-         cntrMessageStat = xPL_createBroadcastMessage(theService, xPL_MESSAGE_STATUS) ;
-
-         xPL_setBroadcastMessage(cntrMessageStat, FALSE);
-
-         xPL_setSchema(cntrMessageStat,  get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
-         xPL_setMessageNamedValue(cntrMessageStat, get_token_string_by_id(XPL_DEVICE_ID),counter->name);
-         xPL_setMessageNamedValue(cntrMessageStat, get_token_string_by_id(XPL_TYPE_ID),type);
-         xPL_setMessageNamedValue(cntrMessageStat, get_token_string_by_id(XPL_CURRENT_ID),value);
-         xPL_setMessageNamedValue(cntrMessageStat, get_token_string_by_id(UNIT_ID),unit);
-         xPL_setTarget(cntrMessageStat, xPL_getSourceVendor(msg), xPL_getSourceDeviceID(msg), xPL_getSourceInstanceID(msg));
-   
-         // Broadcast the message
-         mea_sendXPLMessage(cntrMessageStat, NULL);
-
-         (i001->indicators.nbcountersxplsent)++;
-         
-         xPL_releaseMessage(cntrMessageStat);
-      }
-      mea_queue_next(counters_list);
-   }
-   return NOERROR;
-}
-*/
-
 mea_error_t interface_type_001_counters_process_xpl_msg2(interface_type_001_t *i001, cJSON *xplMsgJson, char *device, char *type)
 {
    mea_queue_t *counters_list=i001->counters_list;
@@ -373,7 +291,6 @@ mea_error_t interface_type_001_counters_process_xpl_msg2(interface_type_001_t *i
 
       if(!device || mea_strcmplower(device,counter->name)==0)
       {
-//         xPL_MessagePtr cntrMessageStat;
          char value[20];
          char *unit;
          
@@ -466,15 +383,11 @@ int16_t interface_type_001_counters_poll_inputs2(interface_type_001_t *i001)
 
       if(!mea_test_timer(&(counter->timer)))
       {
-         if(counter_read(i001, counter)<0)
-         {
+         if(counter_read(i001, counter)<0) {
          }
          else
          {
-            if(counter->counter!=counter->last_counter)
-            {
-//DBSERVER               if(counter->todbflag==1)
-//DBSERVER                  counter_to_db(counter);
+            if(counter->counter!=counter->last_counter) {
             }
 
             counter_to_xpl2(i001, counter);

@@ -17,7 +17,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include <signal.h>
-#include <sqlite3.h>
 #include <errno.h>
 #include <pthread.h>
 
@@ -25,6 +24,7 @@
 #include "globals.h"
 #include "consts.h"
 
+#include "mea_string_utils.h"
 #include "mea_verbose.h"
 #include "mea_queue.h"
 
@@ -71,7 +71,6 @@ char *printf_mask_addr="%02x%02x%02x%02x-%02x%02x%02x%02x";
 struct callback_data_s // donnee "userdata" pour les callbacks
 {
    PyThreadState   *mainThreadState;
-   sqlite3         *param_db;
    xbee_xd_t       *xd;
    mea_queue_t     *queue;
    pthread_mutex_t *callback_lock;
@@ -82,7 +81,6 @@ struct callback_data_s // donnee "userdata" pour les callbacks
 struct callback_commissionning_data_s
 {
    interface_type_002_t *i002;
-   sqlite3         *param_db;
    
    // indicateurs
    uint32_t       *commissionning_request;
@@ -94,14 +92,12 @@ struct callback_xpl_data_s
 {
    PyThreadState  *mainThreadState;
    PyThreadState  *myThreadState;
-   sqlite3        *param_db;
 };
 
 
 struct thread_params_s
 {
    xbee_xd_t            *xd;
-   sqlite3              *param_db;
    mea_queue_t          *queue;
    pthread_mutex_t       callback_lock;
    pthread_cond_t        callback_cond;
@@ -109,7 +105,6 @@ struct thread_params_s
    PyThreadState        *myThreadState;
    parsed_parameters_t  *plugin_params;
    int                   nb_plugin_params;
-   sqlite3_stmt         *stmt;
    data_queue_elem_t    *e;
    interface_type_002_t *i002;
 };
@@ -314,51 +309,22 @@ int get_local_xbee_addr(xbee_xd_t *xd, xbee_host_t *local_xbee)
 }
 
 
-PyObject *stmt_to_pydict_device(sqlite3_stmt * stmt)
-{
-   PyObject *data_dict=NULL;
-   
-   data_dict=PyDict_New();
-   if(!data_dict)
-      return NULL;
-   
-   mea_addLong_to_pydict(data_dict, get_token_string_by_id(DEVICE_ID_ID), sqlite3_column_int(stmt, 0));
-   mea_addString_to_pydict(data_dict, get_token_string_by_id(DEVICE_NAME_ID), (char *)sqlite3_column_text(stmt, 6));
-   mea_addLong_to_pydict(data_dict, get_token_string_by_id(DEVICE_TYPE_ID_ID), sqlite3_column_int(stmt, 5));
-   mea_addLong_to_pydict(data_dict, get_token_string_by_id(DEVICE_LOCATION_ID_ID), sqlite3_column_int(stmt, 1));
-   mea_addString_to_pydict(data_dict, get_token_string_by_id(DEVICE_INTERFACE_NAME_ID), (char *)sqlite3_column_text(stmt, 7));
-   mea_addString_to_pydict(data_dict, get_token_string_by_id(DEVICE_INTERFACE_TYPE_NAME_ID), (char *)sqlite3_column_text(stmt, 9));
-   mea_addString_to_pydict(data_dict, get_token_string_by_id(DEVICE_STATE_ID), (char *)sqlite3_column_text(stmt, 2));
-   mea_addString_to_pydict(data_dict, get_token_string_by_id(DEVICE_TYPE_PARAMETERS_ID), (char *)sqlite3_column_text(stmt, 4));
-   mea_addLong_to_pydict(data_dict, get_token_string_by_id(TODBFLAG_ID), sqlite3_column_int(stmt, 11));
-
-   uint32_t addr_h, addr_l;
-   
-   if(sscanf((char *)sqlite3_column_text(stmt, 10), "MESH://%x-%x", &addr_h, &addr_l)==2) {
-      mea_addLong_to_pydict(data_dict, get_token_string_by_id(ADDR_H_ID), (long)addr_h);
-      mea_addLong_to_pydict(data_dict, get_token_string_by_id(ADDR_L_ID), (long)addr_l);
-   }
-   
-   return data_dict;
-}
-
-
-PyObject *stmt_to_pydict_interface(sqlite3_stmt * stmt)
+PyObject *json_to_pydict_interface(cJSON *jsonInterface)
 {
    PyObject *data_dict;
    
    data_dict=PyDict_New();
    if(!data_dict)
       return NULL;
-   
-   mea_addLong_to_pydict(data_dict, get_token_string_by_id(INTERFACE_ID_ID), (long)sqlite3_column_int(stmt, 1));
-   mea_addLong_to_pydict(data_dict, get_token_string_by_id(INTERFACE_TYPE_ID_ID), (long)sqlite3_column_int(stmt, 2));
-   mea_addString_to_pydict(data_dict, get_token_string_by_id(INTERFACE_NAME_ID), (char *)sqlite3_column_text(stmt, 3));
-   mea_addLong_to_pydict(data_dict, get_token_string_by_id(INTERFACE_STATE_ID), (long)sqlite3_column_int(stmt, 7));
-   
+  
+   mea_addLong_to_pydict(data_dict, get_token_string_by_id(INTERFACE_ID_ID), (long)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble);
+   mea_addLong_to_pydict(data_dict, get_token_string_by_id(INTERFACE_TYPE_ID_ID), (long)cJSON_GetObjectItem(jsonInterface, "id_type")->valuedouble);
+   mea_addString_to_pydict(data_dict, get_token_string_by_id(INTERFACE_NAME_ID), (char *)jsonInterface->string);
+   mea_addLong_to_pydict(data_dict, get_token_string_by_id(INTERFACE_STATE_ID), (long)cJSON_GetObjectItem(jsonInterface, "state")->valuedouble);
+
    uint32_t addr_h, addr_l;
    
-   if(sscanf((char *)sqlite3_column_text(stmt, 5), "MESH://%x-%x", &addr_h, &addr_l)==2) {
+   if(sscanf((char *)cJSON_GetObjectItem(jsonInterface, "dev")->valuestring, "MESH://%x-%x", &addr_h, &addr_l)==2) {
       mea_addLong_to_pydict(data_dict, get_token_string_by_id(ADDR_H_ID), (long)addr_h);
       mea_addLong_to_pydict(data_dict, get_token_string_by_id(ADDR_L_ID), (long)addr_l);
    }
@@ -373,13 +339,10 @@ int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    int ret;
    int err;
    
-   
    interface_type_002_t *interface=(interface_type_002_t *)userValue;
    struct callback_xpl_data_s *params=(struct callback_xpl_data_s *)interface->xPL_callback_data;
    
    interface->indicators.xplin++;
-   
-   sqlite3 *params_db = params->param_db;
    
    PyEval_AcquireLock();
    if(!params->mainThreadState)
@@ -396,69 +359,47 @@ int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    if(!device || device[0]==0)
       return ERROR;
    
-   char sql[2048];
-   sqlite3_stmt * stmt;
-   
-   sprintf(sql,"%s WHERE sensors_actuators.deleted_flag <> 1 AND lower(sensors_actuators.name)='%s' AND sensors_actuators.state='1' AND lower(interfaces.dev) LIKE \'%s://%%';", sql_select_device_info, device, interface->name);
-   ret = sqlite3_prepare_v2(params_db, sql, (int)(strlen(sql)+1), &stmt, NULL);
-   if(ret) {
-      VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR, __func__, sqlite3_errmsg (params_db));
-      return ERROR;
+   parsed_parameters_t *plugin_params=NULL;
+   int nb_plugin_params;
+       
+   plugin_params=alloc_parsed_parameters(device_info->parameters, valid_xbee_plugin_params, &nb_plugin_params, &err, 0);
+   if(!plugin_params || !plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
+      if(plugin_params)
+          release_parsed_parameters(&plugin_params);
+      return ERROR; // si pas de parametre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin pour ce capteur
    }
-   
-   while(1) {
-      int s = sqlite3_step(stmt);
-      if (s == SQLITE_ROW) {
-         parsed_parameters_t *plugin_params=NULL;
-         int nb_plugin_params;
+
+   plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
+   if(plugin_elem) {
+      plugin_elem->type_elem=XPLMSG;
+      { // appel des fonctions Python
+         PyEval_AcquireLock();
+         PyThreadState *tempState = PyThreadState_Swap(params->myThreadState);
+               
+         plugin_elem->aDict=mea_device_info_to_pydict_device(device_info);
+
+         mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ID_XBEE_ID), (long)interface->xd);
+         PyObject *d=mea_xplMsgToPyDict2(xplMsgJson);
+         PyDict_SetItemString(plugin_elem->aDict, XPLMSG_STR_C, d);
+         mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(DEVICE_TYPE_ID_ID), device_info->type_id);
+         Py_DECREF(d);
+               
+         if(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
+         mea_addString_to_pydict(plugin_elem->aDict, get_token_string_by_id(DEVICE_PARAMETERS_ID), plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
+               
+         PyThreadState_Swap(tempState);
+         PyEval_ReleaseLock();
+      } // fin appel des fonctions Python
+   }         
+   pythonPluginServer_add_cmd(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
+   interface->indicators.senttoplugin++;
+   release_parsed_parameters(&plugin_params);
+   plugin_elem=NULL;
+
          
-         plugin_params=alloc_parsed_parameters((char *)sqlite3_column_text(stmt, 3), valid_xbee_plugin_params, &nb_plugin_params, &err, 0);
-         if(!plugin_params || !plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
-            if(plugin_params)
-               release_parsed_parameters(&plugin_params);
+   DBG_FREE(plugin_params);
+   plugin_params=NULL;
 
-            continue; // si pas de parametre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin pour ce capteur
-         }
-         plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-         if(plugin_elem) {
-            plugin_elem->type_elem=XPLMSG; { // appel des fonctions Python
-               PyEval_AcquireLock();
-               PyThreadState *tempState = PyThreadState_Swap(params->myThreadState);
-               
-               plugin_elem->aDict=stmt_to_pydict_device(stmt);
-               mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ID_XBEE_ID), (long)interface->xd);
-
-               PyObject *d=mea_xplMsgToPyDict2(xplMsgJson);
-
-               PyDict_SetItemString(plugin_elem->aDict, XPLMSG_STR_C, d);
-               mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(DEVICE_TYPE_ID_ID), sqlite3_column_int(stmt, 5));
-               Py_DECREF(d);
-               
-               if(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
-                  mea_addString_to_pydict(plugin_elem->aDict, get_token_string_by_id(DEVICE_PARAMETERS_ID), plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
-               
-               PyThreadState_Swap(tempState);
-               PyEval_ReleaseLock();
-            } // fin appel des fonctions Python
-            
-            pythonPluginServer_add_cmd(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-            interface->indicators.senttoplugin++;
-            release_parsed_parameters(&plugin_params);
-            plugin_elem=NULL;
-         }
-         
-         DBG_FREE(plugin_params);
-         plugin_params=NULL;
-      }
-      else if (s == SQLITE_DONE) {
-         sqlite3_finalize(stmt);
-         break;
-      }
-      else {
-         sqlite3_finalize(stmt);
-         break; // voir autres erreurs possibles
-      }
-   }
    return NOERROR;
 }
 
@@ -501,15 +442,11 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
    int err;
    
    struct callback_commissionning_data_s *callback_commissionning=(struct callback_commissionning_data_s *)data;
-   
    *(callback_commissionning->commissionning_request)=*(callback_commissionning->commissionning_request)+1;
-   
-   sqlite3 *params_db=callback_commissionning->param_db;
    
    nd_resp=(struct xbee_node_identification_response_s *)cmd;
    
    char addr[18];
-   // pourquoi ne pas utiliser addr_h et addr_l (snprintf(_addr,sizeof(_addr),"%08x-%08x",addr_h,addr_l))
    sprintf(addr,
            // "%02x%02x%02x%02x-%02x%02x%02x%02x",
            printf_mask_addr,
@@ -524,66 +461,55 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
    
    VERBOSE(9) mea_log_printf("%s (%s)  : commissionning request received from %s.\n", INFO_STR, __func__, addr);
    
-   char sql[1024];
-   sqlite3_stmt * stmt;
-   sprintf(sql,"%s WHERE sensors_actuators.deleted_flag <> 1 AND lower(interfaces.dev) ='%s://%s' AND interfaces.state='2';", sql_select_interface_info, callback_commissionning->i002->name, addr);
-   
-   int ret = sqlite3_prepare_v2(params_db,sql,(int)(strlen(sql)+1),&stmt,NULL);
-   if(ret) {
-      VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR, __func__, sqlite3_errmsg (params_db));
+   char devName[256];
+   snprintf(devName, sizeof(devName)-1, "%s://%s", callback_commissionning->i002->name, addr);
+   cJSON *jsonInterface = getInterfaceByDevName_alloc(devName);
+   if(jsonInterface == NULL)
+      return ERROR;
+
+   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
+
+   parsed_parameters_t *plugin_params=NULL;
+   int nb_plugin_params;
+      
+   plugin_params=alloc_parsed_parameters(parameters, valid_xbee_plugin_params, &nb_plugin_params, &err, 0);
+   if(!plugin_params || !plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
+      if(plugin_params)
+         release_parsed_parameters(&plugin_params);
       return ERROR;
    }
-   
-   int s = sqlite3_step(stmt);
-   if (s == SQLITE_ROW) {
-      // on ne traite que la premiere ligne si elle existe car on ne devrait pas pouvoir avoir n ligne sur cette requete
-      parsed_parameters_t *plugin_params=NULL;
-      int nb_plugin_params;
-      
-      plugin_params=alloc_parsed_parameters((char *)sqlite3_column_text(stmt, 6), valid_xbee_plugin_params, &nb_plugin_params, &err, 0);
-      if(!plugin_params || !plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
-         if(plugin_params)
-            release_parsed_parameters(&plugin_params);
-
-         sqlite3_finalize(stmt);
-         return ERROR;
-      }
  
-      plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-      if(plugin_elem) {
-         plugin_elem->type_elem=COMMISSIONNING;
+   plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
+   if(plugin_elem) {
+      plugin_elem->type_elem=COMMISSIONNING;
          
-         { // appel des fonctions Python
-            mea_python_lock();
-            /*
-            PyEval_AcquireLock();
-            PyThreadState *tempState = PyThreadState_Swap(callback_commissionning->myThreadState);
-            */
-            plugin_elem->aDict=stmt_to_pydict_interface(stmt);
-            mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ID_XBEE_ID), (long)callback_commissionning->i002->xd);
-            mea_addLong_to_pydict(plugin_elem->aDict, "LOCAL_XBEE_ADDR_H", (long)callback_commissionning->i002->local_xbee->l_addr_64_h);
-            mea_addLong_to_pydict(plugin_elem->aDict, "LOCAL_XBEE_ADDR_L", (long)callback_commissionning->i002->local_xbee->l_addr_64_l);
+      { // appel des fonctions Python
+         mea_python_lock();
+
+         plugin_elem->aDict = json_to_pydict_interface(jsonInterface);
+/////         plugin_elem->aDict=stmt_to_pydict_interface(stmt);
+
+         mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ID_XBEE_ID), (long)callback_commissionning->i002->xd);
+         mea_addLong_to_pydict(plugin_elem->aDict, "LOCAL_XBEE_ADDR_H", (long)callback_commissionning->i002->local_xbee->l_addr_64_h);
+         mea_addLong_to_pydict(plugin_elem->aDict, "LOCAL_XBEE_ADDR_L", (long)callback_commissionning->i002->local_xbee->l_addr_64_l);
             
-            if(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
-               mea_addString_to_pydict(plugin_elem->aDict, get_token_string_by_id(INTERFACE_PARAMETERS_ID), plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
-            mea_python_unlock();
-         } // fin appel des fonctions Python
+         if(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
+            mea_addString_to_pydict(plugin_elem->aDict, get_token_string_by_id(INTERFACE_PARAMETERS_ID), plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
+         mea_python_unlock();
+      } // fin appel des fonctions Python
          
-         pythonPluginServer_add_cmd(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-         *(callback_commissionning->senttoplugin)=*(callback_commissionning->senttoplugin)+1;
-      }
-      release_parsed_parameters(&plugin_params); 
-      plugin_params=NULL;
+      pythonPluginServer_add_cmd(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
+      *(callback_commissionning->senttoplugin)=*(callback_commissionning->senttoplugin)+1;
    }
-   sqlite3_finalize(stmt);
+
+   release_parsed_parameters(&plugin_params); 
+   plugin_params=NULL;
    
    VERBOSE(9) {
-      if(!rval)
-         mea_log_printf("%s (%s)  : commissionning request transmitted.\n", INFO_STR, __func__);
-      else
-         mea_log_printf("%s (%s)  : can't transmit commissionning request.\n", INFO_STR, __func__);
+      mea_log_printf("%s (%s)  : commissionning request transmitted.\n", INFO_STR, __func__);
    }
-   return rval;
+
+   return NOERROR;
 }
 
 
@@ -615,11 +541,6 @@ void *_thread_interface_type_002_xbeedata_cleanup(void *args)
    if(params->plugin_params)
       release_parsed_parameters(&(params->plugin_params));
    
-   if(params->stmt) {
-      sqlite3_finalize(params->stmt);
-      params->stmt=NULL;
-   }
-   
    if(params->queue && params->queue->nb_elem>0) // on vide s'il y a quelque chose avant de partir
       mea_queue_cleanup(params->queue, _iodata_free_queue_elem);
    
@@ -634,6 +555,108 @@ void *_thread_interface_type_002_xbeedata_cleanup(void *args)
    mea_log_printf("%s (%s)  : end.\n", INFO_STR, __func__);
 
    return NULL;
+}
+
+
+mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, struct thread_params_s *params, data_queue_elem_t *e)
+{
+   cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, "devices");
+
+   if(jsonDevices == NULL)
+      return -1;
+   cJSON *jsonDevice=jsonDevices->child;
+
+   while(jsonDevice) {
+
+      int err=0;
+
+      char *name=jsonDevice->string;
+      int id_sensor_actuator=(int)cJSON_GetObjectItem(jsonDevice, "id_sensor_actuator")->valuedouble;
+      int id_type=(int)cJSON_GetObjectItem(jsonDevice, "id_type")->valuedouble;
+      char *parameters=(char*)cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
+      char *dev=(char*)cJSON_GetObjectItem(jsonInterface, "dev")->valuestring;
+      int todbflag=0;
+
+      printf("@@@@@ %s %d %d %s %s\n", name, id_sensor_actuator, id_type, parameters, dev);
+
+      params->plugin_params=alloc_parsed_parameters(parameters, valid_xbee_plugin_params, &(params->nb_plugin_params), &err, 0);
+      if(!params->plugin_params || !params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
+         if(params->plugin_params)
+            release_parsed_parameters(&(params->plugin_params));
+         continue; // si pas de paramètre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin
+      }
+               
+      plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
+      if(plugin_elem) {
+
+         pthread_cleanup_push( (void *)free, (void *)plugin_elem );
+
+         plugin_elem->type_elem=XBEEDATA;
+              
+         memcpy(plugin_elem->buff, e->cmd, e->l_cmd);
+         plugin_elem->l_buff=e->l_cmd;
+               
+         uint16_t data_type = e->cmd[0]; // 0x90 serie, 0x92 iodata
+
+         { // appel des fonctions Python
+            PyEval_AcquireLock();
+            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); // trop compliquer de traiter avec pthread_cleanup => on interdit les arrets lors des commandes python
+            PyThreadState *tempState = PyThreadState_Swap(params->myThreadState);
+
+            uint32_t addr_h, addr_l;
+
+            struct device_info_s device_info;
+            device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
+            plugin_elem->aDict=mea_device_info_to_pydict_device(&device_info);
+
+            if(sscanf((char *)dev, "MESH://%x-%x", &addr_h, &addr_l)==2) {
+               mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ADDR_H_ID), (long)addr_h);
+               mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ADDR_L_ID), (long)addr_l);
+            }
+       
+            PyObject *value;
+
+            value = PyByteArray_FromStringAndSize(plugin_elem->buff, (long)plugin_elem->l_buff);
+            PyDict_SetItemString(plugin_elem->aDict, "cmd", value);
+            Py_DECREF(value);
+            mea_addLong_to_pydict(plugin_elem->aDict, "l_cmd", (long)plugin_elem->l_buff);
+
+            value = PyByteArray_FromStringAndSize(&(plugin_elem->buff[12]), (long)plugin_elem->l_buff-12);
+            PyDict_SetItemString(plugin_elem->aDict, "cmd_data", value);
+            Py_DECREF(value);
+            mea_addLong_to_pydict(plugin_elem->aDict, "l_cmd_data", (long)plugin_elem->l_buff-12);
+
+            mea_addLong_to_pydict(plugin_elem->aDict, "data_type", (long)data_type);
+            mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ID_XBEE_ID), (long)params->xd);
+                  
+            if(params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
+               mea_addString_to_pydict(plugin_elem->aDict, get_token_string_by_id(DEVICE_PARAMETERS_ID), params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
+                  
+            PyThreadState_Swap(tempState);
+            PyEval_ReleaseLock();
+            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL); // on réauthorise les arrêts 
+            pthread_testcancel(); // on test tout de suite pour être sûr qu'on a pas ratté une demande d'arrêt
+         } // fin appel des fonctions Python
+
+         pythonPluginServer_add_cmd(params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
+         params->i002->indicators.senttoplugin++;
+         DBG_FREE(plugin_elem);
+         plugin_elem=NULL;
+               
+         pthread_cleanup_pop(0);
+      }
+      else {
+         VERBOSE(2) {
+            mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
+            perror("");
+         }
+         pthread_exit(PTHREAD_CANCELED);
+      }
+      release_parsed_parameters(&(params->plugin_params));
+      jsonDevice=jsonDevice->next;
+   }
+
+   return 0;
 }
 
 
@@ -653,15 +676,12 @@ void *_thread_interface_type_002_xbeedata(void *args)
    params->i002->thread_is_running=1;
    process_heartbeat(params->i002->monitoring_id);
    
-   sqlite3 *params_db=params->param_db;
    data_queue_elem_t *e;
    xbee_xd_t *xd=params->xd;
    int ret;
    
    params->plugin_params=NULL;
    params->nb_plugin_params=0;
-   // params->e=NULL;
-   params->stmt=NULL;
    
    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
    PyEval_AcquireLock();
@@ -709,7 +729,7 @@ void *_thread_interface_type_002_xbeedata(void *args)
       pthread_cleanup_pop(0);
       
       if(!ret) {
-         char sql[2048];
+         char devName[256];
          char addr[18];
          
          params->i002->indicators.xbeedatain++;
@@ -725,96 +745,16 @@ void *_thread_interface_type_002_xbeedata(void *args)
                  e->addr_64_l[2],
                  e->addr_64_l[3]);
          VERBOSE(9) mea_log_printf("%s  (%s) : data from = %s received\n",INFO_STR, __func__, addr);
-         
-         sprintf(sql,"%s WHERE lower(interfaces.dev)=lower('%s://%s') AND sensors_actuators.deleted_flag <> 1 AND sensors_actuators.state='1';", sql_select_device_info, params->i002->name, addr);
-         ret = sqlite3_prepare_v2(params_db,sql,(int)(strlen(sql)+1),&(params->stmt),NULL);
-         if(ret) {
-            VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR, __func__, sqlite3_errmsg (params_db));
-            pthread_exit(NULL);
+
+         snprintf(devName, sizeof(devName)-1, "%s://%s", params->i002->name, addr);
+         mea_strtolower(devName);
+
+         cJSON *jsonInterface = getInterfaceByDevName_alloc(devName);
+
+         if(jsonInterface) {
+            _thread_interface_type_002_xbeedata_devices(jsonInterface, params, e);
+            cJSON_Delete(jsonInterface);
          }
-         
-         while(1) {
-            int s = sqlite3_step(params->stmt);
-            if (s == SQLITE_ROW) {
-               int err;
-               
-               params->plugin_params=alloc_parsed_parameters((char *)sqlite3_column_text(params->stmt, 3), valid_xbee_plugin_params, &(params->nb_plugin_params), &err, 0);
-               if(!params->plugin_params || !params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
-                  if(params->plugin_params)
-                     release_parsed_parameters(&(params->plugin_params));
-
-                  continue; // si pas de paramètre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin
-               }
-               
-               plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-               if(plugin_elem) {
-                  pthread_cleanup_push( (void *)free, (void *)plugin_elem );
-
-                  plugin_elem->type_elem=XBEEDATA;
-                 
-                  memcpy(plugin_elem->buff, e->cmd, e->l_cmd);
-                  plugin_elem->l_buff=e->l_cmd;
-                  
-                  uint16_t data_type = e->cmd[0]; // 0x90 serie, 0x92 iodata
-                  
-                  { // appel des fonctions Python
-                     PyEval_AcquireLock();
-                     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); // trop compliquer de traiter avec pthread_cleanup => on interdit les arrets lors des commandes python
-                     PyThreadState *tempState = PyThreadState_Swap(params->myThreadState);
-                     
-                     plugin_elem->aDict=stmt_to_pydict_device(params->stmt);
-                     
-                     PyObject *value;
-
-                     value = PyByteArray_FromStringAndSize(plugin_elem->buff, (long)plugin_elem->l_buff);
-                     PyDict_SetItemString(plugin_elem->aDict, "cmd", value);
-                     Py_DECREF(value);
-                     mea_addLong_to_pydict(plugin_elem->aDict, "l_cmd", (long)plugin_elem->l_buff);
-
-                     value = PyByteArray_FromStringAndSize(&(plugin_elem->buff[12]), (long)plugin_elem->l_buff-12);
-                     PyDict_SetItemString(plugin_elem->aDict, "cmd_data", value);
-                     Py_DECREF(value);
-                     mea_addLong_to_pydict(plugin_elem->aDict, "l_cmd_data", (long)plugin_elem->l_buff-12);
-
-                     mea_addLong_to_pydict(plugin_elem->aDict, "data_type", (long)data_type);
-                     mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ID_XBEE_ID), (long)params->xd);
-                     
-                     if(params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
-                        mea_addString_to_pydict(plugin_elem->aDict, get_token_string_by_id(DEVICE_PARAMETERS_ID), params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
-                     
-                     PyThreadState_Swap(tempState);
-                     PyEval_ReleaseLock();
-                     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL); // on réauthorise les arrêts 
-                     pthread_testcancel(); // on test tout de suite pour être sûr qu'on a pas ratté une demande d'arrêt
-                  } // fin appel des fonctions Python
-                  pythonPluginServer_add_cmd(params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-                  params->i002->indicators.senttoplugin++;
-                  DBG_FREE(plugin_elem);
-                  plugin_elem=NULL;
-                  
-                  pthread_cleanup_pop(0);
-               }
-               else {
-                  VERBOSE(2) {
-                     mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-                     perror("");
-                  }
-                  pthread_exit(PTHREAD_CANCELED);
-               }
-               release_parsed_parameters(&(params->plugin_params));
-            }
-            else if (s == SQLITE_DONE) {
-               sqlite3_finalize(params->stmt);
-               params->stmt=NULL;
-               break;
-            }
-            else {
-               sqlite3_finalize(params->stmt);
-               params->stmt=NULL;
-               break; // traitement des erreurs Ã  affiner avant break ...
-            }
-         }
-         
          DBG_FREE(e->cmd);
          e->cmd=NULL;
          DBG_FREE(e);
@@ -822,9 +762,7 @@ void *_thread_interface_type_002_xbeedata(void *args)
          
          pthread_testcancel();
       }
-      else
-      {
-         // pb d'accès aux données de la file
+      else {
          DEBUG_SECTION mea_log_printf("%s (%s) : mea_queue_out_elem - no data in queue\n", DEBUG_STR, __func__);
       }
       pthread_testcancel();
@@ -842,7 +780,7 @@ _thread_interface_type_002_xbeedata_clean_exit:
 
 
 // xd est déjà dans i002 pourquoi le passer en parametre ...
-pthread_t *start_interface_type_002_xbeedata_thread(interface_type_002_t *i002, xbee_xd_t *xd, sqlite3 *db, thread_f function)
+pthread_t *start_interface_type_002_xbeedata_thread(interface_type_002_t *i002, xbee_xd_t *xd, thread_f function)
 /**  
  * \brief     Demarrage du thread de gestion des données (non solicitées) en provenance des xbee
  * \param     i002           descripteur de l'interface
@@ -876,7 +814,7 @@ pthread_t *start_interface_type_002_xbeedata_thread(interface_type_002_t *i002, 
    mea_queue_init(params->queue);
 
    params->xd=xd;
-   params->param_db=db;
+//   params->param_db=db;
    pthread_mutex_init(&params->callback_lock, NULL);
    pthread_cond_init(&params->callback_cond, NULL);
    params->i002=(void *)i002;
@@ -890,7 +828,7 @@ pthread_t *start_interface_type_002_xbeedata_thread(interface_type_002_t *i002, 
       goto clean_exit;
    }
    callback_xbeedata->xd=xd;
-   callback_xbeedata->param_db=db;
+//   callback_xbeedata->param_db=db;
    callback_xbeedata->callback_lock=&params->callback_lock;
    callback_xbeedata->callback_cond=&params->callback_cond;
    callback_xbeedata->queue=params->queue;
@@ -991,7 +929,7 @@ int get_type_interface_type_002()
 }
 
 
-interface_type_002_t *malloc_and_init_interface_type_002(sqlite3 *sqlite3_param_db, int id_driver, int id_interface, char *name, char *dev, char *parameters, char *description)
+interface_type_002_t *malloc_and_init2_interface_type_002(int id_driver, cJSON *jsonInterface)
 {
    interface_type_002_t *i002;
                   
@@ -1014,21 +952,26 @@ interface_type_002_t *malloc_and_init_interface_type_002(sqlite3 *sqlite3_param_
          perror("");
       }  
       return NULL;
-      
    }
+
+   char *name=jsonInterface->string;
+   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,"id_interface")->valuedouble;
+   char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
+   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
+   char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
+
    strncpy(i002->dev, (char *)dev, sizeof(i002->dev)-1);
    strncpy(i002->name, (char *)name, sizeof(i002->name)-1);
    i002->id_interface=id_interface;
-   
    i002->parameters=(char *)malloc(strlen((char *)parameters)+1);
    strcpy(i002->parameters,(char *)parameters);
+
    i002->indicators.senttoplugin=0;
    i002->indicators.xplin=0;
    i002->indicators.xbeedatain=0;
    i002->indicators.commissionning_request=0;
 
    // initialisation du process
-   i002_start_stop_params->sqlite3_param_db = sqlite3_param_db;
    i002_start_stop_params->i002=i002;
    i002->monitoring_id=process_register((char *)name);
    
@@ -1233,7 +1176,6 @@ int16_t check_status_interface_type_002(interface_type_002_t *i002)
 }
 
 
-//mea_error_t start_interface_type_002(interface_type_002_t *i002, sqlite3 *db, int id_interface, const unsigned char *dev_and_speed, tomysqldb_md_t *md, char *parameters)
 int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
 /**
  * \brief     Demarrage d'une interface de type 2
@@ -1255,7 +1197,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    int16_t nerr;
    int err;
    int ret;
-   
+  
    xbee_xd_t *xd=NULL;
    xbee_host_t *local_xbee=NULL;
    
@@ -1412,7 +1354,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    /*
     * Gestion des sous-interfaces
     */
-   start_stop_params->i002->thread=start_interface_type_002_xbeedata_thread(start_stop_params->i002, xd, start_stop_params->sqlite3_param_db, (thread_f)_thread_interface_type_002_xbeedata);
+   start_stop_params->i002->thread=start_interface_type_002_xbeedata_thread(start_stop_params->i002, xd, (thread_f)_thread_interface_type_002_xbeedata);
 
    //
    // gestion du commissionnement : mettre une zone donnees specifique au commissionnement
@@ -1426,7 +1368,6 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
       goto clean_exit;
    }
    commissionning_callback_params->i002=start_stop_params->i002;
-   commissionning_callback_params->param_db=start_stop_params->sqlite3_param_db;
    commissionning_callback_params->senttoplugin=&(start_stop_params->i002->indicators.senttoplugin); // indicateur requete vers plugin
    commissionning_callback_params->commissionning_request=&(start_stop_params->i002->indicators.commissionning_request); // indicateur nb demande commissionnement
    xbee_set_commissionning_callback2(xd, _interface_type_002_commissionning_callback, (void *)commissionning_callback_params);
@@ -1442,7 +1383,6 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
       }
       goto clean_exit;
    }
-   xpl_callback_params->param_db=start_stop_params->sqlite3_param_db;
    xpl_callback_params->mainThreadState=NULL;
    xpl_callback_params->myThreadState=NULL;
    
@@ -1500,7 +1440,7 @@ clean_exit:
 #ifndef ASPLUGIN
 int get_fns_interface_type_002(struct interfacesServer_interfaceFns_s *interfacesFns)
 {
-   interfacesFns->malloc_and_init = (malloc_and_init_f)&malloc_and_init_interface_type_002;
+   interfacesFns->malloc_and_init2 = (malloc_and_init2_f)&malloc_and_init2_interface_type_002;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_002;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_002;
    interfacesFns->clean = (clean_f)&clean_interface_type_002;

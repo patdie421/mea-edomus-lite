@@ -554,7 +554,7 @@ _thread_interface_type_006_genericserial_data_clean_exit:
 }
 
 
-pthread_t *start_interface_type_006_genericserial_data_thread(interface_type_006_t *i006, /* sqlite3 *db, */  parsed_parameters_t *interface_parameters, thread_f function)
+pthread_t *start_interface_type_006_genericserial_data_thread(interface_type_006_t *i006, parsed_parameters_t *interface_parameters, thread_f function)
 {
    pthread_t *thread=NULL;
    struct genericserial_thread_params_s *params=NULL;
@@ -988,7 +988,6 @@ clean_exit:
 #ifndef ASPLUGIN
 int get_fns_interface_type_006(struct interfacesServer_interfaceFns_s *interfacesFns)
 {
-   interfacesFns->malloc_and_init = NULL;
    interfacesFns->malloc_and_init2 = (malloc_and_init2_f)&malloc_and_init2_interface_type_006;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_006;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_006;

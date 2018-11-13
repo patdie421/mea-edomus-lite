@@ -27,7 +27,6 @@
 #include "processManager.h"
 #include "datetimeServer.h"
 #include "xPLServer.h"
-//NODEJSSERVER #include "nodejsServer.h"
 
 #include "globals.h"
 #include "consts.h"
@@ -204,10 +203,8 @@ enum comparator_e { O_EQ=0, O_NE, O_GR, O_LO, O_GE, O_LE };
 
 static int getComparator(char *s)
 {
-   if(s[1]=='=' && s[2]==0)
-   {
-      switch(s[0])
-      {
+   if(s[1]=='=' && s[2]==0) {
+      switch(s[0]) {
          case '=' : return O_EQ;
          case '!' : return O_NE;
          case '>' : return O_GE;
@@ -215,8 +212,7 @@ static int getComparator(char *s)
          default: return -1;
       }
    }
-   else if(s[1]==0)
-   {
+   else if(s[1]==0) {
       switch(s[0])
       {
          case '>' : return O_GR;
@@ -236,26 +232,22 @@ static int _value_setFromStr(struct value_s *v, char *str, char trimFlag)
    char *_str;
    char *p = NULL;
 
-   if(trimFlag!=0)
-   {
+   if(trimFlag!=0) {
       _str=alloca(sizeof(v->val.strval));
       p=mea_strtrim(strncpy(_str, str,sizeof(v->val.strval)-1));
    }
    else
       p=str;
 
-   if(getNumber(p, &f)==0)
-   {
+   if(getNumber(p, &f)==0) {
       v->type=0;
       v->val.floatval=f; 
    }
-   else if(getBoolean(p, &b)==0)
-   {
+   else if(getBoolean(p, &b)==0) {
       v->type=2;
       v->val.booleanval=b;
    }
-   else
-   {
+   else {
       v->type=1;
       strncpy(v->val.strval, str, sizeof(v->val.strval)); 
       v->val.strval[sizeof(v->val.strval)-1]=0;
@@ -280,30 +272,38 @@ enum conversion_e { INT=0x01, FLOAT=0x02, HIGHLOW=0x04, TRUEFALSE=0x08, DEFAULT=
 
 static int value_toStr(struct value_s *v, char *str, int l_str, enum conversion_e flag)
 {
-   if(v->type==0)
-      if(flag & INT)
+   if(v->type==0) {
+      if(flag & INT) {
          snprintf(str,l_str,"%d", (int)v->val.floatval);
-      else
+      }
+      else {
          snprintf(str,l_str,"%f", v->val.floatval);
-   else if(v->type==1)
-   {
+      }
+   }
+   else if(v->type==1) {
       strncpy(str,v->val.strval,l_str-1);
       str[l_str-1]=0;
    }
-   else
-   {
-      if(flag & HIGHLOW)
-         if(v->val.booleanval==0)
+   else {
+      if(flag & HIGHLOW) {
+         if(v->val.booleanval==0) {
             strcpy(str, c_low_str);
-         else
+         }
+         else {
             strcpy(str, c_high_str);
-      else if(flag & TRUEFALSE)
-         if(v->val.booleanval==0)
+         }
+      }
+      else if(flag & TRUEFALSE) {
+         if(v->val.booleanval==0) {
             strcpy(str, c_false_str);
-         else
+         }
+         else {
             strcpy(str, c_true_str);
-      else
+         }
+      }
+      else {
          snprintf(str,l_str,"%d",v->val.booleanval);
+      }
    }
 
    return 0;
@@ -323,8 +323,7 @@ static int value_cmp(struct value_s *v1, int comparator, struct value_s *v2)
    }
    // autres cas on a forcement v1->type == v2->type
    int cmp=0; 
-   if(v1->type == 0) // numérique
-   {
+   if(v1->type == 0) { // numérique
       double diff=v1->val.floatval - v2->val.floatval;
       if(diff==0.0)
          cmp=0;

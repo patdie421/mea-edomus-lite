@@ -93,6 +93,7 @@ def mea_xplCmndMsg(data):
 
 def mea_dataFromSensor(data):
     xplMsg = {}
+    print data
     try:
         id_type=data["device_type_id"]
         id_sensor=data["device_id"]

@@ -114,6 +114,9 @@ static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le de
    {"PUT",                        HTTP_PUT_ID},
    {"SESSION",                    API_SESSION_ID},
    {"INTERFACE",                  API_INTERFACE_ID},
+   {"api_key",                    API_KEY_ID},
+   {"data",                       DATA_ID},
+   {"l_data",                     L_DATA_ID},
    {NULL,0}
 };
 
@@ -156,8 +159,7 @@ enum token_id_e get_token_id_by_string(char *str)
    if(!str)
       return _UNKNOWN;
    
-   for(int i=0;tokens_list[i].str;i++)
-   {
+   for(int i=0;tokens_list[i].str;i++) {
       if(mea_strcmplower((char *)tokens_list[i].str, str) == 0)
          return tokens_list[i].id;
    }

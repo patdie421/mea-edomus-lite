@@ -11,14 +11,12 @@ extern char *outputs_rules;
 extern cJSON *_inputs_rules;
 extern cJSON *_outputs_rules;
 
-//int automator_sendxpl(cJSON *parameters);
 int automator_sendxpl2(cJSON *parameters);
 
 int automator_init(char *rulesfile);
 cJSON *automator_load_rules(char *rules);
 int automator_reload_rules_from_file(char *rulesfile);
 
-//int automator_match_inputs_rules(cJSON *rules, xPL_MessagePtr message);
 int automator_matchInputsRules(cJSON *rules, cJSON *message_json);
 int automator_playOutputRules(cJSON *rules);
 int automator_reset_inputs_change_flags(void);

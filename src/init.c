@@ -22,7 +22,6 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <sqlite3.h>
 
 #include "init.h"
 

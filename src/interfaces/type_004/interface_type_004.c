@@ -10,7 +10,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include <signal.h>
-#include <sqlite3.h>
 #include <errno.h>
 #include <pthread.h>
 
@@ -46,12 +45,10 @@
 // changement de couleur
 // ./xPLSend -m cmnd -c control.basic device=lampe001 current=#FF0000 type=color
 
-//char *valid_hue_params[]={"S:HUELIGHT", "I:REACHABLE_USE", "S:HUEGROUP", "S:HUESCENE", NULL};
 char *valid_hue_params[]={"S:HUELIGHT", "I:REACHABLE_USE", "S:HUEGROUP", NULL};
 #define PARAMS_HUELIGH 0
 #define PARAMS_REACHABLE 1
 #define PARAMS_HUEGROUP 2
-// #define PARAMS_HUESCENE 3
 
 #define DEBUG_FLAG 1
 
@@ -770,10 +767,8 @@ int _interface_type_004_clean_configs_lists(interface_type_004_t *i004)
 }
 
 
-int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
+int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
 {
-   sqlite3_stmt * stmt = NULL;
-   char sql_request[255];
    int ret = -1;
    parsed_parameters_t *hue_params=NULL;
    int nb_hue_params=0;
@@ -781,233 +776,170 @@ int load_interface_type_004(interface_type_004_t *i004, sqlite3 *db)
    
    i004->loaded=0;
    
-//   fprintf(stderr,"LOAD INTERFACE TYPE 004\n");
    
    // on vide d'abord les listes s'il y a déjà des données
    _interface_type_004_clean_configs_lists(i004);
 
-   // on récupère les capteurs/actionneurs déclaré dans la base
-   sprintf(sql_request,"SELECT * FROM sensors_actuators WHERE sensors_actuators.deleted_flag <> 1 AND id_interface=%d AND sensors_actuators.state='1'", i004->id_interface);
-   
-   ret = sqlite3_prepare_v2(db,sql_request,(int)(strlen(sql_request)+1),&stmt,NULL);
-   if(ret) {
-      VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR,__func__,sqlite3_errmsg (db));
-      goto load_interface_type_004_clean_exit;
-   }
-   
+   cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, "devices");
+   if(jsonDevices == NULL)
+      goto  load_interface_type_004_clean_exit;
+
+   cJSON *jsonDevice = jsonDevices->child;
+
    // récupération des parametrages des capteurs dans la base
-   while (1) // boucle de traitement du résultat de la requete
+   while (jsonDevice) // boucle de traitement du résultat de la requete
    {
-      int s=sqlite3_step(stmt);
-      if (s==SQLITE_ROW) {
          // les valeurs dont on a besoin
-         int id_sensor_actuator=sqlite3_column_int(stmt, 1);
-         int id_type=sqlite3_column_int(stmt, 2);
-         const unsigned char *name=sqlite3_column_text(stmt, 4);
-         const unsigned char *parameters=sqlite3_column_text(stmt, 7);
-         int todbflag=sqlite3_column_int(stmt, 9);
-         
-         hue_params=alloc_parsed_parameters((char *)parameters, valid_hue_params, &nb_hue_params, &nerr, 0);
-         if(hue_params && nb_hue_params>0) {
-//            int params_test = (hue_params->parameters[PARAMS_HUELIGH].value.s != NULL) + (hue_params->parameters[PARAMS_HUEGROUP].value.s != NULL) + (hue_params->parameters[PARAMS_HUESCENE].value.s != NULL);
-            int params_test = (hue_params->parameters[PARAMS_HUELIGH].value.s != NULL) + (hue_params->parameters[PARAMS_HUEGROUP].value.s != NULL);
+      char *name=jsonDevice->string;
+      int id_sensor_actuator=(int)cJSON_GetObjectItem(jsonDevice,"id_sensor_actuator")->valuedouble;
+      int id_type=(int)cJSON_GetObjectItem(jsonDevice,"id_type")->valuedouble;
+      char *parameters=cJSON_GetObjectItem(jsonDevice,"parameters")->valuestring;
+      int todbflag = 0;
+
+      hue_params=alloc_parsed_parameters((char *)parameters, valid_hue_params, &nb_hue_params, &nerr, 0);
+      if(hue_params && nb_hue_params>0) {
+         int params_test = (hue_params->parameters[PARAMS_HUELIGH].value.s != NULL) + (hue_params->parameters[PARAMS_HUEGROUP].value.s != NULL);
             
-            if(params_test != 1) {
-               VERBOSE(2) {
-                  mea_log_printf("%s (%s) : a HUELIGHT, HUEGROUP or HUESCENE parameter is mandatory and only one ... (device %s skipped)", WARNING_STR, __func__, name);
-               }
-               continue;
+         if(params_test != 1) {
+            VERBOSE(2) {
+               mea_log_printf("%s (%s) : a HUELIGHT, HUEGROUP or HUESCENE parameter is mandatory and only one ... (device %s skipped)", WARNING_STR, __func__, name);
             }
+            continue;
+         }
             
-            if(hue_params->parameters[PARAMS_HUELIGH].value.s) { // c'est une lampe ?
-               struct lightsListElem_s *e = NULL;
+         if(hue_params->parameters[PARAMS_HUELIGH].value.s) { // c'est une lampe ?
+            struct lightsListElem_s *e = NULL;
                
-               if(id_type != 500 && id_type != 501) {
-                  VERBOSE(2) {
-                     mea_log_printf("%s (%s) : incorrect type (INPUT or OUTPUT only allowed) ... (device %s skipped)", WARNING_STR, __func__, name);
-                     continue;
-                  }
+            if(id_type != 500 && id_type != 501) {
+               VERBOSE(2) {
+                  mea_log_printf("%s (%s) : incorrect type (INPUT or OUTPUT only allowed) ... (device %s skipped)", WARNING_STR, __func__, name);
+                  continue;
                }
-               // on cherche dans la liste si elle existe déjà
-               HASH_FIND(hh_huename, i004->lightsListByHueName, hue_params->parameters[PARAMS_HUELIGH].value.s, strlen(hue_params->parameters[PARAMS_HUELIGH].value.s), e);
-               if (e == NULL) {
-                  // elle n'existe pas on va la créer
-                  e = (struct lightsListElem_s *)malloc(sizeof(struct lightsListElem_s));
-                  char *_huename=malloc(strlen(hue_params->parameters[PARAMS_HUELIGH].value.s)+1);
-                  if(_huename==NULL) {
-                     VERBOSE(2) {
-                        mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-                        perror("");
-                     }
-                     goto load_interface_type_004_clean_exit;
-                  }
-                  strcpy(_huename, hue_params->parameters[PARAMS_HUELIGH].value.s);
-                  e->huename = _huename;
-                  e->sensorname=NULL;
-                  e->actuatorname=NULL;
-                  e->id_sensor=-1;
-                  e->todbflag_sensor=-1;
-                  e->id_actuator=-1;
-                  e->todbflag_actuator=-1;
-                  e->reachable_use=0;
-                  HASH_ADD_KEYPTR( hh_huename, i004->lightsListByHueName, e->huename, strlen(e->huename), e );
-               }
-               
-               char *_name=NULL;
-               _name=malloc(strlen((char *)name)+1);
-               if(_name==NULL) {
+            }
+            // on cherche dans la liste si elle existe déjà
+            HASH_FIND(hh_huename, i004->lightsListByHueName, hue_params->parameters[PARAMS_HUELIGH].value.s, strlen(hue_params->parameters[PARAMS_HUELIGH].value.s), e);
+            if (e == NULL) {
+               // elle n'existe pas on va la créer
+               e = (struct lightsListElem_s *)malloc(sizeof(struct lightsListElem_s));
+               char *_huename=malloc(strlen(hue_params->parameters[PARAMS_HUELIGH].value.s)+1);
+               if(_huename==NULL) {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                      perror("");
                   }
                   goto load_interface_type_004_clean_exit;
                }
-               strcpy(_name, (char *)name);
-               mea_strtolower(_name);
-               
-               switch(id_type)
-               {
-                  case 500: // c'est une entrée
-                     if(e->id_sensor != -1) {
-                        // warning déjà initialisé comme capteur
-                     }
-                     else {
-                        e->sensorname = _name;
-                        e->id_sensor = id_sensor_actuator;
-                        e->todbflag_sensor=todbflag;
-                        e->reachable_use=hue_params->parameters[PARAMS_REACHABLE].value.i;
-                        HASH_ADD_KEYPTR( hh_sensorname, i004->lightsListBySensorName, e->sensorname, strlen(e->sensorname), e );
-                     }
-                     break;
-                  case 501:
-                     if(e->id_actuator != -1) {
-                        // erreur déjà initialisé comme actionneur
-                     }
-                     else {
-                        e->actuatorname = _name;
-                        e->id_actuator = id_sensor_actuator;
-                        e->todbflag_actuator=todbflag;
-                        HASH_ADD_KEYPTR( hh_actuatorname, i004->lightsListByActuatorName, e->actuatorname, strlen(e->actuatorname), e );
-                     }
-                     break;
-                  default:
-                        VERBOSE(2) {
-                           mea_log_printf("%s (%s) : type error, skipped",WARNING_STR,__func__);
-                        }
-                     // erreur, pas type autorisé
-                     break;
-               }
-               
+               strcpy(_huename, hue_params->parameters[PARAMS_HUELIGH].value.s);
+               e->huename = _huename;
+               e->sensorname=NULL;
+               e->actuatorname=NULL;
+               e->id_sensor=-1;
+               e->todbflag_sensor=-1;
+               e->id_actuator=-1;
+               e->todbflag_actuator=-1;
+               e->reachable_use=0;
+               HASH_ADD_KEYPTR( hh_huename, i004->lightsListByHueName, e->huename, strlen(e->huename), e );
             }
-            else if(hue_params->parameters[PARAMS_HUEGROUP].value.s) { // c'est un groupe ?
-               if(id_type != 501) {
-                  VERBOSE(2) {
-                     mea_log_printf("%s (%s) : group is output only (device %s skipped)", WARNING_STR, __func__, name);
-                  }
-                  continue;
+            
+            char *_name=NULL;
+            _name=malloc(strlen((char *)name)+1);
+            if(_name==NULL) {
+               VERBOSE(2) {
+                  mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
+                  perror("");
                }
-               
-               struct groupsListElem_s *g = NULL;
-               HASH_FIND(hh_groupname, i004->groupsListByGroupName, (char *)name, strlen((char *)name), g);
-               if (g == NULL) {
-                  // il n'existe pas on va le créer
-                  g = (struct groupsListElem_s *)malloc(sizeof(struct groupsListElem_s));
-                  char *_groupname=malloc(strlen((char *)name)+1);
-                  if(_groupname==NULL) {
-                     VERBOSE(2) {
-                        mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-                        perror("");
-                     }
-                     goto load_interface_type_004_clean_exit;
-                  }
-                  char *_huegroupname=malloc(strlen(hue_params->parameters[PARAMS_HUEGROUP].value.s)+1);
-                  if(_huegroupname==NULL) {
-                     VERBOSE(2) {
-                        mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-                        perror("");
-                     }
-                     free(_groupname);
-                     _groupname=NULL;
-                     goto load_interface_type_004_clean_exit;
-                  }
-                  strcpy(_groupname, (char *)name);
-                  mea_strtolower(_groupname);
-                  g->groupname = _groupname;
-                  strcpy(_huegroupname, hue_params->parameters[PARAMS_HUEGROUP].value.s);
-                  g->huegroupname = _huegroupname;
-                  
-                  HASH_ADD_KEYPTR( hh_groupname, i004->groupsListByGroupName, g->groupname, strlen(g->groupname), g );
-               }
-               else {
-                  VERBOSE(2) {
-                     mea_log_printf("%s (%s) : group already defined, skipped",WARNING_STR,__func__);
-                  }
-               }
+               goto load_interface_type_004_clean_exit;
             }
-/*
-            else if(hue_params->parameters[PARAMS_HUESCENE].value.s) { // c'est une scene ?
-               if(id_type != 501) {
+            strcpy(_name, (char *)name);
+            mea_strtolower(_name);
+            
+            switch(id_type)
+            {
+               case 500: // c'est une entrée
+                  if(e->id_sensor != -1) {
+                     // warning déjà initialisé comme capteur
+                  }
+                  else {
+                     e->sensorname = _name;
+                     e->id_sensor = id_sensor_actuator;
+                     e->todbflag_sensor=todbflag;
+                     e->reachable_use=hue_params->parameters[PARAMS_REACHABLE].value.i;
+                     HASH_ADD_KEYPTR( hh_sensorname, i004->lightsListBySensorName, e->sensorname, strlen(e->sensorname), e );
+                  }
+                  break;
+               case 501:
+                  if(e->id_actuator != -1) {
+                     // erreur déjà initialisé comme actionneur
+                  }
+                  else {
+                     e->actuatorname = _name;
+                     e->id_actuator = id_sensor_actuator;
+                     e->todbflag_actuator=todbflag;
+                     HASH_ADD_KEYPTR( hh_actuatorname, i004->lightsListByActuatorName, e->actuatorname, strlen(e->actuatorname), e );
+                  }
+                  break;
+               default:
                   VERBOSE(2) {
-                     mea_log_printf("%s (%s) : scene is output only (device %s skipped)", WARNING_STR, __func__, name);
+                     mea_log_printf("%s (%s) : type error, skipped",WARNING_STR,__func__);
                   }
-                  continue;
-               }
-               
-               struct scenesListElem_s *s = NULL;
-               HASH_FIND(hh_scenename, i004->scenesListBySceneName, (char *)name, strlen((char *)name), s);
-               if (s == NULL) {
-                  // il n'existe pas on va le créer
-                  s = (struct scenesListElem_s *)malloc(sizeof(struct scenesListElem_s));
-                  char *_scenename=malloc(strlen((char *)name)+1);
-                  if(_scenename==NULL) {
-                     VERBOSE(2) {
-                        mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-                        perror("");
-                     }
-                     goto load_interface_type_004_clean_exit;
-                  }
-                  char *_huescenename=malloc(strlen(hue_params->parameters[PARAMS_HUESCENE].value.s)+1);
-                  if(_huescenename==NULL) {
-                     VERBOSE(2) {
-                        mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-                        perror("");
-                     }
-                     free(_scenename);
-                     _scenename=NULL;
-                     goto load_interface_type_004_clean_exit;
-                  }
-                  strcpy(_scenename, (char *)name);
-                  mea_strtolower(_scenename);
-                  s->scenename = _scenename;
-                  strcpy(_huescenename, hue_params->parameters[PARAMS_HUESCENE].value.s);
-                  s->huescenename = _huescenename;
-                  
-                  HASH_ADD_KEYPTR( hh_scenename, i004->scenesListBySceneName, s->scenename, strlen(s->scenename), s );
-               }
-               else {
-                  VERBOSE(2) {
-                     mea_log_printf("%s (%s) : scene already defined, skipped",WARNING_STR,__func__);
-                  }
-               }
-            }
-*/
-            release_parsed_parameters(&hue_params);
-         }
-         else {
-            VERBOSE(2) {
-               mea_log_printf("%s (%s) : parameter error ... (device %s skipped)", WARNING_STR, __func__, name);
+                  // erreur, pas type autorisé
+                  break;
             }
          }
-      }
-      else if (s==SQLITE_DONE) {
-         sqlite3_finalize(stmt);
-         break;
+         else if(hue_params->parameters[PARAMS_HUEGROUP].value.s) { // c'est un groupe ?
+            if(id_type != 501) {
+               VERBOSE(2) {
+                  mea_log_printf("%s (%s) : group is output only (device %s skipped)", WARNING_STR, __func__, name);
+               }
+               continue;
+            }
+               
+            struct groupsListElem_s *g = NULL;
+            HASH_FIND(hh_groupname, i004->groupsListByGroupName, (char *)name, strlen((char *)name), g);
+            if (g == NULL) {
+               // il n'existe pas on va le créer
+               g = (struct groupsListElem_s *)malloc(sizeof(struct groupsListElem_s));
+               char *_groupname=malloc(strlen((char *)name)+1);
+               if(_groupname==NULL) {
+                  VERBOSE(2) {
+                     mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
+                     perror("");
+                  }
+                  goto load_interface_type_004_clean_exit;
+               }
+               char *_huegroupname=malloc(strlen(hue_params->parameters[PARAMS_HUEGROUP].value.s)+1);
+               if(_huegroupname==NULL) {
+                  VERBOSE(2) {
+                     mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
+                     perror("");
+                  }
+                  free(_groupname);
+                  _groupname=NULL;
+                  goto load_interface_type_004_clean_exit;
+               }
+               strcpy(_groupname, (char *)name);
+               mea_strtolower(_groupname);
+               g->groupname = _groupname;
+               strcpy(_huegroupname, hue_params->parameters[PARAMS_HUEGROUP].value.s);
+               g->huegroupname = _huegroupname;
+               
+               HASH_ADD_KEYPTR( hh_groupname, i004->groupsListByGroupName, g->groupname, strlen(g->groupname), g );
+            }
+            else {
+               VERBOSE(2) {
+                  mea_log_printf("%s (%s) : group already defined, skipped",WARNING_STR,__func__);
+               }
+            }
+         }
+         release_parsed_parameters(&hue_params);
       }
       else {
-         // traitement d'erreur à faire ici
-         sqlite3_finalize(stmt);
-         goto load_interface_type_004_clean_exit;
+         VERBOSE(2) {
+            mea_log_printf("%s (%s) : parameter error ... (device %s skipped)", WARNING_STR, __func__, name);
+         }
       }
+
+      jsonDevice=jsonDevice->next;
    }
    
    i004->loaded=1;
@@ -1109,7 +1041,7 @@ int get_type_interface_type_004()
 }
 
 
-interface_type_004_t *malloc_and_init_interface_type_004(sqlite3 *sqlite3_param_db, int id_driver, int id_interface, char *name, char *dev, char *parameters, char *description)
+interface_type_004_t *malloc_and_init2_interface_type_004(int id_driver, cJSON *jsonInterface)
 {
    interface_type_004_t *i004=NULL;
    
@@ -1133,9 +1065,9 @@ interface_type_004_t *malloc_and_init_interface_type_004(sqlite3 *sqlite3_param_
       }
       return NULL;
    }
-   strncpy(i004->dev, (char *)dev, sizeof(i004->dev)-1);
-   strncpy(i004->name, (char *)name, sizeof(i004->name)-1);
-   i004->id_interface=id_interface;
+
+   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
+
    i004->parameters=(char *)malloc(strlen((char *)parameters)+1);
    if(!i004->parameters) {
       free(i004);
@@ -1149,7 +1081,16 @@ interface_type_004_t *malloc_and_init_interface_type_004(sqlite3 *sqlite3_param_
       }
       return NULL;
    }
+
+   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,"id_interface")->valuedouble;
+   char *name=jsonInterface->string;
+   char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
+   char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
+
    strcpy(i004->parameters,(char *)parameters);
+   strncpy(i004->dev, (char *)dev, sizeof(i004->dev)-1);
+   strncpy(i004->name, (char *)name, sizeof(i004->name)-1);
+   i004->id_interface=id_interface;
    i004->indicators.xplin=0;
    i004->indicators.xplout=0;
    i004->indicators.lightschanges=0;
@@ -1157,9 +1098,7 @@ interface_type_004_t *malloc_and_init_interface_type_004(sqlite3 *sqlite3_param_
    i004->lightsListByActuatorName=NULL;
    i004->lightsListBySensorName=NULL;
    i004->groupsListByGroupName=NULL;
-//   i004->scenesListBySceneName=NULL;
    i004->allGroups=NULL;
-//   i004->allScenes=NULL;
    i004->lastHueLightsState=NULL;
    i004->currentHueLightsState=NULL;
    i004->server[0]=0;
@@ -1170,7 +1109,6 @@ interface_type_004_t *malloc_and_init_interface_type_004(sqlite3 *sqlite3_param_
    i004->loaded=0;
    
    i004->monitoring_id=process_register((char *)name);
-   i004_start_stop_params->sqlite3_param_db = sqlite3_param_db;
    i004_start_stop_params->i004=i004;
    
    process_set_group(i004->monitoring_id, 1);
@@ -1289,10 +1227,16 @@ int start_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg)
    
    struct interface_type_004_start_stop_params_s *start_stop_params=(struct interface_type_004_start_stop_params_s *)data; // données pour la gestion des arrêts/relances
    struct thread_interface_type_004_args_s *interface_type_004_thread_args=NULL; // parametre à transmettre au thread
-   
+
+   cJSON *jsonInterface = getInterfaceById_alloc(start_stop_params->i004->id_interface);
+   if(jsonInterface == NULL) {
+      VERBOSE(2) mea_log_printf("%s (%s) : can't get interface description.\n", ERROR_STR,__func__);
+      return -1;
+   }
+ 
    if(start_stop_params->i004->loaded!=1) {
       // les données sont elles déjà chargées ?
-      ret=load_interface_type_004(start_stop_params->i004, start_stop_params->sqlite3_param_db);
+      ret=load_interface_type_004(start_stop_params->i004, jsonInterface);
       if(ret<0) {
          VERBOSE(2) mea_log_printf("%s (%s) : can not load lights.\n", ERROR_STR,__func__);
          return -1;
@@ -1362,7 +1306,7 @@ start_interface_type_004_clean_exit:
 #ifndef ASPLUGIN
 int get_fns_interface_type_004(struct interfacesServer_interfaceFns_s *interfacesFns)
 {
-   interfacesFns->malloc_and_init = (malloc_and_init_f)&malloc_and_init_interface_type_004;
+   interfacesFns->malloc_and_init2 = (malloc_and_init2_f)&malloc_and_init2_interface_type_004;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_004;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_004;
    interfacesFns->clean = (clean_f)&clean_interface_type_004;
@@ -1377,916 +1321,3 @@ int get_fns_interface_type_004(struct interfacesServer_interfaceFns_s *interface
    return 0;
 }
 #endif
-
-/*END*/
-/* LIGHTS
- {
-	"1":	{
- "state":	{
- "on":	true,
- "bri":	254,
- "hue":	14910,
- "sat":	144,
- "xy":	[0.459600, 0.410500],
- "ct":	369,
- "alert":	"none",
- "effect":	"none",
- "colormode":	"ct",
- "reachable":	true
- },
- "type":	"Extended color light",
- "name":	"Hue Lamp 1",
- "modelid":	"LCT001",
- "uniqueid":	"00:17:88:01:00:ff:76:98-0b",
- "swversion":	"66013452",
- "pointsymbol":	{
- "1":	"none",
- "2":	"none",
- "3":	"none",
- "4":	"none",
- "5":	"none",
- "6":	"none",
- "7":	"none",
- "8":	"none"
- }
-	},
-	"2":	{
- "state":	{
- "on":	true,
- "bri":	254,
- "hue":	14910,
- "sat":	144,
- "xy":	[0.459600, 0.410500],
- "ct":	369,
- "alert":	"none",
- "effect":	"none",
- "colormode":	"ct",
- "reachable":	true
- },
- "type":	"Extended color light",
- "name":	"Hue Lamp 2",
- "modelid":	"LCT001",
- "uniqueid":	"00:17:88:01:00:d3:72:f4-0b",
- "swversion":	"66013452",
- "pointsymbol":	{
- "1":	"none",
- "2":	"none",
- "3":	"none",
- "4":	"none",
- "5":	"none",
- "6":	"none",
- "7":	"none",
- "8":	"none"
- }
-	},
-	"3":	{
- "state":	{
- "on":	false,
- "bri":	17,
- "hue":	5000,
- "sat":	254,
- "xy":	[0.623000, 0.360300],
- "ct":	500,
- "alert":	"none",
- "effect":	"none",
- "colormode":	"hs",
- "reachable":	true
- },
- "type":	"Extended color light",
- "name":	"Hue Lamp 3",
- "modelid":	"LCT001",
- "uniqueid":	"00:17:88:01:00:d3:72:1b-0b",
- "swversion":	"66013452",
- "pointsymbol":	{
- "1":	"none",
- "2":	"none",
- "3":	"none",
- "4":	"none",
- "5":	"none",
- "6":	"none",
- "7":	"none",
- "8":	"none"
- }
-	},
-	"4":	{
- "state":	{
- "on":	false,
- "bri":	240,
- "hue":	15331,
- "sat":	121,
- "xy":	[0.444800, 0.406600],
- "ct":	343,
- "alert":	"none",
- "effect":	"none",
- "colormode":	"ct",
- "reachable":	false
- },
- "type":	"Extended color light",
- "name":	"Hue Spot 1",
- "modelid":	"LCT003",
- "uniqueid":	"00:17:88:01:00:d7:32:fe-0b",
- "swversion":	"66010732",
- "pointsymbol":	{
- "1":	"none",
- "2":	"none",
- "3":	"none",
- "4":	"none",
- "5":	"none",
- "6":	"none",
- "7":	"none",
- "8":	"none"
- }
-	},
-	"5":	{
- "state":	{
- "on":	false,
- "bri":	254,
- "hue":	15331,
- "sat":	121,
- "xy":	[0.444800, 0.406600],
- "ct":	343,
- "alert":	"none",
- "effect":	"none",
- "colormode":	"ct",
- "reachable":	false
- },
- "type":	"Extended color light",
- "name":	"Hue Spot 2",
- "modelid":	"LCT003",
- "uniqueid":	"00:17:88:01:00:d7:5b:af-0b",
- "swversion":	"66010732",
- "pointsymbol":	{
- "1":	"none",
- "2":	"none",
- "3":	"none",
- "4":	"none",
- "5":	"none",
- "6":	"none",
- "7":	"none",
- "8":	"none"
- }
-	},
-	"6":	{
- "state":	{
- "on":	false,
- "bri":	228,
- "hue":	446,
- "sat":	248,
- "xy":	[0.694300, 0.301500],
- "alert":	"none",
- "effect":	"none",
- "colormode":	"hs",
- "reachable":	true
- },
- "type":	"Color light",
- "name":	"LivingColors 1",
- "modelid":	"LLC012",
- "uniqueid":	"00:17:88:01:00:c1:e5:b4-0b",
- "swversion":	"66009461",
- "pointsymbol":	{
- "1":	"none",
- "2":	"none",
- "3":	"none",
- "4":	"none",
- "5":	"none",
- "6":	"none",
- "7":	"none",
- "8":	"none"
- }
-	},
-	"7":	{
- "state":	{
- "on":	true,
- "bri":	254,
- "alert":	"none",
- "effect":	"none",
- "reachable":	true
- },
- "type":	"Dimmable light",
- "name":	"Lux Lamp 1",
- "modelid":	"LWB004",
- "uniqueid":	"00:17:88:01:00:ee:06:22-0b",
- "swversion":	"66012040",
- "pointsymbol":	{
- "1":	"none",
- "2":	"none",
- "3":	"none",
- "4":	"none",
- "5":	"none",
- "6":	"none",
- "7":	"none",
- "8":	"none"
- }
-	},
-	"8":	{
- "state":	{
- "on":	true,
- "bri":	254,
- "alert":	"none",
- "effect":	"none",
- "reachable":	true
- },
- "type":	"Dimmable light",
- "name":	"Lux Lamp 2",
- "modelid":	"LWB004",
- "uniqueid":	"00:17:88:01:00:e4:f1:8b-0b",
- "swversion":	"66012040",
- "pointsymbol":	{
- "1":	"none",
- "2":	"none",
- "3":	"none",
- "4":	"none",
- "5":	"none",
- "6":	"none",
- "7":	"none",
- "8":	"none"
- }
-	},
-	"9":	{
- "state":	{
- "on":	false,
- "bri":	254,
- "hue":	14922,
- "sat":	144,
- "xy":	[0.459500, 0.410500],
- "ct":	369,
- "alert":	"none",
- "effect":	"none",
- "colormode":	"ct",
- "reachable":	false
- },
- "type":	"Extended color light",
- "name":	"Hue Spot 3",
- "modelid":	"LCT003",
- "uniqueid":	"00:17:88:01:00:d4:9a:5a-0b",
- "swversion":	"66010732",
- "pointsymbol":	{
- "1":	"none",
- "2":	"none",
- "3":	"none",
- "4":	"none",
- "5":	"none",
- "6":	"none",
- "7":	"none",
- "8":	"none"
- }
-	}
- }
- */
-
-/* GROUPS
- {
-	"1": {
- "name": "Chambre",
- "lights": [
- "4",
- "5"
- ],
- "type": "LightGroup",
- "action": {
- "on": false,
- "bri": 254,
- "hue": 15331,
- "sat": 121,
- "xy": [
- 0.4448,
- 0.4066
- ],
- "ct": 343,
- "effect": "none",
- "colormode": "xy"
- }
-	},
-	"2": {
- "name": "Salle",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "type": "LightGroup",
- "action": {
- "on": false,
- "bri": 42,
- "hue": 64769,
- "sat": 254,
- "xy": [
- 0.6539,
- 0.3102
- ],
- "ct": 500,
- "effect": "none",
- "colormode": "xy"
- }
-	}
- }
- */
-
-/* SCENES
- {
-	"ac637e2f0-on-0": {
- "name": "Détente on 0",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"f5d73dbdd-on-0": {
- "name": "Concentration on",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"c4a83e4d1-on-0": {
- "name": "Pencils on 0",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"e915785b2-on-0": {
- "name": "Lecture on 0",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"7359e4301-on-0": {
- "name": "Tele on 0",
- "lights": [
- "1",
- "2",
- "3",
- "6",
- "7",
- "8"
- ],
- "active": true
-	},
-	"694eea563-on-0": {
- "name": "Salle tele on 0",
- "lights": [
- "1",
- "2",
- "3",
- "6",
- "7",
- "8"
- ],
- "active": true
-	},
-	"74f97e0ba-on-0": {
- "name": "Blue rain on 0",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"492a0289d-on-0": {
- "name": "Normal chambre o",
- "lights": [
- "4",
- "5",
- "9"
- ],
- "active": true
-	},
-	"b2595e9d5-off-0": {
- "name": "Stimulation off ",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"33300ac17-on-0": {
- "name": "Feet up on 0",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"497b50d84-on-0": {
- "name": "Sunset on 0",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"0a54b1e8f-on-0": {
- "name": "Beach on 0",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"62f8ac156-on-0": {
- "name": "Ski on 0",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"77470a3f5-off-0": {
- "name": "Salle blanc max ",
- "lights": [
- "7",
- "8"
- ],
- "active": true
-	},
-	"eee5731af-on-0": {
- "name": "Tele on 0",
- "lights": [
- "1",
- "2",
- "3",
- "6",
- "7",
- "8"
- ],
- "active": true
-	},
-	"9b91fe11f-on-0": {
- "name": "Deep sea on 0",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"1105989c0-on-0": {
- "name": "Kathy on 0",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"710090866-on-0": {
- "name": "Chambre on 0",
- "lights": [
- "4"
- ],
- "active": true
-	},
-	"a839f426f-off-0": {
- "name": "Tele off 0",
- "lights": [
- "1",
- "2",
- "3",
- "6",
- "7",
- "8"
- ],
- "active": true
-	},
-	"4f5b7b74a-on-0": {
- "name": "Chambre on 0",
- "lights": [
- "4"
- ],
- "active": true
-	},
-	"6818eaba2-off-0": {
- "name": "Salle clair off ",
- "lights": [
- "1",
- "2",
- "7",
- "8"
- ],
- "active": true
-	},
-	"e55ffdb23-on-0": {
- "name": "Salle clair on 0",
- "lights": [
- "1",
- "2",
- "7",
- "8"
- ],
- "active": true
-	},
-	"f8bc44e52-on-0": {
- "name": "Tele on 0",
- "lights": [
- "1",
- "2",
- "3",
- "6",
- "7",
- "8"
- ],
- "active": true
-	},
-	"160d5ef01-on-0": {
- "name": "Salle tele on 0",
- "lights": [
- "1",
- "2",
- "7",
- "8"
- ],
- "active": true
-	},
-	"738e3c2af-off-0": {
- "name": "2 lights off",
- "lights": [
- "4",
- "5"
- ],
- "active": true
-	},
-	"616aa3d59-on-0": {
- "name": "Normal chambre o",
- "lights": [
- "4",
- "5"
- ],
- "active": true
-	},
-	"0b885c15a-on-0": {
- "name": "Chambre droite o",
- "lights": [
- "4",
- "5"
- ],
- "active": true
-	},
-	"08daea0cb-on-0": {
- "name": "Exemple on 0",
- "lights": [
- "4",
- "5"
- ],
- "active": true
-	},
-	"02b12e930-off-0": {
- "name": "Stimulation off ",
- "lights": [
- "1",
- "2",
- "3"
- ],
- "active": true
-	},
-	"7d910430a-on-0": {
- "name": "Tele on 0",
- "lights": [
- "6"
- ],
- "active": true
-	},
-	"4da4d88a8-on-0": {
- "name": "Tele on 0",
- "lights": [
- "6"
- ],
- "active": true
-	},
-	"4e1535f87-on-0": {
- "name": "Tele on 0",
- "lights": [
- "6"
- ],
- "active": true
-	},
-	"1679091c5-off-0": {
- "name": "Tele off 0",
- "lights": [
- "6"
- ],
- "active": true
-	},
-	"8f6ddbba8-on-0": {
- "name": "Tele on 0",
- "lights": [
- "6"
- ],
- "active": true
-	},
-	"72e5d13a0-on-0": {
- "name": "Sunset on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"adae11952-on-0": {
- "name": "Pencils on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"a7c98823e-on-0": {
- "name": "Deep sea on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"95d8961d0-on-0": {
- "name": "Tele on 0",
- "lights": [
- "3",
- "6"
- ],
- "active": true
-	},
-	"e3d294f74-on-0": {
- "name": "Tele on 0",
- "lights": [
- "3",
- "6"
- ],
- "active": true
-	},
-	"03a266731-on-0": {
- "name": "Tele on 0",
- "lights": [
- "1",
- "2",
- "3",
- "6"
- ],
- "active": true
-	},
-	"64ba3baa0-on-0": {
- "name": "Tele on 0",
- "lights": [
- "1",
- "2",
- "3",
- "6"
- ],
- "active": true
-	},
-	"e0e35bf60-on-0": {
- "name": "Tele on 0",
- "lights": [
- "3",
- "6"
- ],
- "active": true
-	},
-	"7963a0d85-on-0": {
- "name": "Tele on 0",
- "lights": [
- "3",
- "6"
- ],
- "active": true
-	},
-	"3073fd683-on-0": {
- "name": "Kathy on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"d5fd21738-on-0": {
- "name": "Détente on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"96760b5e4-on-0": {
- "name": "Concentration on",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"ac49576c5-on-0": {
- "name": "Beach on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"ffedf38f5-on-0": {
- "name": "Ski on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"47b3d9dc1-off-0": {
- "name": "Tele off 0",
- "lights": [
- "3",
- "6"
- ],
- "active": true
-	},
-	"df17df96f-on-0": {
- "name": "Rose on 0",
- "lights": [
- "3",
- "6"
- ],
- "active": true
-	},
-	"c9a243534-on-0": {
- "name": "Stimulation on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"decdac1cc-on-0": {
- "name": "Lecture on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"a5860783c-on-0": {
- "name": "Greece on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"e87a1005d-on-0": {
- "name": "Laila on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"ec8449243-on-0": {
- "name": "Hammock on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"c3bbfe6c0-on-0": {
- "name": "Jump! on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"de9bb579b-on-0": {
- "name": "Taj on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"480d1fe5e-on-0": {
- "name": "Blue rain on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"74e592844-on-0": {
- "name": "Feet up on 0",
- "lights": [
- "1",
- "2"
- ],
- "active": true
-	},
-	"9318d922b-on-0": {
- "name": "Lecture on 0",
- "lights": [
- "3"
- ],
- "active": true
-	},
-	"5b7b92122-on-0": {
- "name": "Couleur on 0",
- "lights": [
- "3",
- "6"
- ],
- "active": true
-	},
-	"eccbc87e4-off-0": {
- "name": "Lecture off 0",
- "lights": [
- "3"
- ],
- "active": true
-	},
-	"7a1cc289d-on-0": {
- "name": "Beach on 0",
- "lights": [
- "1",
- "2",
- "7",
- "8"
- ],
- "active": true
-	},
-	"6e54c30d5-on-0": {
- "name": "Salle blanc max ",
- "lights": [
- "7",
- "8"
- ],
- "active": true
-	},
-	"de9291cfb-on-0": {
- "name": "Lecture on 0",
- "lights": [
- "3"
- ],
- "active": true
-	},
-	"fa3a944f5-on-0": {
- "name": "Salle clair on 0",
- "lights": [
- "1",
- "2",
- "7",
- "8"
- ],
- "active": true
-	},
-	"5ffc621d6-on-0": {
- "name": "Salle clair on 0",
- "lights": [
- "1",
- "2",
- "7",
- "8"
- ],
- "active": true
-	},
-	"548d15e37-off-0": {
- "name": "Normal chambre o",
- "lights": [
- "4",
- "5",
- "9"
- ],
- "active": true
-	},
-	"92c2f3193-on-0": {
- "name": "Chambre droite o",
- "lights": [
- "4",
- "5",
- "9"
- ],
- "active": true
-	},
-	"409da3c16-on-0": {
- "name": "Beach on 0",
- "lights": [
- "1",
- "2",
- "7",
- "8"
- ],
- "active": true
-	}
- }
- */
-

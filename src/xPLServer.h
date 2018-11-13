@@ -9,7 +9,6 @@
 #define __xPLServer_h
 
 #include <inttypes.h>
-// #include <sqlite3.h>
 #include <setjmp.h>
 #include <pthread.h>
 
@@ -42,7 +41,6 @@ typedef struct xplRespQueue_elem_s
 struct xplServer_start_stop_params_s
 {
    cJSON *params_list;
-//   sqlite3 *sqlite3_param_db;
 };
 
 

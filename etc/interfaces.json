@@ -1,4 +1,13 @@
 {
+   "I002" : {
+      "id_type":200,
+      "description":"",
+      "dev":"SERIAL://ttyUSB1:9600",
+      "parameters":"",
+      "state":1,
+      "devices": {
+      }
+   },
    "I010" : {
       "id_type":3010,
       "description":"",

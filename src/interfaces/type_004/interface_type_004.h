@@ -17,7 +17,6 @@
 */
 #include <inttypes.h>
 #include <pthread.h>
-#include <sqlite3.h>
 #include <signal.h>
 #include "uthash.h"
 #include "cJSON.h"
@@ -96,16 +95,10 @@ typedef struct interface_type_004_s
                    
    struct groupsListElem_s
                    *groupsListByGroupName;
-/*
-   struct scenesListElem_s
-                   *scenesListBySceneName;
-*/
    cJSON *lastHueLightsState;
    cJSON *currentHueLightsState;
    cJSON *allGroups;
-/*
-   cJSON *allScenes;
-*/   
+
    struct interface_type_004_indicators_s
                     indicators;
    int              loaded;
@@ -118,20 +111,14 @@ typedef struct interface_type_004_s
 struct interface_type_004_start_stop_params_s
 {
    interface_type_004_t *i004;
-   sqlite3 *sqlite3_param_db;
 };
 
 
-struct thread_interface_type_004_args_s {
+struct thread_interface_type_004_args_s
+{
    interface_type_004_t *i004;
 };
 
-/*
-int start_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg);
-int stop_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg);
-int restart_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg);
-int16_t check_status_interface_type_004(interface_type_004_t *i004);
-*/
 
 xpl2_f get_xPLCallback_interface_type_004(void *ixxx);
 int get_monitoring_id_interface_type_004(void *ixxx);
@@ -139,7 +126,6 @@ int set_xPLCallback_interface_type_004(void *ixxx, xpl2_f cb);
 int set_monitoring_id_interface_type_004(void *ixxx, int id);
 int get_type_interface_type_004(void);
 
-interface_type_004_t *malloc_and_init_interface_type_004(sqlite3 *sqlite3_param_db, int id_driver, int id_interface, char *name, char *dev, char *parameters, char *description);
 int clean_interface_type_004(void *ixxx);
 
 #ifndef ASPLUGIN

@@ -75,6 +75,9 @@ struct tokens_strings_da_s
    char *http_put_str_c;
    char *api_session_str_c;
    char *api_interface_str_c;
+   char *api_key_str_c;
+   char *data_str_c;
+   char *l_data_str_c;
 };
 
 extern struct tokens_strings_da_s *tokens_string_da;
@@ -137,6 +140,9 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define HTTP_PUT_STR_C                   tokens_string_da->http_put_str_c
 #define API_SESSION_STR_C                tokens_string_da->api_session_str_c
 #define API_INTERFACE_STR_C              tokens_string_da->api_interface_str_c
+#define API_KEY_STR_C                    tokens_string_da->api_key_str_c
+#define DATA_STR_C                       tokens_string_da->data_str_c
+#define L_DATA_STR_C                     tokens_string_da->l_data_str_c
 
 #else
 
@@ -197,6 +203,9 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define HTTP_POST_STR_C                  get_token_string_by_id(HTTP_POST_ID)
 #define API_SESSION_STR_C                get_token_string_by_id(API_SESSION_ID)
 #define API_SESSIONS_STR_C               get_token_string_by_id(API_SESSIONS_ID)
+#define API_KEY_STR_C                    get_token_string_by_id(API_KEY_ID)
+#define DATA_STR_C                       get_token_string_by_id(DATA_ID)
+#define L_DATA_STR_C                     get_token_string_by_id(L_DATA_ID)
 
 #endif
 

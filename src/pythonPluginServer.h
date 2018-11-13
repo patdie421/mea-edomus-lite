@@ -10,7 +10,6 @@
 #include <Python.h>
 
 #include <pthread.h>
-#include <sqlite3.h>
 
 
 #define DEBUG_PyEval_AcquireLock(id, last_time) { \
@@ -32,7 +31,6 @@ typedef enum {XBEEDATA=1, XPLMSG=2, COMMISSIONNING=3, DATAFROMSENSOR=6 } pythonP
 struct pythonPluginServer_start_stop_params_s
 {
    cJSON *params_list;
-   sqlite3 *sqlite3_param_db;
 };
 
 

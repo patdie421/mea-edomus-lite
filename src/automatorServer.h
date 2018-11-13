@@ -37,16 +37,13 @@ extern pthread_t *_automatorServer_thread_id;
 
 struct automatorServer_start_stop_params_s
 {
-//   char **params_list;
    cJSON *params_list;
-//   sqlite3 *sqlite3_param_db;
 };
 
 
 typedef struct automator_msg_s
 {
    int type;
-//   xPL_MessagePtr msg;
    cJSON *msg_json;
 } automator_msg_t;
 
@@ -56,7 +53,6 @@ typedef struct automator_queue_elem_s
 } automator_queue_elem_t;
 
 
-//mea_error_t automatorServer_add_msg(xPL_MessagePtr msg);
 mea_error_t automatorServer_add_msg(cJSON *msg_json);
 int         automatorServer_timer_wakeup(char *name, void *userdata);
 

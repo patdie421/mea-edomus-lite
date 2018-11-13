@@ -154,7 +154,8 @@ int16_t _interface_type_003_xPL_callback2(cJSON *xplMsgJson, struct device_info_
          plugin_elem->aDict=mea_device_info_to_pydict_device(device_info);
 
          mea_addLong_to_pydict(plugin_elem->aDict, XPL_ENOCEAN_ADDR_STR_C, (long)enocean_addr);
-         mea_addLong_to_pydict(plugin_elem->aDict, "api_key", (long)i003->id_interface);
+//         mea_addLong_to_pydict(plugin_elem->aDict, "api_key", (long)i003->id_interface);
+         mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, (long)i003->id_interface);
 
          PyObject *dd=mea_xplMsgToPyDict2(xplMsgJson);
          PyDict_SetItemString(plugin_elem->aDict, XPLMSG_STR_C, dd);
@@ -368,10 +369,13 @@ void *_thread_interface_type_003_enocean_data(void *args)
                         PyObject *value;
 
                         value = PyByteArray_FromStringAndSize(plugin_elem->buff, (long)plugin_elem->l_buff);
+                        // PyDict_SetItemString(plugin_elem->aDict, DATA_STR_C, value);
                         PyDict_SetItemString(plugin_elem->aDict, "data", value);
                         Py_DECREF(value);
-                        mea_addLong_to_pydict(plugin_elem->aDict, "l_data", (long)plugin_elem->l_buff);
-                        mea_addLong_to_pydict(plugin_elem->aDict, "api_key", (long)params->i003->id_interface);
+                        // mea_addLong_to_pydict(plugin_elem->aDict, "l_data", (long)plugin_elem->l_buff);
+                        mea_addLong_to_pydict(plugin_elem->aDict, L_DATA_STR_C, (long)plugin_elem->l_buff);
+                        // mea_addLong_to_pydict(plugin_elem->aDict, "api_key", (long)params->i003->id_interface);
+                        mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, (long)params->i003->id_interface);
 
                         if(params->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s)
                            mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, params->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
@@ -1063,7 +1067,6 @@ clean_exit:
 #ifndef ASPLUGIN
 int get_fns_interface_type_003(struct interfacesServer_interfaceFns_s *interfacesFns)
 {
-   interfacesFns->malloc_and_init = NULL;
    interfacesFns->malloc_and_init2 = (malloc_and_init2_f)&malloc_and_init_interface_type_003;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_003;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_003;

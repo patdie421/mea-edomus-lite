@@ -12,8 +12,6 @@ int get_fns_interface(void *lib, struct interfacesServer_interfaceFns_s *interfa
 {
    if(lib)
    {
-      interfacesFns->malloc_and_init = NULL;
-
       interfacesFns->malloc_and_init2 = (malloc_and_init2_f)dlsym(lib, "malloc_and_init2_interface_type_005");
       if(!interfacesFns->malloc_and_init2)
          fprintf(stderr,"malloc_and_init2: %s\n", dlerror());

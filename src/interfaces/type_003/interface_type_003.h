@@ -61,7 +61,6 @@ typedef struct interface_type_003_s {
 
 struct interface_type_003_data_s {
    interface_type_003_t *i003;
-   sqlite3 *sqlite3_param_db;
 };
 
 

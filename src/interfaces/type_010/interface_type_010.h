@@ -10,10 +10,8 @@
 
 #include <signal.h>
 #include <Python.h>
-#include <sqlite3.h>
 
 #include "interfacesServer.h"
-//DBSERVER #include "dbServer.h"
 #include "xPLServer.h"
 #include "pythonPluginServer.h"
 
@@ -77,7 +75,6 @@ typedef struct interface_type_010_s
 struct interface_type_010_data_s
 {
    interface_type_010_t *i010;
-   sqlite3 *sqlite3_param_db;
 };
 
 
@@ -88,7 +85,6 @@ int     set_monitoring_id_interface_type_010(void *ixxx, int id);
 int     get_type_interface_type_010(void);
 
 int     clean_interface_type_010(void *ixxx);
-interface_type_010_t *malloc_and_init_interface_type_010(sqlite3 *sqlite3_param_db, int id_driver, int id_interface, char *name, char *dev, char *parameters, char *description);
 
 int16_t api_interface_type_010(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err);
 

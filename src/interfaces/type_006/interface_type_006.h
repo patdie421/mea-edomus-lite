@@ -66,7 +66,6 @@ typedef struct interface_type_006_s
 struct interface_type_006_data_s
 {
    interface_type_006_t *i006;
-   sqlite3 *sqlite3_param_db;
 };
 
 
@@ -76,7 +75,6 @@ int set_xPLCallback_interface_type_006(void *ixxx, xpl2_f cb);
 int set_monitoring_id_interface_type_006(void *ixxx, int id);
 int get_type_interface_type_006(void);
 
-interface_type_006_t *malloc_and_init_interface_type_006(sqlite3 *sqlite3_param_db, int id_driver, int id_interface, char *name, char *dev, char *parameters, char *description);
 int clean_interface_type_006(void *ixx);
 
 #ifndef ASPLUGIN

@@ -43,9 +43,7 @@ void interface_type_001_sensors_free_queue_elem(void *d);
 int16_t interface_type_001_sensors_process_traps(int16_t numTrap, char *data, int16_t l_data, void *userdata);
 
 struct sensor_s *interface_type_001_sensors_valid_and_malloc_sensor(int16_t id_sensor_actuator, char *name, char *parameters);
-//mea_error_t interface_type_001_sensors_process_xpl_msg(interface_type_001_t *i001, xPL_ServicePtr theService, xPL_MessagePtr msg, char *device, char *type);
 mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i001, cJSON *xplMsgJson, char *device, char *type);
-//int16_t interface_type_001_sensors_poll_inputs(interface_type_001_t *i001);
 int16_t interface_type_001_sensors_poll_inputs2(interface_type_001_t *i001);
 void interface_type_001_sensors_init(interface_type_001_t *i001);
 

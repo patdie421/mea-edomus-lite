@@ -14,9 +14,6 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <signal.h>
-#ifndef NOMORESQLITE3
-#include <sqlite3.h>
-#endif 
 #include <dlfcn.h>
 
 #include "globals.h"
@@ -44,24 +41,6 @@
 #include "interface_type_005.h"
 #include "interface_type_006.h"
 
-#ifndef NOMORESQLITE3
-char *sql_select_device_info="SELECT \
-sensors_actuators.id_sensor_actuator, \
-sensors_actuators.id_location, \
-sensors_actuators.state, \
-sensors_actuators.parameters, \
-types.parameters, \
-sensors_actuators.id_type, \
-lower(sensors_actuators.name), \
-lower(interfaces.name), \
-interfaces.id_type, \
-(SELECT lower(types.name) FROM types WHERE types.id_type = interfaces.id_type), \
-interfaces.dev, \
-sensors_actuators.todbflag, \
-types.typeoftype, \
-sensors_actuators.id_interface \
-FROM sensors_actuators INNER JOIN interfaces ON sensors_actuators.id_interface = interfaces.id_interface INNER JOIN types ON sensors_actuators.id_type = types.id_type" ;
-#endif
 
 #define MAX_INTERFACES_PLUGINS 10 // au demarrage et pour les statics
 
@@ -493,9 +472,7 @@ cJSON *findInterfaceById(cJSON *jsonInterfaces, int id)
    return NULL;
 }
 
-
-// #ifndef NOMORESQLITE3
-#ifdef SQLITE3_ON
+/*
 void linkInterfacesDevices(cJSON *jsonInterfaces, cJSON *jsonDevices)
 {
    cJSON *jsonDevice=jsonDevices->child;
@@ -516,265 +493,7 @@ void linkInterfacesDevices(cJSON *jsonInterfaces, cJSON *jsonDevices)
       jsonDevice = jsonDevice->next;
    }
 }
- 
- 
-cJSON *typesTableToJson(sqlite3 *sqlite3_param_db)
-{
-   char sql[256];
-   sqlite3_stmt * stmt;
-   int ret = 0;
- 
-   cJSON *jsonTypes=cJSON_CreateObject();
- 
-   if(!jsonTypes) {
-      VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s - cJSON_CreateObject: ",ERROR_STR,__func__,"creation error");
-      }
-      return NULL;
-   }
- 
-   sprintf(sql,"SELECT * FROM types");
-   ret = sqlite3_prepare_v2(sqlite3_param_db, sql, (int)(strlen(sql)+1), &stmt, NULL);
-   if(ret)
-   {
-      VERBOSE(1) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR,__func__,sqlite3_errmsg(sqlite3_param_db));
-      return NULL;
-   }
- 
-   while (1)
-   {
-      int s = sqlite3_step (stmt); // sqlite function need int
-      if (s == SQLITE_ROW)
-      {
-         int16_t id_type;
-         const unsigned char *name;
-         const unsigned char *description;
-         const unsigned char *parameters;
-         int16_t flag;
-         int16_t typeoftype;
- 
-         id_type = sqlite3_column_int(stmt, 1);
-         name = sqlite3_column_text(stmt, 2);
-         description = sqlite3_column_text(stmt, 3);
-         parameters = sqlite3_column_text(stmt, 4);
-         flag = sqlite3_column_int(stmt, 5);
-         typeoftype = sqlite3_column_int(stmt, 6);
- 
-         cJSON *jsonType=cJSON_CreateObject();
-         cJSON_AddItemToObject(jsonType, "id_type",     cJSON_CreateNumber((double)id_type));
-         cJSON_AddItemToObject(jsonType, "description", cJSON_CreateString((const char *)description));
-         cJSON_AddItemToObject(jsonType, "parameters",  cJSON_CreateString((const char *)parameters));
-         cJSON_AddItemToObject(jsonType, "flag",        cJSON_CreateNumber((double)flag));
-         cJSON_AddItemToObject(jsonType, "typeoftype",  cJSON_CreateNumber((double)typeoftype));
-         cJSON_AddItemToObject(jsonTypes, (const char *)name, jsonType);
-      }
-      else if (s == SQLITE_DONE)
-      {
-         sqlite3_finalize(stmt);
-         break;
-      }
-      else
-      {
-         VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_step - %s\n", ERROR_STR,__func__,sqlite3_errmsg (sqlite3_param_db));
-         sqlite3_finalize(stmt);
-         return NULL;
-      }
-   }
- 
-   return jsonTypes;
-}
- 
- 
-cJSON *devicesTableToJson(sqlite3 *sqlite3_param_db)
-{
-   char sql[256];
-   sqlite3_stmt * stmt;
-   int ret = 0;
- 
-   cJSON *jsonDevices=cJSON_CreateObject();
- 
-   if(!jsonDevices) {
-      VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s - cJSON_CreateObject: ",ERROR_STR,__func__,"creation error");
-      }
-      return NULL;
-   }
- 
-   sprintf(sql,"SELECT * FROM sensors_actuators");
-   ret = sqlite3_prepare_v2(sqlite3_param_db, sql, (int)(strlen(sql)+1), &stmt, NULL);
-   if(ret)
-   {
-      VERBOSE(1) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR,__func__,sqlite3_errmsg(sqlite3_param_db));
-      return NULL;
-   }
- 
-   while (1)
-   {
-      int s = sqlite3_step (stmt); // sqlite function need int
-      if (s == SQLITE_ROW)
-      {
-         int16_t id_sensor_actuator;
-         int16_t id_type;
-         int16_t id_interface;
-         const unsigned char *name;
-         const unsigned char *description;
-         const unsigned char *parameters;
-         int16_t state;
- 
-         id_sensor_actuator = sqlite3_column_int(stmt, 1);
-         id_type = sqlite3_column_int(stmt, 2);
-         id_interface = sqlite3_column_int(stmt, 3);
-         name = sqlite3_column_text(stmt, 4);
-         description = sqlite3_column_text(stmt, 5);
-         parameters = sqlite3_column_text(stmt, 7);
-         state = sqlite3_column_int(stmt, 8);
- 
-         cJSON *jsonDevice=cJSON_CreateObject();
-         cJSON_AddItemToObject(jsonDevice, "id_sensor_actuator", cJSON_CreateNumber((double)id_sensor_actuator));
-         cJSON_AddItemToObject(jsonDevice, "id_type",            cJSON_CreateNumber((double)id_type));
-         cJSON_AddItemToObject(jsonDevice, "id_interface",       cJSON_CreateNumber((double)id_interface));
-         cJSON_AddItemToObject(jsonDevice, "description",        cJSON_CreateString((const char *)description));
-         cJSON_AddItemToObject(jsonDevice, "parameters",         cJSON_CreateString((const char *)parameters));
-         cJSON_AddItemToObject(jsonDevice, "state",              cJSON_CreateNumber((double)state));
-         cJSON_AddItemToObject(jsonDevices, (const char *)name, jsonDevice);
- 
-         char *s=cJSON_Print(jsonDevice);
-         free(s);
-      }
-      else if (s == SQLITE_DONE)
-      {
-         sqlite3_finalize(stmt);
-         break;
-      }
-      else
-      {
-         VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_step - %s\n", ERROR_STR,__func__,sqlite3_errmsg (sqlite3_param_db));
-         sqlite3_finalize(stmt);
-         return NULL;
-      }
-   }
- 
-   return jsonDevices;
-}
- 
- 
-cJSON *interfacesTableToJson(sqlite3 *sqlite3_param_db)
-{
-   char sql[256];
-   sqlite3_stmt * stmt;
-   int ret = 0;
- 
-   cJSON *jsonInterfaces=cJSON_CreateObject();
- 
-   if(!jsonInterfaces) {
-      VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s - cJSON_CreateObject: ",ERROR_STR,__func__,"creation error");
-      }
-      return NULL;
-   }
- 
-   sprintf(sql,"SELECT * FROM interfaces");
-   ret = sqlite3_prepare_v2(sqlite3_param_db, sql, (int)(strlen(sql)+1), &stmt, NULL);
-   if(ret)
-   {
-      VERBOSE(1) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR,__func__,sqlite3_errmsg(sqlite3_param_db));
-      return NULL;
-   }
- 
-   while (1)
-   {
-      int s = sqlite3_step (stmt); // sqlite function need int
-      if (s == SQLITE_ROW)
-      {
-         int16_t id_interface;
-         int16_t id_type;
-         const unsigned char *dev;
-         const unsigned char *parameters;
-         const unsigned char *name;
-         const unsigned char *description;
-         int16_t state;
- 
-         id_interface = sqlite3_column_int(stmt, 1);
-         id_type = sqlite3_column_int(stmt, 2);
-         name = sqlite3_column_text(stmt, 3);
-         description = sqlite3_column_text(stmt, 4);
-         dev = sqlite3_column_text(stmt, 5);
-         parameters = sqlite3_column_text(stmt, 6);
-         state = sqlite3_column_int(stmt, 7);
- 
-         cJSON *jsonInterface=cJSON_CreateObject();
-         cJSON_AddItemToObject(jsonInterface, "id_interface", cJSON_CreateNumber((double)id_interface));
-         cJSON_AddItemToObject(jsonInterface, "id_type",      cJSON_CreateNumber((double)id_type));
-         cJSON_AddItemToObject(jsonInterface, "description",  cJSON_CreateString((const char *)description));
-         cJSON_AddItemToObject(jsonInterface, "dev",          cJSON_CreateString((const char *)dev));
-         cJSON_AddItemToObject(jsonInterface, "parameters",   cJSON_CreateString((const char *)parameters));
-         cJSON_AddItemToObject(jsonInterface, "state",        cJSON_CreateNumber((double)state));
-         cJSON_AddItemToObject(jsonInterface, "devices",      cJSON_CreateObject());
- 
-         cJSON_AddItemToObject(jsonInterfaces, (const char *)name, jsonInterface);
-      }
-      else if (s == SQLITE_DONE)
-      {
-         sqlite3_finalize(stmt);
-         break;
-      }
-      else
-      {
-         VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_step - %s\n", ERROR_STR,__func__,sqlite3_errmsg (sqlite3_param_db));
-         sqlite3_finalize(stmt);
-         return NULL;
-      }
-   }
- 
-   return jsonInterfaces;
-}
- 
- 
-int resyncDevices(cJSON *jsonInterfaces, sqlite3 *sqlite3_param_db)
-{
-/*
-* A faire :
-* recharger les "devices" pour les interfaces présentes
 */
-   return 0;
-}
- 
-
-cJSON *jsonInterfacesLoad(sqlite3 *sqlite3_param_db)
-{
-   cJSON *_jsonInterfaces=interfacesTableToJson(sqlite3_param_db);
-   if(_jsonInterfaces==NULL)
-      return NULL;
- 
-   cJSON *_jsonDevices=devicesTableToJson(sqlite3_param_db);
- 
-   linkInterfacesDevices(_jsonInterfaces, _jsonDevices);
- 
-   cJSON_Delete(_jsonDevices);
- 
-   if(checkJsonInterfaces(_jsonInterfaces)==-1) {
-      cJSON_Delete(_jsonInterfaces);
-      return NULL;
-   }
-
-   return _jsonInterfaces;
-}
-
-cJSON *jsonTypesLoad(sqlite3 *sqlite3_param_db)
-{
-   cJSON *_jsonTypes=typesTableToJson(sqlite3_param_db);
-   if(_jsonTypes==NULL)
-      return NULL;
- 
-   if(checkJsonTypes(_jsonTypes)==-1) {
-      cJSON_Delete(_jsonTypes);
-      return NULL;
-   }
-
-   return _jsonTypes;
-}
-#endif
- 
 
 cJSON *jsonInterfacesLoad(char *file)
 {
@@ -1416,16 +1135,8 @@ int start_interfaces_load_json(cJSON *params_list)
 }
 
 
-#ifndef NOMORESQLITE3
-mea_queue_t *start_interfaces(cJSON *params_list, sqlite3 *sqlite3_param_db)
-#else
 mea_queue_t *start_interfaces(cJSON *params_list)
-#endif
 {
-#ifndef NOMORESQLITE3
-   char sql[255];
-   sqlite3_stmt * stmt;
-#endif
    int16_t ret;
    int sortie=0;
    interfaces_queue_elem_t *iq;
@@ -1522,11 +1233,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
  
          if(iq->fns) {
             void *ptr = NULL;
-            if(iq->fns->malloc_and_init != NULL) {
-               printf("@@ %s\n", name);
-               ptr = iq->fns->malloc_and_init(sqlite3_param_db, i, id_interface, name, dev, parameters, description);
-            }
-            else {
+            if(iq->fns->malloc_and_init2 != NULL) {
                ptr = iq->fns->malloc_and_init2(i, jsonInterface);
             }
  
@@ -1603,7 +1310,7 @@ int restart_interfaces(int my_id, void *data, char *errmsg, int l_errmsg)
  
    stop_interfaces();
    sleep(1);
-   start_interfaces(interfacesServerData->params_list, interfacesServerData->sqlite3_param_db);
+   start_interfaces(interfacesServerData->params_list);
  
    return 0;
 }
