@@ -34,7 +34,6 @@
 #include "parameters_utils.h"
 
 #include "xPLServer.h"
-
 #include "processManager.h"
 
 #include "interfacesServer.h"
@@ -133,7 +132,7 @@ int load_interface_type_001(interface_type_001_t *i001, cJSON *jsonInterface)
    int interface_id=(int)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
  
    // préparation des éléments de contexte de l'interface
-   i001->interface_id=interface_id;
+// i001->interface_id=interface_id;
    i001->xPL_callback2=NULL;
    i001->counters_list=NULL;
    i001->sensors_list=NULL;
