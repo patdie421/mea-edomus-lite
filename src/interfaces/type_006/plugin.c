@@ -22,9 +22,13 @@ int get_fns_interface(void *lib, struct interfacesServer_interfaceFns_s *interfa
       if(!interfacesFns->get_xPLCallback)
          fprintf(stderr,"get_xPLCallback: %s\n", dlerror());
 
-      interfacesFns->clean = (clean_f)dlsym(lib, "clean_interface_type_006");
+      interfacesFns->update_devices = (update_devices_f)dlsym(lib, "update_devices_type_006");
       if(!interfacesFns->get_xPLCallback)
          fprintf(stderr,"get_xPLCallback: %s\n", dlerror());
+
+      interfacesFns->clean = (clean_f)dlsym(lib, "clean_interface_type_006");
+      if(!interfacesFns->clean)
+         fprintf(stderr,"clean: %s\n", dlerror());
 
       interfacesFns->set_monitoring_id = (set_monitoring_id_f)dlsym(lib, "set_monitoring_id_interface_type_006");
       if(!interfacesFns->set_monitoring_id)

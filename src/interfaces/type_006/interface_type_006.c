@@ -610,7 +610,16 @@ start_interface_type_006_genericserial_data_thread_clean_exit:
 }
 
 
-int clean_interface_type_006(void *ixxx) {
+int update_devices_type_006(void *ixxx)
+{
+   printf("update devices type 006\n");
+
+   return 0;
+}
+
+
+int clean_interface_type_006(void *ixxx)
+{
    interface_type_006_t *i006 = (interface_type_006_t *)ixxx;
 
    if(i006->parameters) {
@@ -991,6 +1000,7 @@ int get_fns_interface_type_006(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->malloc_and_init2 = (malloc_and_init2_f)&malloc_and_init2_interface_type_006;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_006;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_006;
+   interfacesFns->update_devices = (update_devices_f)&update_devices_type_006;
    interfacesFns->clean = (clean_f)&clean_interface_type_006;
    interfacesFns->set_monitoring_id = (set_monitoring_id_f)&set_monitoring_id_interface_type_006;
    interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_006;

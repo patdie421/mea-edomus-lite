@@ -1125,6 +1125,14 @@ interface_type_004_t *malloc_and_init2_interface_type_004(int id_driver, cJSON *
 }
 
 
+int update_devices_type_004(void *ixxx)
+{
+   printf("update devices type 004\n");
+
+   return 0;
+}
+
+
 int clean_interface_type_004(void *ixxx)
 {
    interface_type_004_t *i004 = (interface_type_004_t *)ixxx;
@@ -1309,6 +1317,7 @@ int get_fns_interface_type_004(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->malloc_and_init2 = (malloc_and_init2_f)&malloc_and_init2_interface_type_004;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_004;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_004;
+   interfacesFns->update_devices = (update_devices_f)&update_devices_type_004;
    interfacesFns->clean = (clean_f)&clean_interface_type_004;
    interfacesFns->set_monitoring_id = (set_monitoring_id_f)&set_monitoring_id_interface_type_004;
    interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_004;

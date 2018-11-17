@@ -56,8 +56,8 @@ typedef int    (*set_xPLCallback_f)(void *, xpl2_f);
 typedef int    (*clean_f)(void *);
 typedef int    (*get_type_f)(void);
 typedef int    (*get_interface_id_f)(void *);
+typedef int    (*update_devices_f)(void *);
 typedef int    (*api_f)(void *ixxx, char *, void *, int, void **, int16_t *, char *, int); // *cmnd, void *args, int nb_args, void **res, char *err, int l_err
-
 
 struct interfacesServer_interfaceFns_s {
    void *lib;
@@ -69,6 +69,8 @@ struct interfacesServer_interfaceFns_s {
    set_monitoring_id_f set_monitoring_id;
    get_xPLCallback_f get_xPLCallback;
    set_xPLCallback_f set_xPLCallback;
+
+   update_devices_f update_devices;
    get_type_f get_type;
 
    clean_f clean;
@@ -113,4 +115,20 @@ int          device_info_from_json(struct device_info_s *device_info, cJSON *jso
 // wrapper
 cJSON       *getInterfaceByDevName_alloc(char *devName);
 cJSON       *getInterfaceById_alloc(int id);
+char        *getInterfacesAsString_alloc();
+char        *getInterfaceAsStringByName_alloc(char *name);
+char        *getDevicesAsString_alloc(char *interface);
+char        *getDeviceAsStringByName_alloc(char *interface, char *device);
+
+char        *getTypesAsString_alloc();
+char        *getTypeAsStringByName_alloc(char *name);
+
+int         addDevice(char *interface, cJSON *device);
+int         deleteDevice(char *interface, char *name);
+int         updateDevice(char *interface, char *name, cJSON *device);
+
+int         deleteInterface(char *interface);
+int         addInterface(cJSON *jsonData);
+int         updateInterface(char *interface, cJSON *jsonData);
+
 #endif

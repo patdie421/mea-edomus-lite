@@ -41,15 +41,14 @@ int _indicators_cmp(void **e1, void **e2)
 }
 #endif
 
+/*
 #ifndef NO_DATASEND
 char *_notif_hostname=NULL;
 int _notif_port=0;
 
-
 void managed_processes_set_notification_hostname(char *hostname)
 {
-   if(hostname)
-   {
+   if(hostname) {
      char *h=(char *)malloc(strlen(hostname)+1);
      strcpy(h, hostname);
      char *t=_notif_hostname;
@@ -57,8 +56,7 @@ void managed_processes_set_notification_hostname(char *hostname)
      if(t)
        free(t);
    }
-   else
-   {
+   else {
       char *t=_notif_hostname;
       _notif_hostname=NULL;
       if(t)
@@ -72,6 +70,7 @@ void managed_processes_set_notification_port(int port)
    _notif_port=port;
 }
 #endif
+*/
 
 int _indicator_exist(int id, char *name)
 {
@@ -114,7 +113,6 @@ int _indicator_exist(int id, char *name)
    return ret;
 }
 
-
 int16_t _match_scheduling_number(char *s, char num)
 {
    // inspirer de http://www.cise.ufl.edu/~cop4600/cgi-bin/lxr/http/source.cgi/commands/simple/cron.c
@@ -125,8 +123,7 @@ int16_t _match_scheduling_number(char *s, char num)
    if (strcmp(s, "*")==0)
       return num;
 
-   while ((c = *s++) && (c >= '0') && (c <= '9'))
-   {
+   while ((c = *s++) && (c >= '0') && (c <= '9')) {
       n = (n * 10) + c - '0';
    }
       
@@ -142,11 +139,9 @@ int16_t _match_scheduling_number(char *s, char num)
       case ',':
          if (num == n)
             return num;
-         do
-         {
+         do {
             n = 0;
-            while ((c = *s++) && (c >= '0') && (c <= '9'))
-            {
+            while ((c = *s++) && (c >= '0') && (c <= '9')) {
                n = (n * 10) + c - '0';
             }
             if(num == n)
@@ -160,8 +155,7 @@ int16_t _match_scheduling_number(char *s, char num)
          if (num < n)
             return -1;
          n = 0;
-         while ((c = *s++) && (c >= '0') && (c <= '9'))
-         {
+         while ((c = *s++) && (c >= '0') && (c <= '9')) {
             n = (n * 10) + c - '0';
          }
          if(num<=n)
@@ -189,13 +183,10 @@ int process_job_set_scheduling_data(int id, char *str, int16_t condition)
    if(id>=0 &&
       id<managed_processes.max_processes &&
       managed_processes.processes_table[id] &&
-      managed_processes.processes_table[id]->type == JOB)
-   {
-      if(managed_processes.processes_table[id]->scheduling_data==NULL)
-      {
+      managed_processes.processes_table[id]->type == JOB) {
+      if(managed_processes.processes_table[id]->scheduling_data==NULL) {
          managed_processes.processes_table[id]->scheduling_data=(struct managed_processes_scheduling_data_s *)malloc(sizeof(struct managed_processes_scheduling_data_s));
-         if(managed_processes.processes_table[id]->scheduling_data==NULL)
-         {
+         if(managed_processes.processes_table[id]->scheduling_data==NULL) {
             ret=-1;
             goto process_job_set_scheduling_data_clean_exit;
          }
@@ -203,21 +194,18 @@ int process_job_set_scheduling_data(int id, char *str, int16_t condition)
       }
       mps = managed_processes.processes_table[id]->scheduling_data;
    }
-   else
-   {
+   else {
       ret=-1;
       goto process_job_set_scheduling_data_clean_exit;
    }
    
-   if(mps->schedule_command_mem)
-   {
+   if(mps->schedule_command_mem) {
       free(mps->schedule_command_mem);
       mps->schedule_command_mem=NULL;
    }
 
    mps->schedule_command_mem = (char *)malloc(strlen(str)+1);
-   if(mps->schedule_command_mem==NULL)
-   { 
+   if(mps->schedule_command_mem==NULL) { 
       ret=-1;
       goto process_job_set_scheduling_data_clean_exit;
    }
@@ -227,8 +215,7 @@ int process_job_set_scheduling_data(int id, char *str, int16_t condition)
 
    mea_strremovespaces(s);
    char *tmp_ptr=realloc(mps->schedule_command_mem, strlen(s)+1);
-   if(tmp_ptr==NULL)
-   {
+   if(tmp_ptr==NULL) {
       free(mps->schedule_command_mem);
       mps->schedule_command_mem=NULL;
       ret=-1;
@@ -241,10 +228,8 @@ int process_job_set_scheduling_data(int id, char *str, int16_t condition)
    mps->schedule_command_strings_ptr[0]=s;
    
    int i=0,j=1;
-   for(;s[i] && j<5;i++)
-   {
-      if(s[i]=='|')
-      {
+   for(;s[i] && j<5;i++) {
+      if(s[i]=='|') {
          s[i]=0;
          mps->schedule_command_strings_ptr[j++]=&(s[i+1]);
       }
@@ -276,8 +261,7 @@ process_job_set_scheduling_data_clean_exit:
 
 void _managed_processes_process_jobs_scheduling()
 {
-   if(mea_test_timer(&(managed_processes.scheduling_timer))<0)
-   {
+   if(mea_test_timer(&(managed_processes.scheduling_timer))<0) {
       return;
    }
 
@@ -290,11 +274,9 @@ void _managed_processes_process_jobs_scheduling()
    int16_t l_errormsg=80;
   
    int i=0; 
-   for(;i<managed_processes.max_processes;i++)
-   {
+   for(;i<managed_processes.max_processes;i++) {
       if(managed_processes.processes_table[i] != NULL &&
-         managed_processes.processes_table[i]->type==JOB)
-      {
+         managed_processes.processes_table[i]->type==JOB) {
          struct managed_processes_scheduling_data_s *mps=managed_processes.processes_table[i]->scheduling_data;
 
          if( _match_scheduling_number(mps->schedule_command_strings_ptr[0], tm->tm_min) >=0 && // mm
@@ -303,8 +285,7 @@ void _managed_processes_process_jobs_scheduling()
              _match_scheduling_number(mps->schedule_command_strings_ptr[3], tm->tm_mon) >=0 && // MM
              _match_scheduling_number(mps->schedule_command_strings_ptr[4], tm->tm_wday)>=0 ) // DayOfWeek
          {
-            if(managed_processes.processes_table[i]->status != RUNNING)
-            {
+            if(managed_processes.processes_table[i]->status != RUNNING) {
                l_errormsg=80;
                process_run_task(i, errmsg, l_errormsg);
             }
@@ -331,8 +312,7 @@ int managed_processes_indicators_list(char *message, int l_message)
 
    int first_process=1;
    int i=0;
-   for(;i<managed_processes.max_processes;i++)
-   {
+   for(;i<managed_processes.max_processes;i++) {
       if(managed_processes.processes_table[i] &&
          managed_processes.processes_table[i]->type!=TASK &&
          managed_processes.processes_table[i]->type!=JOB )
@@ -399,23 +379,19 @@ int _managed_processes_process_to_json(int id, char *s, int s_l, int flag)
    s[0]=0;
    if(id>=0 &&
       id<managed_processes.max_processes &&
-      managed_processes.processes_table[id])
-   {
+      managed_processes.processes_table[id]) {
       if(mea_strncat(s, s_l, "{")<0)
          return -1;
 
-      if(flag && managed_processes.processes_table[id]->status==RUNNING)
-      {
+      if(flag && managed_processes.processes_table[id]->status==RUNNING) {
          if(mea_strncat(s, s_l, "\"heartbeat\":")<0)
             return -1;
    
-         if( managed_processes.processes_table[id]->heartbeat_status != 0)
-         {
+         if( managed_processes.processes_table[id]->heartbeat_status != 0) {
             if(mea_strncat(s, s_l, "\"OK\"")<0)
                return -1;
          }
-         else
-         {
+         else {
             if(mea_strncat(s, s_l, "\"KO\"")<0)
                return -1;
          }
@@ -424,8 +400,7 @@ int _managed_processes_process_to_json(int id, char *s, int s_l, int flag)
             return -1;
       }
       
-      if(managed_processes.processes_table[id]->description[0])
-      {
+      if(managed_processes.processes_table[id]->description[0]) {
          n=snprintf(buff,sizeof(buff),"\"desc\":\"%s\",",managed_processes.processes_table[id]->description);
          if(n<0 || n==sizeof(buff))
             return -1;
@@ -465,12 +440,10 @@ int _managed_processes_process_to_json(int id, char *s, int s_l, int flag)
 
       if( flag &&
           managed_processes.processes_table[id]->indicators_list &&
-          mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0 )
-      {
+          mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0 ) {
          while(1)
          {
-            if(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0)
-            {
+            if(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0) {
                int n=snprintf(buff,sizeof(buff),",\"%s\":%ld",e->name,e->value);
                if(n<0 || n==sizeof(buff))
                   return -1;
@@ -490,7 +463,13 @@ int _managed_processes_process_to_json(int id, char *s, int s_l, int flag)
 }
 
 
-int managed_processes_processes_to_json(char *message, int l_message)
+int managed_processes_process_to_json(int id, char *message, int l_message)
+{
+   return _managed_processes_process_to_json(id, message, l_message, 1);
+}
+
+
+int managed_processes_processes_to_json(char *message, int l_message, int type)
 {
    char buff[512];
    char json[2048];
@@ -501,12 +480,9 @@ int managed_processes_processes_to_json(char *message, int l_message)
       return -1;
    int flag=0;
    int i=0;
-   for(;i<managed_processes.max_processes;i++)
-   {
-      if(managed_processes.processes_table[i])
-      {
-         if(flag==1)
-         {
+   for(;i<managed_processes.max_processes;i++) {
+      if(managed_processes.processes_table[i] && (type==-1 || type==managed_processes.processes_table[i]->type))  {
+         if(flag==1) {
             if(mea_strncat(json, sizeof(json), ", ")<0)
                return -1;
          }
@@ -536,7 +512,7 @@ int managed_processes_processes_to_json(char *message, int l_message)
 }
 
 
-int managed_processes_processes_to_json_mini(char *json, int l_json)
+int managed_processes_processes_to_json_mini(char *json, int l_json, int type)
 {
    char buff[512];
    json[0]=0;
@@ -545,12 +521,9 @@ int managed_processes_processes_to_json_mini(char *json, int l_json)
       return -1;
    int flag=0;
    int i=0;
-   for(;i<managed_processes.max_processes;i++)
-   {
-      if(managed_processes.processes_table[i])
-      {
-         if(flag==1)
-         {
+   for(;i<managed_processes.max_processes;i++) {
+      if(managed_processes.processes_table[i] && (type==-1 || type==managed_processes.processes_table[i]->type)) {
+         if(flag==1) {
             if(mea_strncat(json, l_json, ", ")<0)
                return -1;
          }
@@ -586,8 +559,7 @@ int process_set_status(int id, process_status_t status)
       id>=managed_processes.max_processes ||
       !managed_processes.processes_table[id])
       ret=-1;
-   else
-   {
+   else {
       managed_processes.processes_table[id]->status=status;
    }
    
@@ -609,8 +581,7 @@ int process_set_heartbeat_interval(int id, int interval)
       id>=managed_processes.max_processes ||
       !managed_processes.processes_table[id])
       ret=-1;
-   else
-   {
+   else {
       managed_processes.processes_table[id]->heartbeat_interval=interval;
    }
    
@@ -632,8 +603,7 @@ int process_wd_disable(int id, int flag)
       id>=managed_processes.max_processes ||
       !managed_processes.processes_table[id])
       ret=-1;
-   else
-   {
+   else {
       managed_processes.processes_table[id]->wdonoff=flag;
    }
    
@@ -655,8 +625,7 @@ int process_set_type(int id, process_type_t type)
       id>=managed_processes.max_processes ||
       !managed_processes.processes_table[id])
       ret=-1;
-   else
-   {
+   else {
       managed_processes.processes_table[id]->type=type;
    }
    
@@ -678,8 +647,7 @@ int process_set_group(int id, int group_id)
       id>=managed_processes.max_processes ||
       !managed_processes.processes_table[id])
       ret=-1;
-   else
-   {
+   else {
       managed_processes.processes_table[id]->group_id=group_id;
    }
    
@@ -701,8 +669,7 @@ int process_set_description(int id, char *description)
       id>=managed_processes.max_processes ||
       !managed_processes.processes_table[id])
       ret=-1;
-   else
-   {
+   else {
       strncpy(managed_processes.processes_table[id]->description, description, sizeof(managed_processes.processes_table[id]->description)-2);
       managed_processes.processes_table[id]->description[sizeof(managed_processes.processes_table[id]->description)-1]=0; // pour être sur d'avoir une chaine terminée
    }
@@ -725,8 +692,7 @@ int process_set_watchdog_recovery(int id, managed_processes_process_f recovery_t
       id>=managed_processes.max_processes ||
       !managed_processes.processes_table[id])
       ret=-1;
-   else
-   {
+   else {
       managed_processes.processes_table[id]->heartbeat_recovery=recovery_task;
       managed_processes.processes_table[id]->heartbeat_recovery_data=recovery_task_data;
       ret=0;
@@ -750,8 +716,7 @@ int process_set_start_stop(int id, managed_processes_process_f start, managed_pr
       id>=managed_processes.max_processes ||
       !managed_processes.processes_table[id])
       ret=-1;
-   else
-   {
+   else {
       managed_processes.processes_table[id]->status=STOPPED;
       managed_processes.processes_table[id]->start=start;
       managed_processes.processes_table[id]->stop=stop;
@@ -770,16 +735,13 @@ int16_t _processes_manager_increase_max_processes(int nb_more)
    struct managed_processes_process_s **old_table= managed_processes.processes_table;
 
    managed_processes.processes_table=(struct managed_processes_process_s **)realloc(managed_processes.processes_table, (managed_processes.max_processes + nb_more)*sizeof(struct managed_processes_process_s *));
-   if(!managed_processes.processes_table)
-   {
+   if(!managed_processes.processes_table) {
       managed_processes.processes_table = old_table;
       return -1;
    }
-   else
-   {
+   else {
       int i=0;
-      for(i=managed_processes.max_processes;i<managed_processes.max_processes+nb_more;i++)
-      {
+      for(i=managed_processes.max_processes;i<managed_processes.max_processes+nb_more;i++) {
          managed_processes.processes_table[i]=NULL;
       }
       managed_processes.max_processes=managed_processes.max_processes+nb_more;
@@ -792,33 +754,26 @@ int16_t _processes_manager_increase_max_processes(int nb_more)
 int16_t _process_register(char *name)
 {
    int16_t i=0;
-   for(;i<managed_processes.max_processes;i++)
-   {
-      if(!managed_processes.processes_table[i])
-      {
+   for(;i<managed_processes.max_processes;i++) {
+      if(!managed_processes.processes_table[i]) {
          managed_processes.processes_table[i]=(struct managed_processes_process_s *)calloc(1, sizeof(struct managed_processes_process_s));
-         if(!managed_processes.processes_table[i])
-         {
+         if(!managed_processes.processes_table[i]) {
             return -1;
          }
-         else
-         {
+         else {
             strncpy(managed_processes.processes_table[i]->name, name, sizeof(managed_processes.processes_table[i]->name)-1);
             managed_processes.processes_table[i]->description[0]=0;
             managed_processes.processes_table[i]->last_heartbeat=time(NULL);
             
             managed_processes.processes_table[i]->indicators_list=(mea_queue_t *)malloc(sizeof(mea_queue_t));
-            if(!managed_processes.processes_table[i]->indicators_list)
-            {
+            if(!managed_processes.processes_table[i]->indicators_list) {
                free(managed_processes.processes_table[i]);
                managed_processes.processes_table[i]=NULL;
                
                return -1;
             }
-            else
-            {
-               if(mea_queue_init(managed_processes.processes_table[i]->indicators_list)!=ERROR)
-               {
+            else {
+               if(mea_queue_init(managed_processes.processes_table[i]->indicators_list)!=ERROR) {
 #ifdef QUEUE_ENABLE_INDEX
                   mea_queue_create_index(managed_processes.processes_table[i]->indicators_list, _indicators_cmp);
 #endif
@@ -856,11 +811,9 @@ int process_register(char *name)
 
    ret=_process_register(name);
    
-   if(ret==-2) // pas trouvé de place
-   {
+   if(ret==-2) { // pas trouvé de place
 #ifdef AUTO_INCREASE_MAX_PROCESSES
-      if(_processes_manager_increase_max_processes(5)==0) // on essaye d'en rajouter
-      {
+      if(_processes_manager_increase_max_processes(5)==0) { // on essaye d'en rajouter
          ret=_process_register(name);
          if(ret==-2)
             ret=-1;
@@ -885,8 +838,7 @@ int process_forced_watchdog_recovery(int id)
 
    if(id>=0 &&
       id<managed_processes.max_processes &&
-      managed_processes.processes_table[id])
-   {
+      managed_processes.processes_table[id]) {
       managed_processes.processes_table[id]->forced_watchdog_recovery_flag=1;
    }
  
@@ -905,8 +857,7 @@ int process_unregister(int id)
 
    if(id>=0 &&
       id<managed_processes.max_processes &&
-      managed_processes.processes_table[id])
-   {
+      managed_processes.processes_table[id]) {
       mea_queue_cleanup(managed_processes.processes_table[id]->indicators_list, _indicators_free_queue_elem);
       
       free(managed_processes.processes_table[id]->indicators_list);
@@ -941,14 +892,12 @@ int clean_managed_processes()
 int init_processes_manager(int max_nb_processes)
 {
    managed_processes.processes_table=(struct managed_processes_process_s **)malloc(max_nb_processes * sizeof(struct managed_processes_process_s *));
-   if(!managed_processes.processes_table)
-   {
+   if(!managed_processes.processes_table) {
       return -1;
    }
 
    int i=0;
-   for(;i<max_nb_processes;i++)
-   {
+   for(;i<max_nb_processes;i++) {
       managed_processes.processes_table[i]=NULL;
    }
 
@@ -977,8 +926,7 @@ int process_heartbeat(int id)
 
    if(id>=0 &&
       id<managed_processes.max_processes &&
-      managed_processes.processes_table[id])
-   {
+      managed_processes.processes_table[id]) {
       time_t now = time(NULL);
       ret = (int)(now - managed_processes.processes_table[id]->last_heartbeat);
       managed_processes.processes_table[id]->last_heartbeat = now;
@@ -1004,8 +952,7 @@ int process_add_indicator(int id, char *name, long initial_value)
       return 0;
 
    e=(struct process_indicator_s *)malloc(sizeof(struct process_indicator_s));
-   if(e)
-   {
+   if(e) {
       strncpy(e->name, name, 40);
       e->value=initial_value;
    }
@@ -1033,16 +980,12 @@ int process_del_indicator(int id, char *name)
 
    if(id>=0 &&
       id<managed_processes.max_processes &&
-      managed_processes.processes_table[id])
-   {
+      managed_processes.processes_table[id]) {
       struct process_indicator_s *e;
 
-      if(mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0)
-      {
-         while(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0)
-         {
-            if(strcmp(name, e->name) == 0)
-            {
+      if(mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0) {
+         while(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0) {
+            if(strcmp(name, e->name) == 0) {
                mea_queue_remove_current(managed_processes.processes_table[id]->indicators_list);
                goto process_del_indicator_clean_exit;
             }
@@ -1068,8 +1011,7 @@ int process_index_indicators_list(int id)
 
    if(id>=0 &&
       id<managed_processes.max_processes &&
-      managed_processes.processes_table[id])
-   {
+      managed_processes.processes_table[id]) {
       mea_queue_recreate_index(managed_processes.processes_table[id]->indicators_list, 0);
    }
 
@@ -1092,27 +1034,21 @@ int process_get_indicator(int id, char *name, long *value)
 
    if(id>=0 &&
       id<managed_processes.max_processes &&
-      managed_processes.processes_table[id])
-   {
+      managed_processes.processes_table[id]) {
       struct process_indicator_s *e;
 
 #ifdef QUEUE_ENABLE_INDEX
-      if(mea_queue_get_index_status(managed_processes.processes_table[id]->indicators_list)==1)
-      {
-         if(mea_queue_find_elem_using_index(managed_processes.processes_table[id]->indicators_list, (void *)name, (void *)&e)==0)
-         {
+      if(mea_queue_get_index_status(managed_processes.processes_table[id]->indicators_list)==1) {
+         if(mea_queue_find_elem_using_index(managed_processes.processes_table[id]->indicators_list, (void *)name, (void *)&e)==0) {
             *value=e->value;
             ret=0;
          }
          goto process_get_indicator_clean_exit;
       }
 #endif
-      if(mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0)
-      {
-         while(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0)
-         {
-            if(strcmp(name, e->name) == 0)
-            {
+      if(mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0) {
+         while(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0) {
+            if(strcmp(name, e->name) == 0) {
                *value=e->value;
                ret=0;
                goto process_get_indicator_clean_exit;
@@ -1142,27 +1078,21 @@ int process_update_indicator(int id, char *name, long value)
    
    if(id>=0 &&
       id<managed_processes.max_processes &&
-      managed_processes.processes_table[id])
-   {
+      managed_processes.processes_table[id]) {
       struct process_indicator_s *e;
 
 #ifdef QUEUE_ENABLE_INDEX
-      if(mea_queue_get_index_status(managed_processes.processes_table[id]->indicators_list)==1)
-      {
-         if(mea_queue_find_elem_using_index(managed_processes.processes_table[id]->indicators_list, (void *)name, (void *)&e)==0)
-         {
+      if(mea_queue_get_index_status(managed_processes.processes_table[id]->indicators_list)==1) {
+         if(mea_queue_find_elem_using_index(managed_processes.processes_table[id]->indicators_list, (void *)name, (void *)&e)==0) {
             e->value=value;
             ret=0;
          }
          goto process_update_indicator_clean_exit;
       }
 #endif
-      if(mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0)
-      {
-         while(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0)
-         {
-            if(strcmp(name, e->name) == 0)
-            {
+      if(mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0) {
+         while(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0) {
+            if(strcmp(name, e->name) == 0) {
                e->value=value;
                ret=0;
                break;
@@ -1181,6 +1111,7 @@ process_update_indicator_clean_exit:
 }
 
 
+/*
 #ifndef NO_DATASEND
 int managed_processes_send_stats_now(char *hostname, int port)
 {
@@ -1262,6 +1193,8 @@ int _managed_processes_send_stats(char *hostname, int port)
    return ret;
 }
 #endif
+*/
+
 
 int _managed_processes_processes_check_heartbeats(int doRecovery)
 {
@@ -1270,20 +1203,16 @@ int _managed_processes_processes_check_heartbeats(int doRecovery)
    pthread_rwlock_wrlock(&managed_processes.rwlock);
 
    int i=0;
-   for(;i<managed_processes.max_processes;i++)
-   {
+   for(;i<managed_processes.max_processes;i++) {
       if(managed_processes.processes_table[i] &&
-         managed_processes.processes_table[i]->status==RUNNING )
-      {
+         managed_processes.processes_table[i]->status==RUNNING ) {
          time_t now = time(NULL);
 
-         if(managed_processes.processes_table[i]->async_stop==1)
-         {
+         if(managed_processes.processes_table[i]->async_stop==1) {
             managed_processes.processes_table[i]->async_stop=0;
             managed_processes_process_f f=NULL;
             void *d=NULL;
-            if(managed_processes.processes_table[i]->stop)
-            {
+            if(managed_processes.processes_table[i]->stop) {
                f=managed_processes.processes_table[i]->stop;
                d=managed_processes.processes_table[i]->start_stop_data;
                if(f)
@@ -1293,23 +1222,18 @@ int _managed_processes_processes_check_heartbeats(int doRecovery)
          }
          else if((((now - managed_processes.processes_table[i]->last_heartbeat) < managed_processes.processes_table[i]->heartbeat_interval) && (managed_processes.processes_table[i]->forced_watchdog_recovery_flag == 0))
                || ( managed_processes.processes_table[i]->type == TASK)
-               || ( managed_processes.processes_table[i]->type == JOB))
-         {
+               || ( managed_processes.processes_table[i]->type == JOB)) {
             managed_processes.processes_table[i]->heartbeat_status=1;
             managed_processes.processes_table[i]->heartbeat_counter=0;
          }
-         else if(managed_processes.processes_table[i]->wdonoff==0)
-         {
+         else if(managed_processes.processes_table[i]->wdonoff==0) {
             VERBOSE(5) mea_log_printf("%s (%s) : watchdog process for %s\n",INFO_STR,__func__,managed_processes.processes_table[i]->name);
             managed_processes.processes_table[i]->heartbeat_counter++;
             managed_processes.processes_table[i]->heartbeat_status=0;
-            if(doRecovery)
-            {
-               if(managed_processes.processes_table[i]->heartbeat_counter<=5)
-               {
+            if(doRecovery) {
+               if(managed_processes.processes_table[i]->heartbeat_counter<=5) {
                   char errmsg[80];
-                  if(managed_processes.processes_table[i]->heartbeat_recovery)
-                  {
+                  if(managed_processes.processes_table[i]->heartbeat_recovery) {
                      int ret=0;
                      
                      managed_processes.processes_table[i]->heartbeat_wdcounter++;
@@ -1333,8 +1257,7 @@ int _managed_processes_processes_check_heartbeats(int doRecovery)
                      VERBOSE(5) mea_log_printf("%s (%s) : no watchdog recovery procedure for %s\n", INFO_STR, __func__, managed_processes.processes_table[i]->name);
                   }
                }
-               else
-               {
+               else {
                   // traiter l'erreur
                   VERBOSE(5) mea_log_printf("%s (%s) : watchdog recovery not started for %s, too mush restart\n", INFO_STR, __func__, managed_processes.processes_table[i]->name);
                   managed_processes.processes_table[i]->heartbeat_status=RECOVERY_ERROR;
@@ -1356,11 +1279,11 @@ int managed_processes_loop()
    int ret=0;
    _managed_processes_process_jobs_scheduling();
    ret=_managed_processes_processes_check_heartbeats(1);
-
+/*
 #ifndef NO_DATASEND
    _managed_processes_send_stats(_notif_hostname, _notif_port);
 #endif
- 
+*/ 
   return ret; // -1 si un process en erreur definitif ... à traiter par le programme
 }
 
@@ -1372,14 +1295,11 @@ int process_is_running(int id)
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&managed_processes.rwlock );
    pthread_rwlock_rdlock(&managed_processes.rwlock);
 
-   if(id<0 || id>=managed_processes.max_processes)
-   {
+   if(id<0 || id>=managed_processes.max_processes) {
      ret=-1;
    }
-   else
-   {
-      if(managed_processes.processes_table[id])
-      {
+   else {
+      if(managed_processes.processes_table[id]) {
          ret=managed_processes.processes_table[id]->status;
       }
       else
@@ -1405,10 +1325,8 @@ int process_start(int id, char *errmsg, int l_errmsg)
       id<managed_processes.max_processes &&
       managed_processes.processes_table[id] &&
       managed_processes.processes_table[id]->status==STOPPED &&
-      managed_processes.processes_table[id]->type!=NOTMANAGED)
-   {
-      if(managed_processes.processes_table[id]->start)
-      {
+      managed_processes.processes_table[id]->type!=NOTMANAGED) {
+      if(managed_processes.processes_table[id]->start) {
          f=managed_processes.processes_table[id]->start;
          d=managed_processes.processes_table[id]->start_stop_data;
       }
@@ -1421,8 +1339,7 @@ int process_start(int id, char *errmsg, int l_errmsg)
    pthread_rwlock_unlock(&managed_processes.rwlock);
    pthread_cleanup_pop(0); 
 
-   if(ret!=-1)
-   {
+   if(ret!=-1) {
       managed_processes.processes_table[id]->last_heartbeat = time(NULL);
 
       ret=f(id, d, errmsg, l_errmsg); // lancement du process
@@ -1430,12 +1347,11 @@ int process_start(int id, char *errmsg, int l_errmsg)
       pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&managed_processes.rwlock );
       pthread_rwlock_wrlock(&managed_processes.rwlock);
       
-      if(managed_processes.processes_table[id])
-      {
-         if(ret<0)
+      if(managed_processes.processes_table[id]) {
+         if(ret<0) {
             managed_processes.processes_table[id]->status=STOPPED;
-         else
-         {
+         }
+         else {
             managed_processes.processes_table[id]->status=RUNNING;
          }
       }
@@ -1458,8 +1374,7 @@ int process_async_stop(int id)
       id<managed_processes.max_processes &&
       managed_processes.processes_table[id] &&
       managed_processes.processes_table[id]->status==RUNNING &&
-      managed_processes.processes_table[id]->type!=NOTMANAGED)
-   {
+      managed_processes.processes_table[id]->type!=NOTMANAGED) {
       managed_processes.processes_table[id]->async_stop=1;
    }
    else
@@ -1502,17 +1417,17 @@ void *_task_thread(void *data)
    
    pthread_rwlock_unlock(&managed_processes.rwlock);
    pthread_cleanup_pop(0);
-
+/*
 #ifndef NO_DATASEND
    managed_processes_send_stats_now(_notif_hostname, _notif_port);
 #endif
-
+*/
    task_thread_data->task(task_thread_data->id, task_thread_data->task_data, NULL, 0);
-   
+/*   
 #ifndef NO_DATASEND
    managed_processes_send_stats_now(_notif_hostname, _notif_port);
 #endif
-
+*/
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&managed_processes.rwlock );
    pthread_rwlock_wrlock(&managed_processes.rwlock);
    
@@ -1521,8 +1436,7 @@ void *_task_thread(void *data)
    pthread_rwlock_unlock(&managed_processes.rwlock);
    pthread_cleanup_pop(0);
    
-   if(data)
-   {
+   if(data) {
       free(data);
       data=NULL;
    }
@@ -1541,20 +1455,16 @@ int process_run_task(int id, char *errmsg, int l_errmsg)
    if(id>=0 &&
       id<managed_processes.max_processes    &&
       managed_processes.processes_table[id] &&
-      (managed_processes.processes_table[id]->type==TASK || managed_processes.processes_table[id]->type==JOB) )
-   {
-      if(managed_processes.processes_table[id]->start)
-      {
+      (managed_processes.processes_table[id]->type==TASK || managed_processes.processes_table[id]->type==JOB) ) {
+      if(managed_processes.processes_table[id]->start) {
          struct task_thread_data_s *task_thread_data=(struct task_thread_data_s *)malloc(sizeof(struct task_thread_data_s));
          task_thread_data->task=managed_processes.processes_table[id]->start;
          task_thread_data->task_data=managed_processes.processes_table[id]->start_stop_data;
          task_thread_data->id=id;
          pthread_t process_task_thread;
-         if(pthread_create (&process_task_thread, NULL, _task_thread, (void *)task_thread_data))
-         {
+         if(pthread_create (&process_task_thread, NULL, _task_thread, (void *)task_thread_data)) {
             VERBOSE(2) mea_log_printf("%s (%s) : pthread_create - can't start thread\n",ERROR_STR,__func__);
-            if(errmsg)
-            {
+            if(errmsg) {
                snprintf(errmsg, l_errmsg, "internal error (pthread_create)");
                ret=-1;
                goto process_task_clean_exit;
@@ -1586,10 +1496,8 @@ int process_stop(int id, char *errmsg, int l_errmsg)
       id<managed_processes.max_processes &&
       managed_processes.processes_table[id] &&
       managed_processes.processes_table[id]->status==RUNNING &&
-      managed_processes.processes_table[id]->type!=NOTMANAGED)
-   {
-      if(managed_processes.processes_table[id]->stop)
-      {
+      managed_processes.processes_table[id]->type!=NOTMANAGED) {
+      if(managed_processes.processes_table[id]->stop) {
          f=managed_processes.processes_table[id]->stop;
          d=managed_processes.processes_table[id]->start_stop_data;
       }
@@ -1608,8 +1516,7 @@ int process_stop(int id, char *errmsg, int l_errmsg)
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&managed_processes.rwlock );
    pthread_rwlock_wrlock(&managed_processes.rwlock);
 
-   if(managed_processes.processes_table[id])
-   {
+   if(managed_processes.processes_table[id]) {
       managed_processes.processes_table[id]->status=0;
    }
    
@@ -1627,8 +1534,7 @@ int process_set_data(int id, void *data)
 
    if(id>=0 &&
       id<managed_processes.max_processes &&
-      managed_processes.processes_table[id])
-   {
+      managed_processes.processes_table[id]) {
       managed_processes.processes_table[id]->start_stop_data=data;
    }
 
@@ -1648,8 +1554,7 @@ void* process_get_data_ptr(int id)
 
    if(id>=0 &&
       id<managed_processes.max_processes &&
-      managed_processes.processes_table[id])
-   {
+      managed_processes.processes_table[id]) {
       ptr=managed_processes.processes_table[id]->start_stop_data;
    }
 

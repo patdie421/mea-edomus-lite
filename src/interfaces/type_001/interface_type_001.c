@@ -497,6 +497,14 @@ void *_thread_interface_type_001(void *args)
 }
 
 
+int update_devices_type_001(void *data)
+{
+   printf("Update device 001\n");
+
+   return 0;
+}
+
+
 int restart_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
 {
    process_stop(my_id, data, 0);
@@ -673,6 +681,7 @@ int get_fns_interface_type_001(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->clean = (clean_f)&clean_interface_type_001;
    interfacesFns->set_monitoring_id = (set_monitoring_id_f)&set_monitoring_id_interface_type_001;
    interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_001;
+   interfacesFns->update_devices = (update_devices_f)&update_devices_type_001;
    interfacesFns->get_type = (get_type_f)&get_type_interface_type_001;
 
    interfacesFns->lib = NULL;

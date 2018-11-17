@@ -582,8 +582,6 @@ int main(int argc, const char * argv[])
    }
 
 
-   DEBUG_SECTION appParameters_print(NULL);
-   
    //
    // stdout et stderr vers fichier log
    //

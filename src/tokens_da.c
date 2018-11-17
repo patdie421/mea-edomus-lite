@@ -96,9 +96,13 @@ int16_t init_strings_da()
    tokens_string_da->http_put_str_c                   = get_token_string_by_id(HTTP_PUT_ID);
    tokens_string_da->api_session_str_c                = get_token_string_by_id(API_SESSION_ID);
    tokens_string_da->api_interface_str_c              = get_token_string_by_id(API_INTERFACE_ID);
+   tokens_string_da->api_device_str_c                 = get_token_string_by_id(API_DEVICE_ID);
+   tokens_string_da->api_service_str_c                = get_token_string_by_id(API_SERVICE_ID);
    tokens_string_da->api_key_str_c                    = get_token_string_by_id(API_KEY_ID);
    tokens_string_da->data_str_c                       = get_token_string_by_id(DATA_ID);
    tokens_string_da->l_data_str_c                     = get_token_string_by_id(L_DATA_ID);
+   tokens_string_da->api_type_str_c                   = get_token_string_by_id(API_TYPE_ID);
+   tokens_string_da->api_configuration_str_c          = get_token_string_by_id(API_CONFIGURATION_ID);
 
 #endif
    return 0;

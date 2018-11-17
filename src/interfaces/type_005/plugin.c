@@ -25,8 +25,8 @@ int get_fns_interface(void *lib, struct interfacesServer_interfaceFns_s *interfa
          fprintf(stderr,"get_xPLCallback: %s\n", dlerror());
 
       interfacesFns->clean = (clean_f)dlsym(lib, "clean_interface_type_005");
-      if(!interfacesFns->get_xPLCallback)
-         fprintf(stderr,"get_xPLCallback: %s\n", dlerror());
+      if(!interfacesFns->clean)
+         fprintf(stderr,"clean: %s\n", dlerror());
 
       interfacesFns->set_monitoring_id = (set_monitoring_id_f)dlsym(lib, "set_monitoring_id_interface_type_005");
       if(!interfacesFns->set_monitoring_id)

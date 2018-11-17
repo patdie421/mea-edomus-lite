@@ -114,6 +114,8 @@ static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le de
    {"PUT",                        HTTP_PUT_ID},
    {"SESSION",                    API_SESSION_ID},
    {"INTERFACE",                  API_INTERFACE_ID},
+   {"SERVICE",                    API_SERVICE_ID},
+   {"CONFIGURATION",              API_CONFIGURATION_ID},
    {"api_key",                    API_KEY_ID},
    {"data",                       DATA_ID},
    {"l_data",                     L_DATA_ID},

@@ -121,16 +121,17 @@ int   process_forced_watchdog_recovery(int id);
 int   init_processes_manager(int max_nb_processes);
 int   clean_managed_processes(void);
 
-int   managed_processes_processes_to_json(char *json, int l_json);
-int   managed_processes_processes_to_json_mini(char *json, int l_json);
+int   managed_processes_processes_to_json(char *json, int l_json, int type);
+int   managed_processes_processes_to_json_mini(char *json, int l_json, int type);
+int   managed_processes_process_to_json(int id, char *message, int l_message);
 int   managed_processes_indicators_list(char *json, int l_json);
-
+/*
 #ifndef NO_DATASEND
 void  managed_processes_set_notification_hostname(char *hostname);
 void  managed_processes_set_notification_port(int port);
 int   managed_processes_send_stats_now(char *hostname, int port);
 #endif
-
+*/
 int   managed_processes_check_heartbeat(int doRecovery);
 int   managed_processes_loop(void);
 

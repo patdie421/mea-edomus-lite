@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <string.h>
+
 #include "configuration.h"
 #include "cJSON.h"
 
@@ -30,6 +32,53 @@ char *appParameters_defaults =
 cJSON *getAppParameters()
 {
    return appParameters;
+}
+
+
+char *getAppParametersAsString_alloc()
+{
+   char *s=NULL;
+
+   if(appParameters) {
+      s=cJSON_Print(appParameters);
+   }
+
+   return s;
+}
+
+
+int updateAppParameters(cJSON *jsonData)
+{
+   return 0;
+}
+
+
+int updateAppParameter(char *name, cJSON *jsonData)
+{
+   return 0;
+}
+
+
+char *getAppParameterAsString_alloc(char *name)
+{
+   char *_s=NULL;
+   char *s=NULL;
+
+   if(appParameters) {
+      cJSON *p=cJSON_GetObjectItem(appParameters, name);
+      if(p) {
+         _s=cJSON_Print(p);
+         if(_s) {
+            #define KEYVALUE "{\"value\":%s}"
+            s=malloc(strlen(_s)+sizeof(KEYVALUE)+1);
+            if(s)
+               sprintf(s, KEYVALUE, _s);
+            free(_s); 
+         } 
+      }
+   }
+
+   return s;
 }
 
 

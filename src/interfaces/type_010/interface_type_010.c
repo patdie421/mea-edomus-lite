@@ -652,6 +652,14 @@ static int process_interface_type_010_data(interface_type_010_t *i010)
 }
 
 
+int update_devices_type_010(void *ixxx)
+{
+   printf("update devices type 010\n");
+
+   return 0;
+}
+
+
 static int clean_interface_type_010_data_source(interface_type_010_t *i010)
 {
    if(i010->file_desc_in >= 0)
@@ -937,6 +945,7 @@ interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *
       strcpy(i010->parameters,(char *)parameters);
 
    i010->indicators.xplin=0;
+   i010->indicators.senttoplugin=0;
 
    i010->line_buffer = NULL;
    i010->line_buffer_l=0;
@@ -1147,7 +1156,7 @@ void *_thread_interface_type_010(void *args)
    {
       process_heartbeat(params->i010->monitoring_id);
       process_update_indicator(params->i010->monitoring_id, interface_type_010_xplin_str, params->i010->indicators.xplin);
-      process_update_indicator(params->i010->monitoring_id, interface_type_010_xplin_str, params->i010->indicators.senttoplugin);
+      process_update_indicator(params->i010->monitoring_id, interface_type_010_senttoplugin_str, params->i010->indicators.senttoplugin);
 
       // traiter les données en provenance des périphériques
       if(params->i010->file_desc_in != -1)
@@ -1313,6 +1322,7 @@ int get_fns_interface_type_010(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->malloc_and_init2 = (malloc_and_init2_f)&malloc_and_init2_interface_type_010;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_010;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_010;
+   interfacesFns->update_devices = (update_devices_f)&update_devices_type_010;
    interfacesFns->clean = (clean_f)&clean_interface_type_010;
    interfacesFns->set_monitoring_id = (set_monitoring_id_f)&set_monitoring_id_interface_type_010;
    interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_010;

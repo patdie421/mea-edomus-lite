@@ -10,4 +10,10 @@ int appParameters_set(char *k, char *v, cJSON *d);
 char *appParameters_get(char *k, cJSON *d);
 void appParameters_print(cJSON *p);
 
+char *getAppParametersAsString_alloc();
+char *getAppParameterAsString_alloc(char *name);
+
+int updateAppParameters(cJSON *jsonData);
+int updateAppParameter(char *name, cJSON *jsonData);
+
 #endif
