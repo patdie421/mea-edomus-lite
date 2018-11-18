@@ -727,7 +727,6 @@ int netatmo_get_thermostat_data(char *access_token, char *relay_id, char *thermo
       }
       else
       {
-         printf("ICI1: %s\n",cr.p);
          ret=_netatmo_parse_thermostat_data_json(cr.p, thermostat_id, thermostat_data, err, l_err);
          if(ret<0)
          {

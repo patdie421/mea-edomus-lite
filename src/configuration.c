@@ -6,27 +6,31 @@
 
 #include "configuration.h"
 #include "cJSON.h"
+#include "mea_verbose.h"
 
 cJSON *appParameters = NULL;
 
 char *appParameters_defaults = 
-"{ \"MEAPATH\" : \"\", \
-   \"PHPCGIPATH\" : \"\", \
-   \"PHPINIPATH\" : \"\", \
-   \"GUIPATH\" : \"\", \
-   \"LOGPATH\" : \"\", \
-   \"PLUGINPATH\" : \"\", \
-   \"DRIVERSPATH\" : \"\", \
-   \"VENDORID\" : \"\", \
-   \"DEVICEID\" : \"\", \
-   \"INSTANCEID\" : \"\", \
-   \"VERBOSELEVEL\" : \"\", \
-   \"GUIPORT\" : \"\", \
-   \"PHPSESSIONSPATH\" : \"\", \
-   \"PARAMSDBVERSION\" : \"\", \
-   \"INTERFACE\" : \"\", \
-   \"RULESFILE\" : \"\", \
-   \"RULESFILESPATH\" : \"\" }";
+"{\"MEAPATH\":\"\",\
+\"PHPCGIPATH\":\"\",\
+\"PHPINIPATH\":\"\",\
+\"GUIPATH\":\"\",\
+\"LOGPATH\":\"\",\
+\"PLUGINPATH\":\"\",\
+\"DRIVERSPATH\":\"\",\
+\"VENDORID\":\"\",\
+\"DEVICEID\":\"\",\
+\"INSTANCEID\":\"\",\
+\"VERBOSELEVEL\":\"\",\
+\"GUIPORT\":\"\",\
+\"PHPSESSIONSPATH\":\"\",\
+\"PARAMSDBVERSION\":\"\",\
+\"INTERFACE\":\"\",\
+\"RULESFILE\":\"\",\
+\"RULESFILESPATH\":\"\"}";
+
+
+int appParameters_set(char *key, char *value, cJSON *d);
 
 
 cJSON *getAppParameters()
@@ -34,7 +38,7 @@ cJSON *getAppParameters()
    return appParameters;
 }
 
-
+ 
 char *getAppParametersAsString_alloc()
 {
    char *s=NULL;
@@ -47,15 +51,71 @@ char *getAppParametersAsString_alloc()
 }
 
 
+cJSON *filterByJson_alloc(cJSON *j, cJSON *f)
+{
+   if(j==NULL || f==NULL)
+      return NULL;
+
+   cJSON *_j=cJSON_CreateObject();
+   cJSON *e = j->child;
+
+   while(e) {
+      if(e->type==cJSON_String && cJSON_GetObjectItem(f,e->string)) {
+         cJSON *_e = cJSON_Duplicate(e, 1);
+         cJSON_AddItemToArray(_j, _e);
+      }
+      e=e->next;
+   } 
+
+   return _j;
+}
+
+
 int updateAppParameters(cJSON *jsonData)
 {
+   cJSON *filter=cJSON_Parse(appParameters_defaults);
+   if(!filter) {
+      return -1;
+   }
+   cJSON *j=filterByJson_alloc(jsonData, filter);
+   if(!j) {
+      return -1;
+   }
+   cJSON_Delete(filter);
+
+   cJSON *e=j->child;
+   while(e) {
+      appParameters_set(e->string, e->valuestring, appParameters);
+      e=e->next;
+   } 
+   cJSON_Delete(j);
+
+   char *s=cJSON_Print(appParameters);
+   mea_log_printf("%s\n", s);
+   free(s); 
+
    return 0;
 }
 
 
 int updateAppParameter(char *name, cJSON *jsonData)
 {
-   return 0;
+   if(!jsonData || jsonData->type!=cJSON_String)
+      return -1;
+   
+   cJSON *filter=cJSON_Parse(appParameters_defaults);
+   if(!filter) {
+      return -1;
+   }
+
+   int ret=-1;
+   if(cJSON_GetObjectItem(filter, name)) {
+      appParameters_set(name, jsonData->valuestring, appParameters);
+      ret=0;
+   }
+   cJSON_Delete(filter);
+
+   return ret;
 }
 
 
@@ -67,7 +127,8 @@ char *getAppParameterAsString_alloc(char *name)
    if(appParameters) {
       cJSON *p=cJSON_GetObjectItem(appParameters, name);
       if(p) {
-         _s=cJSON_Print(p);
+         s=cJSON_Print(p);
+/*
          if(_s) {
             #define KEYVALUE "{\"value\":%s}"
             s=malloc(strlen(_s)+sizeof(KEYVALUE)+1);
@@ -75,9 +136,9 @@ char *getAppParameterAsString_alloc(char *name)
                sprintf(s, KEYVALUE, _s);
             free(_s); 
          } 
+*/
       }
    }
-
    return s;
 }
 
@@ -137,5 +198,7 @@ int appParameters_set(char *key, char *value, cJSON *d)
    else {
       cJSON_AddItemToObject(d, (const char *)key, newValue);
    }
+
+   return 0;
 }
 

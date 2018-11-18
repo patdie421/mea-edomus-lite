@@ -21,6 +21,14 @@ char *_users = "{\"admin\":\"admin\",\"user\":\"user\"}";
 cJSON *users = NULL;
 cJSON *sessions = NULL;
 
+char *no_valid_json_data_str="no valid json data";
+char *bad_method_str="bad method";
+char *not_authorized_str="not authorized";
+
+#define NO_VALID_JSON_DATA no_valid_json_data_str
+#define BAD_METHOD bad_method_str
+#define NOT_AUTHORIZED not_authorized_str
+
 
 int returnResponse(struct mg_connection *conn, int httperr, int errnum, char *msg)
 {
@@ -145,7 +153,7 @@ int openSession(struct mg_connection *conn)
                cJSON_Delete(root);
             }
             else {
-               returnResponse(conn, 400, 1, "no valid json data");
+               returnResponse(conn, 400, 1, NO_VALID_JSON_DATA);
             }
 
             free(data);
@@ -311,7 +319,7 @@ int mea_rest_api_service_PUT(struct mg_connection *conn, int method, char *token
          cJSON_Delete(jsonData);
       }
       else {
-         return returnResponse(conn, 400, 1, "no valid json data");
+         return returnResponse(conn, 400, 1, NO_VALID_JSON_DATA);
       }
    }
    else {
@@ -327,7 +335,7 @@ int mea_rest_api_type(struct mg_connection *conn, int method, char *tokens[], in
    const char *meaSessionId=mg_get_header(conn, "Mea-Session");
 
    if(checkSession((char *)meaSessionId)!=0) {
-      return returnResponse(conn, 401, 99, "not authorized");
+      return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
    }
 
    switch(method) {
@@ -360,7 +368,7 @@ int mea_rest_api_type(struct mg_connection *conn, int method, char *tokens[], in
          break;
 
       default:
-         return returnResponse(conn, 405, 1, "bad method");
+         return returnResponse(conn, 405, 1, BAD_METHOD);
    }
  
    return 0;
@@ -372,7 +380,7 @@ int mea_rest_api_service(struct mg_connection *conn, int method, char *tokens[],
    const char *meaSessionId=mg_get_header(conn, "Mea-Session");
 
    if(checkSession((char *)meaSessionId)!=0) {
-      return returnResponse(conn, 401, 99, "not authorized");
+      return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
    }
 
    int ret=0;
@@ -394,7 +402,7 @@ int mea_rest_api_service(struct mg_connection *conn, int method, char *tokens[],
          break;
 
       default:
-         return returnResponse(conn, 405, 1, "bad method");
+         return returnResponse(conn, 405, 1, BAD_METHOD);
    }
 
    return returnResponse(conn, 500, 1, NULL);
@@ -443,7 +451,7 @@ int mea_rest_api_device_POST_PUT(struct mg_connection *conn, int method, char *i
          }
       }
       else {
-         return returnResponse(conn, 400, 1, "no valid json data");
+         return returnResponse(conn, 400, 1, NO_VALID_JSON_DATA);
       }
    }
    else {
@@ -501,7 +509,7 @@ int mea_rest_api_device(struct mg_connection *conn, int method, char *interface,
       case HTTP_DELETE_ID:
          return mea_rest_api_device_DELETE(conn, method, interface, tokens, l_tokens);
       default:
-         return returnResponse(conn, 405, 1, "bad method");
+         return returnResponse(conn, 405, 1, BAD_METHOD);
    }
    
    return returnResponse(conn, 500, 1, NULL);
@@ -513,8 +521,12 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
    const char *meaSessionId=mg_get_header(conn, "Mea-Session");
 
    if(checkSession((char *)meaSessionId)!=0) {
-      return returnResponse(conn, 401, 99, "not authorized");
+      return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
    }
+
+   if(l_tokens>1)
+      return mea_rest_api_device(conn, method, tokens[0], &(tokens[1]), l_tokens-1);
+
    switch(method) {
       case HTTP_DELETE_ID:
 
@@ -532,9 +544,6 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
                }
             }
          }
-         else {
-            return mea_rest_api_device(conn, method, tokens[0], &(tokens[1]), l_tokens-1);
-         }
          return returnResponse(conn, 404, 1, NULL);
 
 
@@ -550,23 +559,18 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
                return returnResponse(conn, 404, 1, NULL);
             }
          }
-         else {
-            if(l_tokens==1) {
-               char *s=getInterfaceAsStringByName_alloc(tokens[0]);
-               if(s) {
-                  httpResponse(conn, 200, NULL, s);
-                  free(s);
-                  return 1;
-               }
-               else {
-                  return returnResponse(conn, 404, 1, NULL);
-               }
+         else if(l_tokens==1) {
+            char *s=getInterfaceAsStringByName_alloc(tokens[0]);
+            if(s) {
+               httpResponse(conn, 200, NULL, s);
+               free(s);
+               return 1;
             }
             else {
-               return mea_rest_api_device(conn, method, tokens[0], &(tokens[1]), l_tokens-1);
+               return returnResponse(conn, 404, 1, NULL);
             }
          }
-         break;
+         return returnResponse(conn, 500, 1, NULL);
 
       case HTTP_POST_ID:
          if(l_tokens==0) {
@@ -580,19 +584,19 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
                }
             }
             else {
-               return returnResponse(conn, 400, 1, "no valid json data");
+               return returnResponse(conn, 400, 1, NO_VALID_JSON_DATA);
             }
          }
          else {
             return mea_rest_api_device(conn, method, tokens[0], &(tokens[1]), l_tokens-1);
          }
-         return returnResponse(conn, 404, 1, NULL);
+         return returnResponse(conn, 500, 1, NULL);
 
       case HTTP_PUT_ID:
          if(l_tokens==0) {
             return returnResponse(conn, 404, 1, NULL);
          }
-         if(l_tokens==1) {
+         else if(l_tokens==1) {
             cJSON *jsonData=getData_alloc(conn);
             if(jsonData) {
                if(updateInterface(tokens[0], jsonData)>=0) {
@@ -603,16 +607,13 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
                }
             }
             else {
-               return returnResponse(conn, 400, 1, "no valid json data");
+               return returnResponse(conn, 400, 1, NO_VALID_JSON_DATA);
             }
          }
-         else
-            return mea_rest_api_device(conn, method, tokens[0], &(tokens[1]), l_tokens-1);
 
       default:
-         return returnResponse(conn, 405, 1, "bad method");
+         return returnResponse(conn, 405, 1, BAD_METHOD);
    }
-
    return returnResponse(conn, 500, 1, NULL);
 }
 
@@ -622,7 +623,7 @@ int mea_rest_api_configuration(struct mg_connection *conn, int method, char *tok
    const char *meaSessionId=mg_get_header(conn, "Mea-Session");
 
    if(checkSession((char *)meaSessionId)!=0) {
-      return returnResponse(conn, 401, 99, "not authorized");
+      return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
    }
    switch(method) {
       case HTTP_GET_ID:
@@ -655,7 +656,7 @@ int mea_rest_api_configuration(struct mg_connection *conn, int method, char *tok
       case HTTP_PUT_ID: {
          cJSON *jsonData=getData_alloc(conn);
          if(!jsonData) {
-            return returnResponse(conn, 400, 1, "no valid json data");
+            return returnResponse(conn, 400, 1, NO_VALID_JSON_DATA);
          }
          if(l_tokens==0) {
             if(updateAppParameters(jsonData)==0) {
@@ -674,12 +675,11 @@ int mea_rest_api_configuration(struct mg_connection *conn, int method, char *tok
             }
          }
          else {
-            
             return returnResponse(conn, 404, 1, NULL);
          }
       }
       default:
-         return returnResponse(conn, 405, 1, "bad method");
+         return returnResponse(conn, 405, 1, BAD_METHOD);
    }
 }
 
@@ -704,7 +704,7 @@ int mea_rest_api_session(struct mg_connection *conn, int method, char *tokens[],
          }
 
       default:
-         return returnResponse(conn, 405, 1, "bad method");
+         return returnResponse(conn, 405, 1, BAD_METHOD);
    }
 
    return returnResponse(conn, 500, 1, NULL);

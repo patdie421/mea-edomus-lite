@@ -43,6 +43,7 @@
 
 
 int update_interfaces(int id);
+int remove_interface(int id_interface);
 
 #define MAX_INTERFACES_PLUGINS 10 // au demarrage et pour les statics
 
@@ -54,6 +55,15 @@ mea_queue_t *_interfaces=NULL;
 
 pthread_rwlock_t interfaces_queue_rwlock;
 pthread_rwlock_t jsonInterfaces_rwlock;
+
+char *interface_defaults="{ \
+\"name\":\"\", \
+\"id_type\":-1, \
+\"description\":\"\", \
+\"parameters\":\"\", \
+\"state\":-1 \
+}";
+
 
 /*
 * New functions
@@ -308,18 +318,101 @@ cJSON *findTypeByIdThroughIndex(struct types_index_s *types_index, int id)
 
 int deleteInterface(char *interface)
 {
+   cJSON *jsonInterface = NULL;
+   int id_interface = -1;
+
+   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
+   pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
+
+   jsonInterface = cJSON_GetObjectItem(jsonInterfaces, interface);
+   if(jsonInterface)
+      id_interface=(int)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
+
+   pthread_rwlock_unlock(&jsonInterfaces_rwlock);
+   pthread_cleanup_pop(0);
+
+   if(id_interface==-1)
+      return -1;
+
+   remove_interface(id_interface);
+
+   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
+   pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
+
+   cJSON_DeleteItemFromObject(jsonInterfaces, interface);
+
+   pthread_rwlock_unlock(&jsonInterfaces_rwlock);
+   pthread_cleanup_pop(0);
+
    return 0;
 }
 
 
 int addInterface(cJSON *jsonData)
 {
-   char *s=cJSON_Print(jsonData);
-   if(s) {
-      free(s);
+   if(jsonData == NULL || jsonData->type != cJSON_Object)
+      return -1;
+
+   cJSON *newInterface=cJSON_Parse(interface_defaults);
+   if(!newInterface)
+      return -1;
+
+   cJSON *e=jsonData->child;
+   while(e) {
+      cJSON *d=cJSON_GetObjectItem(newInterface, e->string);
+      if(d != NULL && d->type==e->type) {
+         cJSON_DeleteItemFromObject(newInterface, e->string);
+         cJSON_AddItemToArray(newInterface, cJSON_Duplicate(e,1));
+      } 
+      e=e->next;
    }
 
-   return 0;
+   char name[41];
+   int id_type=(int)cJSON_GetObjectItem(newInterface, "id_type")->valuedouble;
+   int state=(int)cJSON_GetObjectItem(newInterface, "state")->valuedouble;
+   char *_name=(char *)cJSON_GetObjectItem(newInterface, "name")->valuestring;
+
+   if(strlen(_name)>=3) { // ajouter check du nom de l'interface (que des lettres, chiffres et _)
+      strncpy(name, _name, sizeof(name)-1);
+      mea_strtoupper(name);
+      cJSON_DeleteItemFromObject(newInterface, "name");
+   }
+   else
+      goto addInterface_clean_exit;
+
+   if(state<0 && state>2)
+      goto addInterface_clean_exit;
+
+   if(id_type<0) // ajouter le check de l'id interface dans jsonTypes
+      goto addInterface_clean_exit;
+
+   cJSON_AddItemToObject(newInterface, "devices", cJSON_CreateObject());
+
+   int ret=-1; 
+   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
+   pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
+
+   if(!cJSON_GetObjectItem(jsonInterfaces, name)) {
+      cJSON_AddItemToObject(jsonInterfaces, name, newInterface);
+      ret=0;
+   }
+
+   pthread_rwlock_unlock(&jsonInterfaces_rwlock);
+   pthread_cleanup_pop(0);
+
+   if(ret==0) {
+//
+// rechargement des interfaces
+//
+   }
+
+   return ret;
+
+addInterface_clean_exit:
+   if(newInterface)
+      cJSON_Delete(newInterface);
+
+   return -1;
 }
 
 
@@ -1306,6 +1399,72 @@ int16_t interfacesServer_call_interface_api(int id_interface, char *cmnd, void *
    return ret;
 }
  
+
+int remove_interface(int id_interface)
+{
+   interfaces_queue_elem_t *iq;
+   int ret=-1;
+
+   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
+   pthread_rwlock_wrlock(&interfaces_queue_rwlock);
+ 
+   if(_interfaces && _interfaces->nb_elem) {
+
+      mea_queue_first(_interfaces);
+      while(1) {
+         ret=mea_queue_current(_interfaces, (void **)&iq);
+
+         if(ret==ERROR) {
+            ret=-1;
+            break; 
+         }
+
+         if(iq->id == id_interface) {
+ 
+            int monitoring_id = iq->fns->get_monitoring_id(iq->context);
+ 
+            if(iq->delegate_flag == 0 && monitoring_id>-1 && process_is_running(monitoring_id)) {
+               iq->fns->set_xPLCallback(iq->context, NULL);
+ 
+               if(monitoring_id!=-1) {
+                  void *start_stop_params = process_get_data_ptr(monitoring_id);
+ 
+                  process_stop(monitoring_id, NULL, 0);
+                  process_unregister(monitoring_id);
+ 
+                  iq->fns->set_monitoring_id(iq->context, -1);
+ 
+                  if(start_stop_params) {
+                     free(start_stop_params);
+                     start_stop_params=NULL;
+                  }
+               }
+               iq->fns->clean(iq->context);
+               free(iq->context);
+               iq->context=NULL;
+            }
+ 
+            free(iq);
+            iq=NULL;
+
+            mea_queue_remove_current(_interfaces);
+            ret=0;
+            break;
+         }
+
+         if(mea_queue_next(_interfaces)==ERROR) {
+            ret=-1;
+            break;
+         }
+      }
+   }
+
+   pthread_rwlock_unlock(&interfaces_queue_rwlock);
+   pthread_cleanup_pop(0);
+
+   return ret;
+}
+
  
 void stop_interfaces()
 {
