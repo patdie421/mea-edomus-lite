@@ -654,7 +654,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010)
 
 int update_devices_type_010(void *ixxx)
 {
-   printf("update devices type 010\n");
+   mea_log_printf("%s (%s) : update devices type 010: nothing to do\n", ERROR_STR, __func__);
 
    return 0;
 }

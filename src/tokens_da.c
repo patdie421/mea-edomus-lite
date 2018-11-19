@@ -103,6 +103,7 @@ int16_t init_strings_da()
    tokens_string_da->l_data_str_c                     = get_token_string_by_id(L_DATA_ID);
    tokens_string_da->api_type_str_c                   = get_token_string_by_id(API_TYPE_ID);
    tokens_string_da->api_configuration_str_c          = get_token_string_by_id(API_CONFIGURATION_ID);
+   tokens_string_da->api_user_str_c                   = get_token_string_by_id(API_USER_ID);
 
 #endif
    return 0;

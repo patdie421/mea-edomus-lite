@@ -17,8 +17,13 @@
 #include "configuration.h"
 
 char *_users = "{\"admin\":\"admin\",\"user\":\"user\"}";
+char *_users2 = "{ \
+\"admin\": { \"password\":\"admin\", \"fullname\":\"admin\" }, \
+\"user\": { \"password\":\"user\", \"fullname\":\"user\" } \
+}";
 
 cJSON *users = NULL;
+cJSON *users2 = NULL;
 cJSON *sessions = NULL;
 
 char *no_valid_json_data_str="no valid json data";
@@ -65,17 +70,17 @@ int closeSession(struct mg_connection *conn, char *id)
 {
    cJSON *json_id = NULL;
 
-   mea_log_printf("closing session: %s\n", id);
+   mea_log_printf("%s (%s) : closing session: %s\n",ERROR_STR,__func__, id);
 
    json_id = cJSON_GetObjectItem(sessions, id);
 
    if(json_id) {
       cJSON_DeleteItemFromObject(sessions, id);
 
-      mea_log_printf("Session closed\n");
+      mea_log_printf("%s (%s) : session closed\n",ERROR_STR,__func__);
    }
    else
-      mea_log_printf("Unknown session\n");
+      mea_log_printf("%s (%s) : unknown session\n",ERROR_STR,__func__);
 
    return 1;
 }
@@ -194,6 +199,68 @@ int checkSession(char *sessionId)
    else {
       return -1;
    }
+}
+
+
+char *get_users_list_alloc()
+{
+   char *s=cJSON_Print(users2);
+
+   return s;
+}
+
+
+int mea_rest_api_user_GET(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
+{
+   if(l_tokens==0) {
+      char *s=get_users_list_alloc();
+      httpResponse(conn, 200, NULL, s);
+      free(s);
+      return 0;
+   }
+   else if(l_tokens==1) {
+      cJSON *jsonUser=cJSON_GetObjectItem(users2, tokens[0]);
+      if(jsonUser) {
+         char *s=cJSON_Print(jsonUser);
+         httpResponse(conn, 200, NULL, s);
+         free(s);
+         return 0;
+      }
+   }
+   return returnResponse(conn, 404, 1, NULL);
+}
+
+
+int mea_rest_api_user_POST(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
+{
+   if(l_tokens==0) {
+      cJSON *jsonData=getData_alloc(conn);
+      if(jsonData) {
+         return returnResponse(conn, 200, 0, "user post");
+      }
+   }
+   return returnResponse(conn, 404, 1, NULL);
+}
+
+
+int mea_rest_api_user_PUT(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
+{
+   if(l_tokens==1) {
+      cJSON *jsonData=getData_alloc(conn);
+      if(jsonData) {
+         return returnResponse(conn, 200, 0, "user put");
+      }
+   }
+   return returnResponse(conn, 404, 1, NULL);
+}
+
+
+int mea_rest_api_user_DELETE(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
+{
+   if(l_tokens==1) {
+      return returnResponse(conn, 200, 0, "user delete");
+   }
+   return returnResponse(conn, 404, 1, NULL);
 }
 
 
@@ -681,6 +748,36 @@ int mea_rest_api_configuration(struct mg_connection *conn, int method, char *tok
       default:
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
+   return returnResponse(conn, 500, 1, NULL);
+}
+
+
+int mea_rest_api_user(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
+{
+   const char *meaSessionId=mg_get_header(conn, "Mea-Session");
+
+   if(checkSession((char *)meaSessionId)!=0) {
+      return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
+   }
+
+   switch(method) {
+
+      case HTTP_GET_ID:
+         return mea_rest_api_user_GET(conn, method, tokens, l_tokens);
+
+      case HTTP_POST_ID:
+         return mea_rest_api_user_POST(conn, method, tokens, l_tokens);
+
+      case HTTP_PUT_ID:
+         return mea_rest_api_user_PUT(conn, method, tokens, l_tokens);
+
+      case HTTP_DELETE_ID:
+         return mea_rest_api_user_DELETE(conn, method, tokens, l_tokens);
+
+      default:
+         return returnResponse(conn, 405, 1, BAD_METHOD);
+   }
+   return returnResponse(conn, 500, 1, NULL);
 }
 
 
@@ -706,7 +803,6 @@ int mea_rest_api_session(struct mg_connection *conn, int method, char *tokens[],
       default:
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
-
    return returnResponse(conn, 500, 1, NULL);
 }
 
@@ -716,6 +812,7 @@ int mea_rest_api_init()
    srand(time(NULL));
    sessions=cJSON_CreateObject();
    users=cJSON_Parse(_users);
+   users2=cJSON_Parse(_users2);
 }
 
 
@@ -759,6 +856,8 @@ int mea_rest_api(struct mg_connection *conn, int method, char *tokens[], int l_t
          return mea_rest_api_type(conn, method, _tokens, _l_tokens);
       case API_CONFIGURATION_ID:
          return mea_rest_api_configuration(conn, method, _tokens, _l_tokens);
+      case API_USER_ID:
+         return mea_rest_api_user(conn, method, _tokens, _l_tokens);
       default:
          return returnResponse(conn, 404, 1, NULL);
    } 
