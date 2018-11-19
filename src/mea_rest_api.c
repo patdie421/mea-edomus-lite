@@ -16,13 +16,11 @@
 #include "processManager.h"
 #include "configuration.h"
 
-char *_users = "{\"admin\":\"admin\",\"user\":\"user\"}";
 char *_users2 = "{ \
 \"admin\": { \"password\":\"admin\", \"fullname\":\"admin\" }, \
 \"user\": { \"password\":\"user\", \"fullname\":\"user\" } \
 }";
 
-cJSON *users = NULL;
 cJSON *users2 = NULL;
 cJSON *sessions = NULL;
 
@@ -126,10 +124,11 @@ int openSession(struct mg_connection *conn)
 
                if(user && password) {
                
-                  cJSON *u = cJSON_GetObjectItem(users, user->valuestring);
+                  cJSON *u = cJSON_GetObjectItem(users2, user->valuestring);
 
                   if(u) {
-                     if(u->type=cJSON_String && strcmp(password->valuestring, u->valuestring)==0) {
+                     cJSON *p=cJSON_GetObjectItem(u, "password");
+                     if(p && p->type==cJSON_String && strcmp(password->valuestring, p->valuestring)==0) {
 
                         char id[21];
 
@@ -307,9 +306,10 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
 
       if(ret==0) {
          httpResponse(conn, 200, NULL, json);
+         return 0;
       }
       else {
-         returnResponse(conn, 500, 1, "very bad error");
+         return returnResponse(conn, 500, 1, "very bad error");
       }
    }
    else if(l_tokens==1) {
@@ -318,20 +318,20 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
             id=id*(10*i)+(tokens[0][i]-'0');
          } 
          else {
-            returnResponse(conn, 400, 1, "id not an integer");
-            return 1;
+            return returnResponse(conn, 400, 1, "id not an integer");
          }
       }
       ret=managed_processes_process_to_json(id, json, sizeof(json)-1);
       if(ret==0) {
-         returnResponse(conn, 200, 0, NULL);
+         httpResponse(conn, 200, NULL, json);
+         return 0;
       }
       else {
-         returnResponse(conn, 500, 1, "oups, wath append");
+         return returnResponse(conn, 500, 1, "oups, wath append");
       }
    }
    else {
-      returnResponse(conn, 404, 1, NULL);
+      return returnResponse(conn, 404, 1, NULL);
    }
    return 1;
 }
@@ -811,7 +811,6 @@ int mea_rest_api_init()
 {
    srand(time(NULL));
    sessions=cJSON_CreateObject();
-   users=cJSON_Parse(_users);
    users2=cJSON_Parse(_users2);
 }
 
@@ -820,8 +819,8 @@ int mea_rest_api_exit()
 {
    cJSON_Delete(sessions);
    sessions=NULL;
-   cJSON_Delete(users);
-   users=NULL;
+   cJSON_Delete(users2);
+   users2=NULL;
 }
 
 

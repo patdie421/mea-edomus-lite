@@ -90,10 +90,6 @@ int updateAppParameters(cJSON *jsonData)
    } 
    cJSON_Delete(j);
 
-   char *s=cJSON_Print(appParameters);
-   mea_log_printf("%s\n", s);
-   free(s); 
-
    return 0;
 }
 

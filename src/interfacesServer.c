@@ -103,7 +103,7 @@ struct types_index_s *types_index = NULL;
 
 struct devs_index_s
 {
-   char devName[41];
+   char devName[81];
    cJSON *interface;
    UT_hash_handle hh;
 };
@@ -353,6 +353,15 @@ int deleteInterface(char *interface)
    pthread_rwlock_unlock(&interfaces_queue_rwlock);
    pthread_cleanup_pop(0);
 
+   struct devs_index_s *e = NULL;
+   for(e=devs_index; e != NULL; e=e->hh.next) {
+      if(e && e->interface && (int)cJSON_GetObjectItem(e->interface, "id_interface")->valuedouble == id_interface) {
+         HASH_DEL(devices_index, e);
+         free(e);
+         break;
+      }
+   }
+
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
 
@@ -388,6 +397,7 @@ int addInterface(cJSON *jsonData)
    int id_type=(int)cJSON_GetObjectItem(newInterface, "id_type")->valuedouble;
    int state=(int)cJSON_GetObjectItem(newInterface, "state")->valuedouble;
    char *_name=(char *)cJSON_GetObjectItem(newInterface, "name")->valuestring;
+   char *dev=(char *)cJSON_GetObjectItem(newInterface, "dev")->valuestring;
 
    if(strlen(_name)>=3) { // ajouter check du nom de l'interface (que des lettres, chiffres et _)
       strncpy(name, _name, sizeof(name)-1);
@@ -412,6 +422,12 @@ int addInterface(cJSON *jsonData)
 
    if(!cJSON_GetObjectItem(jsonInterfaces, name)) {
       cJSON_AddItemToObject(jsonInterfaces, name, newInterface);
+
+      struct devs_index_s *e=(struct devs_index_s *)malloc(sizeof(struct devs_index_s));
+      mea_strncpytrimlower(e->devName, dev, sizeof(e->devName));
+      e->interface=newInterface;
+      HASH_ADD_STR(devs_index, devName, e);
+
       ret=0;
    }
 
@@ -472,8 +488,24 @@ int updateInterface(char *interface, cJSON *jsonData)
          e=next;
       }
 
+      char devName[81]="";
+      mea_strncpytrimlower(devName, (char *)cJSON_GetObjectItem(jsonInterface, "dev")->valuestring, sizeof(devName)-1);
+
       cJSON_DeleteItemFromObject(jsonInterfaces, interface);
+
+      struct devs_index_s *_e = NULL;
+
+      HASH_FIND_STR(devs_index, devName, _e);
+      if(_e) {
+         HASH_DEL(devs_index, _e);
+      }
       cJSON_AddItemToObject(jsonInterfaces, interface, _jsonInterface);
+
+      mea_strncpytrimlower(_e->devName, (char *)cJSON_GetObjectItem(_jsonInterface, "dev")->valuestring, sizeof(_e->devName)-1);
+      _e->interface=_jsonInterface;
+     
+      HASH_ADD_STR(devs_index, devName, _e); 
+
       ret=0;
    }
 
@@ -1206,10 +1238,8 @@ exit:
  
 int16_t unload_interfaces_fns(struct interfacesServer_interfaceFns_s *ifns)
 {
-   for(int i=0; ifns[i].get_type; i++)
-   {
-      if(ifns[i].plugin_flag==1)
-      {
+   for(int i=0; ifns[i].get_type; i++) {
+      if(ifns[i].plugin_flag==1) {
          dlclose(ifns[i].lib);
          ifns[i].lib=NULL;
       }
@@ -1363,19 +1393,15 @@ next:
  
  
 #ifdef ASPLUGIN
-// int load_interface(int type, cJSON *params_list)
 int load_interface(int type, char *driversPath)
 {
-   for(int i=0; interfacesFns[i].get_type; i++)
-   {
+   for(int i=0; interfacesFns[i].get_type; i++) {
       if(interfacesFns[i].get_type() == type)
          return 0;
    }
  
-   for(int i=0; plugins_list[i].name; i++)
-   {
-      if(type == plugins_list[i].type)
-      {
+   for(int i=0; plugins_list[i].name; i++) {
+      if(type == plugins_list[i].type) {
          struct interfacesServer_interfaceFns_s fns;
          get_fns_interface_f fn = NULL;
          char interface_so[256];
@@ -1383,26 +1409,21 @@ int load_interface(int type, char *driversPath)
          snprintf(interface_so, sizeof(interface_so)-1,"%s/%s", driversPath, plugins_list[i].name);
 
          void *lib = dlopen(interface_so, RTLD_NOW | RTLD_GLOBAL);
-         if(lib)
-         {
+         if(lib) {
             char *err;
  
             fn=dlsym(lib, "get_fns_interface");
             err = dlerror();
-            if(err!=NULL)
-            {
+            if(err!=NULL) {
                VERBOSE(1) mea_log_printf("%s (%s) : dlsym - %s\n", ERROR_STR, __func__, err);
                return -1;
             }
-            else
-            {
-               if(interfacesFns_nb >= (interfacesFns_max-1))
-               {
+            else {
+               if(interfacesFns_nb >= (interfacesFns_max-1)) {
                   struct interfacesServer_interfaceFns_s *tmp;
                   interfacesFns_max+=5;
                   tmp = realloc(interfacesFns,  sizeof(struct interfacesServer_interfaceFns_s)*interfacesFns_max);
-                  if(tmp == NULL)
-                  {
+                  if(tmp == NULL) {
                      dlclose(lib);
                      return -1;
                   }
@@ -1416,8 +1437,7 @@ int load_interface(int type, char *driversPath)
                return 1;
             }
          }
-         else
-         {
+         else {
             VERBOSE(2) mea_log_printf("%s (%s) : dlopen - %s\n", ERROR_STR, __func__, dlerror());
             return -1;
          }
@@ -1438,15 +1458,12 @@ int16_t interfacesServer_call_interface_api(int id_interface, char *cmnd, void *
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
    pthread_rwlock_rdlock(&interfaces_queue_rwlock);
  
-   if(_interfaces && _interfaces->nb_elem)
-   {
+   if(_interfaces && _interfaces->nb_elem) {
       mea_queue_first(_interfaces);
-      while(1)
-      {
+      while(1) {
          mea_queue_current(_interfaces, (void **)&iq);
  
-         if(iq && iq->context && iq->id == id_interface)
-         {
+         if(iq && iq->context && iq->id == id_interface) {
             found=1;
             break;
          }
@@ -1496,9 +1513,6 @@ int remove_interface(mea_queue_t *interfaces_list, int id_interface)
    interfaces_queue_elem_t *iq;
    int ret=-1;
 
-   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
-   pthread_rwlock_wrlock(&interfaces_queue_rwlock);
- 
    if(interfaces_list && interfaces_list->nb_elem) {
 
       mea_queue_first(interfaces_list);
@@ -1550,9 +1564,6 @@ int remove_interface(mea_queue_t *interfaces_list, int id_interface)
       }
    }
 
-   pthread_rwlock_unlock(&interfaces_queue_rwlock);
-   pthread_cleanup_pop(0);
-
    return ret;
 }
 
@@ -1564,23 +1575,19 @@ void stop_interfaces()
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
    pthread_rwlock_wrlock(&interfaces_queue_rwlock);
  
-   if(_interfaces && _interfaces->nb_elem)
-   {
+   if(_interfaces && _interfaces->nb_elem) {
       mea_queue_first(_interfaces);
-      while(_interfaces->nb_elem)
-      {
+      while(_interfaces->nb_elem) {
          mea_queue_out_elem(_interfaces, (void **)&iq);
  
          int monitoring_id = iq->fns->get_monitoring_id(iq->context);
  
-         if(iq->delegate_flag == 0 && monitoring_id>-1 && process_is_running(monitoring_id))
-         {
+         if(iq->delegate_flag == 0 && monitoring_id>-1 && process_is_running(monitoring_id)) {
             iq->fns->set_xPLCallback(iq->context, NULL);
  
             int monitoring_id = iq->fns->get_monitoring_id(iq->context);
  
-            if(monitoring_id!=-1)
-            {
+            if(monitoring_id!=-1) {
                void *start_stop_params = process_get_data_ptr(monitoring_id);
  
                process_stop(monitoring_id, NULL, 0);
@@ -1588,8 +1595,7 @@ void stop_interfaces()
  
                iq->fns->set_monitoring_id(iq->context, -1);
  
-               if(start_stop_params)
-               {
+               if(start_stop_params) {
                   free(start_stop_params);
                   start_stop_params=NULL;
                }
@@ -1666,18 +1672,15 @@ int remove_delegate_links(mea_queue_t *interfaces_list, char *interface)
    interfaces_queue_elem_t *iq_clone;
  
    mea_queue_first(interfaces_list);
-   while(1)
-   {
+   while(1) {
       mea_queue_current(interfaces_list, (void **)&iq);
  
-      if(iq && !iq->context)
-      {
+      if(iq && !iq->context) {
          char name[256], more[256];
          int n;
  
          ret=sscanf(iq->dev,"%[^:]://%[^\n]%n\n", name, more, &n);
-         if(ret>0 && strlen(iq->dev) == n)
-         {
+         if(ret>0 && strlen(iq->dev) == n) {
             if(iq_clone->context && iq_clone->delegate_flag == 0) {
                if(mea_strcmplower(name, interface) == 0) {
                   iq->context = NULL;
@@ -1691,8 +1694,8 @@ int remove_delegate_links(mea_queue_t *interfaces_list, char *interface)
       if(ret<0)
          break;
    }
- 
 
+   return 0;
 }
 
  
@@ -1708,26 +1711,20 @@ int link_delegates(mea_queue_t *interfaces_list)
    mea_queue_clone(interfaces_list_clone, interfaces_list); // pour le double balayage
  
    mea_queue_first(interfaces_list);
-   while(1)
-   {
+   while(1) {
       mea_queue_current(interfaces_list, (void **)&iq);
  
-      if(iq && !iq->context)
-      {
+      if(iq && !iq->context) {
          char name[256], more[256];
          int n;
  
          ret=sscanf(iq->dev,"%[^:]://%[^\n]%n\n", name, more, &n);
-         if(ret>0 && strlen(iq->dev) == n)
-         {
+         if(ret>0 && strlen(iq->dev) == n) {
             mea_queue_first(interfaces_list_clone);
-            while(1)
-            {
+            while(1) {
                mea_queue_current(interfaces_list_clone, (void **)&iq_clone);
-               if(iq_clone->context && iq_clone->delegate_flag == 0)
-               {
-                  if(mea_strcmplower(name, iq_clone->name) == 0)
-                  {
+               if(iq_clone->context && iq_clone->delegate_flag == 0) {
+                  if(mea_strcmplower(name, iq_clone->name) == 0) {
                      iq->context = iq_clone->context;
                      iq->fns = iq_clone->fns;
                   }
@@ -1737,8 +1734,7 @@ int link_delegates(mea_queue_t *interfaces_list)
                   break;
             }
          }
-         else
-         {
+         else {
          }
       }
  
@@ -1819,6 +1815,7 @@ int update_interface_devices(int id_interface)
 
    pthread_rwlock_unlock(&interfaces_queue_rwlock);
    pthread_cleanup_pop(0);
+
    return 0;
 }
 
@@ -1970,8 +1967,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    pthread_rwlock_wrlock(&interfaces_queue_rwlock);
  
    _interfaces=(mea_queue_t *)malloc(sizeof(mea_queue_t));
-   if(!_interfaces)
-   {
+   if(!_interfaces) {
       VERBOSE(1) {
          mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
          perror("");
