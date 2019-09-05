@@ -42,7 +42,7 @@ cJSON *loadJson(char *file)
       return NULL;
 
    fseek(fp, 0L, SEEK_END);
-   uint32_t sz = (uint32_t)ftell(fp);
+   int32_t sz = (uint32_t)ftell(fp);
    if(sz>=0) {
       data=(char *)malloc(sz);
       fseek(fp, 0L, SEEK_SET);

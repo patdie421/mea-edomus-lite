@@ -40,7 +40,7 @@ int returnResponse(struct mg_connection *conn, int httperr, int errnum, char *ms
    if(msg!=NULL)
       snprintf(buff, sizeof(buff)-1, "{\"errno\":%d, \"msg\":\"%s\"}", errnum, msg); 
    else
-      snprintf(buff, sizeof(buff)-1, "{\"errno\":%d}", errnum, msg); 
+      snprintf(buff, sizeof(buff)-1, "{\"errno\":%d}", errnum); 
 
    httpResponse(conn, httperr, NULL, buff);
 
@@ -61,6 +61,8 @@ int purgeSessions() {
          session = next;
       }
    }
+
+   return 1;
 }
 
 
@@ -812,6 +814,8 @@ int mea_rest_api_init()
    srand(time(NULL));
    sessions=cJSON_CreateObject();
    users2=cJSON_Parse(_users2);
+
+   return 1;
 }
 
 
@@ -821,6 +825,8 @@ int mea_rest_api_exit()
    sessions=NULL;
    cJSON_Delete(users2);
    users2=NULL;
+
+   return 1;
 }
 
 

@@ -624,8 +624,8 @@ int16_t autoInit(cJSON *params_list)
    }
 
    char cfgfile[256];
-   n=snprintf(cfgfile, sizeof(to_check), "%s/etc/mea-edomus.json", meaPath);
-   if(n<0 || n==sizeof(to_check)) {
+   n=snprintf(cfgfile, sizeof(cfgfile), "%s/etc/mea-edomus.json", meaPath);
+   if(n<0 || n==sizeof(cfgfile)) {
       VERBOSE(2) {
             mea_log_printf ("%s (%s) : snprintf - ", ERROR_STR,__func__);
             perror("");
@@ -727,8 +727,8 @@ int16_t interactiveInit(cJSON *params_list)
    }
 
    char cfgfile[256];
-   n=snprintf(cfgfile, sizeof(to_check), "%s/etc/mea-edomus.json", meaPath);
-   if(n<0 || n==sizeof(to_check)) {
+   n=snprintf(cfgfile, sizeof(cfgfile), "%s/etc/mea-edomus.json", meaPath);
+   if(n<0 || n==sizeof(cfgfile)) {
       VERBOSE(2) {
             mea_log_printf ("%s (%s) : snprintf - ", ERROR_STR,__func__);
             perror("");

@@ -888,7 +888,7 @@ int checkJsonDevices(cJSON *jsonDevices)
       cJSON *json_parameters = cJSON_GetObjectItem(jsonDevice, "parameters");
       cJSON *json_state = cJSON_GetObjectItem(jsonDevice, "state");
 
-      if( (json_id_type == NULL) || (!json_id_type->type == cJSON_Number))
+      if( (json_id_type == NULL) || !(json_id_type->type == cJSON_Number))
          return -1;
       if( (json_id_description == NULL) || !(json_id_description->type == cJSON_String))
          return -1;
@@ -1500,7 +1500,7 @@ int stop_interface(int id_interface)
 
 int restart_interface(int id_interface)
 {
-   if(stop_interface==0) {
+   if(stop_interface(id_interface)==0) {
       sleep(1);
       return start_interface(id_interface);
    }
@@ -1785,6 +1785,8 @@ int start_interfaces_load_json(cJSON *params_list)
       }
       createTypesIndex(&types_index, jsonTypes);
    }
+
+   return 0;
 }
 
 

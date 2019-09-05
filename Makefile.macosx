@@ -5,8 +5,7 @@ TECHNO=macosx
 DEBUGFLAGS = -g -D__DEBUG_ON__
 ASPLUGIN = 1
 
-#MYPATH=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-MYPATH=/Users/patrice/Developpement/Logiciels/mea-edomus
+MYPATH=/Users/patrice/Developpement/Logiciels/mea-edomus-lite
 
 SOURCES=$(shell echo src/*.c)
 # OBJECTS=$(SOURCES:.c=.o)
@@ -14,7 +13,7 @@ OBJECTS=$(addprefix $(TECHNO).objects/, $(SOURCES:.c=.o))
 
 EXECUTABLE=mea-edomus.$(TECHNO)
 
-INTERFACES=type_001 type_002 type_003 type_004 type_005 type_006
+INTERFACES=type_001 type_002 type_003 type_004 type_005 type_006 type_010
 INTERFACES_NOTPLUGIN=type_001
 
 INTERFACES_PATH=$(addprefix src/interfaces/, $(INTERFACES))
@@ -43,16 +42,13 @@ CFLAGS      = -std=c99 \
               -std=gnu99 \
                $(DEBUGFLAGS) \
               -O3 \
-              -D_BSD_SOURCE \
-              -I/usr/local/mysql/include \
+              -D_DEFAULT_SOURCE \
               -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
               -I$(MYPATH)/src \
                $(INTERFACES_CFLAGS) \
                $(ASPLUGIN_CFLAGS)
 
-LDFLAGS     = -L/usr/local/mysql/lib \
-              -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
-              -lmysqlclient \
+LDFLAGS     = -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
               -lpthread \
               -lm \
               -ldl \
@@ -60,6 +56,7 @@ LDFLAGS     = -L/usr/local/mysql/lib \
               -lpython2.7 \
               -lcurl \
               $(ASPLUGIN_LDFLAGS)
+
 
 all: .deps $(TECHNO).objects interfaces $(SOURCES) $(EXECUTABLE)
 
@@ -92,9 +89,6 @@ build-all: build-commands all
 
 build-php-cgi:
 	make -C complements/php-cgi -f php-cgi.mk SOURCE=$(MYPATH)
-
-build-nodejs:
-	make -C complements/nodejs  -f nodejs.mk  SOURCE=$(MYPATH)
 
 build-xplhub:
 	make -C complements/xplhub  -f xplhub.mk  SOURCE=$(MYPATH)
