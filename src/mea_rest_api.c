@@ -10,7 +10,7 @@
 #include "mea_string_utils.h"
 #include "tokens.h"
 #include "mongoose.h"
-#include "guiServer.h"
+#include "httpServer.h"
 
 #include "interfacesServer.h"
 #include "processManager.h"

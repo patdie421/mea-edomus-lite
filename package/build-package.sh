@@ -22,43 +22,50 @@ rm -r $SOURCE/package/tmp > /dev/null 2>&1
 mkdir -p $SOURCE/package/tmp
 mkdir -p $SOURCE/package/tmp/bin
 mkdir -p $SOURCE/package/tmp/lib
-mkdir -p $SOURCE/package/tmp/lib/mea-gui
-mkdir -p $SOURCE/package/tmp/lib/mea-gui/maps
 mkdir -p $SOURCE/package/tmp/lib/mea-plugins
 mkdir -p $SOURCE/package/tmp/lib/mea-drivers
 mkdir -p $SOURCE/package/tmp/lib/mea-rules
 mkdir -p $SOURCE/package/tmp/etc
-mkdir -p $SOURCE/package/tmp/etc/init.d
+if [ "$TECHNO" == "linux" ]
+then
+   mkdir -p $SOURCE/package/tmp/etc/init.d
+fi
 mkdir -p $SOURCE/package/tmp/var
 mkdir -p $SOURCE/package/tmp/var/log
 mkdir -p $SOURCE/package/tmp/var/db
+mkdir -p $SOURCE/package/tmp/html
 
 chmod -R 775 $SOURCE/package/tmp/*
 chmod -R g+x $SOURCE/package/tmp/*
 
-cd $SOURCE/gui
-tar cf - . | ( cd $SOURCE/package/tmp/lib/mea-gui ; tar xf - )
+#cd $SOURCE/gui
+#tar cf - . | ( cd $SOURCE/package/tmp/lib/mea-gui ; tar xf - )
 
 cd $SOURCE/plugins
 tar cf - . | ( cd $SOURCE/package/tmp/lib/mea-plugins ; tar xf - )
-rm $SOURCE/package/tmp/lib/mea-plugins/*.pyc
+rm $SOURCE/package/tmp/lib/mea-plugins/*.pyc 2> /dev/null
 
 cd $SOURCE/src/interfaces
-cp type_*/interface*.dylib type_*/interface*.so $SOURCE/package/tmp/lib/mea-drivers
- 
-cp $SOURCE/linux/init.d/* $SOURCE/package/tmp/etc/init.d
+cp type_*/interface*.dylib type_*/interface*.so $SOURCE/package/tmp/lib/mea-drivers 2>/dev/null
+if [ "$TECHNO" == "macosx" ]
+then
+   dynext=".dylib"
+else
+   dynext=".so"
+fi
+cd $SOURCE/package/tmp/lib/mea-drivers
+for i in *"$dynext"
+do
+   file=`basename "$i" "$dynext"`
+   mv "$i" "$file"".idrv"
+done
+
+if [ "$TECHNO" == "linux" ]
+then
+   cp $SOURCE/linux/init.d/* $SOURCE/package/tmp/etc/init.d
+fi
 
 cp $SOURCE/mea-edomus.$TECHNO $SOURCE/package/tmp/bin/mea-edomus
-
-if [ -f $SOURCE/complements/php-cgi/src/php-5.5.16/sapi/cgi/php-cgi ]
-then
-   cp $SOURCE/complements/php-cgi/src/php-5.5.16/sapi/cgi/php-cgi $SOURCE/package/tmp/bin
-fi
-
-if [ -f $SOURCE/complements/nodejs/src/node-v0.10.32/out/Release/node ]
-then
-   cp $SOURCE/complements/nodejs/src/node-v0.10.32/out/Release/node $SOURCE/package/tmp/bin
-fi
 
 if [ -f $SOURCE/complements/xplhub/src/xplhub/xplhub ]
 then

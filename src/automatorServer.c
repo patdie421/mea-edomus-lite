@@ -26,7 +26,6 @@
 #include "configuration.h"
 
 #include "processManager.h"
-//NOTIFY #include "notify.h"
 
 #include "automator.h"
 #include "automatorServer.h"
@@ -474,7 +473,6 @@ int stop_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
    _automatorServer_monitoring_id=-1;
 
    VERBOSE(1) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, automator_server_name_str, stopped_successfully_str);
-//NOTIFY   mea_notify_printf('S', "%s %s.", automator_server_name_str, stopped_successfully_str);
 
    return 0;
 }
@@ -498,7 +496,6 @@ int start_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
          VERBOSE(1) {
             mea_log_printf("%s (%s) : can't start %s (thread error) - %s\n", ERROR_STR, __func__, automator_server_name_str, notify_str);
          }
-//NOTIFY         mea_notify_printf('E', "Can't start %s - %s", automator_server_name_str, err_str);
 
          return -1;
       }
@@ -509,12 +506,10 @@ int start_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
       VERBOSE(1) {
          mea_log_printf("%s (%s) : can't start %s (incorrect rules path).\n", ERROR_STR, __func__, automator_server_name_str);
       }
-//NOTIFY      mea_notify_printf('E', "Can't start %s - incorrect rules path", automator_server_name_str);
       return -1;
    }
 
    VERBOSE(2) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, automator_server_name_str, launched_successfully_str);
-//NOTIFY   mea_notify_printf('S', "%s %s.", automator_server_name_str, launched_successfully_str);
 
    return 0;
 }

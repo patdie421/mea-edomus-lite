@@ -16,20 +16,15 @@
 // base de paramétrage
 
 #define MEA_PATH               1
-#define SQLITE3_DB_PARAM_PATH  2
 #define CONFIG_FILE            3
-#define PHPCGI_PATH            4
-#define PHPINI_PATH            5
-#define GUI_PATH               6
+#define HTML_PATH              6
 #define LOG_PATH               7
 #define PLUGINS_PATH           8
-#define VENDOR_ID              9 
-#define DEVICE_ID             10
-#define INSTANCE_ID           11
+#define XPL_VENDORID           9 
+#define XPL_DEVICEID          10
+#define XPL_INSTANCEID        11
 #define VERBOSELEVEL          12
-#define GUIPORT               13
-#define PHPSESSIONS_PATH      14
-#define PARAMSDBVERSION       15
+#define HTTP_PORT             13
 #define INTERFACE             16
 #define RULES_FILE            17
 #define RULES_FILES_PATH      18

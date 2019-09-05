@@ -87,9 +87,6 @@ clean-all: clean
 
 build-all: build-commands all
 
-build-php-cgi:
-	make -C complements/php-cgi -f php-cgi.mk SOURCE=$(MYPATH)
-
 build-xplhub:
 	make -C complements/xplhub  -f xplhub.mk  SOURCE=$(MYPATH)
 

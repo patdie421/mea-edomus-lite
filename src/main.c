@@ -40,14 +40,13 @@
 
 #include "parameters_utils.h"
 #include "configuration.h"
-#include "init.h"
 
 #include "processManager.h"
 
 #include "datetimeServer.h"
 #include "xPLServer.h"
 #include "pythonPluginServer.h"
-#include "guiServer.h"
+#include "httpServer.h"
 #include "automatorServer.h"
 #include "interfacesServer.h"
 
@@ -83,46 +82,16 @@ void usage(char *cmd)
       "",
       "Options de lancement de l'application : ",
       "  --basepath, -p      : chemin de l'installation",
-      "  --paramsdb, -d      : chemin et nom la base de paramétrage",
-      "  --guiport, -g       : port tcp de l'ihm",
+      "  --apiport, -g       : port tcp du serveur HTTP",
       "  --verboselevel, -v  : niveau de détail des messages d'erreur (1 à 9)",
       "  --help, -h          : ce message",
-      "",
-      "Options d'initialisation et de modification : ",
-      "  --init     (-i)     : initialisation interactive.",
-      "  --autoinit (-a)     : intialisation automatique.",
-      "  --update   (-u)     : modification d'un ou plusieurs parametre de la base.",
-      "Remarque : --init, --autoinit et --update sont incompatibles.",
-      "",
-      "Parametres pour --init, --autoinit ou --update uniquement : ",
-      "  --basepath, -p      (défaut : /usr/local/mea-edomus)",
-      "  --paramsdb, -d      (défaut : basepath/var/db/params.db ou ",
-      "                                /var/db/mea-params.db si basepath=/usr)",
-#ifdef __linux__
-      "  --interface, -I     (défaut : eth0)",
-#else
-      "  --interface, -I     (défaut : en0)",
-#endif
-      "  --phpcgipath, -C    (défaut : basepath/bin)",
-      "  --phpsessionspath, -s",
-      "                      (défaut : basepath/log/sessions ou /tmp si basepath=/usr)"
-      "  --phpinipath, -H    (défaut : basepath/etc ou /etc si basepath=/usr)",
-      "  --guipath, -G       (défaut : basepath/lib/mea-gui)",
-      "  --logpath, -L       (défaut : basepath/var/log ou /var/log si basepath=/usr)",
-      "  --pluginspath, -A   (défaut : basepath/lib/mea-plugins)",
-      "  --driverspath, -x   (défaut : basepath/lib/mea-drivers)",
-      "  --rulesfilespath, -R(défaut : basepath/lib/rules)",
-      "  --rulesfile, -r     (défaut : basepath/lib/rules/automator.rules)",
-      "  --vendorid, -V      (défaut : mea)",
-      "  --deviceid, -E      (défaut : edomus)",
-      "  --instanceid, -S    (défaut : home)",
       "",
       NULL
    };
    
    if(!cmd)
       cmd="mea-edomus";
-   printf("\nusage : %s [options de lancememnt] [options d'intialisation]\n", cmd);
+   printf("\nusage : %s [options de lancemement]\n", cmd);
    for(int16_t i=0;usage_text[i];i++)
       printf("%s\n",usage_text[i]);
 }
@@ -155,21 +124,16 @@ void init_param_names(char *names[])
 {
    names[0]                    = NULL;
    names[MEA_PATH]             = NULL;
-   names[SQLITE3_DB_PARAM_PATH]= NULL;
    names[CONFIG_FILE]          = NULL;
-   names[PHPCGI_PATH]          = "PHPCGIPATH";
-   names[PHPINI_PATH]          = "PHPINIPATH";
-   names[GUI_PATH]             = "GUIPATH";
+   names[HTML_PATH]            = "HTML_PATH";
    names[LOG_PATH]             = "LOGPATH";
    names[PLUGINS_PATH]         = "PLUGINPATH";
    names[DRIVERS_PATH]         = "DRIVERSPATH";
-   names[VENDOR_ID]            = "VENDORID";
-   names[DEVICE_ID]            = "DEVICEID";
-   names[INSTANCE_ID]          = "INSTANCEID";
+   names[XPL_VENDORID]            = "XPL_VENDORID";
+   names[XPL_DEVICEID]            = "XPL_DEVICEID";
+   names[XPL_INSTANCEID]          = "XPL_INSTANCEID";
    names[VERBOSELEVEL]         = "VERBOSELEVEL";
-   names[GUIPORT]              = "GUIPORT";
-   names[PHPSESSIONS_PATH]     = "PHPSESSIONSPATH";
-   names[PARAMSDBVERSION]      = "PARAMSDBVERSION";
+   names[HTTP_PORT]            = "HTTP_PORT";
    names[INTERFACE]            = "INTERFACE";
    names[RULES_FILE]           = "RULESFILE";
    names[RULES_FILES_PATH]     = "RULESFILESPATH";
@@ -238,8 +202,6 @@ void clean_all_and_exit()
    parsed_parameters_clean_all(1);
    release_strings_da();
    release_tokens();
-
-//   VERBOSE(9) mea_log_printf("%s (%s) : mea-edomus down ...\n", INFO_STR, __func__);
 
    exit(0);
 }
@@ -331,26 +293,9 @@ int main(int argc, const char * argv[])
 
    // toutes les options possibles
    static struct option long_options[] = {
-      {"init",              no_argument,       0,  'i'                  },
-      {"autoinit",          no_argument,       0,  'a'                  },
-      {"update",            no_argument,       0,  'u'                  },
       {"basepath",          required_argument, 0,  MEA_PATH             }, // 'p'
-      {"paramsdb",          required_argument, 0,  SQLITE3_DB_PARAM_PATH}, // 'd'
-      {"interface",         required_argument, 0,  INTERFACE            }, // 'I'
-      {"phpcgipath",        required_argument, 0,  PHPCGI_PATH          }, // 'C'
-      {"phpinipath",        required_argument, 0,  PHPINI_PATH          }, // 'H'
-      {"phpsessionspath",   required_argument, 0,  PHPSESSIONS_PATH     }, // 's'
-      {"guipath",           required_argument, 0,  GUI_PATH             }, // 'G'
-      {"logpath",           required_argument, 0,  LOG_PATH             }, // 'L'
-      {"pluginspath",       required_argument, 0,  PLUGINS_PATH         }, // 'A'
-      {"driverspath",       required_argument, 0,  DRIVERS_PATH         }, // 'x'
-      {"vendorid",          required_argument, 0,  VENDOR_ID            }, // 'V'
-      {"deviceid",          required_argument, 0,  DEVICE_ID            }, // 'E'
-      {"instanceid",        required_argument, 0,  INSTANCE_ID          }, // 'S'
       {"verboselevel",      required_argument, 0,  VERBOSELEVEL         }, // 'v'
-      {"rulesfile",         required_argument, 0,  RULES_FILE           }, // 'r'
-      {"rulesfilespath",    required_argument, 0,  RULES_FILES_PATH     }, // 'R'
-      {"guiport",           required_argument, 0,  GUIPORT              }, // 'g'
+      {"apiport",           required_argument, 0,  HTTP_PORT              }, // 'g'
       {"help",              no_argument,       0,  'h'                  }, // 'h'
       {0,                   0,                 0,  0                    }
    };
@@ -390,15 +335,16 @@ int main(int argc, const char * argv[])
    if(!appParameters_get("MEAPATH", NULL))
       appParameters_set("MEAPATH","/usr/local/mea-edomus",NULL);
 
+
    //
    // récupération des autres paramètres de la ligne de commande
    //
-   int16_t _d=0, _i=0, _a=0, _u=0, _o=0, _v=-1, _b=0;
+   int16_t _v=-1;
    int option_index = 0; // getopt_long function need int
    int c = 0; // getopt_long function need int
    cJSON *cmdlineParameters = appParameters_create();
 
-   while ((c = getopt_long(argc, (char * const *)argv, "hiaup:d:C:H:s:G:L:A:V:E:S:v:g:I:x:", long_options, &option_index)) != -1)
+   while ((c = getopt_long(argc, (char * const *)argv, "hp:v:g:", long_options, &option_index)) != -1)
    {
       switch (c) {
          case 'h':
@@ -406,30 +352,9 @@ int main(int argc, const char * argv[])
             exit(0);
             break;
 
-         case 'i':
-            c=-1;
-            _i=1;
-            break;
-            
-         case 'a':
-            c=-1;
-            _a=1;
-            break;
-         
-         case 'u':
-            c=-1;
-            _u=1;
-            break;
-            
          case 'p':
 	 case MEA_PATH:
             appParameters_set("MEAPATH", optarg, NULL);
-            break;
-            
-         case 'd':
-         case SQLITE3_DB_PARAM_PATH:
-	    appParameters_set("SQLITE3DBPARAMPATH", optarg, NULL);
-	    _d=1;
             break;
 
          case 'v':
@@ -439,131 +364,23 @@ int main(int argc, const char * argv[])
             break;
 
          case 'g':
-	 case GUIPORT:
-	    appParameters_set("GUIPORT", optarg, NULL);
-            break;
-            
-         case 'C':
-         case PHPCGI_PATH:
-	    appParameters_set("PHPCGIPATH", optarg, NULL);
-            break;
-            
-         case 'H':
-         case PHPINI_PATH:
-	    appParameters_set("PHPINIPATH", optarg, NULL);
-            break;
-            
-         case 's':
-         case PHPSESSIONS_PATH:
-	    appParameters_set("PHPSESSIONSPATH", optarg, NULL);
-            break;
-            
-         case 'G':
-         case GUI_PATH:
-	    appParameters_set("GUIPATH", optarg, NULL);
-            break;
-            
-         case 'L':
-         case LOG_PATH:
-	    appParameters_set("LOGPATH", optarg, NULL);
-            break;
-            
-         case 'A':
-         case PLUGINS_PATH:
-	    appParameters_set("PLUGINPATH", optarg, NULL);
-            break;
-            
-         case 'x':
-         case DRIVERS_PATH:
-	    appParameters_set("DRIVERSPATH", optarg, NULL);
+	 case HTTP_PORT:
+	    appParameters_set("HTTP_PORT", optarg, NULL);
             break;
 
-         case 'V':
-         case VENDOR_ID:
-	    appParameters_set("VENDORID", optarg, NULL);
-            break;
-            
-         case 'E':
-         case DEVICE_ID:
-	    appParameters_set("DEVICEID", optarg, NULL);
-            break;
-
-         case 'S':
-         case INSTANCE_ID:
-	    appParameters_set("INSTANCEID", optarg, NULL);
-            break;
-
-         case 'I':
-	 case INTERFACE:
-	    appParameters_set("INTERFACE", optarg, NULL);
-            break;
-
-         case 'r':
-         case RULES_FILE:
-	    appParameters_set("RULESFILE", optarg, NULL);
-            break;
-
-         case 'R':
-         case RULES_FILES_PATH:
-	    appParameters_set("RULESFILEPATH", optarg, NULL);
-            break;
-      }
-
-
-      if(c>'!') { // parametre non attendu trouvé (! = premier caractère imprimable).
-         VERBOSE(1) mea_log_printf("%s (%s) : Paramètre \"%s\" inconnu.\n",ERROR_STR,__func__,optarg);
-         usage((char *)argv[0]);
-         clean_all_and_exit();
+         default:
+            VERBOSE(1) mea_log_printf("%s (%s) : Paramètre \"%s\" inconnu.\n",ERROR_STR,__func__,optarg);
+            usage((char *)argv[0]);
+            clean_all_and_exit();
       }
    }
 
    //
    // Contrôle des parametres
    //
-   if((_i+_a+_u)>1) {
-      VERBOSE(1) mea_log_printf("%s (%s) : --init (-i), --autoinit (-a), et --update (-u) incompatible\n",ERROR_STR,__func__);
-      usage((char *)argv[0]);
-      clean_all_and_exit();
-   }
-   
    if(_v > 0 && _v < 10)
          set_verbose_level(_v);
 
-   if(!_d) { // si pas de db en parametre on construit un chemin vers le nom "théorique" de la db
-      char tmp[256];
-      snprintf(tmp,sizeof(tmp)-1,"%s/var/db/params.db",appParameters_get("MEAPATH", NULL));
-      appParameters_set("SQLITE3DBPARAMPATH", tmp, NULL);
-   }
-   
-   if(_i || _a) {
-      initMeaEdomus(_a, getAppParameters());
-      
-      clean_all_and_exit();
-   }
-   
-   if(_u) {
-//      updateMeaEdomus(params_list, params_names);
-      clean_all_and_exit();
-   }
-/*
-   if(_o) {
-      VERBOSE(1) mea_log_printf("%s (%s) : options complémentaires uniquement utilisable avec --init (-i), --autoinit (-a), et --update (-u)\n", ERROR_STR, __func__);
-      usage((char *)argv[0]);
-      clean_all_and_exit();
-   }
-*/
-   //
-   // Contrôle et ouverture de la base de paramétrage
-   //
-/*
-   int16_t cause;
-   if(checkParamsDb(appParameters_get("SQLITE3DBPARAMPATH", NULL), &cause)) {
-      VERBOSE(1) mea_log_printf("%s (%s) : checkParamsDb - parameters database error (%d)\n", ERROR_STR, __func__, cause);
-      clean_all_and_exit();
-   }
-*/
- 
-   
    // lecture de tous les paramètres de l'application
 #ifdef __linux__
    appParameters_set("INTERFACE", "eth0", NULL);
@@ -571,21 +388,24 @@ int main(int argc, const char * argv[])
    appParameters_set("INTERFACE", "en0", NULL);
 #endif
 
-
-   char cfgfile[256];
+   char cfgfile[1024];
    snprintf(cfgfile,sizeof(cfgfile)-1, "%s/etc/mea-edomus.json", appParameters_get("MEAPATH", NULL));
    ret = read_all_application_parameters(cfgfile);
 
    if(ret) {
-      VERBOSE(1) mea_log_printf("%s (%s) : can't load parameters\n",ERROR_STR,__func__);
+      VERBOSE(1) mea_log_printf("%s (%s) : can't load parameters (%s)\n",ERROR_STR,__func__,cfgfile);
       clean_all_and_exit();
    }
 
 
+#ifdef __MEA_DEBUG_ON__
+   appParameters_display();
+#endif
+
    //
    // stdout et stderr vers fichier log
    //
-   char log_file[255];
+   char log_file[1024];
    int16_t n;
 
    if(!appParameters_get("LOGPATH",NULL) || !strlen(appParameters_get("LOGPATH",NULL))) {
@@ -603,7 +423,7 @@ int main(int argc, const char * argv[])
 
    int fd=open(log_file, O_CREAT | O_APPEND | O_RDWR,  S_IWUSR | S_IRUSR);
    if(fd<0) {
-      VERBOSE(1) mea_log_printf("%s (%s) : can't open log file - ",ERROR_STR,__func__);
+      VERBOSE(1) mea_log_printf("%s (%s) : can't open log file (%s) - ",ERROR_STR,__func__,log_file);
       perror("");
       clean_all_and_exit();
    }
@@ -654,10 +474,10 @@ int main(int argc, const char * argv[])
    //
    struct httpServerData_s httpServer_start_stop_params;
    httpServer_start_stop_params.params_list=getAppParameters();
-   httpServer_monitoring_id=process_register("GUISERVER");
+   httpServer_monitoring_id=process_register("HTTPSERVER");
    process_set_group(httpServer_monitoring_id, 5);
-   process_set_start_stop(httpServer_monitoring_id , start_guiServer, stop_guiServer, (void *)(&httpServer_start_stop_params), 1);
-   process_set_watchdog_recovery(httpServer_monitoring_id, restart_guiServer, (void *)(&httpServer_start_stop_params));
+   process_set_start_stop(httpServer_monitoring_id , start_httpServer, stop_httpServer, (void *)(&httpServer_start_stop_params), 1);
+   process_set_watchdog_recovery(httpServer_monitoring_id, restart_httpServer, (void *)(&httpServer_start_stop_params));
    process_add_indicator(httpServer_monitoring_id, "HTTPIN", 0);
    process_add_indicator(httpServer_monitoring_id, "HTTPOUT", 0);
    if(process_start(httpServer_monitoring_id, NULL, 0)<0) {
@@ -739,20 +559,20 @@ int main(int argc, const char * argv[])
 //   process_job_set_scheduling_data(log_rotation_id, "0,5,10,15,20,25,30,35,40,45,50,55|*|*|*|*", 0);
    process_job_set_scheduling_data(log_rotation_id, "0|0|*|*|*", 0); // rotation des log tous les jours à minuit
    process_set_group(log_rotation_id, 7);
-
    VERBOSE(1) mea_log_printf("%s (%s) : MEA-EDOMUS %s starded\n", INFO_STR, __func__, __MEA_EDOMUS_VERSION__);
+
 
    time_t start_time;
    long uptime = 0;
    start_time = time(NULL);
-   int guiport = atoi(appParameters_get("GUIPORT",NULL));
+   int apiport = atoi(appParameters_get("HTTP_PORT",NULL));
 
    while(1) { // boucle principale
       // supervision "externe" des process
       if(process_is_running(httpServer_monitoring_id)==RUNNING) {
          char response[512];
          // interrogation du serveur HTTP Interne pour heartbeat ... (voir le passage d'un parametre pour sécuriser ...)
-         gethttp(localhost_const, guiport, "/CMD/ping.php", response, sizeof(response)); // a remplacer par un guiServer_ping();
+         gethttp(localhost_const, apiport, "/CMD/ping.php", response, sizeof(response)); // a remplacer par un guiServer_ping();
       }
 
       // indicateur de fonctionnement de mea-edomus

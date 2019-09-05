@@ -11,23 +11,19 @@
 cJSON *appParameters = NULL;
 
 char *appParameters_defaults = 
-"{\"MEAPATH\":\"\",\
-\"PHPCGIPATH\":\"\",\
-\"PHPINIPATH\":\"\",\
-\"GUIPATH\":\"\",\
-\"LOGPATH\":\"\",\
-\"PLUGINPATH\":\"\",\
-\"DRIVERSPATH\":\"\",\
-\"VENDORID\":\"\",\
-\"DEVICEID\":\"\",\
-\"INSTANCEID\":\"\",\
-\"VERBOSELEVEL\":\"\",\
-\"GUIPORT\":\"\",\
-\"PHPSESSIONSPATH\":\"\",\
-\"PARAMSDBVERSION\":\"\",\
-\"INTERFACE\":\"\",\
-\"RULESFILE\":\"\",\
-\"RULESFILESPATH\":\"\"}";
+"{\"MEAPATH\":\".\",\
+\"HTML_PATH\":\"./html\",\
+\"LOGPATH\":\"./var/log\",\
+\"PLUGINPATH\":\"./lib/mea-plugins\",\
+\"DRIVERSPATH\":\"./lib/mea-drivers\",\
+\"XPL_VENDORID\":\"mea\",\
+\"XPL_DEVICEID\":\"edomus\",\
+\"XPL_INSTANCEID\":\"0\",\
+\"VERBOSELEVEL\":\"1\",\
+\"HTTP_PORT\":\"8083\",\
+\"INTERFACE\":\"eth0\",\
+\"RULESFILE\":\"mea-edomus.rules\",\
+\"RULESFILESPATH\":\"./lib/mea-rules\"}";
 
 
 int appParameters_set(char *key, char *value, cJSON *d);
@@ -152,6 +148,13 @@ void appParameters_print(cJSON *p) {
    char *s = cJSON_Print(p);
    printf("%s\n", s);
    free(s);
+}
+
+
+void appParameters_display()
+{
+   if(appParameters)
+      appParameters_print(appParameters);
 }
 
 

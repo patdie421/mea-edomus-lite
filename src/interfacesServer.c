@@ -1281,11 +1281,14 @@ struct plugin_info_s {
 };
 struct plugin_info_s *plugins_list = NULL;
 
+/*
 #ifndef __APPLE__
    #define DYN_EXT ".so"
 #else
    #define DYN_EXT ".dylib"
 #endif
+*/
+#define DYN_EXT ".idrv"
  
 struct plugin_info_s plugin_info_defaults[] = {
    { "interface_type_002" DYN_EXT, INTERFACE_TYPE_002, 0 },
@@ -1765,7 +1768,7 @@ int start_interfaces_load_json(cJSON *params_list)
       jsonInterfaces=jsonInterfacesLoad(jsonInterfacesFile);
       if(!jsonInterfaces) {
          VERBOSE(1) {
-            mea_log_printf("%s (%s) : can't load interfaces descriptions\n",ERROR_STR,__func__);
+            mea_log_printf("%s (%s) : can't load interfaces descriptions from %s\n",ERROR_STR,__func__,jsonInterfacesFile);
          }
          return -1;
       }

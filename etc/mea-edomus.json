@@ -1,21 +1,4 @@
 {
-  "MEAPATH": "/data/sda2/prod/mea-edomus-lite",
-  "PHPCGIPATH": "/data/sda2/prod/mea-edomus-lite/bin",
-  "PHPINIPATH": "/data/sda2/prod/mea-edomus-lite/etc",
-  "GUIPATH": "/data/sda2/prod/mea-edomus-lite/lib/mea-gui",
-  "LOGPATH": "/data/sda2/prod/mea-edomus-lite/var/log",
-  "PLUGINPATH": "/data/sda2/prod/mea-edomus-lite/lib/mea-plugins",
-  "DRIVERSPATH": "/data/sda2/prod/mea-edomus-lite/lib/mea-drivers",
-  "VENDORID": "mea",
-  "DEVICEID": "edomus",
-  "INSTANCEID": "homedev2",
-  "VERBOSELEVEL": "1",
-  "GUIPORT": "8083",
-  "PHPSESSIONSPATH": "/data/sda2/prod/mea-edomus-lite/var/sessions",
-  "PARAMSDBVERSION": "0",
-  "INTERFACE": "eth0",
-  "RULESFILE": "/data/sda2/prod/mea-edomus-lite/lib/mea-rules/automator.rules",
-  "RULESFILESPATH": "/data/sda2/prod/mea-edomus-lite/lib/mea-rules",
-  "SQLITE3DBPARAMPATH": "/data/sda2/prod/mea-edomus-lite/var/db/params.db"
+  "MEAPATH": "."
 }
 
