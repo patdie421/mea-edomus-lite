@@ -45,11 +45,13 @@ CFLAGS      = -std=c99 \
               -O3 \
               -D_DEFAULT_SOURCE \
               -I/usr/include/python2.7 \
-              -I$(MYPATH)/src \
+              -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
+              -I"$(MYPATH)/src" \
                $(INTERFACES_CFLAGS) \
                $(ASPLUGIN_CFLAGS)
 
-LDFLAGS     = -lpthread \
+LDFLAGS     = -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
+              -lpthread \
               -lm \
               -ldl \
               -lsqlite3 \

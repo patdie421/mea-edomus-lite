@@ -21,7 +21,7 @@ ifeq ($(TECHNO), linux)
                  -DTECHNO_$(TECHNO) \
                  -I/usr/include/mysql \
                  -I/usr/include/python2.7 \
-                 -I$(BASEDIR)/src \
+                 -I"$(BASEDIR)/src" \
                  $(DEBUGFLAGS)
 endif
 ifeq ($(TECHNO), macosx)
@@ -31,7 +31,7 @@ ifeq ($(TECHNO), macosx)
                  -IxPLLib-mac \
                  -I/usr/local/mysql/include \
                  -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
-                 -I$(BASEDIR)/src \
+                 -I"$(BASEDIR)/src" \
                  $(DEBUGFLAGS)
 endif
 

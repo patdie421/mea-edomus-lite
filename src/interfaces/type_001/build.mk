@@ -39,6 +39,7 @@ interface_type_001_counters.c
 OBJECTS=$(addprefix $(TECHNO).objects/, $(SOURCES:.c=.o))
 
 $(TECHNO).objects/%.o: %.c
+	@echo $(CFLAGS)
 	@$(CC) $(INCLUDES) -c $(CFLAGS) -MM -MT $(TECHNO).objects/$*.o $*.c > .deps/$*.dep
 	$(CC) $(INCLUDES) -c $(CFLAGS) $*.c -o $(TECHNO).objects/$*.o
 
