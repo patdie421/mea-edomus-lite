@@ -38,7 +38,7 @@ char rulesset_file[255] = "";
 
 /* prototypes de fonctions */
 int yylex (void);
-int yyerror(char *s);
+void yyerror(char *s);
 
 int nl(FILE *fd);
 int space(FILE *fd, int nb);
@@ -379,7 +379,7 @@ Fonction_parametres:
 %%
 
 
-int yyerror(char *s)
+void yyerror(char *s)
 {
    printError(jsonerror_flag, 1, current_file, yylineno, line_offset, yytext, s);
 }
@@ -407,6 +407,7 @@ int indent(FILE *fd, int nb)
    if(indent_flag == 1)
       for(int i=0; i<nb; i++)
          fputs("   ", fd);
+   return 0;
 }
 
 
@@ -415,6 +416,7 @@ int space(FILE *fd, int nb)
    if(indent_flag == 1)
       for(int i=0; i<nb; i++)
          fputc(' ', fd);
+   return 0;
 }
 
 
@@ -422,6 +424,7 @@ int nl(FILE *fd)
 {
    if(indent_flag == 1)
       fprintf(fd, "\n");
+   return 0;
 }
 
 
@@ -746,7 +749,7 @@ int main(int argc, const char * argv[])
      while(!feof(fdi))
      {
         line[0]=0;
-        int ret=fgets(line, sizeof(line)-1, fdi);
+        char *ret=fgets(line, sizeof(line)-1, fdi);
         fputs(line, out);
      }
      fclose(fdi);
@@ -776,7 +779,7 @@ int main(int argc, const char * argv[])
      while(!feof(fdo))
      {
         line[0]=0;
-        int ret=fgets(line, sizeof(line)-1, fdo);
+        char *ret=fgets(line, sizeof(line)-1, fdo);
         fputs(line, out);
      }
      unlink(ofname); // suppression du fichier temporaire
