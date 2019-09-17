@@ -1,2 +1,0 @@
-macosx.objects/src/consts.o: src/consts.c \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/consts.h

@@ -1,2 +1,0 @@
-macosx.objects/src/mongoose.o: src/mongoose.c \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mongoose.h

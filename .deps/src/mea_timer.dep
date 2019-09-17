@@ -1,2 +1,0 @@
-macosx.objects/src/mea_timer.o: src/mea_timer.c \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_timer.h

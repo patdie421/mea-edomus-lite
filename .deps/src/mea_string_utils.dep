@@ -1,2 +1,0 @@
-macosx.objects/src/mea_string_utils.o: src/mea_string_utils.c \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_string_utils.h
