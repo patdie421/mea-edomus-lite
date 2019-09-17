@@ -48,7 +48,8 @@ CFLAGS      = -std=c99 \
               -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
               -I"$(MYPATH)/src" \
                $(INTERFACES_CFLAGS) \
-               $(ASPLUGIN_CFLAGS)
+               $(ASPLUGIN_CFLAGS) \
+              -pthread
 
 LDFLAGS     = -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
               -I/usr/lib/python2.7 \

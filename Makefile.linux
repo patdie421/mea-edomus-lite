@@ -53,7 +53,6 @@ CFLAGS      = -std=c99 \
 LDFLAGS     = -lpthread \
               -lm \
               -ldl \
-              -lsqlite3 \
               -lpython2.7 \
               -lrt \
               -lcurl \
