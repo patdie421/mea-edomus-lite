@@ -906,7 +906,12 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
    if(!ret) {
       int n=snprintf(dev,sizeof(buff)-1,"/dev/%s",buff);
       if(n<0 || n==(sizeof(buff)-1)) {
-         strerror_r(errno, err_str, sizeof(err_str));
+#ifdef _POSIX_SOURCE
+         char *ret;
+#else
+         int ret;
+#endif
+         ret=strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(2) {
             mea_log_printf("%s (%s) : snprintf - %s\n", ERROR_STR, __func__, err_str);
          }
@@ -920,7 +925,12 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
 
    ed=(enocean_ed_t *)malloc(sizeof(enocean_ed_t));
    if(!ed) {
-      strerror_r(errno, err_str, sizeof(err_str));
+#ifdef _POSIX_SOURCE
+      char *ret;
+#else
+      int ret;
+#endif
+      ret=strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
@@ -929,7 +939,12 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
 
    fd=enocean_init(ed, dev);
    if (fd == -1) {
-      strerror_r(errno, err_str, sizeof(err_str));
+#ifdef _POSIX_SOURCE
+      char *ret;
+#else
+      int ret;
+#endif
+      ret=strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : enocean_init - Unable to open serial port (%s).\n", ERROR_STR, __func__, dev);
       }
@@ -1027,7 +1042,12 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
    //
    xpl_callback_data=(struct xpl_callback_data_s *)malloc(sizeof(struct xpl_callback_data_s));
    if(!xpl_callback_data) {
-      strerror_r(errno, err_str, sizeof(err_str));
+#ifdef _POSIX_SOURCE
+      char *ret;
+#else
+      int ret;
+#endif
+      ret=strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }

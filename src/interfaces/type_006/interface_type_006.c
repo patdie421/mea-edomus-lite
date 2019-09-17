@@ -910,7 +910,12 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
    if(!ret) {
       int n=snprintf(dev,sizeof(buff)-1,"/dev/%s",buff);
       if(n<0 || n==(sizeof(buff)-1)) {
-         strerror_r(errno, err_str, sizeof(err_str));
+#ifdef _POSIX_SOURCE
+         char *ret;
+#else
+         int ret;
+#endif
+         ret=strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(2) {
             mea_log_printf("%s (%s) : snprintf - %s\n", ERROR_STR, __func__, err_str);
          }
@@ -953,7 +958,12 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
    // données pour les callbacks xpl
    struct callback_xpl_data_s *xpl_callback_params=(struct callback_xpl_data_s *)malloc(sizeof(struct callback_xpl_data_s));
    if(!xpl_callback_params) {
-      strerror_r(errno, err_str, sizeof(err_str));
+#ifdef _POSIX_SOURCE
+      char *ret;
+#else
+      int ret;
+#endif
+      ret=strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
@@ -972,7 +982,7 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
       return 0;
    }
 
-   strerror_r(errno, err_str, sizeof(err_str));
+   ret=strerror_r(errno, err_str, sizeof(err_str));
    VERBOSE(2) mea_log_printf("%s  (%s) : %s can't start - %s.\n", ERROR_STR, __func__, start_stop_params->i006->name, err_str);
    
 clean_exit:
