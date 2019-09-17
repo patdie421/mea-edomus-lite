@@ -15,4 +15,3 @@ jobs:
   - script: sudo apt update
   - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
   - script: make -f Makefile.ubuntu
-  - displayName: 'build ubuntu'
