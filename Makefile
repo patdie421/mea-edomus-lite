@@ -54,7 +54,6 @@ LDFLAGS     = -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
               -lpthread \
               -lm \
               -ldl \
-              -lsqlite3 \
               -lpython2.7 \
               -lrt \
               -lcurl \
