@@ -1083,18 +1083,24 @@ cJSON *jsonTypesLoad(char *file)
 
 int resyncDevices(cJSON *jsonInterfaces, char *file)
 {
+   // à faire
+
    return 0;
 }
 
  
 int jsonInterfacesSave()
 {
+   // à faire
+
    return 0;
 }
 
 
 int jsonTypesSave()
 {
+   // à faire
+
    return 0;
 }
 
@@ -1491,12 +1497,16 @@ int16_t interfacesServer_call_interface_api(int id_interface, char *cmnd, void *
 
 int start_interface(int id_interface)
 {
+   // à faire
+
    return 0;
 }
 
 
 int stop_interface(int id_interface)
 {
+   // à faire
+
    return 0;
 }
 
@@ -1762,9 +1772,10 @@ int start_interfaces_load_json(cJSON *params_list)
       jsonTypes=NULL;
    }
 
+   char *meapath=appParameters_get("MEAPATH", params_list);
    if(1) {
-      char jsonInterfacesFile[256];
-      snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", appParameters_get("MEAPATH", params_list));
+      char jsonInterfacesFile[1024];
+      snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", meapath);
       jsonInterfaces=jsonInterfacesLoad(jsonInterfacesFile);
       if(!jsonInterfaces) {
          VERBOSE(1) {
@@ -1777,8 +1788,8 @@ int start_interfaces_load_json(cJSON *params_list)
    }
 
    if(1) {
-      char jsonTypesFile[256];
-      snprintf(jsonTypesFile, sizeof(jsonTypesFile)-1, "%s/etc/types.json", appParameters_get("MEAPATH", params_list));
+      char jsonTypesFile[1024];
+      snprintf(jsonTypesFile, sizeof(jsonTypesFile)-1, "%s/etc/types.json", meapath);
       jsonTypes=jsonTypesLoad(jsonTypesFile);
       if(!jsonTypes) {
          VERBOSE(1) {

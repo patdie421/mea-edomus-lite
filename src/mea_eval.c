@@ -39,8 +39,7 @@ static inline int16_t  mea_eval_getFunctionId(char *str, int16_t l);
 enum mea_eval_function_id_e { INT_F=0 };
 
 
-struct mea_eval_function_def_s
-{
+struct mea_eval_function_def_s {
    char *name;
    enum mea_eval_function_id_e num;
    uint16_t l;
@@ -74,8 +73,7 @@ static int mea_eval_getOperatorN(char *str, char **newptr)
    char *p = str;
    *newptr = p;
 
-   switch(*p)
-   {
+   switch(*p) {
       case '+':
       case '-':
       case '*':
@@ -98,10 +96,8 @@ static int16_t mea_eval_getFunctionId(char *str, int16_t l)
    strncpy(name, str, l);
    name[l]=0;
 
-   for(int i=0; functionsList[i].name; ++i)
-   {
-      if(strcmp(functionsList[i].name, name)==0)
-      {
+   for(int i=0; functionsList[i].name; ++i) {
+      if(strcmp(functionsList[i].name, name)==0) {
          functionId=functionsList[i].num+128;
          break;
       }
@@ -112,8 +108,7 @@ static int16_t mea_eval_getFunctionId(char *str, int16_t l)
 
 static int mea_eval_callFunction(double *d, int fn, double d1)
 {
-   switch(fn-128)
-   {
+   switch(fn-128) {
       case INT_F: // int()
         *d=(double)((int)d1);
         break;
@@ -135,15 +130,13 @@ static enum mea_eval_token_type_id_e mea_eval_getToken(char *str, char **newptr,
    char *p = str;
    *newptr=p;
  
-   switch(*p)
-   {
+   switch(*p) {
       case '#':
          {
             char *n = NULL;
             ++p;
             double d=strtod(p, &n);
-            if(p!=n)
-            {
+            if(p!=n) {
                v->floatval=d;
                *newptr=n;
                return NUMERIC_T;
@@ -157,17 +150,14 @@ static enum mea_eval_token_type_id_e mea_eval_getToken(char *str, char **newptr,
             ++p;
             while(*p && *p!='}')
                ++p;
-            if(*p=='}')
-            {
+            if(*p=='}') {
                char name[VALUE_MAX_STR_SIZE];
                strncpy(name, str+1, (int)(p-str)-1);
                name[(int)(p-str-1)]=0; 
 
-               if(_getVarId != NULL)
-               {
+               if(_getVarId != NULL) {
                   int16_t id = 0;
-                  if(_getVarId(name, mea_eval_userdata, &id)<0)
-                  {
+                  if(_getVarId(name, mea_eval_userdata, &id)<0) {
                      return -1;
                   }
                   v->var_id=id;
@@ -191,8 +181,7 @@ static enum mea_eval_token_type_id_e mea_eval_getToken(char *str, char **newptr,
             while(*p && isalpha(*p))
                ++p;
             int16_t ret=mea_eval_getFunctionId(str, (int16_t)(p-str));
-            if(ret>=0)
-            {
+            if(ret>=0) {
                v->fn_id=ret;
                *newptr=p;
                return FUNCTION_T;
@@ -241,8 +230,7 @@ static int mea_eval_getOperatorPriorityN(int op)
    if(op>127) // c'est un id fonction
       return 3;
 
-   switch(op)
-   {
+   switch(op) {
       case '+':
       case '-':
          return 1;
@@ -268,14 +256,12 @@ static int mea_eval_operatorPriorityCmpN(int op1, int op2)
 static int pushToEvalStack(int type, void *value, struct mea_eval_stack_s **stack, int *stack_size, int *stack_index)
 {
    ++(*stack_index);
-   if(*stack_index >= *stack_size)
-   {
+   if(*stack_index >= *stack_size) {
       *stack_size = *stack_size + 10;
       struct mea_eval_stack_s *tmp;
       tmp = *stack;
       *stack = (struct mea_eval_stack_s *)realloc(*stack, *stack_size * sizeof(struct mea_eval_stack_s));
-      if(*stack == NULL)
-      {
+      if(*stack == NULL) {
          *stack = tmp;
          return -1;
       }
@@ -284,8 +270,7 @@ static int pushToEvalStack(int type, void *value, struct mea_eval_stack_s **stac
    struct mea_eval_stack_s *s=*stack;
 
    s[*stack_index].type=type;
-   switch(type)
-   {
+   switch(type) {
       case 1:
          s[*stack_index].val.value=*((double *)value);
          break;
@@ -308,23 +293,19 @@ static int mea_eval_calcOperationN(int op, struct mea_eval_stack_s *stack, int *
 {
    double d, d1, d2;
 
-   if(op<128) // c'est un opérateur
-   {
+   if(op<128) { // c'est un opérateur
       d2=stack[(*stack_index)--].val.value;
       d1=stack[(*stack_index)--].val.value;
       if(mea_eval_doOperationN(&d, d1, op, d2)<0)
          return -1;
    }
-   else // c'est une fonction ou une variable
-   {
-      if(op==255) // c'est une variable
-      {
+   else { // c'est une fonction ou une variable
+      if(op==255) { // c'est une variable
          d1=stack[(*stack_index)--].val.value;
          if(_getVarVal != NULL && _getVarVal((int)d1, mea_eval_userdata, &d)<0)
             return -1; 
       }
-      else
-      {
+      else {
          d1=stack[(*stack_index)--].val.value;
          if(mea_eval_callFunction(&d, op, d1)<0)
             return -1;
@@ -343,14 +324,12 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
    int operators_index=-1;
 
    *err = 0;
-   if(!*str)
-   {
+   if(!*str) {
       *err=1; // pas de ligne à évaluer
       return -1;
    }
 
-   if(*lvl>10)
-   {
+   if(*lvl>10) {
       *err=2; // trop de niveau de parenthèse
       return -1;
    }
@@ -358,14 +337,12 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
    char *p=str;
    char *s;
 
-   do
-   {
+   do {
       s=p;
       mea_eval_getSpace(s, &p);
       
       s=p;
-      if(*s=='(')
-      {
+      if(*s=='(') {
          ++s;
          *lvl=*lvl+1;
          if(_evalCalcN(s, &p, lvl, stack, stack_size, stack_index, err)<0)
@@ -377,20 +354,17 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
          
          if(*p==')')
             ++p;
-         else
-         {
+         else {
             *newptr=p;
             *err=3; // parenthèse fermante attendu (expression)
             return -1;
          }
       }
-      else
-      {
+      else {
          union mea_eval_token_data_u v;
          int ret=mea_eval_getToken(s, &p, &v);
 
-         if(ret==NUMERIC_T)
-         {
+         if(ret==NUMERIC_T) {
             pushToEvalStack(1, (void *)&(v.floatval), &stack, stack_size, stack_index);
          }
          else if(ret==VARIABLE_T)
@@ -401,8 +375,7 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
             pushToEvalStack(2, (void *)&f, &stack, stack_size, stack_index);
 #else
             double d=0.0;
-            if(_getVarVal(v.var_id, mea_eval_userdata, &d) < 0)
-            {
+            if(_getVarVal(v.var_id, mea_eval_userdata, &d) < 0) {
                *newptr=p;
                *err=10;
                return -1;
@@ -411,20 +384,17 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
                pushToEvalStack(1, (void *)&d, &stack, stack_size, stack_index);
 #endif
          }
-         else if(ret==FUNCTION_T)
-         {
+         else if(ret==FUNCTION_T) {
             s=p;
             mea_eval_getSpace(s, &p);
             
             s=p;
-            if(*s!='(')
-            {
+            if(*s!='(') {
                *newptr=p;
                *err=6; // parenthèse ouvrante attendu
                return -1;
             }
-            else
-            {
+            else {
                ++s;
                ++(*lvl);
                if(_evalCalcN(s, &p, lvl, stack, stack_size, stack_index, err)<0)
@@ -435,8 +405,7 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
                mea_eval_getSpace(s,&p);
 
                s=p;
-               if(*s!=')')
-               {
+               if(*s!=')') {
                   *newptr=p;
                   *err=7; // parenthèse fermante attendu (fonction)
                   return -1;
@@ -447,15 +416,12 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
                //int op=v.fn_id;
                if(operators_index==-1)
                   operators[++operators_index]=v.fn_id;
-               else
-               {
-                  if(mea_eval_operatorPriorityCmpN(v.fn_id, operators[operators_index])<=0)
-                  {
+               else {
+                  if(mea_eval_operatorPriorityCmpN(v.fn_id, operators[operators_index])<=0) {
 #if ONFLYEVAL==0
                      pushToEvalStack(2, (void *)&(operators[operators_index]), &stack, stack_size, stack_index);
 #else
-                     if(mea_eval_calcOperationN(operators[operators_index], stack, stack_size, stack_index) < 0)
-                     {
+                     if(mea_eval_calcOperationN(operators[operators_index], stack, stack_size, stack_index) < 0) {
                         *newptr=p;
                         *err=11;
                         return -1;
@@ -468,8 +434,7 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
                }
             }
          }
-         else
-         {
+         else {
             *newptr=p;
             *err=4; // pas d'opérande
             return -1;
@@ -481,19 +446,15 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
 
       s=p;
       int op=mea_eval_getOperatorN(s, &p);
-      if(op!=-1)
-      {
+      if(op!=-1) {
          if(operators_index==-1)
             operators[++operators_index]=op;
-         else
-         {
-            if(mea_eval_operatorPriorityCmpN(op, operators[operators_index])<=0)
-            {
+         else {
+            if(mea_eval_operatorPriorityCmpN(op, operators[operators_index])<=0) {
 #if ONFLYEVAL==0
                pushToEvalStack(2, (void *)&(operators[operators_index]), &stack, stack_size, stack_index);
 #else
-               if(mea_eval_calcOperationN(operators[operators_index], stack, stack_size, stack_index) < 0)
-               {
+               if(mea_eval_calcOperationN(operators[operators_index], stack, stack_size, stack_index) < 0) {
                   *newptr=p;
                   *err=11;
                   return -1;
@@ -505,12 +466,10 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
                operators[++operators_index]=op;
          }
       }
-      else if((*s == 0) || (*s == ')' && *lvl > 0))
-      {
+      else if((*s == 0) || (*s == ')' && *lvl > 0)) {
          break;
       }
-      else
-      {
+      else {
          *newptr=p;
          if(*s==')')
             *err=8;
@@ -557,8 +516,7 @@ struct mea_eval_stack_s *mea_eval_buildStack_alloc(char *str, char **p, int16_t 
    int stack_size = DEFAULT_STACK_SIZE;
 
    stack = (struct mea_eval_stack_s *)malloc(stack_size * (sizeof(struct mea_eval_stack_s)));
-   if(stack==NULL)
-   {
+   if(stack==NULL) {
       *err = -1;
       return NULL;
    }
@@ -569,8 +527,7 @@ struct mea_eval_stack_s *mea_eval_buildStack_alloc(char *str, char **p, int16_t 
 
    tmp=stack;
    stack=realloc(stack, (stack_index+1)*(sizeof(struct mea_eval_stack_s)));
-   if(stack==NULL)
-   {
+   if(stack==NULL) {
       free(tmp);
       return NULL;
    }
@@ -583,14 +540,11 @@ struct mea_eval_stack_s *mea_eval_buildStack_alloc(char *str, char **p, int16_t 
 #ifdef DEBUG
 static void displayStack(struct mea_eval_stack_s *stack, int32_t stack_ptr)
 {
-   for(int i=0; i<=stack_ptr; ++i)
-   {
-      if(stack[i].type==1)
-      {
+   for(int i=0; i<=stack_ptr; ++i) {
+      if(stack[i].type==1) {
          fprintf(stderr,"v = %f\n", stack[i].val.value);
       }
-      else if(stack[i].type==2)
-      {
+      else if(stack[i].type==2) {
          if(stack[i].val.op<128)
             fprintf(stderr,"op = %c\n", stack[i].val.op);
          else
@@ -612,26 +566,21 @@ static int16_t mea_eval_calcn(struct mea_eval_stack_s *stack, int32_t stack_ptr,
    {
       if(stack[i].type==1)
          exec_stack[++exec_stack_index].val.value = stack[i].val.value;
-      else if(stack[i].type==2)
-      {
+      else if(stack[i].type==2) {
          int op = stack[i].val.op;
-         if(op<128)
-         {
+         if(op<128) {
             d2=exec_stack[exec_stack_index--].val.value;
             d1=exec_stack[exec_stack_index--].val.value;
             if(mea_eval_doOperationN(&d, d1, op, d2)<0)
                return -1;
          }
-         else
-         {
-            if(op==255)
-            {
+         else {
+            if(op==255) {
                int16_t var_id=exec_stack[exec_stack_index--].val.id;
                if(_getVarVal(var_id, mea_eval_userdata, &d)<0)
                   return -1;
             }
-            else
-            {
+            else {
                d1=exec_stack[exec_stack_index--].val.value;
                if(mea_eval_callFunction(&d, op, d1)<0)
                   return -1;
@@ -644,20 +593,17 @@ static int16_t mea_eval_calcn(struct mea_eval_stack_s *stack, int32_t stack_ptr,
       else
          return -1;
 
-        if(exec_stack_index >= EXEC_STACK_SIZE-1)
-        {
+        if(exec_stack_index >= EXEC_STACK_SIZE-1) {
            fprintf(stderr,"execution stack overflow\n");
            return -1;
         }
    }
 
-   if(exec_stack_index!=0)
-   {
+   if(exec_stack_index!=0) {
       *r=0.0;
       return -1;
    }
-   else
-   {
+   else {
       *r=exec_stack[0].val.value;
       return 0;
    }
@@ -678,19 +624,16 @@ static int16_t mea_eval_calcn(char *str, char **p, double *r, int16_t *err)
 
    int16_t ret=_evalCalcN(str, p, &lvl, stack, &stack_size, &stack_index, err);
 
-   if(ret < 0)
-   {
+   if(ret < 0) {
       free(stack);
       return -1;
    }
-   if(stack_index!=0 && stack[0].type!=1 && *p != 0)
-   {
+   if(stack_index!=0 && stack[0].type!=1 && *p != 0) {
       *r=0.0;
       free(stack);
       return -1;
    }
-   else
-   {
+   else {
       *r=stack[0].val.value;
       free(stack);
       return 0;
@@ -738,8 +681,7 @@ int16_t mea_eval_calc_numeric(char *str, double *r)
 
 #if ONFLYEVAL==0
 
-struct mea_eval_stack_cache_s
-{
+struct mea_eval_stack_cache_s {
    char *expr;
    struct mea_eval_stack_s *stack;
    int stack_ptr;
@@ -756,8 +698,7 @@ struct mea_eval_stack_s *mea_eval_getStackFromCache(char *expr, int *stack_ptr, 
    struct mea_eval_stack_cache_s *e = NULL;
    HASH_FIND_STR(mea_eval_stacks_cache, expr, e);
 
-   if(e)
-   {
+   if(e) {
       *stack_ptr = e->stack_ptr;
       *err = e->err;
       return e->stack;
@@ -771,23 +712,20 @@ struct mea_eval_stack_s *mea_eval_addStackToCache(char *expr, struct mea_eval_st
 {
    struct mea_eval_stack_cache_s *e = NULL;
    HASH_FIND_STR(mea_eval_stacks_cache, expr, e);
-   if(e)
-   {
+   if(e) {
       if(e->stack)
          free(e->stack);
       e->stack = stack;
       e->stack_ptr = stack_ptr;
    }
-   else
-   {
+   else {
       int l_expr = (int)(strlen(expr));
 
       e = (struct mea_eval_stack_cache_s *)malloc(sizeof(struct mea_eval_stack_cache_s));
       if(e == NULL)
          return NULL;
       e->expr = (char *)malloc(l_expr+1);
-      if(e->expr == NULL)
-      {
+      if(e->expr == NULL) {
          free(e);
          e=NULL;
          return NULL;
@@ -806,12 +744,10 @@ struct mea_eval_stack_s *mea_eval_addStackToCache(char *expr, struct mea_eval_st
 
 void mea_eval_clean_stack_cache()
 {
-   if(mea_eval_stacks_cache)
-   {
+   if(mea_eval_stacks_cache) {
       struct mea_eval_stack_cache_s  *current, *tmp;
 
-      HASH_ITER(hh, mea_eval_stacks_cache, current, tmp)
-      {
+      HASH_ITER(hh, mea_eval_stacks_cache, current, tmp) {
          HASH_DEL(mea_eval_stacks_cache, current);
          if(current->expr)
             free(current->expr);
@@ -833,25 +769,21 @@ int mea_eval_calc_numeric_by_cache(char *expr, double *d)
    struct mea_eval_stack_s *stack = NULL;
 
    stack = mea_eval_getStackFromCache(expr, &stack_ptr, &err);
-   if(err == 0 && stack == NULL)
-   {
+   if(err == 0 && stack == NULL) {
       stack=mea_eval_buildStack_alloc(expr, &p, &err, &stack_ptr);
-      if(stack == NULL && err == -1)
-      {
+      if(stack == NULL && err == -1) {
          fprintf(stderr,"get stack error (%d) at \"%s\"\n", err, p);
          return -1;
       }
 
-      if(mea_eval_addStackToCache(expr, stack, stack_ptr, err)==NULL)
-      {
+      if(mea_eval_addStackToCache(expr, stack, stack_ptr, err)==NULL) {
          free(stack);
          stack=NULL;
          return -1;
       }
    }
 
-   if(!stack)
-   {
+   if(!stack) {
       return -1;
    }
 
@@ -909,8 +841,7 @@ int main(int argc, char *argv[])
    mea_eval_clean_stack_cache();
 
 #else
-   for(int i=0;i<400000;++i)
-   {
+   for(int i=0;i<400000;++i) {
       mea_eval_calc_numeric(expr, &d);
    }
 #endif
