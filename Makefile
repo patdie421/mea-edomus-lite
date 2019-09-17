@@ -6,7 +6,6 @@ DEBUGFLAGS = -g -D__DEBUG_ON__
 ASPLUGIN = 1
 
 MYPATH := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
-D := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 #MYPATH=/home/bananapi/mea-edomus
 #MYPATH=/data/dev/mea-edomus-lite
 SOURCES=$(shell echo src/*.c)
