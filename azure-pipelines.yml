@@ -19,6 +19,6 @@ jobs:
 - job: macosx
   displayName: 'macosx'
   pool:
-    vmImage: 'macosx-latest'
+    vmImage: 'macOS-latest'
   steps:
   - script: make -f Makefile.macosx
