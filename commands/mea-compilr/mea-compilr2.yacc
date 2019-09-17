@@ -746,7 +746,7 @@ int main(int argc, const char * argv[])
      while(!feof(fdi))
      {
         line[0]=0;
-        fgets(line, sizeof(line)-1, fdi);
+        int ret=fgets(line, sizeof(line)-1, fdi);
         fputs(line, out);
      }
      fclose(fdi);
@@ -776,7 +776,7 @@ int main(int argc, const char * argv[])
      while(!feof(fdo))
      {
         line[0]=0;
-        fgets(line, sizeof(line)-1, fdo);
+        int ret=fgets(line, sizeof(line)-1, fdo);
         fputs(line, out);
      }
      unlink(ofname); // suppression du fichier temporaire
