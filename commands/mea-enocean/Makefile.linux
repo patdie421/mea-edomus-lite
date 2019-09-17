@@ -29,13 +29,13 @@ all: enoceanlogger enoceanpairing enoceanoutput
 	@mkdir -p .deps
 
 enoceanoutput: enocean_output.o $(MEALIB)
-	$(CC) $(LDFLAGS) enocean_output.o $(MEALIB) -o $@
+	$(CC) enocean_output.o $(MEALIB) $(LDFLAGS) -o $@
 
 enoceanpairing: enocean_pairing.o $(MEALIB)
-	$(CC) $(LDFLAGS) enocean_pairing.o $(MEALIB) -o $@
+	$(CC) enocean_pairing.o $(MEALIB) $(LDFLAGS) -o $@
 
 enoceanlogger: enocean_logger.o
-	$(CC) $(LDFLAGS) enocean_logger.o -o $@
+	$(CC) enocean_logger.o $(LDFLAGS) -o $@
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $*.c -o $@
