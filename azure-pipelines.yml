@@ -7,7 +7,8 @@ trigger:
 - master
 
 jobs:
-- job:
+- job: ubuntu
+  displayName 'ubuntu'
   pool:
     vmImage: 'ubuntu-latest'
   steps:
