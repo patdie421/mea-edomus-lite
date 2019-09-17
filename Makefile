@@ -52,14 +52,15 @@ CFLAGS      = -std=c99 \
               -pthread
 
 LDFLAGS     = -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
-              -I/usr/lib/python2.7 \
+              -L/usr/lib/python2.7 \
               -lpthread \
               -lm \
               -ldl \
               -lpython2.7 \
               -lrt \
               -lcurl \
-              $(ASPLUGIN_LDFLAGS)
+              $(ASPLUGIN_LDFLAGS) \
+              -pthread
 
 print-%  : ; @echo $* = $($*)
 
