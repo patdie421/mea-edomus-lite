@@ -642,7 +642,7 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
       VERBOSE(2) mea_log_printf("%s (%s) : pthread_create - can't start thread\n",ERROR_STR,__func__);
       goto start_interface_type_001_clean_exit;
    }
-   fprintf(stderr,"INTERFACE_TYPE_001 : %x\n", (unsigned int)interface_type_001_thread_id);
+   fprintf(stderr,"INTERFACE_TYPE_001 : %p\n", interface_type_001_thread_id);
 
    start_stop_params->i001->thread_id=interface_type_001_thread_id;
    
