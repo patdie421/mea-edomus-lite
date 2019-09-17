@@ -1,0 +1,1 @@
+macosx.objects/arduino_pins.o: arduino_pins.c arduino_pins.h

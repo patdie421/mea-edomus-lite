@@ -1,0 +1,2 @@
+macosx.objects/src/cJSON.o: src/cJSON.c \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/cJSON.h

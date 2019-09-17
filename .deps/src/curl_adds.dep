@@ -1,0 +1,3 @@
+macosx.objects/src/curl_adds.o: src/curl_adds.c \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/curl_adds.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_verbose.h

@@ -1,0 +1,3 @@
+macosx.objects/src/mea_sockets_utils.o: src/mea_sockets_utils.c \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_sockets_utils.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_verbose.h

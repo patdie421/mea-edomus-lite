@@ -1,0 +1,6 @@
+macosx.objects/xbee.o: xbee.c \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_verbose.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/serial.h \
+  xbee.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_queue.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_error.h

@@ -1,0 +1,3 @@
+macosx.objects/src/mea_xpl.o: src/mea_xpl.c \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_timer.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_verbose.h

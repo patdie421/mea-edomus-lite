@@ -1,0 +1,2 @@
+macosx.objects/src/sunriset.o: src/sunriset.c \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/sunriset.h

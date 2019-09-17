@@ -1,0 +1,70 @@
+macosx.objects/plugin.o: plugin.c \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/Python.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/patchlevel.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pyconfig.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pymacconfig.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pyport.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pymath.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pymem.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/object.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/objimpl.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pydebug.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/unicodeobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/intobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/boolobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/longobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/floatobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/complexobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/rangeobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/stringobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/memoryobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/bufferobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/bytesobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/bytearrayobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/tupleobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/listobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/dictobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/enumobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/setobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/methodobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/moduleobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/funcobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/classobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/fileobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/cobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pycapsule.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/traceback.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/sliceobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/cellobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/iterobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/genobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/descrobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/warnings.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/weakrefobject.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/codecs.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pyerrors.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pystate.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pyarena.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/modsupport.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pythonrun.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/ceval.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/sysmodule.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/intrcheck.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/import.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/abstract.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/compile.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/code.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/eval.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pyctype.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pystrtod.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pystrcmp.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/dtoa.h \
+  /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/pyfpe.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/interfacesServer.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/xPLServer.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/cJSON.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_queue.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_error.h \
+  interface_type_005.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/uthash.h \
+  netatmo.h

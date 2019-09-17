@@ -1,0 +1,3 @@
+macosx.objects/src/mea_queue.o: src/mea_queue.c \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_queue.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_error.h

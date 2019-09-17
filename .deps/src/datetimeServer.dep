@@ -1,0 +1,6 @@
+macosx.objects/src/datetimeServer.o: src/datetimeServer.c \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_verbose.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_string_utils.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/uthash.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/sunriset.h \
+  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/datetimeServer.h
