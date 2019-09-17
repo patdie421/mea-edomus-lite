@@ -3,7 +3,7 @@
 
 #include "cJSON.h"
 
-#define VALUE_MAX_STR_SIZE 41
+#define VALUE_MAX_STR_SIZE 81
 
 extern char *inputs_rules;
 extern char *outputs_rules;

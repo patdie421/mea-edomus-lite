@@ -2290,7 +2290,7 @@ char *automator_inputs_table_to_json_string_alloc()
             if(v->type == 0)
                sprintf(tmpVal, "%f", v->val.floatval);
             if(v->type == 1)
-               sprintf(tmpVal, "\"%s\"", v->val.strval);
+               snprintf(tmpVal, sizeof(tmpVal)-1, "\"%s\"", v->val.strval);
             if(v->type == 2)
             {
                if(v->val.booleanval==0)
