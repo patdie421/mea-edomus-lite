@@ -5,7 +5,7 @@ TECHNO=macosx
 DEBUGFLAGS = -g -D__DEBUG_ON__
 ASPLUGIN = 1
 
-MYPATH=/Users/patrice/Developpement/Logiciels/mea-edomus-lite
+MYPATH := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 
 SOURCES=$(shell echo src/*.c)
 # OBJECTS=$(SOURCES:.c=.o)
