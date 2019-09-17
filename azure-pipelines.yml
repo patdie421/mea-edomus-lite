@@ -14,11 +14,11 @@ jobs:
   steps:
   - script: sudo apt update
   - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
-  - script: make -f Makefile.ubuntu
+  - script: make -f Makefile.ubuntu clean-all ; make -f Makefile.ubuntu
 
 - job: macosx
   displayName: 'macosx'
   pool:
     vmImage: 'macOS-latest'
   steps:
-  - script: make -f Makefile.macosx
+  - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
