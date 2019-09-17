@@ -77,7 +77,7 @@ $(TECHNO).objects/%.o: %.c
 	$(CC) -c $(CFLAGS) $*.c -o $(TECHNO).objects/$*.o
 
 $(EXECUTABLE): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) $(INTERFACES_OBJECTS) -o $@
+	$(CC) $(OBJECTS) $(INTERFACES_OBJECTS) $(LDFLAGS) -o $@
 
 clean:
 	-rm -f $(OBJECTS) $(INTERFACES_OBJECTS) .deps/src/*
