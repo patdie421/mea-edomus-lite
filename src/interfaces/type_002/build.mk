@@ -32,7 +32,7 @@ ifeq ($(TECHNO), linux)
                  -O2 \
                  -DTECHNO_$(TECHNO) \
                  -I/usr/include/python2.7 \
-                 -I$(BASEDIR)/src \
+                 -I"$(BASEDIR)/src" \
                  $(DEBUGFLAGS) \
                  $(LINUX_ASPLUGIN_CFLAGS)
    LDFLAGS     = $(LINUX_ASPLUGIN_LDFLAGS)
@@ -43,7 +43,7 @@ ifeq ($(TECHNO), macosx)
                  -O2 \
                  -DTECHNO_$(TECHNO) \
                  -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
-                 -I$(BASEDIR)/src \
+                 -I"$(BASEDIR)/src" \
                  $(DEBUGFLAGS) \
                  $(MACOSX_ASPLUGIN_CFLAGS)
    LDFLAGS     = $(MACOSX_ASPLUGIN_LDFLAGS)

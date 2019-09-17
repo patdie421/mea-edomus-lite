@@ -33,7 +33,7 @@ ifeq ($(TECHNO), linux)
                  -DTECHNO_$(TECHNO) \
                  -I/usr/include/mysql \
                  -I/usr/include/python2.7 \
-                 -I$(BASEDIR)/src \
+                 -I"$(BASEDIR)/src" \
                  $(DEBUGFLAGS) \
                  $(LINUX_ASPLUGIN_CFLAGS)
    LDFLAGS     = $(LINUX_ASPLUGIN_LDFLAGS)
@@ -45,7 +45,7 @@ ifeq ($(TECHNO), macosx)
                  -DTECHNO_$(TECHNO) \
                  -I/usr/local/mysql/include \
                  -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
-                 -I$(BASEDIR)/src \
+                 -I"$(BASEDIR)/src" \
                  $(DEBUGFLAGS) \
                  $(MACOSX_ASPLUGIN_CFLAGS)
    LDFLAGS     = $(MACOSX_ASPLUGIN_LDFLAGS)
