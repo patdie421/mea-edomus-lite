@@ -1,6 +1,0 @@
-macosx.objects/enocean.o: enocean.c \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/serial.h \
-  enocean.h \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_queue.h \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_error.h \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_verbose.h

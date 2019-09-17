@@ -1,5 +1,0 @@
-macosx.objects/netatmo.o: netatmo.c netatmo.h \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/cJSON.h \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/curl_adds.h \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_verbose.h \
-  /Users/patrice/Developpement/visual\ studio\ code/mea-edomus-lite/src/mea_string_utils.h
