@@ -328,7 +328,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
          mea_log_printf("%s (%s) : enocean data from - %02x-%02x-%02x-%02x\n", INFO_STR, __func__, a, b, c, d);
 
          char interfaceName[41];
-         sprintf(interfaceName,"%s://%02x-%02x-%02x-%02x", params->i003->name, a, b, c, d);
+         snprintf(interfaceName,sizeof(interfaceName)-1,"%s://%02x-%02x-%02x-%02x", params->i003->name, a, b, c, d);
          mea_strtolower(interfaceName);
 
          cJSON *jsonInterface = getInterfaceByDevName_alloc(interfaceName);
