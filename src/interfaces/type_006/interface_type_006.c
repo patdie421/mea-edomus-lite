@@ -982,9 +982,16 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
       return 0;
    }
 
-   ret=strerror_r(errno, err_str, sizeof(err_str));
-   VERBOSE(2) mea_log_printf("%s  (%s) : %s can't start - %s.\n", ERROR_STR, __func__, start_stop_params->i006->name, err_str);
-   
+   {
+#ifdef _POSIX_SOURCE
+      char *ret;
+#else
+      int ret;
+#endif
+      ret=strerror_r(errno, err_str, sizeof(err_str));
+      VERBOSE(2) mea_log_printf("%s  (%s) : %s can't start - %s.\n", ERROR_STR, __func__, start_stop_params->i006->name, err_str);
+   } 
+
 clean_exit:
    if(start_stop_params->i006->thread) {
       stop_interface_type_006(start_stop_params->i006->monitoring_id, start_stop_params, NULL, 0);

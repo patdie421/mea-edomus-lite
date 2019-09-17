@@ -1230,7 +1230,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
 #else
          int ret;
 #endif
-         strerror_r(errno, err_str, sizeof(err_str));
+         ret=strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(2) {
             mea_log_printf("%s (%s) : snprintf - %s\n", ERROR_STR, __func__, err_str);
          }
