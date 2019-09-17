@@ -6,7 +6,6 @@ DEBUGFLAGS = -g -D__DEBUG_ON__
 ASPLUGIN = 1
 
 MYPATH := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
-D := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 #MYPATH=/home/bananapi/mea-edomus
 #MYPATH=/data/dev/mea-edomus-lite
 SOURCES=$(shell echo src/*.c)
@@ -123,6 +122,7 @@ $(TECHNO).objects:
 .deps:
 	@mkdir -p .deps
 	@mkdir -p .deps/src
-	@rm .deps/src/*.dep
+	@rm .deps/src/*.dep 2>/dev/null
+	@echo done
 
 -include .deps/src/*.dep
