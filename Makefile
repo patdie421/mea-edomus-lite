@@ -122,6 +122,7 @@ $(TECHNO).objects:
 .deps:
 	@mkdir -p .deps
 	@mkdir -p .deps/src
-	@rm .deps/src/*.dep
+	@rm .deps/src/*.dep 2>/dev/null
+	@echo done
 
 -include .deps/src/*.dep
