@@ -608,7 +608,12 @@ int start_pythonPluginServer(int my_id, void *data, char *errmsg, int l_errmsg)
       _pythonPluginServer_thread_id=pythonPluginServer();
       if(_pythonPluginServer_thread_id==NULL)
       {
-         strerror_r(errno, err_str, sizeof(err_str));
+#ifdef _POSIX_SOURCE
+         char *ret;
+#else
+         int ret;
+#endif
+         ret=strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(1) {
             mea_log_printf("%s (%s) : can't start %s (thread error) - %s\n", ERROR_STR, __func__, pythonPlugin_server_name_str, notify_str);
          }

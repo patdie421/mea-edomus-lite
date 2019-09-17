@@ -1286,7 +1286,12 @@ int start_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
 
    xpl_callback_params=(struct callback_xpl_data_s *)malloc(sizeof(struct callback_xpl_data_s));
    if(!xpl_callback_params) {
-       strerror_r(errno, err_str, sizeof(err_str));
+#ifdef _POSIX_SOURCE
+       char *ret;
+#else
+       int ret;
+#endif
+       ret=strerror_r(errno, err_str, sizeof(err_str));
        VERBOSE(2) {
           mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
        }

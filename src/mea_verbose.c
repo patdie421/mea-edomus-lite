@@ -134,9 +134,13 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
    while(!feof(fd))
    {
       size_t nb=fread(buf, 1, sizeof(buf), fd);
-      write(fd_dest, buf, nb);
+      if(write(fd_dest, buf, nb)==-1) {
+         perror("write: ");
+      }
    }
-   ftruncate(fileno(fd), 0);
+   if(!ftruncate(fileno(fd), 0)) {
+      perror("ftruncate: ");
+   } 
 
    flock(fileno(fd), LOCK_UN);
 
