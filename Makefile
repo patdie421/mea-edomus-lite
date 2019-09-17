@@ -51,6 +51,7 @@ CFLAGS      = -std=c99 \
                $(ASPLUGIN_CFLAGS)
 
 LDFLAGS     = -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
+              -I/usr/lib/python2.7 \
               -lpthread \
               -lm \
               -ldl \
