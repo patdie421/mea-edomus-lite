@@ -6,13 +6,13 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
-
-steps:
-- script: |
-    sudo apt update
-    sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
-    make
-  displayName: 'Run a one-line script'
-
+jobs:
+- job:
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+    script: |
+      sudo apt update
+      sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
+      make -f Makefile.ubuntu
+    displayName: 'build ubuntu'
