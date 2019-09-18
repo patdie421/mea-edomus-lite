@@ -15,7 +15,7 @@ stages:
         projectKey: 'mea-edomus-lite'
         projectName: 'mea-edomus-lite'
     - task: SonarCloudAnalyze@1
-    displayName 'Analyse on SonarCloud'
+      displayName 'Analyse on SonarCloud'
 
 - stage: etape1
   jobs:
