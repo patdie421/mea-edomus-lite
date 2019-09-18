@@ -22,7 +22,7 @@ stages:
         configMode: manual
         cliProjectKey: mea-edomus-lite
         cliProjectName: mea-edomus-lite
-        cfamily.build-wrapper-output=bw_output: mea-edomus.ubuntu
+        cfamily.build-wrapper-output: mea-edomus.ubuntu
     - task: SonarCloudAnalyze@1
       displayName: 'Analyse on SonarCloud'
 
