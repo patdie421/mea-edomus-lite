@@ -1,32 +1,33 @@
 trigger:
-
-
 - master
 
-jobs:
-- job: ubuntu
-  displayName: 'ubuntu'
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-  - script: sudo apt update
-  - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
-  - script: make -f Makefile.ubuntu clean-all ; make -f Makefile.ubuntu
+stages:
+- stage: etape1
+   jobs:
+  - job: ubuntu
+    displayName: 'ubuntu'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: sudo apt update
+    - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
+    - script: make -f Makefile.ubuntu clean-all ; make -f Makefile.ubuntu
 
-- job: macosx
-  displayName: 'macosx'
-  pool:
-    vmImage: 'macOS-latest'
-  steps:
-  - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
-
-- job: jenkins
-  displayName: 'jenkins'
-  steps:
-    - task: JenkinsQueueJob@2
-      inputs:
-        serverEndpoint: 'jenkins'
-        jobName: 'mea-edomus-lite'
-        captureConsole: true
-        capturePipeline: true
-        isParameterizedJob: false
+  - job: macosx
+    displayName: 'macosx'
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
+- stage: etape2
+   jobs:
+  - job: jenkins
+    displayName: 'jenkins'
+    steps:
+      - task: JenkinsQueueJob@2
+        inputs:
+          serverEndpoint: 'jenkins'
+          jobName: 'mea-edomus-lite'
+          captureConsole: true
+          capturePipeline: true
+          isParameterizedJob: false
