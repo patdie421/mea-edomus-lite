@@ -19,11 +19,11 @@ all:
 	for i in $(COMMANDS) ; \
 	do \
            echo $$i ;\
-	   $(MAKE) -C $$i -f Makefile.$(TECHNO) BASEDIR=$(BASEDIR) CC=$(CC); \
+	   $(MAKE) -C $$i -f Makefile.$(TECHNO) BASEDIR="$(BASEDIR)" CC=$(CC); \
 	done
 
 clean:
 	@for i in $(COMMANDS) ; \
 	do \
-	   $(MAKE) -C $$i -f Makefile.$(TECHNO) BASEDIR=$(BASEDIR) clean ; \
+	   $(MAKE) -C $$i -f Makefile.$(TECHNO) BASEDIR="$(BASEDIR)" clean ; \
 	done
