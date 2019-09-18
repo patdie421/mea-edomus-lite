@@ -4,13 +4,17 @@ trigger:
 
 stages:
 - stage: sonar
-  - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
-    displayName: 'Prepare analysis on SonarCloud'
-    inputs:
-      SonarCloud: patdie421
-      organization: 'mea-edmous-lite'
-      projectKey: 'mea-edomus-lite'
-      projectName: 'mea-edomus-lite'
+  jobs:
+    -job: sonar
+    displayName: 'sonar'
+    steps:
+      - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+        displayName: 'Prepare analysis on SonarCloud'
+        inputs:
+          SonarCloud: patdie421
+          organization: 'mea-edmous-lite'
+          projectKey: 'mea-edomus-lite'
+          projectName: 'mea-edomus-lite'
 
 - stage: etape1
   jobs:
