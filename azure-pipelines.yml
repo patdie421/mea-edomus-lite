@@ -3,7 +3,7 @@ trigger:
 
 stages:
 
-- stage: sonar
+- stage: Code Analyse
   jobs:
   - job: sonar
     displayName: 'sonar'
