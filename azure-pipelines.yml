@@ -2,6 +2,7 @@ trigger:
 - master
 
 stages:
+
 - stage: etape1
   jobs:
   - job: ubuntu
@@ -12,6 +13,18 @@ stages:
     - script: sudo apt update
     - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
     - script: make -f Makefile.ubuntu clean-all ; make -f Makefile.ubuntu
+    - task: SonarCloudPrepare@1
+      displayName: 'Prepare analysis on SonarCloud'
+      inputs:
+        SonarCloud: sonar
+        organization: 'mea-edmous-lite'
+        scannerMode: CLI
+        configMode: manual
+        cliProjectKey: mea-edomus-lite
+        cliProjectName: mea-edomus-lite
+        cfamily.build-wrapper-output: mea-edomus.ubuntu
+    - task: SonarCloudAnalyze@1
+      displayName: 'Analyse on SonarCloud'
 
   - job: macosx
     displayName: 'macosx'
@@ -19,7 +32,6 @@ stages:
       vmImage: 'macOS-latest'
     steps:
     - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
-    - publish: package/ea-edomus.tar.pkg.bz2
 
 - stage: etape2
   jobs:
