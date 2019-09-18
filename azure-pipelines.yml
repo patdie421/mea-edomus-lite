@@ -1,4 +1,6 @@
 trigger:
+
+
 - master
 
 jobs:
@@ -17,3 +19,14 @@ jobs:
     vmImage: 'macOS-latest'
   steps:
   - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
+
+- job: jenkins
+  displayName: 'jenkins'
+  steps:
+    - task: JenkinsQueueJob@2
+      inputs:
+        serverEndpoint: 'jenkins'
+        jobName: 'mea-edomus-lite'
+        captureConsole: true
+        capturePipeline: true
+        isParameterizedJob: false
