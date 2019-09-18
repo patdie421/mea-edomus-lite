@@ -2,23 +2,6 @@ trigger:
 - master
 
 stages:
-- stage: sonar
-  jobs:
-  - job: sonar
-    displayName: 'sonar'
-    steps:
-#    - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
-    - task: SonarCloudPrepare@1
-      displayName: 'Prepare analysis on SonarCloud'
-      inputs:
-        SonarCloud: sonar
-        organization: 'mea-edmous-lite'
-        scannerMode: CLI
-        configMode: manual
-        cliProjectKey: mea-edomus-lite
-        cliProjectName: mea-edomus-lite
-    - task: SonarCloudAnalyze@1
-      displayName: 'Analyse on SonarCloud'
 
 - stage: etape1
   jobs:
@@ -30,6 +13,17 @@ stages:
     - script: sudo apt update
     - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
     - script: make -f Makefile.ubuntu clean-all ; make -f Makefile.ubuntu
+    - task: SonarCloudPrepare@1
+      displayName: 'Prepare analysis on SonarCloud'
+      inputs:
+        SonarCloud: sonar
+        organization: 'mea-edmous-lite'
+        scannerMode: CLI
+        configMode: manual
+        cliProjectKey: mea-edomus-lite
+        cliProjectName: mea-edomus-lite
+    - task: SonarCloudAnalyze@1
+      displayName: 'Analyse on SonarCloud'
 
   - job: macosx
     displayName: 'macosx'
