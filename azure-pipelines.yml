@@ -20,7 +20,6 @@ stages:
     steps:
     - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
     - publish: package/ea-edomus.tar.pkg.bz2
-      artifact: mea-edomus-lite.macosx
 
 - stage: etape2
   jobs:
