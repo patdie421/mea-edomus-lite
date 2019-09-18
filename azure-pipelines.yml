@@ -3,16 +3,13 @@ trigger:
 
 stages:
 
-- stage: etape1
+- stage: sonar
   jobs:
-  - job: ubuntu
-    displayName: 'ubuntu'
+  - job: sonar
+    displayName: 'sonar'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - script: sudo apt update
-    - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
-    - script: make -f Makefile.ubuntu clean-all ; make -f Makefile.ubuntu
     - task: SonarCloudPrepare@1
       displayName: 'Prepare analysis on SonarCloud'
       inputs:
@@ -29,6 +26,17 @@ stages:
     - script: static/build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir . make -f Makefile.ubuntu
     - task: SonarCloudAnalyze@1
       displayName: 'Analyse on SonarCloud'
+  
+- stage: etape1
+  jobs:
+  - job: ubuntu
+    displayName: 'ubuntu'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: sudo apt update
+    - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
+    - script: make -f Makefile.ubuntu clean-all ; make -f Makefile.ubuntu
 
   - job: macosx
     displayName: 'macosx'
