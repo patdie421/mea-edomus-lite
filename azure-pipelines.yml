@@ -31,7 +31,6 @@ stages:
       vmImage: 'macOS-latest'
     steps:
     - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
-    - publish: package/ea-edomus.tar.pkg.bz2
 
 - stage: etape2
   jobs:
