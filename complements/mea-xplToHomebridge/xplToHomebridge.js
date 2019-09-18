@@ -268,6 +268,7 @@ function doRequest(surl, request, response, data) {
    }
  
    var xplRequestData=data;
+   var xplmsgtype=0;
    var ret=checkXplRequestData(xplRequestData);
    if(ret!==true) {
       response.writeHead(400, contentType);
@@ -334,7 +335,7 @@ function doDevice(surl, request, response, data)
    }
 
    var id=surl[0]
-   d=false
+   var d=false
    if(devices[id])
       d=devices[id]
    else {
@@ -424,7 +425,7 @@ function doXpl(surl, request, response, data)
             break;
       }
    }
-   return 0;
+   return 1;
 }
  
  

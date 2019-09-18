@@ -233,7 +233,7 @@ function doSendMessage(op, surl, request, response, data) {
 
 
 function deleteCallback(id) {
-   callback=callbacks_queue[id];
+   var callback=callbacks_queue[id];
    if(callback==undefined) {
       return {status: "error", errorcode: 8, message: "no valid id"};
    }
@@ -243,7 +243,7 @@ function deleteCallback(id) {
 
 
 function returnCallback(id) {
-   callback=callbacks_queue[id];
+   var callback=callbacks_queue[id];
    if(callback==undefined) {
       return {status: "error", errorcode: 8, message: "no valid id"};
    }
@@ -253,7 +253,7 @@ function returnCallback(id) {
 
 
 function updateCallback(id, data) {
-   _data=JSON.parse(data);
+   var _data=JSON.parse(data);
    if(callbacks_queue[id]==undefined) {
       return {status: "error", errorcode: 8, message: "no valid id"};
    }
@@ -368,6 +368,7 @@ function doCallback(surl, request, response, data) {
             response.end(JSON.stringify(callbacks_queue));
             break;
          }
+         break;
       case "DELETE":
          if(surl.length!=1) {
             response.writeHead(400, contentType);
@@ -606,7 +607,7 @@ function msgToCallback(message) {
          continue;
       }
 
-      rep=checkFilter(callbacks_queue[i].filter, message)
+      var rep=checkFilter(callbacks_queue[i].filter, message)
       if(rep[0]==true) {
          if(rep[1]==200) {
             httpCall(callbacks_queue[i], message);
