@@ -15,7 +15,7 @@ OBJECTS=$(addprefix $(TECHNO).objects/, $(SOURCES:.c=.o))
 
 EXECUTABLE=mea-edomus.$(TECHNO)
 
-INTERFACES=type_001 type_002 type_003 type_004 type_005 type_006 type_010
+INTERFACES=type_001 type_002 type_003 type_006 type_010
 INTERFACES_NOTPLUGIN=type_001
 
 INTERFACES_PATH=$(addprefix src/interfaces/, $(INTERFACES))
