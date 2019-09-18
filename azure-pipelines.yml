@@ -25,9 +25,13 @@ stages:
         cliProjectName: mea-edomus-lite
         cfamily.build-wrapper-output: mea-edomus.ubuntu
     - script: curl https://binaries.sonarsource.com/CommercialDistribution/sonar-cfamily-plugin/sonar-cfamily-plugin-6.3.0.11371.jar --output sonar.jar
+      displayName: 'get build-wrapper download'
     - script: jar xvf sonar.jar static/build-wrapper-linux-x86.zip
+      displayName: 'get build-wrapper extract from jar'
     - script: cd static ; unzip build-wrapper-linux-x86.zip
+      displayName: 'get build-wrapper unzip'
     - script: static/build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir . make -f Makefile.ubuntu
+      displayName: 'build-wrapper'
     - task: SonarCloudAnalyze@1
       displayName: 'Analyse on SonarCloud'
   
@@ -53,6 +57,7 @@ stages:
       vmImage: 'macOS-latest'
     steps:
     - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
+      displayName: 'Make'
 
 - stage: etape2
   jobs:
@@ -60,6 +65,7 @@ stages:
     displayName: 'jenkins'
     steps:
       - task: JenkinsQueueJob@2
+        displayName: 'start jenkins job'
         inputs:
           serverEndpoint: 'jenkins'
           jobName: 'mea-edomus-lite'
