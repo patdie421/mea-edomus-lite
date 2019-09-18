@@ -10,6 +10,8 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - script: sudo apt update
+    - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
     - task: SonarCloudPrepare@1
       displayName: 'Prepare analysis on SonarCloud'
       inputs:
