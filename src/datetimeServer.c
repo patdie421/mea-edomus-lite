@@ -193,7 +193,7 @@ int mea_timeFromStr(char *str, time_t *t)
          if(newTime==NULL)
             return -1;
 
-         strcpy(newTime->dateTimeStr, str);
+         strncpy(newTime->dateTimeStr, str, sizeof(newTime->dateTimeStr)-1);
          memcpy(&(newTime->tm), &tm, sizeof(struct tm));
          newTime->last_access = mea_time_value;
          newTime->time_value = mktime(&tm);

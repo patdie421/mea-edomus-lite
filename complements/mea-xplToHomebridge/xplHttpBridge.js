@@ -607,7 +607,7 @@ function msgToCallback(message) {
          continue;
       }
 
-      rep=checkFilter(callbacks_queue[i].filter, message)
+      var rep=checkFilter(callbacks_queue[i].filter, message)
       if(rep[0]==true) {
          if(rep[1]==200) {
             httpCall(callbacks_queue[i], message);
