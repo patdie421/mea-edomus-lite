@@ -23,6 +23,7 @@ stages:
         cliProjectKey: mea-edomus-lite
         cliProjectName: mea-edomus-lite
         cfamily.build-wrapper-output: mea-edomus.ubuntu
+    - script: find . -name "*wrapper*"
     - task: SonarCloudAnalyze@1
       displayName: 'Analyse on SonarCloud'
 
