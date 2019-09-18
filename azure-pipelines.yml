@@ -3,7 +3,7 @@ trigger:
 
 stages:
 - stage: etape1
-   jobs:
+  jobs:
   - job: ubuntu
     displayName: 'ubuntu'
     pool:
@@ -20,7 +20,7 @@ stages:
     steps:
     - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
 - stage: etape2
-   jobs:
+  jobs:
   - job: jenkins
     displayName: 'jenkins'
     steps:
