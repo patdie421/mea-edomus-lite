@@ -910,16 +910,17 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
 
    if(xd->signal_flag<0)
    {
-      if(xbee_err)
-      {
+      if(xbee_err) {
          *xbee_err=XBEE_ERR_DOWN;
-         return -1;
       }
+      return -1;
    }
 
    if(pthread_self()==xd->read_thread) // risque de dead lock si appeler par un call back => on interdit
    {
-      *xbee_err=XBEE_ERR_IN_CALLBACK;
+      if(xbee_err) {
+         *xbee_err=XBEE_ERR_IN_CALLBACK;
+      }
       return -1;
    }
    
@@ -952,9 +953,10 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
             ret=pthread_cond_timedwait(&xd->sync_cond, &xd->sync_lock, &ts);
             if(ret)
             {
-               if(ret!=ETIMEDOUT)
-               {
-                  *xbee_err=XBEE_ERR_SYS;
+               if(ret!=ETIMEDOUT) {
+                  if(xbee_err) {
+                     *xbee_err=XBEE_ERR_SYS;
+                  }
                   return_val=-1;
                   goto next_or_return;
                }
@@ -974,8 +976,9 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
                   {
                      if(e->xbee_err!=XBEE_ERR_NOERR) // la reponse est une erreur
                      {
-                        *xbee_err=e->xbee_err; // on la retourne directement
-                        
+                        if(xbee_err) {
+                           *xbee_err=e->xbee_err; // on la retourne directement
+                        }  
                         // et on fait le menage avant de sortir
                         mea_queue_remove_current(xd->queue);
                         _xbee_free_queue_elem(e);
@@ -990,8 +993,9 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
                         // recuperation des donnees
                         memcpy(resp,e->cmd,e->l_cmd);
                         *l_resp=e->l_cmd;
-                        *xbee_err=e->xbee_err;
-                        
+                        if(xbee_err) {
+                           *xbee_err=e->xbee_err;
+                        } 
                         // et on fait le menage avant de sortir
                         _xbee_free_queue_elem(e);
                         xd->queue->current->d=NULL; // pour evite le bug
@@ -1027,9 +1031,11 @@ next_or_return:
       }
       while (--boucle);
    }
-   else
-      *xbee_err=nerr;
-
+   else {
+      if(xbee_err) {
+         *xbee_err=nerr;
+      }
+   }
 error_exit:
    return -1;
 }

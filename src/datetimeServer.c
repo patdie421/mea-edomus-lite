@@ -320,12 +320,10 @@ static int getSunRiseSetOrTwilingStartEnd(double lon, double lat, time_t *_start
       case +1:
          DEBUG_SECTION2(DEBUGFLAG) fprintf(stderr, "Sun above horizon\n");
          return -1;
-         break;
 
       case -1:
          DEBUG_SECTION2(DEBUGFLAG) fprintf(stderr, "Sun below horizon\n");
          return -1;
-         break;
    }
 
    return 0;

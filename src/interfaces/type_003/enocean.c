@@ -460,7 +460,6 @@ int16_t _enocean_process_data(uint16_t *step, uint8_t c, uint8_t *data, uint16_t
          }
 
          return 1;
-         break;
    }
    return 0;
 
