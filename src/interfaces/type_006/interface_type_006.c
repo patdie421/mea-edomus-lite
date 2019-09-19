@@ -695,6 +695,9 @@ int get_type_interface_type_006()
 
 static int api_write_data(interface_type_006_t *i006, PyObject *args, PyObject **res, int16_t *nerr, char *err, int l_err)
 {
+   err="";
+   l_err=0;
+
    if(i006->fd == -1) {
       *nerr=253;
       return -253;

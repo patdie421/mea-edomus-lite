@@ -65,26 +65,23 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
    int ret_code=0;
    int ret=0;
    char *name_old=NULL, *name_new=NULL;
-   FILE *fd;
+   FILE *fd=NULL;
 
    fd=fopen(name, "r+");
    if(!fd)
        return -1;
 
    name_old = (char *)malloc(strlen(name)+7); // 7 => '.' + 5 digits + 1
-   if(name_old == NULL)
-   {
+   if(name_old == NULL) {
       ret_code=-1;
       goto mea_rotate_open_log_file_clean_exit;
    }
 
    // removing oldest file if needed
    sprintf(name_old,"%s.%d", name, max_index);
-   if(access( name_old, W_OK ) != -1)
-   {
+   if(access( name_old, W_OK ) != -1) {
       ret=unlink(name_old);
-      if(ret<0)
-      {
+      if(ret<0) {
          perror("unlink: ");
          ret_code=-1;
          goto mea_rotate_open_log_file_clean_exit;
@@ -93,23 +90,19 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
 
 
    name_new = (char *)malloc(strlen(name)+7); // 7 => '.' + 5 digits + 1
-   if(name_new == NULL)
-   {
+   if(name_new == NULL) {
       ret_code=-1;
       goto mea_rotate_open_log_file_clean_exit;
    }
 
    int16_t i=max_index-1;
-   for(;i>-1;i--)
-   {
+   for(;i>-1;i--) {
       sprintf(name_new,"%s.%d", name, i+1);
       sprintf(name_old,"%s.%d", name, i);
 
-      if(access( name_old, W_OK ) != -1)
-      {
+      if(access( name_old, W_OK ) != -1) {
          ret=rename(name_old, name_new);
-         if(ret<0)
-         {
+         if(ret<0) {
             perror("rename: ");
             ret_code=-1;
             goto mea_rotate_open_log_file_clean_exit;
@@ -119,8 +112,7 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
 
    sprintf(name_new,"%s.%d", name, 0);
    int fd_dest=open(name_new, O_CREAT | O_WRONLY, S_IWUSR | S_IRUSR);
-   if(fd_dest<0)
-   {
+   if(fd_dest<0) {
       perror("open: ");
       ret_code=-1;
       goto mea_rotate_open_log_file_clean_exit;
@@ -131,8 +123,7 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
    fseek(fd, 0, SEEK_SET);
    // size_t fread ( void * ptr, size_t size, size_t count, FILE * stream );
    char buf[4096];
-   while(!feof(fd))
-   {
+   while(!feof(fd)) {
       size_t nb=fread(buf, 1, sizeof(buf), fd);
       if(write(fd_dest, buf, nb)==-1) {
          perror("write: ");
@@ -148,13 +139,13 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
    fclose(fd);
  
 mea_rotate_open_log_file_clean_exit:
-   if(name_old)
-   {
+   if(fd)
+      fclose(fd);
+   if(name_old) {
       free(name_old);
       name_old=NULL;
    }
-   if(name_new)
-   {
+   if(name_new) {
       free(name_new);
       name_new=NULL;
    }

@@ -676,7 +676,8 @@ static int clean_interface_type_010_data_source(interface_type_010_t *i010)
 
    i010->line_buffer_l = 0;
    i010->line_buffer_ptr = 0;
-   free(i010->line_buffer);
+   if(i010->line_buffer)
+      free(i010->line_buffer);
    i010->line_buffer = NULL;
 
    return 0;
@@ -1302,7 +1303,7 @@ int start_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
 
    start_stop_params->i010->thread=start_interface_type_010_thread(start_stop_params->i010, NULL, (thread_f)_thread_interface_type_010);
 
-   start_stop_params->i010->xPL_callback_data=NULL;
+   start_stop_params->i010->xPL_callback_data=xpl_callback_params;
    start_stop_params->i010->xPL_callback2=_interface_type_010_xPL_callback2;
 
    VERBOSE(2) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, start_stop_params->i010->name, launched_successfully_str);
