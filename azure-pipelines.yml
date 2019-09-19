@@ -59,6 +59,13 @@ stages:
     - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
       displayName: 'Make'
 
+  - job: perso
+    displayName: 'perso'
+    pool: perso
+    steps:
+    - script: make -f Makefile.ubuntu clean-all ; make -f Makefile.ubuntu
+      displayName: 'Make'
+
 - stage: etape2
   jobs:
   - job: jenkins
