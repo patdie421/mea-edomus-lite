@@ -3,8 +3,8 @@ trigger:
 
 stages:
 
-- stage: 'CodeAnalyse'
-  jobs:
+#- stage: 'CodeAnalyse'
+#  jobs:
 #  - job: sonar
 #    displayName: 'sonar'
 #    pool:
