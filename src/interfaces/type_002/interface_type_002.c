@@ -9,7 +9,7 @@
 #include "interface_type_002.h"
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h>k
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
@@ -516,8 +516,6 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
 void *_thread_interface_type_002_xbeedata_cleanup(void *args)
 {
    struct thread_params_s *params=(struct thread_params_s *)args;
-
-   return NULL;
 
    mea_log_printf("%s (%s)  : stop.\n", INFO_STR, __func__);
    if(!params)
