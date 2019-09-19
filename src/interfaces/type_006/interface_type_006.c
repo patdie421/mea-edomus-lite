@@ -713,7 +713,7 @@ static int api_write_data(interface_type_006_t *i006, PyObject *args, PyObject *
    if(PyObject_CheckBuffer(arg)) {
       ret=PyObject_GetBuffer(arg, &py_packet, PyBUF_SIMPLE);
       if(ret<0)
-      return -255;
+         return -255;
    }
    else
       return -255;
@@ -799,7 +799,7 @@ interface_type_006_t *malloc_and_init2_interface_type_006(int id_driver, cJSON *
    i006->id_interface=id_interface;
    i006->parameters=(char *)malloc(strlen((char *)parameters)+1);
    if(i006->parameters)
-      strcpy(i006->parameters,(char *)parameters);
+      strncpy(i006->parameters,(char *)parameters, strlen((char *)parameters));
    i006->indicators.senttoplugin=0;
    i006->indicators.xplin=0;
    i006->indicators.serialin=0;
@@ -875,7 +875,8 @@ int stop_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
       }
       DEBUG_SECTION mea_log_printf("%s (%s) : %s, fin après %d itération(s)\n",DEBUG_STR, __func__,start_stop_params->i006->name,100-counter);
 
-      free(start_stop_params->i006->thread);
+      if(!start_stop_params->i006->thread)
+         free(start_stop_params->i006->thread);
       start_stop_params->i006->thread=NULL;
    }
  
