@@ -996,100 +996,86 @@ static int automator_evalStr(char *str, struct value_s *v, cJSON *xplMsgJson)
                return -1;
         }
         break;
-     case '$':
-        {
-           int ret=function_call(&(p[1]), v, xplMsgJson);
-           return ret;
+     case '$': {
+        int ret=function_call(&(p[1]), v, xplMsgJson);
+        return ret;
+     }
+     case '{': {
+        int l=(int)(strlen(p));
+        if(p[l-1]!='}')
+           return -1;
+        char name[VALUE_MAX_STR_SIZE];
+        struct inputs_table_s *e = NULL;
+
+        if(l>(sizeof(name)+2))
+           l=sizeof(name)+2;
+
+        int ret = -1;
+        char *_p=NULL;
+        mea_strncpytrim(name, &(p[1]), l-2);
+        name[l-2]=0;
+        _p=name; 
+        pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&inputs_table_lock);
+        pthread_mutex_lock(&inputs_table_lock);
+        HASH_FIND_STR(inputs_table, _p, e);
+        if(e) {
+           v->type=e->v.type;
+           switch(e->v.type) {
+              case 0: v->val.floatval = e->v.val.floatval; break;
+              case 1: strcpy(v->val.strval, e->v.val.strval); break;
+              case 2: v->val.booleanval = e->v.val.booleanval; break;
+           }
         }
-        break;
-     case '{':
-        {
-           int l=(int)(strlen(p));
-           if(p[l-1]!='}')
-              return -1;
-           char name[VALUE_MAX_STR_SIZE];
-           struct inputs_table_s *e = NULL;
-
-           if(l>(sizeof(name)+2))
-              l=sizeof(name)+2;
-
-           int ret = -1;
-           char *_p=NULL;
-           mea_strncpytrim(name, &(p[1]), l-2);
-           name[l-2]=0;
-           _p=name; 
-           pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&inputs_table_lock);
-           pthread_mutex_lock(&inputs_table_lock);
-           HASH_FIND_STR(inputs_table, _p, e);
-           if(e)
-           {
-              v->type=e->v.type;
-              switch(e->v.type)
-              {
-                 case 0: v->val.floatval = e->v.val.floatval; break;
-                 case 1: strcpy(v->val.strval, e->v.val.strval); break;
-                 case 2: v->val.booleanval = e->v.val.booleanval; break;
-              }
-          }
-          else
-             ret=1;
-          pthread_mutex_unlock(&inputs_table_lock);
-          pthread_cleanup_pop(0);
+        else
+           ret=1;
+        pthread_mutex_unlock(&inputs_table_lock);
+        pthread_cleanup_pop(0);
 /*
-          if(strcmp(name, "EVERY10S")==0)
-          {
-             fprintf(stderr,"OUT %s = ",name);
-             value_print(v);
-             fprintf(stderr,"\n");
-          }
-*/
-          if(ret==1)
-             return 1;
+        if(strcmp(name, "EVERY10S")==0) {
+           fprintf(stderr,"OUT %s = ",name);
+           value_print(v);
+           fprintf(stderr,"\n");
         }
-        break;
-     case '<':
-        {
+*/
+        if(ret==1)
+           return 1;
+     }
+     case '<': {
 /*
-           int l=strlen(p);
-           if(p[l-1]!='>')
-              return -1; 
+        int l=strlen(p);
+        if(p[l-1]!='>')
+           return -1; 
 */
-           if(strncmp(&(p[1]),"NOVAL>",6)==0)
-           {
-              strcpy(v->val.strval, p);
-              v->type=1;
-           }
-           else if(strncmp(&(p[1]),"LABEL>",6)==0)
-           {
-              strcpy(v->val.strval, p);
-              v->type=1;
-           }
-           else if(strncmp(&(p[1]), "DISPLAY>", 7)==0)
-           {
-              strcpy(v->val.strval, p);
-              v->type=1;
-           }
-           else
-              return -1;
+        if(strncmp(&(p[1]),"NOVAL>",6)==0) {
+           strcpy(v->val.strval, p);
+           v->type=1;
         }
-        break;
-    default:
-       {
-          _automatorEvalStrOperation = 'x';
-          if(xplMsgJson==NULL)
-             return 1;
+        else if(strncmp(&(p[1]),"LABEL>",6)==0) {
+           strcpy(v->val.strval, p);
+           v->type=1;
+        }
+        else if(strncmp(&(p[1]), "DISPLAY>", 7)==0) {
+           strcpy(v->val.strval, p);
+           v->type=1;
+        }
+        else
+           return -1;
+     }
+    default: {
+       _automatorEvalStrOperation = 'x';
+       if(xplMsgJson==NULL)
+          return 1;
 
-          cJSON *j = cJSON_GetObjectItem(xplMsgJson, p);
-          if(j)
-          {
-             char *_value= j->valuestring;
-             if(_value!=NULL)
-                value_setFromStr(v, _value);
-             else
-                return -1;
-          }
+       cJSON *j = cJSON_GetObjectItem(xplMsgJson, p);
+       if(j) {
+          char *_value= j->valuestring;
+          if(_value!=NULL)
+             value_setFromStr(v, _value);
           else
-            return 1;
+             return -1;
+       }
+       else
+          return 1;
       }
    }
    return 0;
