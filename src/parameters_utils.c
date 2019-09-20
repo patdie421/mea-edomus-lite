@@ -252,14 +252,13 @@ int16_t parsed_parameters_init()
 
 char *getToken(char *str)
 {
-   char *end;
+   char *end=NULL;
    
    // suppression des blancs avant
    while(isspace(*str) && str)
       str++;
    
-   if(*str!=0) // si la chaine n'est pas vide
-   {
+   if(*str!=0) { // si la chaine n'est pas vide
       end=str+strlen(str) - 1;
       
       // suppression des blancs après
@@ -341,14 +340,12 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
    if(err)
       *err=0;
       
-   if(parameters_string == NULL)
-   {
+   if(parameters_string == NULL) {
       *err=11;
       return NULL;
    }
    
-   if(strlen(parameters_string)==0)
-   {
+   if(strlen(parameters_string)==0) {
       *err=10;
       return NULL;
    }
@@ -357,31 +354,27 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
    for(*nb_params=0;parameters_to_find[*nb_params];(*nb_params)++); // nombre max de parametres
    
    // préparation du tableau à retourner
-   if(!*nb_params)
-   {
+   if(!*nb_params) {
       // afficher ici un message d'erreur
       return NULL;
    }
 
 #ifdef PARSED_PARAMETERS_CACHING_ENABLED
    parsed_parameters=_parsed_parameters_get_from_cache(parameters_to_find, *nb_params, parameters_string);
-   if(parsed_parameters)
-   {
+   if(parsed_parameters) {
       parsed_parameters->in_use++;
       return parsed_parameters;
    }
 #endif
 
    value=malloc(strlen(parameters_string+1)); // taille de valeur au max (et même un peu plus).
-   if(!value)
-   {
+   if(!value) {
       if(err) *err=1;
       return NULL;
    }
    
    parsed_parameters=malloc(sizeof(parsed_parameters_t));
-   if(!parsed_parameters)
-   {
+   if(!parsed_parameters) {
       DEBUG_SECTION {
          fprintf (MEA_STDERR, "%s (%s) : %s - ",DEBUG_STR, __func__, MALLOC_ERROR_STR);
          perror("");
@@ -393,8 +386,7 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
  
 
    parsed_parameters->parameters=malloc(sizeof(parsed_parameter_t) * (*nb_params));
-   if(!parsed_parameters->parameters)
-   {
+   if(!parsed_parameters->parameters) {
       DEBUG_SECTION {
          fprintf (MEA_STDERR, "%s (%s) : %s - ",DEBUG_STR, __func__, MALLOC_ERROR_STR);
          perror("");
@@ -406,18 +398,15 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
       return NULL;
    }
  
-
    memset(parsed_parameters->parameters, 0, sizeof(parsed_parameter_t) * *nb_params);
    parsed_parameters->nb=*nb_params;
  
-   while(1)
-   {
+   while(1) {
       ret=sscanf(ptr, "%20[^=;]=%[^;]%n", label, value, &n); // /!\ pas plus de 20 caractères pour un TOKEN
       if(ret==EOF) // plus rien à lire
          break;
       
-      if(ret==2)
-      {
+      if(ret==2) {
          // ici on traite les données lues
          label_token=getToken(label);
          if(value_to_upper)
@@ -425,17 +414,14 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
          value_token=value;
          
          char trouvee=0;
-         for(int i=0;parameters_to_find[i];i++)
-         {
+         for(int i=0;parameters_to_find[i];i++) {
             char *str=&(parameters_to_find[i][2]);
-            if(label_token && strcmp(label_token,str)==0)
-            {
+            if(label_token && strcmp(label_token,str)==0) {
                char type=parameters_to_find[i][0];
                trouvee=1;
                parsed_parameters->parameters[i].label=str;
                int r=-1;
-               switch(type)
-               {
+               switch(type) {
                   case 'I':
                      parsed_parameters->parameters[i].type=INT;
                      sscanf(value_token,"%d%n",&(parsed_parameters->parameters[i].value.i),&r);
@@ -455,31 +441,29 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
                      parsed_parameters->parameters[i].type=STRING;
                      r=(int)strlen(value_token);
                      parsed_parameters->parameters[i].value.s=malloc(r+1);
-                     if(!parsed_parameters->parameters[i].value.s)
-                     {
+                     if(!parsed_parameters->parameters[i].value.s) {
                         DEBUG_SECTION {
                            fprintf (MEA_STDERR, "%s (%s) : %s - ", DEBUG_STR, __func__, MALLOC_ERROR_STR);
                            perror("");
                         }
-                        if(parsed_parameters)
-                        {
+                        if(parsed_parameters) {
                            _clean_parsed_parameters(parsed_parameters);
                            free(parsed_parameters);
                            parsed_parameters=NULL;
                         }
-                        if(err) *err=1; // erreur système, voir errno
+                        if(err)
+                           *err=1; // erreur système, voir errno
                         goto malloc_parsed_parameters_exit;
                      }
-                     strcpy(parsed_parameters->parameters[i].value.s, value_token);
+                     strncpy(parsed_parameters->parameters[i].value.s, value_token,r);
+                     parsed_parameters->parameters[i].value.s[r+1]=0;
                      break;
                      
                   default:
                      break;
                }
-               if(r!=strlen(value_token))
-               {
-                  if(parsed_parameters)
-                  {
+               if(r!=strlen(value_token)) {
+                  if(parsed_parameters) {
                      _clean_parsed_parameters(parsed_parameters);
                      free(parsed_parameters);
                      parsed_parameters=NULL;
@@ -490,10 +474,8 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
                break;
             }
          }
-         if(!trouvee)
-         {
-            if(parsed_parameters)
-            {
+         if(!trouvee) {
+            if(parsed_parameters) {
                _clean_parsed_parameters(parsed_parameters);
                free(parsed_parameters);
                parsed_parameters=NULL;
@@ -505,8 +487,7 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
          ptr+=n;
       }
       
-      if(*ptr == ';') // séparateur, on passe au caractère suivant
-      {
+      if(*ptr == ';') { // séparateur, on passe au caractère suivant
          ptr++;
          if(!ret) // si on avait rien lu
             ret=2; // on fait comme si on avait lu ...
@@ -515,10 +496,8 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
       if(*ptr == 0) // fin de ligne, OK.
          break; // sortie de la boucle
 
-      if(ret<2) // si on a pas un label et une valeur
-      {
-         if(parsed_parameters)
-         {
+      if(ret<2) { // si on a pas un label et une valeur
+         if(parsed_parameters) {
             _clean_parsed_parameters(parsed_parameters);
             free(parsed_parameters);
             parsed_parameters=NULL;
@@ -537,8 +516,7 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
    return parsed_parameters;
 
 malloc_parsed_parameters_exit:
-   if(value)
-   {
+   if(value) {
       free(value);
       value=NULL;
    }
@@ -549,13 +527,10 @@ malloc_parsed_parameters_exit:
 void display_parsed_parameters(parsed_parameters_t *mpp)
 {
    DEBUG_SECTION {
-      if(mpp)
-      {
-         for(int i=0;i<mpp->nb;i++)
-         {
+      if(mpp) {
+         for(int i=0;i<mpp->nb;i++) {
             printf("%s = ", mpp->parameters[i].label);
-            switch((int)(mpp->parameters[i].type))
-            {
+            switch((int)(mpp->parameters[i].type)) {
                case 1:
                   printf("%d (I)\n",mpp->parameters[i].value.i);
                   break;
