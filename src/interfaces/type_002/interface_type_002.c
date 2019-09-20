@@ -9,7 +9,7 @@
 #include "interface_type_002.h"
 
 #include <stdio.h>
-#include <stdlib.h>k
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
