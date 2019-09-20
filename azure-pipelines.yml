@@ -3,37 +3,36 @@ trigger:
 
 stages:
 
-#- stage: 'CodeAnalyse'
-#  jobs:
-#  - job: sonar
-#    displayName: 'sonar'
-#    pool:
-#      vmImage: 'ubuntu-latest'
-#    steps:
-#    - script: sudo apt update
-#      displayName: 'apt update'
-#    - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
-#      displayName: 'install prereq'
-#    - task: SonarCloudPrepare@1
-#      displayName: 'Prepare analysis on SonarCloud'
-#      inputs:
-#        SonarCloud: sonar
-#        organization: 'mea-edmous-lite'
-#        scannerMode: CLI
-#        configMode: manual
-#        cliProjectKey: mea-edomus-lite
-#        cliProjectName: mea-edomus-lite
-#        cfamily.build-wrapper-output: mea-edomus.ubuntu
-#    - script: curl https://binaries.sonarsource.com/CommercialDistribution/sonar-cfamily-plugin/sonar-cfamily-plugin-6.3.0.11371.jar --output sonar.jar
-#      displayName: 'get build-wrapper download'
-#    - script: jar xvf sonar.jar static/build-wrapper-linux-x86.zip
-#      displayName: 'get build-wrapper extract from jar'
-#    - script: cd static ; unzip build-wrapper-linux-x86.zip
-#      displayName: 'get build-wrapper unzip'
-#    - script: static/build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir . make -f Makefile.ubuntu
-#      displayName: 'build-wrapper'
-#    - task: SonarCloudAnalyze@1
-#      displayName: 'Analyse on SonarCloud'
+- stage: 'CodeAnalyse'
+  jobs:
+  - job: sonar
+    displayName: 'sonar'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: sudo apt update
+      displayName: 'apt update'
+    - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
+      displayName: 'install prereq'
+    - task: SonarCloudPrepare@1
+      displayName: 'Prepare analysis on SonarCloud'
+      inputs:
+        SonarCloud: sonar
+        organization: 'mea-edmous-lite'
+        scannerMode: CLI
+        configMode: manual
+        cliProjectKey: mea-edomus-lite
+        cliProjectName: mea-edomus-lite
+    - script: curl https://binaries.sonarsource.com/CommercialDistribution/sonar-cfamily-plugin/sonar-cfamily-plugin-6.3.0.11371.jar --output sonar.jar
+      displayName: 'get build-wrapper download'
+    - script: jar xvf sonar.jar static/build-wrapper-linux-x86.zip
+      displayName: 'get build-wrapper extract from jar'
+    - script: cd static ; unzip build-wrapper-linux-x86.zip
+      displayName: 'get build-wrapper unzip'
+    - script: static/build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir . make -f Makefile.ubuntu
+      displayName: 'build-wrapper'
+    - task: SonarCloudAnalyze@1
+      displayName: 'Analyse on SonarCloud'
   
 - stage: etape1
   jobs:

@@ -407,7 +407,7 @@ int addInterface(cJSON *jsonData)
    else
       goto addInterface_clean_exit;
 
-   if(state<0 && state>2)
+   if(state<0 || state>2)
       goto addInterface_clean_exit;
 
    if(id_type<0) // ajouter le check de l'id interface dans jsonTypes

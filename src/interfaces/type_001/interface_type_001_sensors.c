@@ -270,7 +270,6 @@ struct sensor_s *interface_type_001_sensors_valid_and_malloc_sensor(int16_t id_s
          default:
             VERBOSE(1) mea_log_printf("%s (%s) : bad sensor type (%s)\n",ERROR_STR,__func__,sensor_params->parameters[SENSOR_PARAMS_TYPE].value.s);
             goto interface_type_001_sensors_valid_and_malloc_sensor_clean_exit;
-            break;
       }
       
       if(_valide_sensor_i001(type_id,pin_id,compute_id,algo_id,&err))
@@ -557,7 +556,7 @@ mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i0
          {
             if(sensor->arduino_pin_type==ANALOG_ID)
             {
-               if(sensor->algo==XPL_AREF5_ID || sensor->algo==XPL_AREF5_ID)
+               if(sensor->algo==XPL_AREF5_ID || sensor->algo==XPL_AREF11_ID)
                   type_id=XPL_VOLTAGE_ID;
                else if(sensor->algo==XPL_TMP36_ID)
                   type_id=XPL_TEMP_ID;
