@@ -354,8 +354,8 @@ int16_t setRGBColor(int id, char *template, uint32_t color, char *server, int po
 
    X_Y_B_ForGamutIDFromRgbUint32(color, gamutID, &x, &y, &fbri);
    bri=(int16_t)(fbri * 255.0);
-   sprintf(request, apiOnxyBriColorTemplate, x, y, bri);
-   
+   snprintf(request, sizeof(request)-1, apiOnxyBriColorTemplate, x, y, bri);
+   request[sizeof(request)-1]=0;
    l_response=sizeof(response);
    char *httpResponseDataPtr = httpRequest(HTTP_PUT, server, port, url, request, (int)(strlen(request)), response, &l_response, &nerr);
    if(!httpResponseDataPtr)
