@@ -96,7 +96,8 @@ int _xbee_open(xbee_xd_t *xd, char *dev, int speed)
    int fd=serial_open(dev, speed);
    if(fd != -1)
    {
-      strcpy(xd->serial_dev_name, dev);
+      strncpy(xd->serial_dev_name, dev,sizeof(xd->serial_dev_name)-1);
+      xd->serial_dev_name[sizeof(xd->serial_dev_name)-1]=0;
       xd->speed=speed;
       xd->fd=fd;
    }
@@ -803,8 +804,10 @@ mea_error_t _xbee_update_hosts_tables(xbee_hosts_table_t *table, char *addr_64_h
    
    host->l_addr_16=l_addr_16;
    
-   if(name)
-      strcpy(host->name,name);
+   if(name) {
+      strncpy(host->name,name,sizeof(host->name)-1);
+      host->name[sizeof(host->name)-1]=0;
+   }
    
    return NOERROR;
 }
