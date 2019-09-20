@@ -528,7 +528,8 @@ struct mea_eval_stack_s *mea_eval_buildStack_alloc(char *str, char **p, int16_t 
    tmp=stack;
    stack=realloc(stack, (stack_index+1)*(sizeof(struct mea_eval_stack_s)));
    if(stack==NULL) {
-      free(tmp);
+      if(tmp)
+         free(tmp);
       return NULL;
    }
 
