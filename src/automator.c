@@ -870,7 +870,7 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
                         strncpy(v->val.strval, c_low_str, sizeof(v->val.strval)-1);
                      } 
                      else {
-                        strcpy(v->val.strval, c_high_str, sizeof(v->val.strval)-1);
+                        strncpy(v->val.strval, c_high_str, sizeof(v->val.strval)-1);
                      } 
                      break;
                   case F_TOTFSTR:
