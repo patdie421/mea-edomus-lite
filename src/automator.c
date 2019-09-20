@@ -287,22 +287,28 @@ static int value_toStr(struct value_s *v, char *str, int l_str, enum conversion_
    else {
       if(flag & HIGHLOW) {
          if(v->val.booleanval==0) {
-            strcpy(str, c_low_str);
+            strncpy(str, c_low_str, l_str-1);
+            str[l_str-1]=0;
          }
          else {
-            strcpy(str, c_high_str);
+            strncpy(str, c_high_str, l_str-1);
+            str[l_str-1]=0;
+ 
          }
       }
       else if(flag & TRUEFALSE) {
          if(v->val.booleanval==0) {
-            strcpy(str, c_false_str);
+            strncpy(str, c_false_str,l_str-1);
+            str[l_str-1]=0;
          }
          else {
-            strcpy(str, c_true_str);
+            strncpy(str, c_true_str,l_str-1);
+            str[l_str-1]=0;
          }
       }
       else {
-         snprintf(str,l_str,"%d",v->val.booleanval);
+         snprintf(str,l_str-1,"%d",v->val.booleanval);
+         str[l_str-1]=0;
       }
    }
 
@@ -661,19 +667,16 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
    char *f = NULL;
    int retour=-1;
    int str_l = (int)(strlen(str)+1);
-   if(str_l > MAX_STR_FUNCTION_SIZE)
-   {
+   if(str_l > MAX_STR_FUNCTION_SIZE) {
       VERBOSE(2) mea_log_printf("%s (%s) : string length overflow - %s\n", ERROR_STR, __func__, str);
       return -1;
    }
    char *params=(char *)alloca(str_l);
    f = str;
    int fn=function_getNum(f, params, str_l);
-   switch(fn)
-   {
+   switch(fn) {
       case F_NOW:
-         if(params[0]==0)
-         {
+         if(params[0]==0) {
             time_t t=automator_now;
             v->type=0;
             v->val.floatval=(double)t;
@@ -681,23 +684,19 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
          }
          break;
       case F_NOT:
-         if(params[0]!=0)
-         {
+         if(params[0]!=0) {
             struct value_s r;
             // struct inputs_table_s *e = NULL;
 
             v->type=2;
             v->val.booleanval=1;
             int ret=automator_evalStr(params, &r, xplMsgJson);
-            if(ret==0)
-            {
-               if(r.type==1)
-               {
+            if(ret==0) {
+               if(r.type==1) {
                   if(r.val.strval[0] != 0)
                      v->val.booleanval=0;
                }
-               else if(r.type==0)
-               {
+               else if(r.type==0) {
                   if(r.val.floatval != 0.0)
                      v->val.booleanval=0;
                }
@@ -708,31 +707,25 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
             }
          }
          break;
-      case F_SECOND:
-      {
+      case F_SECOND: {
          int ret = 0;
          int mod = 0;
          struct value_s r;
 
-         if(params[0]!=0)
-         {
+         if(params[0]!=0) {
             ret=automator_evalStr(params, &r, xplMsgJson);
-            if(ret<0)
-            {
+            if(ret<0) {
                retour = 1;
                break;
             }
 
-            if(r.type == 0 && r.val.floatval>= 2)
-            {
+            if(r.type == 0 && r.val.floatval>= 2) {
                mod = (int)r.val.floatval;
             }
-            else
-            {
+            else {
                retour = 1;
                break;
             }
-
          }
 
          v->type=0;
@@ -745,16 +738,14 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
          break;
       }
       case F_STARTUP:
-         if(params[0]==0)
-         {
+         if(params[0]==0) {
             v->type=2;
             v->val.booleanval=startupStatus;
             retour=0;
          }
          break;
       case F_XPLMSGDATA:
-         if(params[0]==0)
-         {
+         if(params[0]==0) {
             v->type=2;
             if(xplMsgJson == NULL)
                v->val.booleanval=0;
@@ -763,38 +754,32 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
             retour=0;
          }
          break;
-      case F_CALCN:
-         {
+      case F_CALCN: {
             int l_params=(int)(strlen(params)-1);
             double d;
 
-            if(l_params > 1 && params[0]=='\'' && params[l_params]=='\'')
-            {
+            if(l_params > 1 && params[0]=='\'' && params[l_params]=='\'') {
                char *p=&(params[1]);
                params[l_params]=0; 
                int ret=mea_eval_calc_numeric_by_cache(p, &d);
-               if(ret==0)
-               {
+               if(ret==0) {
                   v->type=0;
                   v->val.floatval=(double)d;
                   retour = 0;
                }
-               else
-               {
+               else {
                   retour = 1;
                }
             }
          }
          break;
       case F_EXIST:
-         if(params[0]!=0)
-         {
+         if(params[0]!=0) {
             struct value_s r;
             struct inputs_table_s *e = NULL;
 
             int ret=automator_evalStr(params, &r, xplMsgJson);
-            if(ret==0 && r.type==1)
-            {
+            if(ret==0 && r.type==1) {
                v->type=2;
                HASH_FIND_STR(inputs_table, r.val.strval, e);
                if(e)
@@ -881,19 +866,24 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
                switch(fn)
                {
                   case F_TOHLSTR:
-                     if(r.val.booleanval==0)
-                        strcpy(v->val.strval, c_low_str);
-                     else 
-                        strcpy(v->val.strval, c_high_str);
+                     if(r.val.booleanval==0) {
+                        strncpy(v->val.strval, c_low_str, sizeof(v->val.strval)-1);
+                     } 
+                     else {
+                        strcpy(v->val.strval, c_high_str, sizeof(v->val.strval)-1);
+                     } 
                      break;
                   case F_TOTFSTR:
-                     if(r.val.booleanval==0)
-                        strcpy(v->val.strval, c_false_str);
-                     else 
-                        strcpy(v->val.strval, c_true_str);
+                     if(r.val.booleanval==0) {
+                        strncpy(v->val.strval, c_false_str, sizeof(v->val.strval)-1);
+                     }
+                     else {
+                        strncpy(v->val.strval, c_true_str, sizeof(v->val.strval)-1);
+                     }
                      break;
                }
                retour = 0;
+               v->val.strval[sizeof(v->val.strval)-1]=0;
             }
          }
          break;
@@ -1021,9 +1011,16 @@ static int automator_evalStr(char *str, struct value_s *v, cJSON *xplMsgJson)
         if(e) {
            v->type=e->v.type;
            switch(e->v.type) {
-              case 0: v->val.floatval = e->v.val.floatval; break;
-              case 1: strcpy(v->val.strval, e->v.val.strval); break;
-              case 2: v->val.booleanval = e->v.val.booleanval; break;
+              case 0:
+                 v->val.floatval = e->v.val.floatval;
+                 break;
+              case 1:
+                 strncpy(v->val.strval, e->v.val.strval,sizeof(v->val.strval)-1);
+                 v->val.strval[sizeof(v->val.strval)-1]=0;
+                 break;
+              case 2:
+                 v->val.booleanval = e->v.val.booleanval;
+                 break;
            }
         }
         else
@@ -1047,15 +1044,18 @@ static int automator_evalStr(char *str, struct value_s *v, cJSON *xplMsgJson)
            return -1; 
 */
         if(strncmp(&(p[1]),"NOVAL>",6)==0) {
-           strcpy(v->val.strval, p);
+           strncpy(v->val.strval, p, sizeof(v->val.strval)-1);
+           v->val.strval[sizeof(v->val.strval)-1]=0;
            v->type=1;
         }
         else if(strncmp(&(p[1]),"LABEL>",6)==0) {
-           strcpy(v->val.strval, p);
+           strncpy(v->val.strval, p, sizeof(v->val.strval)-1);
+           v->val.strval[sizeof(v->val.strval)-1]=0;
            v->type=1;
         }
         else if(strncmp(&(p[1]), "DISPLAY>", 7)==0) {
-           strcpy(v->val.strval, p);
+           strncpy(v->val.strval, p, sizeof(v->val.strval)-1);
+           v->val.strval[sizeof(v->val.strval)-1]=0;
            v->type=1;
         }
         else
@@ -1908,33 +1908,30 @@ int send_change(char *name, struct value_s *v, struct timespec *t)
 
    if(port==-1)
       port = get_nodejsServer_socketdata_port();
-   if(port==0)
-   {
+   if(port==0) {
       port=-1;
       return -1;
    } 
 
    char str[VALUE_MAX_STR_SIZE+1]="";
 
-   if(v->type == 0)
-   {
+   if(v->type == 0) {
       snprintf(str, VALUE_MAX_STR_SIZE, "%f",v->val.floatval);
       str[VALUE_MAX_STR_SIZE]=0;
    }
    if(v->type == 1)
       sprintf(str, "\"%s\"", v->val.strval);
-   if(v->type == 2)
-   {
-      if(v->val.booleanval==0)
-         strcpy(str,FALSE_STR_C);
+   if(v->type == 2) {
+      if(v->val.booleanval==0) 
+         strncpy(str,FALSE_STR_C, sizeof(str)-1);
       else
-         strcpy(str,TRUE_STR_C);
+         strncpy(str,TRUE_STR_C, sizeof(str)-1);
+      str[sizeof(str)-1]=0;
    }
 
    char last_update_str[VALUE_MAX_STR_SIZE+1]="N/A";
    int r=4;
-   if(t && t->tv_sec)
-   {
+   if(t && t->tv_sec) {
       r=timespec2str(last_update_str, VALUE_MAX_STR_SIZE, t);
       if(r<0)
          return -1;
@@ -1945,12 +1942,10 @@ int send_change(char *name, struct value_s *v, struct timespec *t)
    sprintf(msg,"{\"%s\":{\"v\":%s,\"t\":\"%s\"}}",name, str, last_update_str);
    msg[l_data]=0;
    
-   if(mea_socket_connect(&sock, localhost_const, port)<0)
-   {
+   if(mea_socket_connect(&sock, localhost_const, port)<0) {
       ret=-1;
    }
-   else
-   {
+   else {
       l_data=l_data+4; // 4 pour AUT:
       char *message = (char *)alloca(l_data+9);
 
@@ -1989,13 +1984,12 @@ int automator_send_all_inputs()
       ret= -1;
    else
    {
-      strcpy(msg,"{");
-      for(s=inputs_table; s != NULL; s=s->hh.next)
-      {
+      stnrcpy(msg,"{",l_msg-1);
+      for(s=inputs_table; s != NULL; s=s->hh.next) {
          struct value_s *v = &(s->v);
 
          if(!startflag)
-            strcat(msg,",");
+            strncat(msg,",",l_msg-1);
          if(s->state == UNKNOWN)
             sprintf(tmpVal, "\"???\"");
          else
