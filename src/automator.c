@@ -1261,7 +1261,8 @@ int automator_sendxpl2(cJSON *parameters)
    char source[VALUE_MAX_STR_SIZE]="moi";
    char *type=XPL_CMND_STR_C;
 
-   strcpy(schema, XPL_CONTROLBASIC_STR_C);
+   strncpy(schema, XPL_CONTROLBASIC_STR_C, sizeof(schema)-1);
+   schema[sizeof(schema)-1]=0;
 
    char xplBodyStr[2048] = "";
    int xplBodyStrPtr = 0;
@@ -1799,7 +1800,8 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
                            md = (struct moveforward_dest_s *)malloc(sizeof(struct moveforward_dest_s));
                            if(md)
                            {
-                              strcpy(md->rule, p_onaction);
+                              strncpy(md->rule, p_onaction, sizeof(md->rule)-1);
+                              md->rule[sizeof(md->rule)-1]=0;
                               md->e=_e;
                               HASH_ADD_STR(moveforward_dests, rule, md);
                            } 
@@ -1984,6 +1986,7 @@ int automator_send_all_inputs()
       ret= -1;
    else
    {
+      msg[l_msg-1]=0;
       stnrcpy(msg,"{",l_msg-1);
       for(s=inputs_table; s != NULL; s=s->hh.next) {
          struct value_s *v = &(s->v);
@@ -1995,34 +1998,34 @@ int automator_send_all_inputs()
          else
          {
             if(v->type == 0)
-               sprintf(tmpVal, "%f", v->val.floatval);
+               snprintf(tmpVal, sizeof(tmpVal)-1, "%f", v->val.floatval);
             if(v->type == 1)
-               sprintf(tmpVal, "\"%s\"", v->val.strval);
+               snprintf(tmpVal, sizeof(tmpVal)-1, "\"%s\"", v->val.strval);
             if(v->type == 2)
             {
                if(v->val.booleanval==0)
-                  strcpy(tmpVal, FALSE_STR_C);
+                  strncpy(tmpVal, FALSE_STR_C, sizeof(tmpVal)-1);
                else
-                  strcpy(tmpVal, TRUE_STR_C);
+                  strncpy(tmpVal, TRUE_STR_C, sizeof(tmpVal)-1);
             }
+            tmpVal[sizeof(tmpVal)-1]=0;
          }
 
          char last_update_str[VALUE_MAX_STR_SIZE+1]="N/A";
          int r=4;
          struct timespec *t = &(s->last_update);
-         if(t && t->tv_sec)
-         {
+         if(t && t->tv_sec) {
             r=timespec2str(last_update_str, VALUE_MAX_STR_SIZE, t);
             if(r<0)
                return -1;
          }
 
          sprintf(tmpStr, "\"%s\":{\"v\":%s,\"t\":\"%s\"}", s->name, tmpVal, last_update_str);
-         strcat(msg, tmpStr);
+         strncat(msg, tmpStr,l_msg-1);
          startflag=0;
          ret=0;
       }
-      strcat(msg,"}");
+      strncat(msg,"}", l_msg-1);
    }
    pthread_mutex_unlock(&inputs_table_lock);
    pthread_cleanup_pop(0);
@@ -2030,8 +2033,7 @@ int automator_send_all_inputs()
    if(ret==-1)
       return -1;
 
-   if(mea_socket_connect(&sock, localhost_const, port)<0)
-   {
+   if(mea_socket_connect(&sock, localhost_const, port)<0) {
       return -1;
    }
    else
@@ -2146,8 +2148,10 @@ struct inputs_table_s *_automator_add_to_inputs_table(char *_name, struct value_
       e->v.type=v->type;
       if(v->type == 0)
          e->v.val.floatval = v->val.floatval;
-      if(v->type == 1)
-         strcpy(e->v.val.strval, v->val.strval);
+      if(v->type == 1) {
+         strncpy(e->v.val.strval, v->val.strval, sizeof(e->v.val.strval)-1);
+         e->v.val.strval[sizeof(e->v.val.strval)-1]=0;
+      }
       if(v->type == 2)
          e->v.val.booleanval = v->val.booleanval;
       e->state = state;
@@ -2176,8 +2180,10 @@ struct inputs_table_s *_automator_add_to_inputs_table(char *_name, struct value_
          s->v.type=v->type;
          if(v->type == 0)
             s->v.val.floatval = v->val.floatval;
-         if(v->type == 1)
-            strcpy(s->v.val.strval, v->val.strval);
+         if(v->type == 1) {
+            strncpy(s->v.val.strval, v->val.strval, sizeof(s->v.val.strval)-1);
+            s->v.val.strval[sizeof(s->v.val.strval)-1]=0;
+         }
          if(v->type == 2)
             s->v.val.booleanval = v->val.booleanval;
          if(force_state != -1)
@@ -2256,35 +2262,48 @@ char *automator_inputs_table_to_json_string_alloc()
       ret= -1;
    else
    {
-      strcpy(jsonstr,"{");
+      jsonstr[0]='{';
+      jsonstr[1]=0;
+      
       for(s=inputs_table; s != NULL; s=s->hh.next)
       {
          struct value_s *v = &(s->v);
 
-         if(!startflag)
-            strcat(jsonstr,",");
-         if(s->state == UNKNOWN)
-            sprintf(tmpVal, "\"N/A\"");
+         if(!startflag) {
+            strncat(jsonstr, ",", l_jsonstr-1);
+            jsonstr[l_jsonstr-1]=0;
+         } 
+
+         if(s->state == UNKNOWN) {
+            snprintf(tmpVal, sizeof(tmpVal)-1, "\"N/A\"");
+         }
          else
          {
-            if(v->type == 0)
-               sprintf(tmpVal, "%f", v->val.floatval);
-            if(v->type == 1)
+            if(v->type == 0) {
+               snprintf(tmpVal, sizeof(tmpVal)-1, "%f", v->val.floatval);
+            }
+            if(v->type == 1) {
                snprintf(tmpVal, sizeof(tmpVal)-1, "\"%s\"", v->val.strval);
+            }
             if(v->type == 2)
             {
-               if(v->val.booleanval==0)
-                  strcpy(tmpVal, FALSE_STR_C);
-               else
-                  strcpy(tmpVal, TRUE_STR_C);
+               if(v->val.booleanval==0) {
+                  strncpy(tmpVal, FALSE_STR_C, sizeof(tmpVal)-1);
+               }
+               else {
+                  strncpy(tmpVal, TRUE_STR_C, sizeof(tmpVal)-1);
+               }
             }
          }
-         sprintf(tmpStr, "\"%s\":%s", s->name, tmpVal);
-         strcat(jsonstr, tmpStr);
+         tmpVal[sizeof(tmpVal)-1]=0;
+
+         snprintf(tmpStr, sizeof(tmpStr)-1, "\"%s\":%s", s->name, tmpVal);
+         strncat(jsonstr, tmpStr, l_jsonstr-1);
          startflag=0;
          ret=0;
       }
-      strcat(jsonstr,"}");
+      strncat(jsonstr, "}", l_jsonstr-1);
+      jsonstr[l_jsonstr-1]=0;
    }
    pthread_mutex_unlock(&inputs_table_lock);
    pthread_cleanup_pop(0);
@@ -2298,7 +2317,7 @@ char *automator_inputs_table_to_json_string_alloc()
    data=(char *)malloc(l_data+1);
    if(data)
    {
-      strcpy(data, jsonstr);
+      strncpy(data, jsonstr, l_data);
    }
  
    return data;
@@ -2432,8 +2451,8 @@ int inputs_table_sync(cJSON *rules)
                s->last_update.tv_sec = 0;
                s->last_update.tv_nsec = 0;
                s->v.type=1;
-               strcpy(s->v.val.strval, "N/A");
-
+               strncpy(s->v.val.strval, "N/A", sizeof(s->v.val.strval)-1);
+               s->v.val.strval[sizeof(s->v.val.strval)-1]=0;
                send_change(s->name, &(s->v), NULL);
             }
             HASH_ADD_STR(inputs_table, name, s);
@@ -2547,7 +2566,8 @@ int inputs_table_init(cJSON *rules)
       { 
          struct value_s v;
          v.type=1;
-         strcpy(v.val.strval, "N/A");
+         strncpy(v.val.strval, "N/A", sizeof(v.val.strval)-1);
+         v.val.strval[sizeof(v.val.strval)-1]=0;
          automator_add_to_inputs_table_noupdate(name->valuestring, &v, NULL);
          e=e->next;
       }
