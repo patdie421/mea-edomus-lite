@@ -73,7 +73,7 @@ uint16_t _comio2_get_frame_data_id(comio2_ad_t *ad)
    
    ad->frame_id++;
    if (ad->frame_id>COMIO2_MAX_USER_FRAME_ID)
-   ad->frame_id=1;
+      ad->frame_id=1;
    
    pthread_mutex_unlock(&(ad->ad_lock));
    pthread_cleanup_pop(0);
@@ -95,7 +95,8 @@ int _comio2_open(comio2_ad_t *ad, char *dev, int speed)
    int fd=serial_open(dev, speed);
    if(fd != -1)
    {
-      strcpy(ad->serial_dev_name,dev);
+      strncpy(ad->serial_dev_name,dev,sizeof(ad->serial_dev_name)-1);
+      ad->serial_dev_name[sizeof(ad->serial_dev_name)-1]=0;
       ad->speed=speed;
       ad->fd=fd;
    }
@@ -238,7 +239,7 @@ int16_t comio2_cmdSend(comio2_ad_t *ad,
    
    cmd_data[0]=cmd;
    for(int i=0;i<l_data;i++)
-   cmd_data[i+1]=data[i];
+      cmd_data[i+1]=data[i];
    l_cmd_data=l_data+1;
    
    int ret;
@@ -301,7 +302,7 @@ int16_t comio2_cmdSendAndWaitResp(comio2_ad_t *ad,
    
    cmd_data[0]=cmd;
    for(uint16_t i=0;i<l_data;i++)
-   cmd_data[i+1]=data[i];
+      cmd_data[i+1]=data[i];
    l_cmd_data=l_data+1;
    
    // construction de la trame de la zone data et d'un identifiant de trame "unique"
@@ -409,11 +410,11 @@ int16_t comio2_cmdSendAndWaitResp(comio2_ad_t *ad,
          pthread_cleanup_pop(0);
          
          if(return_val ==0 || return_val==-1)
-         return return_val;
+            return return_val;
       }
       while (--boucle);
    }
-error_exit:
+
    return -1;
 }
 
