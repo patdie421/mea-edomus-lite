@@ -1854,7 +1854,6 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
    char *driversPath=appParameters_get("DRIVERSPATH", params_list);
 
    if(state==1) {
- 
       iq=(interfaces_queue_elem_t *)malloc(sizeof(interfaces_queue_elem_t));
       if(iq==NULL) {
          VERBOSE(1) {
