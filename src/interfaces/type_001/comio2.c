@@ -700,7 +700,7 @@ int16_t _comio2_add_response_to_queue(comio2_ad_t *ad, char *frame, uint16_t l_f
    comio2_queue_elem_t *e;
    
    if(!ad)
-   return -1;
+      return -1;
    
    e=malloc(sizeof(comio2_queue_elem_t));
    if(e)
@@ -716,7 +716,7 @@ int16_t _comio2_add_response_to_queue(comio2_ad_t *ad, char *frame, uint16_t l_f
       mea_queue_in_elem(ad->queue, e);
       
       if(ad->queue->nb_elem>=1)
-      pthread_cond_broadcast(&ad->sync_cond);
+         pthread_cond_broadcast(&ad->sync_cond);
       
       pthread_mutex_unlock(&ad->sync_lock);
       pthread_cleanup_pop(0);
