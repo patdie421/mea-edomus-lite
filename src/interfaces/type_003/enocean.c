@@ -63,7 +63,7 @@ int16_t _enocean_open(enocean_ed_t *ed, char *dev)
    if(fd != -1)
    {
       strncpy(ed->serial_dev_name,dev,sizeof(ed->serial_dev_name)-1);
-      ed->serial_dev_name[sizeof(ed->serial_dev_name)-1];
+      ed->serial_dev_name[sizeof(ed->serial_dev_name)-1]=0;
       ed->fd=fd;
    }
 
