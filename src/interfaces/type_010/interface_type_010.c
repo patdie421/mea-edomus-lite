@@ -262,7 +262,6 @@ static int init_interface_type_010_data_source(interface_type_010_t *i010)
             return 0;
          else
             return -1;
-         break;
       }
       default:
          return -1;
@@ -898,8 +897,6 @@ int16_t api_interface_type_010(void *ixxx, char *cmnd, void *args, int nb_args, 
 
       return -254;
    }
-
-   return -1;
 }
 
 

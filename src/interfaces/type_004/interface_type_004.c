@@ -1,4 +1,4 @@
-#define DEBUGFLAG 0
+// #define DEBUGFLAG 0
 
 #include "interface_type_004.h"
 

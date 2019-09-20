@@ -761,8 +761,6 @@ int16_t api_interface_type_006(void *ixxx, char *cmnd, void *args, int nb_args, 
 
       return -254;
    }
-
-   return -1;
 }
 
 

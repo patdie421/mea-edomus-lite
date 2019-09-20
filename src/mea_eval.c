@@ -778,7 +778,8 @@ int mea_eval_calc_numeric_by_cache(char *expr, double *d)
       }
 
       if(mea_eval_addStackToCache(expr, stack, stack_ptr, err)==NULL) {
-         free(stack);
+         if(stack)
+            free(stack);
          stack=NULL;
          return -1;
       }

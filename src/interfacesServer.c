@@ -1454,7 +1454,6 @@ int load_interface(int type, char *driversPath)
             VERBOSE(2) mea_log_printf("%s (%s) : dlopen - %s\n", ERROR_STR, __func__, dlerror());
             return -1;
          }
-         break;
       }
    }
    return -1;

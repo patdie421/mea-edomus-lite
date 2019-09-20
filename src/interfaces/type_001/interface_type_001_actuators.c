@@ -225,7 +225,6 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                   (i001->indicators.nbactuatorsout)++;
 //DBSERVER                  dbServer_add_data_to_sensors_values(iq->actuator_id, 1, 0, sval[1], XPL_PULSE_STR_C);
                   return NOERROR;
-                  break;
                }
                
                case HIGH_ID:

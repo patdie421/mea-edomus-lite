@@ -426,8 +426,6 @@ int16_t interface_type_005_xPL_sensor2(interface_type_005_t *i005,
    }
    else
       return -1;
-   
-   return 0;
 }
 
 
