@@ -501,10 +501,14 @@ int updateInterface(char *interface, cJSON *jsonData) /* TO TEST */
       }
       cJSON_AddItemToObject(jsonInterfaces, interface, _jsonInterface);
 
-      mea_strncpytrimlower(e->devName, (char *)cJSON_GetObjectItem(_jsonInterface, "dev")->valuestring, sizeof(e->devName)-1);
-      e->interface=_jsonInterface;
-     
-      HASH_ADD_STR(devs_index, devName, e); 
+      //
+      // A REVOIR
+      //
+      // mea_strncpytrimlower(e->devName, (char *)cJSON_GetObjectItem(_jsonInterface, "dev")->valuestring, sizeof(e->devName)-1);
+      // e->interface=_jsonInterface;
+      //
+      // HASH_ADD_STR(devs_index, devName, e); 
+      //
 
       ret=0;
    }

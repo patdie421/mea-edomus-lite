@@ -101,8 +101,8 @@ enocean_ed_t *enocean_new_ed(void);
 
 uint32_t enocean_calc_addr(uint8_t a, uint8_t b, uint8_t c, uint8_t d);
 
-uint16_t enocean_get_chipid(enocean_ed_t *ed, uint32_t *chipid, int16_t *nerr);
-uint16_t enocean_get_baseid(enocean_ed_t *ed, uint32_t *baseid, int16_t *nerr);
+int16_t enocean_get_chipid(enocean_ed_t *ed, uint32_t *chipid, int16_t *nerr);
+int16_t enocean_get_baseid(enocean_ed_t *ed, uint32_t *baseid, int16_t *nerr);
 int16_t  enocean_set_data_callback(enocean_ed_t *ed, enocean_callback_f f);
 int16_t  enocean_set_data_callback2(enocean_ed_t *ed, enocean_callback_f f, void *data);
 int16_t  enocean_remove_data_callback(enocean_ed_t *ed);
@@ -110,8 +110,8 @@ int16_t  enocean_send_packet(enocean_ed_t *ed, uint8_t *packet, uint16_t l_packe
 
 int16_t enocean_send_radio_erp1_packet(enocean_ed_t *ed, uint8_t rorg, uint32_t source, uint32_t dec_id, uint32_t dest, uint8_t *data, uint16_t l_data, uint8_t status, int16_t *nerr);
 
-uint16_t enocean_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr);
-uint16_t enocean_sa_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr);
-uint16_t enocean_sa_confirm_learn_response(enocean_ed_t *ed, uint16_t response_time, uint16_t confirm, int16_t *nerr);
+int16_t enocean_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr);
+int16_t enocean_sa_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr);
+int16_t enocean_sa_confirm_learn_response(enocean_ed_t *ed, uint16_t response_time, uint16_t confirm, int16_t *nerr);
 
 #endif
