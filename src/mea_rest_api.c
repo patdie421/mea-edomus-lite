@@ -180,8 +180,6 @@ int openSession(struct mg_connection *conn)
 
 int checkSession(char *sessionId)
 {
-   return 0;
-
    if(sessionId) {
       cJSON *json_sessionId = cJSON_GetObjectItem(sessions, sessionId);
       if(json_sessionId == NULL) {
