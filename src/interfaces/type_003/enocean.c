@@ -1,5 +1,5 @@
 //
-//  enocean.c
+ee all issues in this file
 //
 //  Created by Patrice Dietsch on 15/12/2014.
 //  Copyright (c) 2014 Patrice Dietsch. All rights reserved.
@@ -62,7 +62,8 @@ int16_t _enocean_open(enocean_ed_t *ed, char *dev)
    int fd=serial_open(dev, B57600);
    if(fd != -1)
    {
-      strcpy(ed->serial_dev_name,dev);
+      strncpy(ed->serial_dev_name,dev,sizeof(ed->serial_dev_name)-1);
+      ed->serial_dev_name[sizeof(ed->serial_dev_name)-1];
       ed->fd=fd;
    }
 
