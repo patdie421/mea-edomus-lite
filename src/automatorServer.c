@@ -81,9 +81,12 @@ void setAutomatorRulesFile(char *file)
       free(rules_file);
       rules_file=NULL;
    }
-   rules_file=malloc(strlen(file)+1);
-   
-   strcpy(rules_file, file);
+
+   int l=strlen(file); 
+   rules_file=malloc(l+1);
+  
+   strncpy(rules_file, file, l);
+   rules_file[l]=0;
 }
 
 

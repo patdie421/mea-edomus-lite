@@ -1267,7 +1267,8 @@ int automator_sendxpl2(cJSON *parameters)
    char xplBodyStr[2048] = "";
    int xplBodyStrPtr = 0;
 
-   sprintf(source,"%s-%s.%s", mea_getXPLVendorID(), mea_getXPLDeviceID(), mea_getXPLInstanceID());
+   snprintf(source, sizeof(source)-1, "%s-%s.%s", mea_getXPLVendorID(), mea_getXPLDeviceID(), mea_getXPLInstanceID());
+   source[sizeof(source)-1]=0;
 
    while(e)
    {
@@ -1319,10 +1320,9 @@ int automator_sendxpl2(cJSON *parameters)
       e=e->next;
    }
 
-   char *msg = (char *)alloca(2048);
-
-   int n=sprintf(msg,"%s\n{\nhop=1\nsource=%s\ntarget=%s\n}\n%s\n{\n%s}\n",type,source,target,schema,xplBodyStr);
-
+   char msg[2048];
+   int n=snprintf(msg, sizeof(msg)-1, "%s\n{\nhop=1\nsource=%s\ntarget=%s\n}\n%s\n{\n%s}\n", type, source, target, schema, xplBodyStr);
+   msg[sizeof(msg)-1]=0;
    if(n>0)
    {
       mea_xPLSendMessage2(msg, n);
