@@ -456,7 +456,7 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
                         goto malloc_parsed_parameters_exit;
                      }
                      strncpy(parsed_parameters->parameters[i].value.s, value_token,r);
-                     parsed_parameters->parameters[i].value.s[r+1]=0;
+                     parsed_parameters->parameters[i].value.s[r]=0;
                      break;
                      
                   default:
