@@ -1,6 +1,4 @@
-//
-ee all issues in this file
-//
+// 
 //  Created by Patrice Dietsch on 15/12/2014.
 //  Copyright (c) 2014 Patrice Dietsch. All rights reserved.
 //
