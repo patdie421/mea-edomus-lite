@@ -745,7 +745,7 @@ int16_t enocean_send_packet(enocean_ed_t *ed, uint8_t *packet, uint16_t l_packet
 }
 
 
-uint16_t enocean_get_chipid(enocean_ed_t *ed, uint32_t *chipid, int16_t *nerr)
+int16_t enocean_get_chipid(enocean_ed_t *ed, uint32_t *chipid, int16_t *nerr)
 {
    uint8_t request[8];
    uint8_t response[40];
@@ -803,7 +803,7 @@ uint16_t enocean_get_chipid(enocean_ed_t *ed, uint32_t *chipid, int16_t *nerr)
 }
 
 
-uint16_t enocean_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr)
+int16_t enocean_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr)
 {
    uint8_t request[14];
    uint8_t reponse[40];
@@ -873,7 +873,7 @@ uint16_t enocean_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr)
 }
 
 
-uint16_t enocean_sa_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr)
+int16_t enocean_sa_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr)
 {
    int ret = -1;
    uint8_t request[40];
@@ -942,7 +942,7 @@ uint16_t enocean_sa_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr)
 }
 
 
-uint16_t enocean_sa_confirm_learn_response(enocean_ed_t *ed, uint16_t response_time, uint16_t confirm, int16_t *nerr)
+int16_t enocean_sa_confirm_learn_response(enocean_ed_t *ed, uint16_t response_time, uint16_t confirm, int16_t *nerr)
 {
    uint8_t request[40];
    uint8_t response[40];
@@ -1009,7 +1009,7 @@ uint16_t enocean_sa_confirm_learn_response(enocean_ed_t *ed, uint16_t response_t
 }
 
 
-uint16_t enocean_get_baseid(enocean_ed_t *ed, uint32_t *baseid, int16_t *nerr)
+int16_t enocean_get_baseid(enocean_ed_t *ed, uint32_t *baseid, int16_t *nerr)
 {
    uint8_t request[8];
    uint8_t response[40];
