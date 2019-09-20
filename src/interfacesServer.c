@@ -456,7 +456,7 @@ addInterface_clean_exit:
 }
 
 
-int updateInterface(char *interface, cJSON *jsonData)
+int updateInterface(char *interface, cJSON *jsonData) /* TO TEST */
 {
    int ret=-1;
    int id_interface=-1;
@@ -501,10 +501,10 @@ int updateInterface(char *interface, cJSON *jsonData)
       }
       cJSON_AddItemToObject(jsonInterfaces, interface, _jsonInterface);
 
-      mea_strncpytrimlower(_e->devName, (char *)cJSON_GetObjectItem(_jsonInterface, "dev")->valuestring, sizeof(_e->devName)-1);
-      _e->interface=_jsonInterface;
+      mea_strncpytrimlower(e->devName, (char *)cJSON_GetObjectItem(_jsonInterface, "dev")->valuestring, sizeof(e->devName)-1);
+      e->interface=_jsonInterface;
      
-      HASH_ADD_STR(devs_index, devName, _e); 
+      HASH_ADD_STR(devs_index, devName, e); 
 
       ret=0;
    }
