@@ -1210,7 +1210,7 @@ int dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson)
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
    pthread_rwlock_rdlock(&interfaces_queue_rwlock);
  
-   while(1) {
+//   while(1) {
  
       if(_interfaces && _interfaces->nb_elem) {
          mea_queue_first(_interfaces);
@@ -1234,7 +1234,7 @@ int dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson)
             }
          }
       }
-   }
+//   }
 
    pthread_rwlock_unlock(&interfaces_queue_rwlock);
    pthread_cleanup_pop(0);
