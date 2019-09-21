@@ -76,17 +76,16 @@ char *getAutomatorRulesFile()
 
 void setAutomatorRulesFile(char *file)
 {
-   if(rules_file)
-   {
+   if(rules_file) {
       free(rules_file);
       rules_file=NULL;
    }
 
    int l=strlen(file); 
    rules_file=malloc(l+1);
+   rules_file[l]=0;
   
    strncpy(rules_file, file, l);
-   rules_file[l]=0;
 }
 
 
@@ -103,8 +102,7 @@ mea_error_t automatorServer_add_msg(cJSON *msg_json)
 
    pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&automator_msg_queue_lock);
    pthread_mutex_lock(&automator_msg_queue_lock);
-   if(automator_msg_queue)
-   {
+   if(automator_msg_queue) {
       mea_queue_in_elem(automator_msg_queue, e);
       if(automator_msg_queue->nb_elem>=1)
          pthread_cond_broadcast(&automator_msg_queue_cond);
@@ -118,10 +116,8 @@ mea_error_t automatorServer_add_msg(cJSON *msg_json)
       return NOERROR;
    
 automatorServer_add_msg_clean_exit:
-   if(e)
-   {
-      if(e->msg_json)
-      {
+   if(e) {
+      if(e->msg_json) {
          cJSON_Delete(e->msg_json);
          e->msg_json=NULL;
       }
@@ -155,8 +151,7 @@ int automatorServer_timer_wakeup(char *name, void *userdata)
 
    pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&automator_msg_queue_lock);
    pthread_mutex_lock(&automator_msg_queue_lock);
-   if(automator_msg_queue)
-   {
+   if(automator_msg_queue) {
       mea_queue_in_elem(automator_msg_queue, e);
       if(automator_msg_queue->nb_elem>=1)
          pthread_cond_broadcast(&automator_msg_queue_cond);
@@ -170,8 +165,7 @@ int automatorServer_timer_wakeup(char *name, void *userdata)
       return 0;
 
 automatorServer_add_msg_clean_exit:
-   if(e)
-   {
+   if(e) {
       free(e);
       e=NULL;
    }
@@ -201,23 +195,20 @@ void *_automator_thread(void *data)
    int err_indicator = 0;
    int16_t timeout;
   
-   while(1)
-   {
+   while(1) {
       ret=0;
       process_heartbeat(_automatorServer_monitoring_id);
       pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&automator_msg_queue_lock);
       pthread_mutex_lock(&automator_msg_queue_lock);
 
-      if(mea_test_timer(&indicator_timer)==0)
-      {
+      if(mea_test_timer(&indicator_timer)==0) {
          process_update_indicator(_automatorServer_monitoring_id, automator_xplin_str, automator_xplin_indicator);
          process_update_indicator(_automatorServer_monitoring_id, automator_xplout_str, automator_xplout_indicator);
          process_update_indicator(_automatorServer_monitoring_id, automator_err_str, err_indicator);
       }
    
       timeout=0; // pour faire en sorte de n'avoir qu'un seul pthread_mutex_unlock en face du pthread_mutex_lock ci-dessus
-      if(automator_msg_queue && automator_msg_queue->nb_elem==0)
-      {
+      if(automator_msg_queue && automator_msg_queue->nb_elem==0) {
          struct timeval tv;
          struct timespec ts;
          gettimeofday(&tv, NULL);
@@ -226,29 +217,24 @@ void *_automator_thread(void *data)
 //         long ns_timeout=1000000000L; // 1s
          ts.tv_sec = tv.tv_sec;
          ts.tv_nsec = (tv.tv_usec * 1000) + ns_timeout;
-         if(ts.tv_nsec>1000000000L) // 1.000.000.000 ns = 1 seconde
-         {
+         if(ts.tv_nsec>1000000000L) { // 1.000.000.000 ns = 1 seconde
             ts.tv_sec++;
             ts.tv_nsec=ts.tv_nsec - 1000000000L;
          }
          ret=pthread_cond_timedwait(&automator_msg_queue_cond, &automator_msg_queue_lock, &ts);
-         if(ret!=0)
-         {
-            if(ret==ETIMEDOUT)
-            {
+         if(ret!=0) {
+            if(ret==ETIMEDOUT) {
                errcntr=0; // c'est pas vraiment une erreur on clear le compteur d'erreur
                timeout=1;
                ret=0;
             }
-            else if(ret==EINVAL)
-            {
+            else if(ret==EINVAL) {
                ++err_indicator;
                DEBUG_SECTION2(DEBUGFLAG) {
                   mea_log_printf("%s (%s) : pthread_cond_timedwait EINVAL error (EINVAL)\n", DEBUG_STR, __func__);
                }
             }
-            else
-            {
+            else {
                ++err_indicator;
                ++errcntr;
                // autres erreurs à traiter
@@ -257,8 +243,7 @@ void *_automator_thread(void *data)
                   perror("");
                }
 
-               if(errcntr > 10) // 10 erreurs d'affilé, on va pas s'en sortir => on s'arrête proprement
-               {         
+               if(errcntr > 10) { // 10 erreurs d'affilé, on va pas s'en sortir => on s'arrête proprement
                   process_async_stop(_automatorServer_monitoring_id);
                   for(;;) sleep(1);
                }
@@ -281,8 +266,7 @@ void *_automator_thread(void *data)
 
       process_heartbeat(_automatorServer_monitoring_id); 
 
-      if (timeout==1) // timeout => un tour d'automate (à vide, càd sans message xPL)
-      {
+      if (timeout==1) { // timeout => un tour d'automate (à vide, càd sans message xPL)
          pthread_testcancel();
          
          automator_matchInputsRules(_inputs_rules, NULL);
@@ -290,8 +274,7 @@ void *_automator_thread(void *data)
          if(n>0)
             automator_xplout_indicator+=n;
 
-         if(automator_send_all_inputs_flag!=0)
-         {
+         if(automator_send_all_inputs_flag!=0) {
             automator_send_all_inputs();
             automator_send_all_inputs_flag=0;
          }
@@ -300,20 +283,16 @@ void *_automator_thread(void *data)
          continue;
       }
      
-      if(!ret && e) // on a sortie un élément de la queue
-      {
-         if(e->type==1)
-         {
+      if(!ret && e) { // on a sortie un élément de la queue
+         if(e->type==1) {
 //            DEBUG_SECTION2(DEBUGFLAG) displayXPLMsg(e->msg);
          }
-         else if(e->type == 2)
-         {
+         else if(e->type == 2) {
              DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : timer wakeup signal\n", INFO_STR, __func__);
          }
 
 /*
-         if(e->type == 1 && e->msg_json)
-         {
+         if(e->type == 1 && e->msg_json) {
             char *tmp = cJSON_Print(e->msg_json);
             mea_log_printf("xpl:%s\n", tmp);
             free(tmp);
@@ -328,21 +307,17 @@ void *_automator_thread(void *data)
          if(n>0)
             automator_xplout_indicator+=n;
 
-         if(automator_send_all_inputs_flag!=0)
-         {
+         if(automator_send_all_inputs_flag!=0) {
             automator_send_all_inputs();
             automator_send_all_inputs_flag=0;
          }
 
          automator_reset_inputs_change_flags();
 
-         if(e)
-         {
-            if(e->type == 1) // l'élément sorti était un message xpl (pas un timer)
-            {
+         if(e) {
+            if(e->type == 1) { // l'élément sorti était un message xpl (pas un timer)
                automator_xplin_indicator++;
-               if(e->msg_json)
-               {
+               if(e->msg_json) {
                   cJSON_Delete(e->msg_json);
                   e->msg_json=NULL;
                }
@@ -351,8 +326,7 @@ void *_automator_thread(void *data)
             e=NULL;
          }
       }
-      else
-      {
+      else {
          // pb d'accés aux données de la file
          VERBOSE(9) mea_log_printf("%s (%s) : mea_queue_out_elem - can't access queue element\n", ERROR_STR, __func__);
       }
@@ -373,8 +347,7 @@ pthread_t *automatorServer()
    pthread_t *automator_thread=NULL;
 
    automator_msg_queue=(mea_queue_t *)malloc(sizeof(mea_queue_t));
-   if(!automator_msg_queue)
-   {
+   if(!automator_msg_queue) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
          perror("");
@@ -386,8 +359,7 @@ pthread_t *automatorServer()
    pthread_cond_init(&automator_msg_queue_cond, NULL);
  
    automator_thread=(pthread_t *)malloc(sizeof(pthread_t));
-   if(!automator_thread)
-   {
+   if(!automator_thread) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ",FATAL_ERROR_STR, __func__, MALLOC_ERROR_STR);
          perror("");
@@ -395,8 +367,7 @@ pthread_t *automatorServer()
       goto automatorServer_clean_exit;
    }
    
-   if(pthread_create (automator_thread, NULL, _automator_thread, NULL))
-   {
+   if(pthread_create (automator_thread, NULL, _automator_thread, NULL)) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : pthread_create - can't start thread - ", FATAL_ERROR_STR, __func__);
          perror("");
@@ -410,14 +381,12 @@ pthread_t *automatorServer()
       return automator_thread;
 
 automatorServer_clean_exit:
-   if(automator_thread)
-   {
+   if(automator_thread) {
       free(automator_thread);
       automator_thread=NULL;
    }
 
-   if(automator_msg_queue)
-   {
+   if(automator_msg_queue) {
       free(automator_msg_queue);
       automator_msg_queue=NULL;
    }
@@ -429,10 +398,8 @@ automatorServer_clean_exit:
 void automator_msg_queue_free_queue_elem(void *d)
 {
    automator_msg_t *e=(automator_msg_t *)d;
-   if(e)
-   {
-      if(e->msg_json)
-      {
+   if(e) {
+      if(e->msg_json) {
          cJSON_Delete(e->msg_json);
          e->msg_json=NULL;
       }
@@ -444,12 +411,10 @@ void automator_msg_queue_free_queue_elem(void *d)
 
 int stop_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
 {
-   if(_automatorServer_thread_id)
-   {
+   if(_automatorServer_thread_id) {
       pthread_cancel(*_automatorServer_thread_id);
       int counter=100;
-      while(counter--)
-      {
+      while(counter--) {
          if(_automatorServer_thread_is_running)
             usleep(100);
          else
@@ -464,8 +429,7 @@ int stop_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
 
    pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&automator_msg_queue_lock);
    pthread_mutex_lock(&automator_msg_queue_lock);
-   if(automator_msg_queue)
-   {
+   if(automator_msg_queue) {
       mea_queue_cleanup(automator_msg_queue, automator_msg_queue_free_queue_elem);
       free(automator_msg_queue);
       automator_msg_queue=NULL;
@@ -487,14 +451,12 @@ int start_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
 
    char err_str[80], notify_str[256];
 
-   if(appParameters_get("RULESFILE", automatorServer_start_stop_params->params_list))
-   {
+   if(appParameters_get("RULESFILE", automatorServer_start_stop_params->params_list)) {
 //      setAutomatorRulesFile(automatorServer_start_stop_params->params_list[RULES_FILE]);
       setAutomatorRulesFile(appParameters_get("RULESFILE", automatorServer_start_stop_params->params_list));
       
       _automatorServer_thread_id=automatorServer();
-      if(_automatorServer_thread_id==NULL)
-      {
+      if(_automatorServer_thread_id==NULL) {
          strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(1) {
             mea_log_printf("%s (%s) : can't start %s (thread error) - %s\n", ERROR_STR, __func__, automator_server_name_str, notify_str);
@@ -504,8 +466,7 @@ int start_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
       }
       _automatorServer_monitoring_id=my_id;
    }
-   else
-   {
+   else {
       VERBOSE(1) {
          mea_log_printf("%s (%s) : can't start %s (incorrect rules path).\n", ERROR_STR, __func__, automator_server_name_str);
       }
@@ -522,8 +483,7 @@ int restart_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
 {
    int ret=0;
    ret=stop_automatorServer(my_id, data, errmsg, l_errmsg);
-   if(ret==0)
-   {
+   if(ret==0) {
       return start_automatorServer(my_id, data, errmsg, l_errmsg);
    }
    return ret;

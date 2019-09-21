@@ -62,23 +62,25 @@ int httpout_indicator=0; // nombre de réponses émises
 const char *options[15];
 struct mg_context* g_mongooseContext = 0;
 
+#define REQUETE_SIZE 1000
 
 int gethttp(char *server, int port, char *url, char *response, int l_response)
 {
    int sockfd; // descripteur de socket
    
    // creation de la requete
-   char requete[1000]="GET ";
-   strcat(requete, url);
-   strcat(requete, " HTTP/1.1\r\n");
-   strcat(requete, "Host: ");
-   strcat(requete, server);
-   strcat(requete, "\r\n");
-   strcat(requete, "Connection: close\r\n");
-   strcat(requete, "\r\n");
+   char requete[REQUETE_SIZE]="GET ";
+   requete[REQUETE_SIZE-1]=0;
+
+   strncat(requete, url, REQUETE_SIZE-1);
+   strncat(requete, " HTTP/1.1\r\n", REQUETE_SIZE-1);
+   strncat(requete, "Host: ", REQUETE_SIZE-1);
+   strncat(requete, server, REQUETE_SIZE-1);
+   strncat(requete, "\r\n", REQUETE_SIZE-1);
+   strncat(requete, "Connection: close\r\n", REQUETE_SIZE-1);
+   strncat(requete, "\r\n", REQUETE_SIZE-1);
    
-   if(mea_socket_connect(&sockfd, server, port)<0)
-   {
+   if(mea_socket_connect(&sockfd, server, port)<0) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : mea_socket_connect - ", ERROR_STR,__func__);
          perror("");
@@ -86,16 +88,14 @@ int gethttp(char *server, int port, char *url, char *response, int l_response)
       return -1;
    }
    
-   if(mea_socket_send(&sockfd, requete, (int)strlen(requete))<0)
-   {
+   if(mea_socket_send(&sockfd, requete, (int)strlen(requete))<0) {
       close(sockfd);
       return -1;
    }
    
    // reception de la reponse HTTP
    int n=(int)recv(sockfd, response, l_response, 0);
-   if(n == -1)
-   {
+   if(n == -1) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : recv - ", ERROR_STR,__func__);
          perror("");
@@ -225,8 +225,10 @@ static int _begin_request_handler(struct mg_connection *conn)
    httpin_indicator++;
    process_update_indicator(_httpServer_monitoring_id, "HTTPIN", httpin_indicator);
 
-   char *uri=alloca(strlen((char *)request_info->uri)+1);
-   strcpy(uri,request_info->uri);
+   int l_uri=strlen((char *)request_info->uri)+1;
+   char *uri=alloca(l_uri);
+   uri[l_uri-1]=0;
+   strncpy(uri, request_info->uri, l_uri-1);
 
    char *tokens[20];
    int l_tokens=mea_strsplit(uri, '/', tokens, 20);
@@ -289,10 +291,13 @@ mea_error_t _start_httpServer(uint16_t port, char *home)
       return ERROR;
    
    val_listening_ports=(char *)malloc(6);
-   sprintf(val_listening_ports,"%d",port);
-   
-   val_document_root=malloc(strlen(home)+1);
-   strcpy(val_document_root,home);
+   val_listening_ports[5]=0;
+   snprintf(val_listening_ports,5,"%d",port);
+  
+   int l_val_document_root=strlen(home)+1; 
+   val_document_root=malloc(l_val_document_root);
+   val_document_root[l_val_document_root-1]=0;
+   strncpy(val_document_root, home, l_val_document_root-1);
    
    options[ 0]=str_document_root;
    options[ 1]=(const char *)val_document_root;
