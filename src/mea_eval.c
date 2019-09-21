@@ -131,65 +131,59 @@ static enum mea_eval_token_type_id_e mea_eval_getToken(char *str, char **newptr,
    *newptr=p;
  
    switch(*p) {
-      case '#':
-         {
-            char *n = NULL;
-            ++p;
-            double d=strtod(p, &n);
-            if(p!=n) {
-               v->floatval=d;
-               *newptr=n;
-               return NUMERIC_T;
-            }
-            else
-               return -1;
+      case '#': {
+         char *n = NULL;
+         ++p;
+         double d=strtod(p, &n);
+         if(p!=n) {
+            v->floatval=d;
+            *newptr=n;
+            return NUMERIC_T;
          }
-         break;
-      case '{':
-         {
+         else
+            return -1;
+      }
+      case '{': {
+         ++p;
+         while(*p && *p!='}')
             ++p;
-            while(*p && *p!='}')
-               ++p;
-            if(*p=='}') {
-               char name[VALUE_MAX_STR_SIZE];
-               strncpy(name, str+1, (int)(p-str)-1);
-               name[(int)(p-str-1)]=0; 
+         if(*p=='}') {
+            char name[VALUE_MAX_STR_SIZE];
+            strncpy(name, str+1, (int)(p-str)-1);
+            name[(int)(p-str-1)]=0; 
 
-               if(_getVarId != NULL) {
-                  int16_t id = 0;
-                  if(_getVarId(name, mea_eval_userdata, &id)<0) {
-                     return -1;
-                  }
-                  v->var_id=id;
+            if(_getVarId != NULL) {
+               int16_t id = 0;
+               if(_getVarId(name, mea_eval_userdata, &id)<0) {
+                  return -1;
                }
-               p++;
-               *newptr=p;
-               return VARIABLE_T;
+               v->var_id=id;
             }
-            else
-               return -1;
+            p++;
+            *newptr=p;
+            return VARIABLE_T;
          }
-         break;
+         else
+            return -1;
+      }
 
-      default:
-         {
-            ++p;
+      default: {
+         ++p;
 
-            if(!isalpha(*p))
-               return -1;
+         if(!isalpha(*p))
+            return -1;
+         ++p;
+         while(*p && isalpha(*p))
             ++p;
-            while(*p && isalpha(*p))
-               ++p;
-            int16_t ret=mea_eval_getFunctionId(str, (int16_t)(p-str));
-            if(ret>=0) {
-               v->fn_id=ret;
-               *newptr=p;
-               return FUNCTION_T;
-            }
-            else
-               return -1;
+         int16_t ret=mea_eval_getFunctionId(str, (int16_t)(p-str));
+         if(ret>=0) {
+            v->fn_id=ret;
+            *newptr=p;
+            return FUNCTION_T;
          }
-         break;
+         else
+            return -1;
+      }
    }
    return -1;
 }
@@ -197,8 +191,7 @@ static enum mea_eval_token_type_id_e mea_eval_getToken(char *str, char **newptr,
 
 static int mea_eval_doOperationN(double *d, double d1, int op, double d2)
 {
-   switch(op)
-   {
+   switch(op) {
       case '+':
          *d=d1+d2;
          break;
@@ -241,8 +234,6 @@ static int mea_eval_getOperatorPriorityN(int op)
       default:
          return -1;
    }
-
-   return -1;
 }
 
 

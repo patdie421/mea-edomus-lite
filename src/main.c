@@ -350,7 +350,6 @@ int main(int argc, const char * argv[])
          case 'h':
             usage((char *)argv[0]);
             exit(0);
-            break;
 
          case 'p':
 	 case MEA_PATH:

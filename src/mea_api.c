@@ -141,11 +141,9 @@ static PyObject *mea_interface_api(PyObject *self, PyObject *args)
       case -254:
          PyErr_SetString(PyExc_RuntimeError, err);
          return NULL;
-         break;
       case -255:
          PyErr_BadArgument();
          return NULL;
-         break;
    }
  
    PyObject *t=PyTuple_New(3);

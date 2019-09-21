@@ -1249,7 +1249,7 @@ int automator_sendxpl2(cJSON *parameters)
          else {
             char s[sizeof(v.val.strval)];
             value_toStr(&v, s, sizeof(v.val.strval), INT | HIGHLOW);
-            int n=sprintf(&(xplBodyStr[xplBodyStrPtr]),"%s=%s\n",e->string,s);
+            int n=sprintf(&(xplBodyStr[xplBodyStrPtr]), "%s=%s\n", e->string, s);
             xplBodyStrPtr+=n;
          }
       }
