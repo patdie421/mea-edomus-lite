@@ -86,11 +86,13 @@ int16_t interface_type_001_counters_process_traps2(int16_t numTrap, char *buff, 
 
          cJSON *xplMsgJson = cJSON_CreateObject();
          cJSON_AddItemToObject(xplMsgJson, XPLMSGTYPE_STR_C, cJSON_CreateString(XPL_TRIG_STR_C));
-         sprintf(str,"%s.%s", get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
+         snprintf(str, sizeof(str)-1, "%s.%s", get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
+         str[sizeof(str)-1]=0;
          cJSON_AddItemToObject(xplMsgJson, XPLSCHEMA_STR_C, cJSON_CreateString(str));
          cJSON_AddItemToObject(xplMsgJson, get_token_string_by_id(XPL_DEVICE_ID), cJSON_CreateString(counter->name));
          cJSON_AddItemToObject(xplMsgJson, get_token_string_by_id(XPL_TYPE_ID), cJSON_CreateString(get_token_string_by_id(XPL_POWER_ID)));
-         sprintf(value,"%f",counter->power);
+         snprintf(value, sizeof(value)-1, "%f", counter->power);
+         value[sizeof(value)-1]=0;
          cJSON_AddItemToObject(xplMsgJson, get_token_string_by_id(XPL_CURRENT_ID), cJSON_CreateString(value));
 
          // Broadcast the message
@@ -164,7 +166,8 @@ struct electricity_counter_s *interface_type_001_sensors_valid_and_malloc_counte
       goto valid_and_malloc_counter_clean_exit;
    }
    
-   strcpy(counter->name,(char *)name);
+   strncpy(counter->name, (char *)name, sizeof(counter->name)-1);
+   counter->name[sizeof(counter->name)-1]=0;
    mea_strtolower(counter->name);
    counter->sensor_id=id_sensor_actuator;
    counter->wh_counter=0;
@@ -197,14 +200,15 @@ valid_and_malloc_counter_clean_exit:
 void counter_to_xpl2(interface_type_001_t *i001, struct electricity_counter_s *counter)
 {
    char str[256];
+   str[sizeof(str)-1]=0;
 
    cJSON *xplMsgJson = cJSON_CreateObject();
    cJSON_AddItemToObject(xplMsgJson, XPLMSGTYPE_STR_C, cJSON_CreateString(XPL_TRIG_STR_C));
-   sprintf(str,"%s.%s", get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
+   snprintf(str, sizeof(str)-1, "%s.%s", get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
    cJSON_AddItemToObject(xplMsgJson, XPLSCHEMA_STR_C, cJSON_CreateString(str));
    cJSON_AddItemToObject(xplMsgJson, get_token_string_by_id(XPL_TYPE_ID), cJSON_CreateString(get_token_string_by_id(XPL_ENERGY_ID)));
    cJSON_AddItemToObject(xplMsgJson, get_token_string_by_id(XPL_DEVICE_ID), cJSON_CreateString(counter->name));
-   sprintf(str,"%d",counter->kwh_counter);
+   snprintf(str, sizeof(str)-1, "%d",counter->kwh_counter);
    cJSON_AddItemToObject(xplMsgJson, get_token_string_by_id(XPL_CURRENT_ID), cJSON_CreateString(str));
 
    // Broadcast the message
@@ -292,16 +296,17 @@ mea_error_t interface_type_001_counters_process_xpl_msg2(interface_type_001_t *i
       if(!device || mea_strcmplower(device,counter->name)==0)
       {
          char value[20];
+         value[sizeof(value)-1]=0;
          char *unit;
          
          if(type_id==XPL_ENERGY_ID)
          {
-            sprintf(value,"%d", counter->kwh_counter);
+            snprintf(value, sizeof(value)-1, "%d", counter->kwh_counter);
             unit="kWh";
          }
          else if(type_id==XPL_POWER_ID)
          {
-            sprintf(value,"%f", counter->power);
+            snprintf(value, sizeof(value)-1, "%f", counter->power);
             unit="W";
          }
          else
@@ -311,8 +316,8 @@ mea_error_t interface_type_001_counters_process_xpl_msg2(interface_type_001_t *i
          cJSON *j = NULL;
          cJSON *msg_json = cJSON_CreateObject();
          
-         sprintf(str,"%s.%s", get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
-
+         snprintf(str, sizeof(str)-1, "%s.%s", get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
+         str[sizeof(str)-1]=0;
          cJSON_AddItemToObject(msg_json, XPLSCHEMA_STR_C,  cJSON_CreateString(str)); 
          cJSON_AddItemToObject(msg_json, get_token_string_by_id(XPL_DEVICE_ID),  cJSON_CreateString(counter->name)); 
          cJSON_AddItemToObject(msg_json, get_token_string_by_id(XPL_TYPE_ID),    cJSON_CreateString(type)); 
@@ -364,7 +369,8 @@ int16_t interface_type_001_counters_poll_inputs2(interface_type_001_t *i001)
          char str[256];
          cJSON *xplMsgJson = cJSON_CreateObject();
          cJSON_AddItemToObject(xplMsgJson, XPLMSGTYPE_STR_C, cJSON_CreateString(XPL_TRIG_STR_C));
-         sprintf(str,"%s.%s", get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
+         snprintf(str, sizeof(str)-1, "%s.%s", get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
+         str[sizeof(str)-1]=0;
          cJSON_AddItemToObject(xplMsgJson, XPLSCHEMA_STR_C, cJSON_CreateString(str));
          cJSON_AddItemToObject(xplMsgJson, get_token_string_by_id(XPL_DEVICE_ID), cJSON_CreateString(counter->name));
          cJSON_AddItemToObject(xplMsgJson, get_token_string_by_id(XPL_TYPE_ID), cJSON_CreateString(get_token_string_by_id(XPL_POWER_ID)));

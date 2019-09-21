@@ -122,7 +122,8 @@ struct actuator_s *interface_type_001_valid_and_malloc_actuator(int16_t id_senso
       
       if(valide_actuator_i001(type_id,pin_id,action_id,&err))
       {
-         strcpy(actuator->name,(char *)name);
+         strncpy(actuator->name, (char *)name, sizeof(actuator->name)-1);
+         actuator->name[sizeof(actuator->name)-1]=0;
          mea_strtolower(actuator->name);
          actuator->actuator_id=id_sensor_actuator;
          actuator->arduino_pin=pin_id;
