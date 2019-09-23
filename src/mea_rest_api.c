@@ -333,7 +333,6 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
    else {
       return returnResponse(conn, 404, 1, NULL);
    }
-   return 1;
 }
 
 
