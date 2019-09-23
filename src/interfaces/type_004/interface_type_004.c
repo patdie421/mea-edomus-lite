@@ -380,8 +380,10 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
    {
       getLightStateByName(i004->currentHueLightsState, (char *)e->huename, &on, &reachable);
       if(e->sensorname) {
-         sensor = (char *)malloc(strlen(e->sensorname)+1);
-         strcpy(sensor,e->sensorname);
+         l_sensor=strlen(e->sensorname)+1;
+         sensor = (char *)malloc(l_sensor);
+         sensor[l_sensor-1]=0;
+         strncpy(sensor, e->sensorname, l_sensor-1);
       }
    }
    
@@ -587,9 +589,11 @@ void *_thread_interface_type_004(void *thread_data)
    
    interface_type_004_t *i004=args->i004;
    char server[sizeof(i004->server)];
-   strcpy(server,i004->server);
+   server[sizeof(server)-1]=0;
+   strncpy(server, i004->server, sizeof(i004->server)-1);
    char user[sizeof(i004->user)];
-   strcpy(user,i004->user);
+   user[sizeof(user)-1]=0;
+   strncpy(user, i004->user, sizeof(user)-1);
    int port=i004->port;
    
    free(thread_data);
@@ -822,7 +826,8 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
             if (e == NULL) {
                // elle n'existe pas on va la créer
                e = (struct lightsListElem_s *)malloc(sizeof(struct lightsListElem_s));
-               char *_huename=malloc(strlen(hue_params->parameters[PARAMS_HUELIGH].value.s)+1);
+               int _l_huename=strlen(hue_params->parameters[PARAMS_HUELIGH].value.s)+1;
+               char *_huename=malloc(_l_huename);
                if(_huename==NULL) {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
@@ -830,7 +835,8 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
                   }
                   goto load_interface_type_004_clean_exit;
                }
-               strcpy(_huename, hue_params->parameters[PARAMS_HUELIGH].value.s);
+               _huename[_l_huename-1]=0;
+               strcpy(_huename, hue_params->parameters[PARAMS_HUELIGH].value.s, _l_huename-1);
                e->huename = _huename;
                e->sensorname=NULL;
                e->actuatorname=NULL;
@@ -843,7 +849,8 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
             }
             
             char *_name=NULL;
-            _name=malloc(strlen((char *)name)+1);
+            _l_name=strlen((char *)name)+1;
+            _name=malloc(_l_name);
             if(_name==NULL) {
                VERBOSE(2) {
                   mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
@@ -851,7 +858,8 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
                }
                goto load_interface_type_004_clean_exit;
             }
-            strcpy(_name, (char *)name);
+            _name[_l_name-1]=0;
+            strncpy(_name, (char *)name, _l_name-1);
             mea_strtolower(_name);
             
             switch(id_type)
@@ -900,7 +908,8 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
             if (g == NULL) {
                // il n'existe pas on va le créer
                g = (struct groupsListElem_s *)malloc(sizeof(struct groupsListElem_s));
-               char *_groupname=malloc(strlen((char *)name)+1);
+               int _l_groupname=strlen((char *)name)+1;
+               char *_groupname=malloc(_l_groupname);
                if(_groupname==NULL) {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
@@ -908,6 +917,9 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
                   }
                   goto load_interface_type_004_clean_exit;
                }
+               _groupname[_l_groupname]=0;
+               
+               int _l_huegroupname=strlen(hue_params->parameters[PARAMS_HUEGROUP].value.s)+1;
                char *_huegroupname=malloc(strlen(hue_params->parameters[PARAMS_HUEGROUP].value.s)+1);
                if(_huegroupname==NULL) {
                   VERBOSE(2) {
@@ -918,7 +930,8 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
                   _groupname=NULL;
                   goto load_interface_type_004_clean_exit;
                }
-               strcpy(_groupname, (char *)name);
+               _huegroupname[_l_huegroupname-1]=0;
+               strncpy(_groupname, (char *)name, _l_huegroupname-1);
                mea_strtolower(_groupname);
                g->groupname = _groupname;
                strcpy(_huegroupname, hue_params->parameters[PARAMS_HUEGROUP].value.s);
@@ -978,10 +991,10 @@ int16_t get_huesystem_connection_parameters(char *device, char *server, uint16_t
    if(r != strlen(_device)) // il reste des données qu'on a pas traitées => erreur
       return -1;
    
-   strncpy(server, _server, l_server);
+   strncpy(server, _server, l_server-1);
    server[l_server-1]=0;
    *port=_port;
-   strncpy(user,_user,l_user);
+   strncpy(user, _user, l_user-1);
    server[l_user-1]=0;
    
    return 0;
@@ -1068,8 +1081,9 @@ interface_type_004_t *malloc_and_init2_interface_type_004(int id_driver, cJSON *
    }
 
    char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
-
-   i004->parameters=(char *)malloc(strlen((char *)parameters)+1);
+   int l_parameters=strlen((char *)parameters)+1;
+   i004->parameters=(char *)malloc(l_parameters);
+   i004->parameters[l_parameters-1]=0;
    if(!i004->parameters) {
       free(i004);
       i004=NULL;
@@ -1088,7 +1102,7 @@ interface_type_004_t *malloc_and_init2_interface_type_004(int id_driver, cJSON *
    char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
    char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
 
-   strcpy(i004->parameters,(char *)parameters);
+   strncpy(i004->parameters,(char *)parameters, l_parameters-1);
    strncpy(i004->dev, (char *)dev, sizeof(i004->dev)-1);
    strncpy(i004->name, (char *)name, sizeof(i004->name)-1);
    i004->id_interface=id_interface;
