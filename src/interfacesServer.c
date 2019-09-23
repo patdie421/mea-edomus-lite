@@ -1810,6 +1810,8 @@ int start_interfaces_load_json(cJSON *params_list)
 
 int update_interface_devices(int id_interface)
 {
+   int ret=0;
+
    printf("Update Interfaces (%d) requested\n", id_interface);
 
    interfaces_queue_elem_t *iq;
@@ -1825,8 +1827,8 @@ int update_interface_devices(int id_interface)
                iq->fns->update_devices(iq->context);
             break;
          }
-         int ret=mea_queue_next(_interfaces);
-         if(ret<0) {
+         int _ret=mea_queue_next(_interfaces);
+         if(_ret<0) {
             ret=-1;
             break;
          }
@@ -1836,7 +1838,7 @@ int update_interface_devices(int id_interface)
    pthread_rwlock_unlock(&interfaces_queue_rwlock);
    pthread_cleanup_pop(0);
 
-   return 0;
+   return ret;
 }
 
 
@@ -1948,7 +1950,6 @@ mea_queue_t *start_interfaces(cJSON *params_list)
 {
    int16_t ret;
    int sortie=0;
-   interfaces_queue_elem_t *iq;
 
    _params_list=params_list;
 
