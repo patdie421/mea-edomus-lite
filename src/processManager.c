@@ -134,7 +134,6 @@ int16_t _match_scheduling_number(char *s, char num)
             return n;
          else
             return -1; /*NOTREACHED*/
-         break;
 
       case ',':
          if (num == n)
@@ -149,7 +148,6 @@ int16_t _match_scheduling_number(char *s, char num)
          }
          while (c == ',');
          return -1; /*NOTREACHED*/
-         break;
 
       case '-':
          if (num < n)
@@ -162,7 +160,6 @@ int16_t _match_scheduling_number(char *s, char num)
             return num;
          else
             return -1; /*NOTREACHED*/
-         break;
 
       default:
          break;
