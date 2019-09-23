@@ -361,29 +361,34 @@ int mea_rest_api_service_PUT(struct mg_connection *conn, int method, char *token
                char msg[256];
                if(mea_strcmplower(jsonAction->valuestring, "start")==0) {
                   ret=process_start(id, msg, sizeof(msg)-1);
+                  cJSON_Delete(jsonData);
                   return returnResponse(conn, 200, 0, msg);
                }
                if(mea_strcmplower(jsonAction->valuestring, "stop")==0) {
                   ret=process_stop(id, msg, sizeof(msg)-1);
+                  cJSON_Delete(jsonData);
                   return returnResponse(conn, 200, 0, msg);
                }
                if(mea_strcmplower(jsonAction->valuestring, "restart")==0) {
                   ret=process_restart(id, msg, sizeof(msg)-1);
+                  cJSON_Delete(jsonData);
                   return returnResponse(conn, 200, 0, msg);
                }
                else {
                   process_start(id, msg, sizeof(msg)-1);
+                  cJSON_Delete(jsonData);
                   return returnResponse(conn, 400, 1,"unknown action");
                }
             }
             else {
+               cJSON_Delete(jsonData);
                return returnResponse(conn, 400, 1,"action not a string");
             }
          }
          else {
+            cJSON_Delete(jsonData);
             return returnResponse(conn, 400, 1,"no action");
          }
-         cJSON_Delete(jsonData);
       }
       else {
          return returnResponse(conn, 400, 1, NO_VALID_JSON_DATA);
@@ -432,7 +437,6 @@ int mea_rest_api_type(struct mg_connection *conn, int method, char *tokens[], in
          else {
             return returnResponse(conn, 404, 1, NULL);
          }
-         break;
 
       default:
          return returnResponse(conn, 405, 1, BAD_METHOD);
@@ -578,8 +582,6 @@ int mea_rest_api_device(struct mg_connection *conn, int method, char *interface,
       default:
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
-   
-   return returnResponse(conn, 500, 1, NULL);
 }
 
 
@@ -657,7 +659,6 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
          else {
             return mea_rest_api_device(conn, method, tokens[0], &(tokens[1]), l_tokens-1);
          }
-         return returnResponse(conn, 500, 1, NULL);
 
       case HTTP_PUT_ID:
          if(l_tokens==0) {
@@ -681,7 +682,6 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
       default:
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
-   return returnResponse(conn, 500, 1, NULL);
 }
 
 
@@ -748,7 +748,6 @@ int mea_rest_api_configuration(struct mg_connection *conn, int method, char *tok
       default:
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
-   return returnResponse(conn, 500, 1, NULL);
 }
 
 
@@ -777,7 +776,6 @@ int mea_rest_api_user(struct mg_connection *conn, int method, char *tokens[], in
       default:
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
-   return returnResponse(conn, 500, 1, NULL);
 }
 
 
@@ -786,11 +784,12 @@ int mea_rest_api_session(struct mg_connection *conn, int method, char *tokens[],
    switch(method) {
 
       case HTTP_POST_ID:
-         if(l_tokens==0)
+         if(l_tokens==0) {
             return openSession(conn);
-         else
+         }
+         else {
             return returnResponse(conn, 404, 1, NULL);
-         break;
+         }
 
       case HTTP_DELETE_ID:
          if(l_tokens==1) {
@@ -864,7 +863,5 @@ int mea_rest_api(struct mg_connection *conn, int method, char *tokens[], int l_t
       default:
          return returnResponse(conn, 404, 1, NULL);
    } 
- 
-   return 1;
 }
 
