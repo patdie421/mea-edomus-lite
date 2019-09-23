@@ -440,8 +440,6 @@ int mea_rest_api_type(struct mg_connection *conn, int method, char *tokens[], in
       default:
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
- 
-   return 0;
 }
 
 
