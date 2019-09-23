@@ -1,1 +1,80 @@
+trigger:
+- master
 
+stages:
+
+- stage: 'CodeAnalyse'
+  jobs:
+  - job: sonar
+    displayName: 'sonar'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: sudo apt update
+      displayName: 'apt update'
+    - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
+      displayName: 'install prereq'
+    - task: SonarCloudPrepare@1
+      displayName: 'Prepare analysis on SonarCloud'
+      inputs:
+        SonarCloud: sonar
+        organization: 'mea-edmous-lite'
+        scannerMode: CLI
+        configMode: manual
+        cliProjectKey: mea-edomus-lite
+        cliProjectName: mea-edomus-lite
+    - script: curl https://binaries.sonarsource.com/CommercialDistribution/sonar-cfamily-plugin/sonar-cfamily-plugin-6.3.0.11371.jar --output sonar.jar
+      displayName: 'get build-wrapper download'
+    - script: jar xvf sonar.jar static/build-wrapper-linux-x86.zip
+      displayName: 'get build-wrapper extract from jar'
+    - script: cd static ; unzip build-wrapper-linux-x86.zip
+      displayName: 'get build-wrapper unzip'
+    - script: static/build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir . make -f Makefile.ubuntu
+      displayName: 'build-wrapper'
+    - task: SonarCloudAnalyze@1
+      displayName: 'Analyse on SonarCloud'
+  
+- stage: etape1
+  jobs:
+  - job: ubuntu
+    displayName: 'ubuntu'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash ; az --version
+      displayName: 'install az cli'
+    - script: sudo apt update
+      displayName: 'apt update'
+    - script: sudo apt install libcurl4-openssl-dev libpython-dev libpython2.7-dev python-dev
+      displayName: 'install prereq'
+    - script: make -f Makefile.ubuntu clean-all ; make -f Makefile.ubuntu
+      displayName: 'Make'
+
+  - job: macosx
+    displayName: 'macosx'
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - script: make -f Makefile.macosx clean-all ; make -f Makefile.macosx
+      displayName: 'Make'
+
+  - job: perso
+    displayName: 'perso'
+    pool: perso
+    steps:
+    - script: make -f Makefile.ubuntu clean-all ; make -f Makefile.ubuntu
+      displayName: 'Make'
+
+- stage: etape2
+  jobs:
+  - job: jenkins
+    displayName: 'jenkins'
+    steps:
+      - task: JenkinsQueueJob@2
+        displayName: 'start jenkins job'
+        inputs:
+          serverEndpoint: 'jenkins'
+          jobName: 'mea-edomus-lite'
+          captureConsole: true
+          capturePipeline: true
+          isParameterizedJob: false
