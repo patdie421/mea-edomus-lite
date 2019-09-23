@@ -414,7 +414,8 @@ int addInterface(cJSON *jsonData)
       goto addInterface_clean_exit;
 
    cJSON_AddItemToObject(newInterface, "devices", cJSON_CreateObject());
-   cJSON_AddItemToObject(newInterface, "id_interface", cJSON_CreateNumber(nextInterfaceId++));
+   cJSON_AddItemToObject(newInterface, "id_interface", cJSON_CreateNumber(nextInterfaceId));
+   nextInterfaceId++;
 
    int ret=-1; 
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
@@ -1680,12 +1681,12 @@ int clean_not_linked(mea_queue_t *interfaces_list)
 }
  
 
-int remove_delegate_links(mea_queue_t *interfaces_list, char *interface)
+int remove_delegate_links(mea_queue_t *interfaces_list, char *interface) // A controler
 {
    int ret = 0;
    interfaces_queue_elem_t *iq;
  
-   interfaces_queue_elem_t *iq_clone;
+//   interfaces_queue_elem_t *iq_clone;
  
    mea_queue_first(interfaces_list);
    while(1) {
@@ -1697,13 +1698,13 @@ int remove_delegate_links(mea_queue_t *interfaces_list, char *interface)
  
          ret=sscanf(iq->dev,"%[^:]://%[^\n]%n\n", name, more, &n);
          if(ret>0 && strlen(iq->dev) == n) {
-            if(iq_clone->context && iq_clone->delegate_flag == 0) {
+//            if(iq_clone->context && iq_clone->delegate_flag == 0) { // /!\ iq_clone n'est pas initialisé !!!! A CORRIGER
                if(mea_strcmplower(name, interface) == 0) {
                   iq->context = NULL;
                   iq->fns = NULL;
                }
             }
-         }
+//         }
       }
  
       ret=mea_queue_next(interfaces_list);
