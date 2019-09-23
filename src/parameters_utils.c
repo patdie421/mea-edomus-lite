@@ -341,12 +341,14 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
       *err=0;
       
    if(parameters_string == NULL) {
-      *err=11;
+      if(err)
+         *err=11;
       return NULL;
    }
    
    if(strlen(parameters_string)==0) {
-      *err=10;
+      if(err)
+         *err=10;
       return NULL;
    }
    
@@ -369,7 +371,8 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
 
    value=malloc(strlen(parameters_string+1)); // taille de valeur au max (et même un peu plus).
    if(!value) {
-      if(err) *err=1;
+      if(err)
+         *err=1;
       return NULL;
    }
    
@@ -468,7 +471,8 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
                      free(parsed_parameters);
                      parsed_parameters=NULL;
                   }
-                  if(err) *err=2; // erreur de syntaxe;
+                  if(err)
+                     *err=2; // erreur de syntaxe;
                   goto malloc_parsed_parameters_exit;
                }
                break;
@@ -480,7 +484,8 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
                free(parsed_parameters);
                parsed_parameters=NULL;
             }
-            if(err) *err=3; // label inconnu
+            if(err)
+               *err=3; // label inconnu
             goto malloc_parsed_parameters_exit;
          }
          // déplacement du pointeur sur les données suivantes
@@ -502,7 +507,8 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
             free(parsed_parameters);
             parsed_parameters=NULL;
          }
-         if(err) *err=4; // label sans valeur
+         if(err)
+            *err=4; // label sans valeur
          goto malloc_parsed_parameters_exit;
       }
    }
