@@ -33,15 +33,13 @@ mea_error_t mea_queue_in_elem(mea_queue_t *queue, void *data)
    
    new->d=data;
    
-   if(queue->first==NULL)
-   {
+   if(queue->first==NULL) {
       queue->first=new;
       queue->last=new;
       new->next=NULL;
       new->prev=NULL;
    }
-   else
-   {
+   else {
       new->next=queue->first;
       new->prev=NULL;
       queue->first->prev=new;
@@ -64,17 +62,14 @@ mea_error_t mea_queue_out_elem(mea_queue_t *queue, void **data)
    if(!queue)
       return ERROR;
    
-   if(queue->last)
-   {
+   if(queue->last) {
       ptr=queue->last;
       
-      if(queue->last == queue->first)
-      {
+      if(queue->last == queue->first) {
          queue->last=NULL;
          queue->first=NULL;
       }
-      else
-      {
+      else {
          queue->last=queue->last->prev;
          queue->last->next=NULL;
       }
@@ -161,8 +156,7 @@ mea_error_t mea_queue_next(mea_queue_t *queue)
    if(!queue || !queue->current)
       return ERROR;
    
-   if(!queue->current->next)
-   {
+   if(!queue->current->next) {
       queue->current=NULL;
       return ERROR;
    }
@@ -176,8 +170,7 @@ mea_error_t mea_queue_prev(mea_queue_t *queue)
 {
    if(!queue || !queue->current)
       return ERROR;
-   if(!queue->current->prev)
-   {
+   if(!queue->current->prev) {
       queue->current=NULL;
       return ERROR;
    }
@@ -195,24 +188,19 @@ mea_error_t mea_queue_cleanup(mea_queue_t *queue, mea_queue_free_data_f f)
    if(!queue)
       return ERROR;
 
-   while(queue->nb_elem>0)
-   {
-      if(queue->last)
-      {
+   while(queue->nb_elem>0) {
+      if(queue->last) {
          ptr=queue->last;
          
-         if(queue->last == queue->first)
-         {
+         if(queue->last == queue->first) {
             queue->last=NULL;
             queue->first=NULL;
          }
-         else
-         {
+         else {
             queue->last=queue->last->prev;
             queue->last->next=NULL;
          }
-         if(ptr->d)
-         {
+         if(ptr->d) {
             if(f)
                f(ptr->d);
          }
@@ -226,8 +214,7 @@ mea_error_t mea_queue_cleanup(mea_queue_t *queue, mea_queue_free_data_f f)
    }
 
 #ifdef QUEUE_ENABLE_INDEX
-   if(queue->index)
-   {
+   if(queue->index) {
       free(queue->index);
       queue->index=NULL;
    }
@@ -263,8 +250,7 @@ mea_error_t mea_queue_remove_current(mea_queue_t *queue)
     if(queue->nb_elem==0)
        return ERROR;
    
-    if(queue->nb_elem==1)
-    {
+    if(queue->nb_elem==1) {
        free(queue->current);
        queue->current=NULL;
        queue->first=NULL;
@@ -281,13 +267,11 @@ mea_error_t mea_queue_remove_current(mea_queue_t *queue)
    next=queue->current->next;
    old=queue->current;
    
-   if(prev)
-   {
+   if(prev) {
       prev->next=queue->current->next;
    }
    
-   if(next)
-   {
+   if(next) {
       next->prev=queue->current->prev;
    }
    
@@ -321,8 +305,7 @@ mea_error_t mea_queue_process_all_elem_data(mea_queue_t *queue, void (*f)(void *
    ptr=queue->first;
    if(!ptr)
       return ERROR;
-   do
-   {
+   do {
       f(ptr->d);
       ptr=ptr->next;
       
@@ -343,10 +326,8 @@ mea_error_t mea_queue_find_elem(mea_queue_t *queue, mea_queue_compare_data_f cmp
    ptr=queue->first;
    if(!ptr)
       return ERROR;
-   do
-   {
-      if(cmpf(data_to_find, ptr->d)==0)
-      {
+   do {
+      if(cmpf(data_to_find, ptr->d)==0) {
          *data=ptr->d;
          return NOERROR;
       }
@@ -367,8 +348,7 @@ mea_error_t mea_queue_get_elem_by_index(mea_queue_t *queue, int i, void **data)
    if(queue->index_status!=1)
       return ERROR;
 
-   if(i>=0 && i<queue->nb_elem)
-   {
+   if(i>=0 && i<queue->nb_elem) {
       *data=queue->index[i];
       return NOERROR;
    }
@@ -410,8 +390,7 @@ mea_error_t mea_queue_create_index(mea_queue_t *queue, mea_queue_compare_data_f 
    if(!queue)
       return ERROR;
 
-   if(queue->index)
-   {
+   if(queue->index) {
       free(queue->index);
       queue->index=NULL;
    }
@@ -419,19 +398,16 @@ mea_error_t mea_queue_create_index(mea_queue_t *queue, mea_queue_compare_data_f 
    queue->index_order_f = f;
    queue->index_status = 0;
    
-   if(queue->nb_elem>0)
-   {
+   if(queue->nb_elem>0) {
       queue->index=malloc(queue->nb_elem * sizeof(void *));
       if(!queue->index)
          return ERROR;
 
-      if(_create_index(queue)!=ERROR)
-      {
+      if(_create_index(queue)!=ERROR) {
          queue->index_status = 1;
          return NOERROR;
       }
-      else
-      {
+      else {
          queue->index_status = 0;
          free(queue->index);
          queue->index=NULL;
@@ -463,24 +439,20 @@ mea_error_t mea_queue_recreate_index(mea_queue_t *queue, char force)
       old_index=queue->index;
 
    queue->index=malloc(queue->nb_elem * sizeof(void *));
-   if(!queue->index)
-   {
+   if(!queue->index) {
       queue->index=old_index;
       return ERROR;
    }
 
-   if(_create_index(queue)!=ERROR)
-   {
+   if(_create_index(queue)!=ERROR) {
       queue->index_status = 1;
-      if(old_index)
-      {
+      if(old_index) {
          free(old_index);
          old_index=NULL;
       }
       return NOERROR;
    }
-   else
-   {
+   else {
       queue->index=old_index;
       return ERROR;
    }
@@ -523,8 +495,7 @@ mea_error_t mea_queue_find_elem_using_index(mea_queue_t *queue, void *data_to_fi
    {
       middle = (end + start) / 2;
       _cmpres=queue->index_order_f(&data_to_find, &(queue->index[middle]));
-      if(_cmpres==0)
-      {
+      if(_cmpres==0) {
          *data=queue->index[middle];
          return NOERROR;
       }
@@ -592,8 +563,7 @@ int main(int argc, char *argv[])
 
    printf("\nTEST1 : construction queue\n");
    int i=0;
-   for(;d1[i];i++)
-   {
+   for(;d1[i];i++) {
       char *_d=(char *)malloc(strlen(d1[i])+1);
       strcpy(_d,d1[i]);
       mea_queue_in_elem(&q, _d);
@@ -605,8 +575,7 @@ int main(int argc, char *argv[])
    printf("queue index status = %d\n", mea_queue_get_index_status(&q));
 
    printf("\nTEST3 : affichage queue triée\n");
-   for(i=0;i<q.nb_elem;i++)
-   {
+   for(i=0;i<q.nb_elem;i++) {
       mea_queue_get_elem_by_index(&q, i, (void **)&str);
       printf("index %d = %s (%p)\n", i, str, str);
    }
@@ -615,8 +584,7 @@ int main(int argc, char *argv[])
  
    printf("\nTEST4 : ajout de nouveaux éléments\n");
    i=0;
-   for(;d2[i];i++)
-   {
+   for(;d2[i];i++) {
       char *_d=(char *)malloc(strlen(d2[i])+1);
       strcpy(_d,d2[i]);
       mea_queue_in_elem(&q, _d);
@@ -629,8 +597,7 @@ int main(int argc, char *argv[])
 
 
    printf("\nTEST6 : affichage queue triée\n");
-   for(i=0;i<q.nb_elem;i++)
-   {
+   for(i=0;i<q.nb_elem;i++) {
       mea_queue_get_elem_by_index(&q, i, (void **)&str);
       printf("index %d = %s\n", i, str);
    }

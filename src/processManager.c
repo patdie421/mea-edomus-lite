@@ -83,18 +83,13 @@ int _indicator_exist(int id, char *name)
    if(id>=0 &&
       id<managed_processes.max_processes &&
       managed_processes.processes_table[id] &&
-      managed_processes.processes_table[id]->indicators_list )
-   {
+      managed_processes.processes_table[id]->indicators_list ) {
       struct process_indicator_s *e;
 
-      if(mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0)
-      {
-         while(1)
-         {
-            if(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0)
-            {
-               if(strcmp(name, e->name) == 0)
-               {
+      if(mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0) {
+         while(1) {
+            if(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0) {
+               if(strcmp(name, e->name) == 0) {
                   ret=0;
                   break;
                }
@@ -127,8 +122,7 @@ int16_t _match_scheduling_number(char *s, char num)
       n = (n * 10) + c - '0';
    }
       
-   switch (c)
-   {
+   switch (c) {
       case '\0':
          if(num == n)
             return n;
@@ -232,12 +226,11 @@ int process_job_set_scheduling_data(int id, char *str, int16_t condition)
       }
    }
 
-   if( _match_scheduling_number(mps->schedule_command_strings_ptr[0], 0)==-2 || // mm
-       _match_scheduling_number(mps->schedule_command_strings_ptr[1], 0)==-2 || // hh
-       _match_scheduling_number(mps->schedule_command_strings_ptr[2], 0)==-2 || // jj
-       _match_scheduling_number(mps->schedule_command_strings_ptr[3], 0)==-2 || // MM
-       _match_scheduling_number(mps->schedule_command_strings_ptr[4], 0)==-2 ) // DayOfWeek
-   {
+   if(_match_scheduling_number(mps->schedule_command_strings_ptr[0], 0)==-2 || // mm
+      _match_scheduling_number(mps->schedule_command_strings_ptr[1], 0)==-2 || // hh
+      _match_scheduling_number(mps->schedule_command_strings_ptr[2], 0)==-2 || // jj
+      _match_scheduling_number(mps->schedule_command_strings_ptr[3], 0)==-2 || // MM
+      _match_scheduling_number(mps->schedule_command_strings_ptr[4], 0)==-2 ) { // DayOfWeek
       free(mps->schedule_command_mem);
       mps->schedule_command_mem=NULL;
       ret=-1;
@@ -276,12 +269,11 @@ void _managed_processes_process_jobs_scheduling()
          managed_processes.processes_table[i]->type==JOB) {
          struct managed_processes_scheduling_data_s *mps=managed_processes.processes_table[i]->scheduling_data;
 
-         if( _match_scheduling_number(mps->schedule_command_strings_ptr[0], tm->tm_min) >=0 && // mm
-             _match_scheduling_number(mps->schedule_command_strings_ptr[1], tm->tm_hour)>=0 && // hh
-             _match_scheduling_number(mps->schedule_command_strings_ptr[2], tm->tm_mday)>=0 && // jj
-             _match_scheduling_number(mps->schedule_command_strings_ptr[3], tm->tm_mon) >=0 && // MM
-             _match_scheduling_number(mps->schedule_command_strings_ptr[4], tm->tm_wday)>=0 ) // DayOfWeek
-         {
+         if(_match_scheduling_number(mps->schedule_command_strings_ptr[0], tm->tm_min) >=0 && // mm
+            _match_scheduling_number(mps->schedule_command_strings_ptr[1], tm->tm_hour)>=0 && // hh
+            _match_scheduling_number(mps->schedule_command_strings_ptr[2], tm->tm_mday)>=0 && // jj
+            _match_scheduling_number(mps->schedule_command_strings_ptr[3], tm->tm_mon) >=0 && // MM
+            _match_scheduling_number(mps->schedule_command_strings_ptr[4], tm->tm_wday)>=0 ) { // DayOfWeek
             if(managed_processes.processes_table[i]->status != RUNNING) {
                l_errormsg=80;
                process_run_task(i, errmsg, l_errormsg);
@@ -312,10 +304,8 @@ int managed_processes_indicators_list(char *message, int l_message)
    for(;i<managed_processes.max_processes;i++) {
       if(managed_processes.processes_table[i] &&
          managed_processes.processes_table[i]->type!=TASK &&
-         managed_processes.processes_table[i]->type!=JOB )
-      {
-         if(first_process==0)
-         {
+         managed_processes.processes_table[i]->type!=JOB ) {
+         if(first_process==0) {
             if(mea_strncat(json,sizeof(json),",")<0)
                return -1;
          }
@@ -332,12 +322,9 @@ int managed_processes_indicators_list(char *message, int l_message)
             return -1;
 
          if(managed_processes.processes_table[i]->indicators_list &&
-            mea_queue_first(managed_processes.processes_table[i]->indicators_list)==0)
-         {
-            while(1)
-            {
-               if(mea_queue_current(managed_processes.processes_table[i]->indicators_list, (void **)&e)==0)
-               {
+            mea_queue_first(managed_processes.processes_table[i]->indicators_list)==0) {
+            while(1) {
+               if(mea_queue_current(managed_processes.processes_table[i]->indicators_list, (void **)&e)==0) {
                   int n=snprintf(buff,sizeof(buff),",\"%s\"",e->name);
                   if(n<0 || n==sizeof(buff))
                      return -1;
@@ -438,8 +425,7 @@ int _managed_processes_process_to_json(int id, char *s, int s_l, int flag)
       if( flag &&
           managed_processes.processes_table[id]->indicators_list &&
           mea_queue_first(managed_processes.processes_table[id]->indicators_list)==0 ) {
-         while(1)
-         {
+         while(1) {
             if(mea_queue_current(managed_processes.processes_table[id]->indicators_list, (void **)&e)==0) {
                int n=snprintf(buff,sizeof(buff),",\"%s\":%ld",e->name,e->value);
                if(n<0 || n==sizeof(buff))
@@ -1117,23 +1103,19 @@ int managed_processes_send_stats_now(char *hostname, int port)
    char json[4096];
    int sock;
    
-   if(hostname)
-   {
+   if(hostname) {
       pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&managed_processes.rwlock );
       pthread_rwlock_wrlock(&managed_processes.rwlock);
 
-      if(managed_processes_processes_to_json(json, sizeof(json)-1)<-1)
-      {
+      if(managed_processes_processes_to_json(json, sizeof(json)-1)<-1) {
          ret=-1;
          goto managed_processes_send_stats_now_clean_exit; 
       }
    
-      if(mea_socket_connect(&sock, hostname, port)<0)
-      {
+      if(mea_socket_connect(&sock, hostname, port)<0) {
          ret=-1;
       }
-      else
-      {
+      else {
          int l_data=(int)(strlen(json)+4); // 4 pour MON:
          char *message = (char *)alloca(l_data+12);
 
@@ -1156,24 +1138,20 @@ int _managed_processes_send_stats(char *hostname, int port)
 {
    int ret=-1;
    
-   if(hostname)
-   {
+   if(hostname) {
       pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&managed_processes.rwlock );
       pthread_rwlock_rdlock(&managed_processes.rwlock);
 
-      if(!mea_test_timer(&managed_processes.timer))
-      {
+      if(!mea_test_timer(&managed_processes.timer)) {
          char json[4096];
          int sock;
       
          managed_processes_processes_to_json(json, sizeof(json)-1);
       
-         if(mea_socket_connect(&sock, hostname, port)<0)
-         {
+         if(mea_socket_connect(&sock, hostname, port)<0) {
             ret=-1;
          }
-         else
-         {
+         else {
             int l_data=(int)(strlen(json)+4);
             char *message = (char *)alloca(l_data+12);
             sprintf(message,"$$$%c%cMON:%s###", (char)(l_data%128), (char)(l_data/128), json);

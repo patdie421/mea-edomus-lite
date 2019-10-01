@@ -554,8 +554,7 @@ static int16_t mea_eval_calcn(struct mea_eval_stack_s *stack, int32_t stack_ptr,
    int32_t exec_stack_index=-1;
    double d, d1, d2;
 
-   for(int i=0;i<=stack_ptr;++i)
-   {
+   for(int i=0;i<=stack_ptr;++i) {
       if(stack[i].type==1)
          exec_stack[++exec_stack_index].val.value = stack[i].val.value;
       else if(stack[i].type==2) {

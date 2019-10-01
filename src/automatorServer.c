@@ -421,7 +421,6 @@ int stop_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
             break;
       }
       DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : %s, fin après %d itération(s)\n",DEBUG_STR, __func__, automator_server_name_str, 100-counter);
-
       
       free(_automatorServer_thread_id);
       _automatorServer_thread_id=NULL;

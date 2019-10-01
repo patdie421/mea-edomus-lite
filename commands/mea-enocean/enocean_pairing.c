@@ -50,6 +50,8 @@ int16_t enocean_f6_02_01(enocean_ed_t *ed, uint32_t addr_dec, uint32_t device_ad
       data[0]=0b00000000;
       status=0b00100000; // status: T21=1, NU=0
       ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_RPS_TELEGRAM, ed->id+addr_dec, 0, device_addr, data, 1, status, &nerr);
+
+      return ret;
 }
 
 
@@ -152,7 +154,7 @@ int16_t teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, uint16_t l
       {
          int16_t nerr = -1;
 
-         char resp[7];
+         uint8_t resp[7];
 
          resp[0]=resp_operation+resp_request+1; // DB_6
          resp[1]=data[8];  // DB_5 (nb channel)
@@ -240,19 +242,16 @@ int16_t teachinout_reversed(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, u
    fprintf(stderr, "rq         : %u (%s)\n", request, requestStr);
    fprintf(stderr, "cmnd       : %u\n", cmnd);
 
-   if(asf60201==1)
-   {
-      enocean_f6_02_01(ed, addr_dec, device_addr, 0, 1);
+   if(asf60201==1) {
+      return enocean_f6_02_01(ed, addr_dec, device_addr, 0, 1);
    }
-   else
-   {
+   else {
       if((request  != 3) &&
          (response == 0) &&
-         (cmnd     == 0))
-      {
+         (cmnd     == 0)) {
          int16_t nerr = -1;
 
-         char resp[7];
+         uint8_t resp[7];
 
          resp[0]=data[7];   // (RORG)
          resp[1]=data[8];   // (FUNC)
@@ -266,6 +265,11 @@ int16_t teachinout_reversed(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, u
          fprintf(stderr,"RESPONSE = %d\n", ret);
 
          learning_state = 0;
+
+         return ret;
+      }
+      else {
+         return -1;
       }
    }
 }
@@ -274,19 +278,17 @@ int16_t teachinout_reversed(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, u
 int16_t learning_callback(uint8_t *data, uint16_t l_data, uint32_t addr, void *callbackdata)
 {
    int16_t nerr = 0;
+   int16_t ret = 0;
 
    enocean_ed_t *ed=(enocean_ed_t *)callbackdata;
 
-   if(learning_state == 0)
-   {
+   if(learning_state == 0) {
       return -1;
    }
 
-   if(data[4]==ENOCEAN_EVENT)
-   {
+   if(data[4]==ENOCEAN_EVENT) {
       fprintf(stderr,"ENOCEAN_EVENT ...\n");
-      if(data[6]==2) // SA_CONFIRM_LEARN
-      {
+      if(data[6]==2) { // SA_CONFIRM_LEARN
          fprintf(stderr,"   SA_CONFIRM_LEARN ...\n");
          fprintf(stderr,"      PM Priority       : %02x", data[7]);
          fprintf(stderr,"      manufacturer ID   : %02x...%02x", data[8] & 0b00000111, data[9]);
@@ -298,13 +300,10 @@ int16_t learning_callback(uint8_t *data, uint16_t l_data, uint32_t addr, void *c
          device_found=1;
       }
    }
-   else if(data[4]==ENOCEAN_RADIO_ERP1)
-   {
+   else if(data[4]==ENOCEAN_RADIO_ERP1) {
       fprintf(stderr,"ENOCEAN_RADIO_ERP1 (%08x ...\n", addr);
-      switch(data[6])
-      {
-         case ENOCEAN_RPS_TELEGRAM:
-         {
+      switch(data[6]) {
+         case ENOCEAN_RPS_TELEGRAM: {
          /* Exemple "Trame d'un bouton"
             00 0x55  85 Synchro
             01 0x00   0 Header1 Data Lenght
@@ -335,8 +334,7 @@ int16_t learning_callback(uint8_t *data, uint16_t l_data, uint32_t addr, void *c
          }
          break;
  
-         case ENOCEAN_UTE_TELEGRAM:
-         {
+         case ENOCEAN_UTE_TELEGRAM: {
          /*
             00 0x55  85 Synchro
             01 0x00   0 Header1 Data Lenght 
@@ -419,6 +417,8 @@ int16_t learning_callback(uint8_t *data, uint16_t l_data, uint32_t addr, void *c
       }
       fprintf(stderr, "\n");
    }
+
+   return ret;
 }
 
 

@@ -134,8 +134,7 @@ static PyObject *mea_interface_api(PyObject *self, PyObject *args)
    PyObject *res = NULL;
 
    int ret=interfacesServer_call_interface_api(id_interface, cmnd, (void *)args, nb_args - 2, (void **)&res, &nerr, err, sizeof(err));
-   switch(ret)
-   {
+   switch(ret) {
       case -252:
       case -253:
       case -254:
@@ -241,8 +240,7 @@ static PyObject *mea_sendEnoceanRadioErp1Packet(PyObject *self, PyObject *args)
 
    Py_buffer py_packet;
    arg=PyTuple_GetItem(args, 4);
-   if(PyObject_CheckBuffer(arg))
-   {
+   if(PyObject_CheckBuffer(arg)) {
       ret=PyObject_GetBuffer(arg, &py_packet, PyBUF_SIMPLE);
       if(ret<0)
          goto mea_sendEnoceanRadioErp1Packet_arg_err;
@@ -287,8 +285,7 @@ static PyObject *mea_sendEnoceanPacketAndWaitResp(PyObject *self, PyObject *args
    // packet
    arg=PyTuple_GetItem(args, 1);
    Py_buffer py_packet;
-   if(PyObject_CheckBuffer(arg))
-   {
+   if(PyObject_CheckBuffer(arg)) {
       ret=PyObject_GetBuffer(arg, &py_packet, PyBUF_SIMPLE);
       if(ret<0)
          goto mea_sendEnoceanPacketAndWaitResp_arg_err;
@@ -299,8 +296,7 @@ static PyObject *mea_sendEnoceanPacketAndWaitResp(PyObject *self, PyObject *args
    // response
    arg=PyTuple_GetItem(args, 2);
    Py_buffer py_response;
-   if(PyObject_CheckBuffer(arg))
-   {
+   if(PyObject_CheckBuffer(arg)) {
       ret=PyObject_GetBuffer(arg, &py_response, PyBUF_SIMPLE | PyBUF_WRITABLE);
       if(ret<0)
          goto mea_sendEnoceanPacketAndWaitResp_arg_err;
@@ -358,8 +354,7 @@ static PyObject *mea_xplSendMsg2(PyObject *self, PyObject *args)
 //   char device_id[40]="";
 //   char instance_id[40]="";
    
-   if(PyTuple_Size(args)!=1)
-   {
+   if(PyTuple_Size(args)!=1) {
       PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_xplMsgSend) : need one argument");
       return NULL;
    }
@@ -367,8 +362,7 @@ static PyObject *mea_xplSendMsg2(PyObject *self, PyObject *args)
    // recuperation du parametre
    PyXplMsg=PyTuple_GetItem(args, 0);
    
-   if(!PyDict_Check(PyXplMsg)) // le parametre doit etre de type “dictionnaire”
-   {
+   if(!PyDict_Check(PyXplMsg)) { // le parametre doit etre de type “dictionnaire”
       PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_xplMsgSend) : argument not a dictionary");
       return NULL;
    }
@@ -383,51 +377,47 @@ static PyObject *mea_xplSendMsg2(PyObject *self, PyObject *args)
  
    // recuperation du type de message
    item = PyDict_GetItemString(PyXplMsg, "msgtype");
-   if(!item)
-   {
+   if(!item) {
        PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_xplMsgSend) : xpl message no type");
        goto mea_xplSendMsg_clean_exit;
    }
    char *p=PyString_AsString(item);
-   if(p)
+   if(p) {
        cJSON_AddItemToObject(xplMsgJson, XPLMSGTYPE_STR_C, cJSON_CreateString(p));
-
+   }
 
    item = PyDict_GetItemString(PyXplMsg, XPLSOURCE_STR_C);
-   if(!item)
-   {
+   if(!item) {
        PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_xplMsgSend) : xpl message no source");
        goto mea_xplSendMsg_clean_exit;
    }
    p=PyString_AsString(item);
-   if(p)
+   if(p) {
        cJSON_AddItemToObject(xplMsgJson, XPLSOURCE_STR_C, cJSON_CreateString(p));
+   }
 
    // recuperation de la class et du type du message XPL
    item = PyDict_GetItemString(PyXplMsg, XPLSCHEMA_STR_C);
-   if(!item)
-   {
+   if(!item) {
       PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_xplMsgSend) : xpl schema not found");
       goto mea_xplSendMsg_clean_exit;
    }
    p=PyString_AsString(item);
-   if(p)
+   if(p) {
       cJSON_AddItemToObject(xplMsgJson, XPLSCHEMA_STR_C, cJSON_CreateString(p));
-
+   }
 
    item = PyDict_GetItemString(PyXplMsg, XPLTARGET_STR_C);
-   if(!item)
-   {
+   if(!item) {
    }
    p=PyString_AsString(item);
-   if(p)
+   if(p) {
       cJSON_AddItemToObject(xplMsgJson, XPLTARGET_STR_C, cJSON_CreateString(p));
+   }
  
    body = PyDict_GetItemString(PyXplMsg, "xpl-body");
-   if(body)
-   {
-      if(!PyDict_Check(body))
-      {
+   if(body) {
+      if(!PyDict_Check(body)) {
          PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_xplMsgSend) : body not a dictionary.\n");
          goto mea_xplSendMsg_clean_exit;
       }
@@ -435,13 +425,11 @@ static PyObject *mea_xplSendMsg2(PyObject *self, PyObject *args)
       // parcours de la liste
       PyObject *key, *value;
       Py_ssize_t pos = 0;
-      while (PyDict_Next(body, &pos, &key, &value))
-      {
+      while (PyDict_Next(body, &pos, &key, &value)) {
          char *skey=PyString_AS_STRING(key);
          char *svalue=PyString_AS_STRING(value);
          
-         if(!skey || !svalue)
-         {
+         if(!skey || !svalue) {
             PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_xplMsgSend) : incorrect data in body.");
             goto mea_xplSendMsg_clean_exit;
          }
@@ -449,8 +437,7 @@ static PyObject *mea_xplSendMsg2(PyObject *self, PyObject *args)
          cJSON_AddItemToObject(xplMsgJson, skey, cJSON_CreateString(svalue));
       }
    }
-   else
-   {
+   else {
       PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_xplMsgSend) : xpl body data not found.");
       goto mea_xplSendMsg_clean_exit;
    }
@@ -518,8 +505,7 @@ static PyObject *mea_sendAtCmdAndWaitResp(PyObject *self, PyObject *args)
    at_cmd[1]=at[1];
    
    arg=PyTuple_GetItem(args, 4);
-   if(PyNumber_Check(arg))
-   {
+   if(PyNumber_Check(arg)) {
       uint32_t val=(uint32_t)PyLong_AsLong(arg);
       uint32_t val_xbee=_indianConvertion(val);
       char *val_xbee_ptr=(char *)&val_xbee;
@@ -528,8 +514,7 @@ static PyObject *mea_sendAtCmdAndWaitResp(PyObject *self, PyObject *args)
          at_cmd[2+i]=val_xbee_ptr[i];
       l_at_cmd=6;
    }
-   else if (PyString_Check(arg))
-   {
+   else if (PyString_Check(arg)) {
       char *at_arg=(char *)PyString_AsString(arg);
       uint16_t i;
       for(i=0;i<strlen(at_arg);i++)
@@ -548,14 +533,11 @@ static PyObject *mea_sendAtCmdAndWaitResp(PyObject *self, PyObject *args)
    host=NULL;
    host=(xbee_host_t *)malloc(sizeof(xbee_host_t)); // description de l'xbee directement connecté
    xbee_get_host_by_addr_64(xd, host, addr_h, addr_l, &err);
-   if(err==XBEE_ERR_NOERR)
-   {
+   if(err==XBEE_ERR_NOERR) {
    }
-   else
-   {
+   else {
       DEBUG_SECTION mea_log_printf("%s (%s) : host not found.\n", DEBUG_STR ,__func__);
-      if(host)
-      {
+      if(host) {
          free(host);
          host=NULL;
       }
@@ -565,11 +547,9 @@ static PyObject *mea_sendAtCmdAndWaitResp(PyObject *self, PyObject *args)
    
    int16_t nerr;
    ret=xbee_atCmdSendAndWaitResp(xd, host, at_cmd, l_at_cmd, resp, &l_resp, &nerr);
-   if(ret==-1)
-   {
+   if(ret==-1) {
       DEBUG_SECTION mea_log_printf("%s (%s) : error %d.\n", DEBUG_STR, __func__, nerr);
-      if(host)
-      {
+      if(host) {
          free(host);
          host=NULL;
       }
@@ -584,15 +564,13 @@ static PyObject *mea_sendAtCmdAndWaitResp(PyObject *self, PyObject *args)
 
    PyObject *t=PyTuple_New(3);
    PyObject *py_cmd=PyBuffer_New(l_resp);
-   if (!PyObject_AsWriteBuffer(py_cmd, &data, (Py_ssize_t *)&l_data))
-   {
+   if (!PyObject_AsWriteBuffer(py_cmd, &data, (Py_ssize_t *)&l_data)) {
       memcpy(data,resp,l_data);
       PyTuple_SetItem(t, 0, PyLong_FromLong(mapped_resp->cmd_status));
       PyTuple_SetItem(t, 1, py_cmd);
       PyTuple_SetItem(t, 2, PyLong_FromLong(l_resp));
    }
-   else
-   {
+   else {
       Py_DECREF(py_cmd);
       Py_DECREF(t);
    }
@@ -603,8 +581,7 @@ static PyObject *mea_sendAtCmdAndWaitResp(PyObject *self, PyObject *args)
    return t; // return True
    
 mea_AtCmdToXbee_arg_err:
-   if(host)
-   {
+   if(host) {
       free(host);
       host=NULL;
    }
@@ -659,8 +636,7 @@ static PyObject *mea_sendAtCmd(PyObject *self, PyObject *args)
    at_cmd[1]=at[1];
    
    arg=PyTuple_GetItem(args, 4);
-   if(PyNumber_Check(arg))
-   {
+   if(PyNumber_Check(arg)) {
       uint32_t val=(uint32_t)PyLong_AsLong(arg);
       uint32_t val_xbee=_indianConvertion(val);
       char *val_xbee_ptr=(char *)&val_xbee;
@@ -669,8 +645,7 @@ static PyObject *mea_sendAtCmd(PyObject *self, PyObject *args)
          at_cmd[2+i]=val_xbee_ptr[i];
       l_at_cmd=6;
    }
-   else if (PyString_Check(arg))
-   {
+   else if (PyString_Check(arg)) {
       char *at_arg=(char *)PyString_AsString(arg);
       uint16_t i;
       for(i=0;i<strlen(at_arg);i++)
@@ -685,12 +660,10 @@ static PyObject *mea_sendAtCmd(PyObject *self, PyObject *args)
    
    int16_t err;
    
-   if(addr_l != 0xFFFFFFFF && addr_h != 0xFFFFFFFF)
-   {
+   if(addr_l != 0xFFFFFFFF && addr_h != 0xFFFFFFFF) {
       host=(xbee_host_t *)malloc(sizeof(xbee_host_t)); // description de l'xbee directement connecté
       xbee_get_host_by_addr_64(xd, host, addr_h, addr_l, &err);
-      if(err!=XBEE_ERR_NOERR)
-      {
+      if(err!=XBEE_ERR_NOERR) {
          DEBUG_SECTION mea_log_printf("%s (%s) : host not found.\n", DEBUG_STR,__func__);
          goto mea_atCmdSend_arg_err;
       }
@@ -702,8 +675,7 @@ static PyObject *mea_sendAtCmd(PyObject *self, PyObject *args)
    // ret=
    xbee_atCmdSend(xd, host, at_cmd, l_at_cmd, &nerr);
    
-   if(host)
-   {
+   if(host) {
       free(host);
       host=NULL;
    }
@@ -712,8 +684,7 @@ static PyObject *mea_sendAtCmd(PyObject *self, PyObject *args)
 mea_atCmdSend_arg_err:
    DEBUG_SECTION mea_log_printf("%s (%s) : arguments error\n", DEBUG_STR,__func__);
    PyErr_BadArgument();
-   if(host)
-   {
+   if(host) {
       free(host);
       host=NULL;
    }

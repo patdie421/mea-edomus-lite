@@ -142,8 +142,7 @@ char *get_token_string_by_id(enum token_id_e id)
  * \return    pointeur sur la chaine du token ou NULL s'il n'existe pas.
  */
 {
-   for(int i=0;tokens_list[i].str;i++)
-   {
+   for(int i=0;tokens_list[i].str;i++) {
       if(tokens_list[i].id == id)
          return (char *)tokens_list[i].str;
    }
@@ -197,8 +196,7 @@ void init_tokens()
    if(tokens_index!=NULL)
       free(tokens_index);
    tokens_index=(struct tokens_index_s *)malloc(sizeof(struct tokens_index_s));
-   if(tokens_index==NULL)
-   {
+   if(tokens_index==NULL) {
       perror("init_tokens_index: ");
       return;
    }
@@ -208,19 +206,16 @@ void init_tokens()
    
    int i=0;
    for(;tokens_list[i].str;i++); // comptage du nombre de tokens
-   if(i>0)
-   {
+   if(i>0) {
       tokens_index->nb_tokens=i;
       tokens_index->index_by_string = (int16_t *)malloc(tokens_index->nb_tokens*sizeof(int16_t));
-      if(tokens_index->index_by_string == NULL)
-      {
+      if(tokens_index->index_by_string == NULL) {
          tokens_index->nb_tokens=0;
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          return;
       }
       tokens_index->index_by_id = (int16_t *)malloc(tokens_index->nb_tokens*sizeof(int16_t));
-      if(tokens_index->index_by_id  == NULL)
-      {
+      if(tokens_index->index_by_id  == NULL) {
          tokens_index->nb_tokens=0;
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          free(tokens_index->index_by_string);
@@ -228,8 +223,7 @@ void init_tokens()
          return;
       }
 
-      for(int i=0;i<tokens_index->nb_tokens;i++)
-      {
+      for(int i=0;i<tokens_index->nb_tokens;i++) {
          tokens_index->index_by_string[i]=i;
          tokens_index->index_by_id[i]=i;
       }
@@ -242,17 +236,13 @@ void init_tokens()
 
 void release_tokens()
 {
-   if(tokens_index)
-   {
-
-      if(tokens_index->index_by_id)
-      {
+   if(tokens_index) {
+      if(tokens_index->index_by_id) {
          free(tokens_index->index_by_id);
          tokens_index->index_by_id=NULL;
       }
 
-      if(tokens_index->index_by_string)
-      {
+      if(tokens_index->index_by_string) {
          free(tokens_index->index_by_string);
          tokens_index->index_by_string=NULL;
       }
@@ -263,8 +253,7 @@ void release_tokens()
 
 char *get_token_string_by_id(enum token_id_e id)
 {
-   if(tokens_index==NULL)
-   {
+   if(tokens_index==NULL) {
 #if TOKENS_AUTOINIT == 1
       init_tokens();
       if(tokens_index==NULL)
@@ -277,8 +266,7 @@ char *get_token_string_by_id(enum token_id_e id)
    int16_t start = 0;
    int16_t end = tokens_index->nb_tokens - 1;
    int16_t _cmpres;
-   do
-   {
+   do {
       int16_t middle=(end + start) / 2;
       if(middle<0)
          return NULL;
@@ -300,12 +288,10 @@ char *get_token_string_by_id(enum token_id_e id)
 
 enum token_id_e get_token_id_by_string(char *str)
 {
-
    if(!str)
       return _UNKNOWN;
 
-   if(tokens_index==NULL)
-   {
+   if(tokens_index==NULL) {
 #if TOKENS_AUTOINIT == 1
       init_tokens();
       if(tokens_index==NULL)
@@ -322,8 +308,7 @@ enum token_id_e get_token_id_by_string(char *str)
    int16_t end = tokens_index->nb_tokens - 1;
    int _cmpres = 0;
   
-   do 
-   {
+   do {
       int16_t middle = (end + start) / 2;
       
       if(middle<0)
@@ -370,31 +355,26 @@ void init_tokens()
    tokens_hash_by_id = NULL;
    int l=0;
  
-   for(int i=0;tokens_list[i].str;i++)
-   {
+   for(int i=0;tokens_list[i].str;i++) {
       HASH_FIND(hh_token_by_string, tokens_hash_by_string, tokens_list[i].str, strlen(tokens_list[i].str), s);
-      if(s)
-      {
+      if(s) {
          DEBUG_SECTION mea_log_printf("%s (%s) : string key duplicated (%s/%d)\n",DEBUG_STR, __func__, tokens_list[i].str, tokens_list[i].id);
          continue;
       }
       HASH_FIND(hh_token_by_id, tokens_hash_by_id, &(tokens_list[i].id), sizeof(tokens_list[i].id), s);
-      if(s)
-      {
+      if(s) {
          DEBUG_SECTION mea_log_printf("%s (%s) : id key duplicated (%s/%d)\n",DEBUG_STR, __func__, tokens_list[i].str, tokens_list[i].id);
          continue;
       }
 
       s = malloc(sizeof(struct tokens_hash_s));
-      if(!s)
-      {
+      if(!s) {
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          return;
       }
       s->token=&tokens_list[i];
       s->str = mea_string_malloc_and_copy((char *)(s->token->str),1);
-      if(!s->str)
-      {
+      if(!s->str) {
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          free(s);
          s=NULL;
@@ -416,13 +396,10 @@ void init_tokens()
 
 void release_tokens()
 {
-   if(tokens_hash_by_id) 
-   { 
+   if(tokens_hash_by_id) { 
       struct tokens_hash_s *s = NULL, *ts = NULL; 
-      HASH_ITER(hh_token_by_string, tokens_hash_by_string, s, ts)
-      { 
-         if(s->str)
-         {
+      HASH_ITER(hh_token_by_string, tokens_hash_by_string, s, ts) { 
+         if(s->str) {
             free(s->str);
             s->str=NULL;
          }
@@ -432,13 +409,10 @@ void release_tokens()
       tokens_hash_by_string=NULL;
    }
    
-   if(tokens_hash_by_id) 
-   { 
+   if(tokens_hash_by_id) { 
       struct tokens_hash_s *s = NULL, *ts = NULL;
-      HASH_ITER(hh_token_by_id, tokens_hash_by_id, s, ts)
-      {
-         if(s->str)
-         {
+      HASH_ITER(hh_token_by_id, tokens_hash_by_id, s, ts) {
+         if(s->str) {
             free(s->str);
             s->str=NULL;
          }
@@ -448,8 +422,7 @@ void release_tokens()
       tokens_hash_by_id=NULL;
    }
 
-   if(_token_string_buf)
-   {
+   if(_token_string_buf) {
       free(_token_string_buf);
       _token_string_buf=NULL;
    }
@@ -465,8 +438,7 @@ char *get_token_string_by_id(enum token_id_e id)
 {
    struct tokens_hash_s *s = NULL;
 
-   if(tokens_hash_by_string == NULL)
-   {   
+   if(tokens_hash_by_string == NULL) {   
 #if TOKENS_AUTOINIT == 1
       init_tokens();
 #else
@@ -476,8 +448,7 @@ char *get_token_string_by_id(enum token_id_e id)
       
    HASH_FIND(hh_token_by_id, tokens_hash_by_id, &id, sizeof(id), s);
    
-   if(s)
-   {
+   if(s) {
       return (char *)(s->token->str);
    }
 
@@ -497,8 +468,7 @@ enum token_id_e get_token_id_by_string(char *str)
    if(!str)
       return _UNKNOWN;
       
-   if(tokens_hash_by_id == NULL)
-   {
+   if(tokens_hash_by_id == NULL) {
 #if TOKENS_AUTOINIT == 1
       init_tokens();
 #else

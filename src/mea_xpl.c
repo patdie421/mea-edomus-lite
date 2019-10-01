@@ -40,26 +40,22 @@ int mea_xPLConnectBroadcast(char *xPLInterfaceName, char *ip, int l_ip, struct s
    struct in_addr xPLInterfaceAddr; // Address associated with interface
    
    // Map protocol name
-   if ((ppe = getprotobyname("udp")) == 0)
-   {
+   if ((ppe = getprotobyname("udp")) == 0) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to lookup UDP protocol info\n", ERROR_STR, __func__);
       return -1;
    }
    
    // Attempt to create a socket
    errno=0;
-   if ((sockfd = socket(AF_INET, SOCK_DGRAM, ppe->p_proto)) < 0)
-   {
+   if ((sockfd = socket(AF_INET, SOCK_DGRAM, ppe->p_proto)) < 0) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to create broadcast socket : %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
       return -1;
    }
    
    // Mark as a broadcasting socket
-   if (setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &flag, (socklen_t)sizeof(flag)) < 0)
-   {
+   if (setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &flag, (socklen_t)sizeof(flag)) < 0) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to set SO_BROADCAST on socket : %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
-      if(close(sockfd)==-1)
-      {
+      if(close(sockfd)==-1) {
          VERBOSE(2) mea_log_printf("%s (%s) : can't close socket : %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
       }
       return -1;
@@ -71,11 +67,9 @@ int mea_xPLConnectBroadcast(char *xPLInterfaceName, char *ip, int l_ip, struct s
    strcpy(interfaceInfo.ifr_name, xPLInterfaceName);
    
    // Get our interface address
-   if (ioctl(sockfd, SIOCGIFADDR, &interfaceInfo) != 0)
-   {
+   if (ioctl(sockfd, SIOCGIFADDR, &interfaceInfo) != 0) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to get IP addr for interface %s\n", ERROR_STR, __func__, xPLInterfaceName);
-      if(close(sockfd)==-1)
-      {
+      if(close(sockfd)==-1) {
          VERBOSE(2) mea_log_printf("%s (%s) : can't close socket : %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
       }
       return -1;
@@ -90,11 +84,9 @@ int mea_xPLConnectBroadcast(char *xPLInterfaceName, char *ip, int l_ip, struct s
    interfaceInfo.ifr_addr.sa_family = AF_INET;
    interfaceInfo.ifr_broadaddr.sa_family = AF_INET;
    strcpy(interfaceInfo.ifr_name, xPLInterfaceName);
-   if(ioctl(sockfd, SIOCGIFNETMASK, &interfaceInfo) != 0)
-   {
+   if(ioctl(sockfd, SIOCGIFNETMASK, &interfaceInfo) != 0) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to extract the interface net mask\n", ERROR_STR, __func__);
-      if(close(sockfd)==-1)
-      {
+      if(close(sockfd)==-1) {
          VERBOSE(2) mea_log_printf("%s (%s) : can't close socket : %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
       }
       return -1;
@@ -140,11 +132,9 @@ int mea_xPLConnectBroadcast(char *xPLInterfaceName, char *ip, int l_ip, struct s
  VERBOSE(5)mea_log_printf("Initial receive socket buffer size is %d bytes\n", startRcvBuffSize);
  
  // Try to increase the buffer (maybe multiple times)
- for (idealRcvBuffSize = 1024000; idealRcvBuffSize > startRcvBuffSize; )
- {
+ for (idealRcvBuffSize = 1024000; idealRcvBuffSize > startRcvBuffSize; ) {
  // Attempt to set the buffer size
- if (setsockopt(thefd, SOL_SOCKET, SO_RCVBUF, &idealRcvBuffSize, sizeof(int)) != 0)
- {
+ if (setsockopt(thefd, SOL_SOCKET, SO_RCVBUF, &idealRcvBuffSize, sizeof(int)) != 0) {
  VERBOSE(5) mea_log_printf("Not able to set receive buffer to %d bytes - retrying\n", idealRcvBuffSize);
  idealRcvBuffSize -= 64000;
  continue;
@@ -184,47 +174,39 @@ int mea_xPLConnectHub(int *xPLPort)
    theSockInfo.sin_port = htons(0);
    
    /* Map protocol name */
-   if ((ppe = getprotobyname("udp")) == 0)
-   {
+   if ((ppe = getprotobyname("udp")) == 0) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to lookup UDP protocol info\n", ERROR_STR, __func__);
       return -1;
    }
    
    /* Attempt to creat the socket */
-   if ((sockfd = socket(PF_INET, SOCK_DGRAM, ppe->p_proto)) < 0)
-   {
+   if ((sockfd = socket(PF_INET, SOCK_DGRAM, ppe->p_proto)) < 0) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to create listener socket %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
       return -1;
    }
    
    /* Mark as a broadcast socket */
-   if (setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &flag, (socklen_t)sizeof(flag)) < 0)
-   {
+   if (setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &flag, (socklen_t)sizeof(flag)) < 0) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to set SO_BROADCAST on socket %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
-      if(close(sockfd)==-1)
-      {
+      if(close(sockfd)==-1) {
          VERBOSE(2) mea_log_printf("%s (%s) : Can't close socket : %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
       }
       return -1;
    }
    
    /* Attempt to bind */
-   if ((bind(sockfd, (struct sockaddr *)&theSockInfo, (socklen_t)sockSize)) < 0)
-   {
+   if ((bind(sockfd, (struct sockaddr *)&theSockInfo, (socklen_t)sockSize)) < 0) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to bind listener socket to port %d, %s (%d)\n", ERROR_STR, __func__, XPLPORT, strerror(errno), errno);
-      if(close(sockfd)==-1)
-      {
+      if(close(sockfd)==-1) {
          VERBOSE(2) mea_log_printf("%s (%s) : can't close socket : %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
       }
       return -1;
    }
    
    /* Fetch the actual socket port # */
-   if (getsockname(sockfd, (struct sockaddr *) &theSockInfo, (socklen_t *) &sockSize)!=0)
-   {
+   if (getsockname(sockfd, (struct sockaddr *) &theSockInfo, (socklen_t *) &sockSize)!=0) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to fetch socket info for bound listener, %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
-      if(close(sockfd)==-1)
-      {
+      if(close(sockfd)==-1) {
          VERBOSE(2) mea_log_printf("%s (%s) : can't close socket : %s (%d)\n", ERROR_STR, __func__, strerror(errno), errno);
       }
       return -1;
@@ -252,8 +234,7 @@ int16_t mea_xPLSendMessage(int fd, struct sockaddr_in *xPLBroadcastAddr, char *t
    
    /* Try to send the message */
    if ((bytesSent = (int)sendto(fd, theData, (size_t)dataLen, 0,
-                                (struct sockaddr *) xPLBroadcastAddr, (socklen_t)sizeof(struct sockaddr_in))) != dataLen)
-   {
+                                (struct sockaddr *) xPLBroadcastAddr, (socklen_t)sizeof(struct sockaddr_in))) != dataLen) {
       VERBOSE(2) mea_log_printf("%s (%s) : unable to broadcast message, %s (%d)\n", ERROR_STR, __func__,strerror(errno), errno);
       return -1;
    }
@@ -276,13 +257,11 @@ int16_t mea_xPLReadMessage(int16_t fd, int32_t timeoutms, char *data, int *l_dat
    timeout.tv_usec = timeoutms * 1000;
    
    int ret = select(fd+1, &input_set, NULL, NULL, &timeout);
-   if(ret<=0)
-   {
+   if(ret<=0) {
       *l_data=0;
       if(ret == 0)
          *nerr = -1; // timeout
-      else
-      {
+      else {
          ret=-1;
          *nerr = -2;
       }
@@ -290,22 +269,18 @@ int16_t mea_xPLReadMessage(int16_t fd, int32_t timeoutms, char *data, int *l_dat
    }
    
    ret = (int)read(fd,data,*l_data);
-   if(ret<1)
-   {
+   if(ret<1) {
       *l_data=0;
-      if(ret==0)
-      {
+      if(ret==0) {
          *nerr=0;
          return 0;
       }
-      else
-      {
+      else {
          *nerr = ret;
          return -1;
       }
    }
-   else
-   {
+   else {
       *l_data = ret;
       *nerr = 0;
       return 0;

@@ -4,7 +4,7 @@ CC = gcc
 SOURCES=$(shell echo *.c)
 OBJECTS=$(SOURCES:.c=.o)
 
-MEAXPLINCLUDESDIR=../../src/xPLLib-mac
+MEAXPLINCLUDESDIR=../../src/xPLLib-mac ../../src
 MEAXPLLIB = ../../lib/meaxpllib/macosx/meaxpllib.a
 
 DEBUGFLAGS = -g \

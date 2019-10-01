@@ -33,8 +33,7 @@ int serial_open(char *dev, int speed)
 #endif
 
    fd = open(dev, flags);
-   if (fd == -1)
-   {
+   if (fd == -1) {
       // ouverture du port serie impossible
       return -1;
    }
@@ -46,13 +45,11 @@ int serial_open(char *dev, int speed)
    memset(&options, 0, sizeof(struct termios));
 
    // paramétrage du débit
-   if(cfsetispeed(&options, speed)<0)
-   {
+   if(cfsetispeed(&options, speed)<0) {
       // modification du debit d'entrée impossible
       return -1;
    }
-   if(cfsetospeed(&options, speed)<0)
-   {
+   if(cfsetospeed(&options, speed)<0) {
       // modification du debit de sortie impossible
       return -1;
    }
@@ -111,8 +108,7 @@ uint32_t speeds[][3]={
 
 int32_t get_speed_from_speed_t(speed_t speed)
 {
-   for(int16_t i=0;speeds[i][0];i++)
-   {
+   for(int16_t i=0;speeds[i][0];i++) {
       if(speeds[i][1]==speed)
          return speeds[i][0];
    }
@@ -138,12 +134,10 @@ int16_t get_dev_and_speed(char *device, char *dev, int16_t dev_l, speed_t *speed
 
    _dev_ptr=mea_strtrim(_dev);
 
-   if(n==1)
-   {
+   if(n==1) {
       *speed=B9600;
    }
-   else
-   {
+   else {
       uint32_t v;
 
       reste_ptr=mea_strtrim(reste);
@@ -158,10 +152,8 @@ int16_t get_dev_and_speed(char *device, char *dev, int16_t dev_l, speed_t *speed
 
       *speed=0;
       int i;
-      for(i=0;speeds[i][0];i++)
-      {
-         if(speeds[i][0]==v)
-         {
+      for(i=0;speeds[i][0];i++) {
+         if(speeds[i][0]==v) {
             *speed=speeds[i][1];
             break;
          }

@@ -142,6 +142,7 @@ void appParameters_clean() {
    }
 }
 
+
 void appParameters_print(cJSON *p) {
    if(p==NULL)
       p=appParameters;

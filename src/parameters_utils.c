@@ -63,17 +63,13 @@ static int16_t _parsed_parameters_clean_cache(time_t t, int force)
    struct _parsed_parameters_cache_list_s *s  = NULL;
    struct _parsed_parameters_cache_list_s *s_tmp  = NULL;
  
-   HASH_ITER(hh, _parsed_parameters_cache_list, s, s_tmp)
-   {
+   HASH_ITER(hh, _parsed_parameters_cache_list, s, s_tmp) {
        struct _parsed_parameters_cache_elems_s *e;
        struct _parsed_parameters_cache_elems_s *e_tmp;
 
-       HASH_ITER(hh, s->parsed_parameters_cache_elems, e, e_tmp) 
-       {
-          if(t==0 || difftime(now,e->last_access)>(double)t)
-          {
-             if(force || (e->parsed_parameters->in_use == 0) )
-             {
+       HASH_ITER(hh, s->parsed_parameters_cache_elems, e, e_tmp) {
+          if(t==0 || difftime(now,e->last_access)>(double)t) {
+             if(force || (e->parsed_parameters->in_use == 0) ) {
                 HASH_DEL(s->parsed_parameters_cache_elems, e);
                 _clean_parsed_parameters(e->parsed_parameters);
                 free(e->parsed_parameters); 
@@ -83,8 +79,7 @@ static int16_t _parsed_parameters_clean_cache(time_t t, int force)
           }
        }
 
-       if(HASH_COUNT(s->parsed_parameters_cache_elems) == 0)
-       {
+       if(HASH_COUNT(s->parsed_parameters_cache_elems) == 0) {
           HASH_DEL(_parsed_parameters_cache_list, s); 
           free(s);
        }
@@ -106,12 +101,10 @@ static int16_t _parsed_parameters_add_to_cache(char **parameters_to_find, char *
    if(_parsed_parameters_cache_counter >= PARSED_PARAMETERS_CACHING_MAX)
       return -1;
 
-   if(_parsed_parameters_cache_rwlock==NULL)
-   {
+   if(_parsed_parameters_cache_rwlock==NULL) {
 #ifdef PARSED_PARAMETERS_CACHING_AUTOINIT   
       _parsed_parameters_cache_rwlock=(pthread_rwlock_t *)malloc(sizeof(pthread_rwlock_t));
-      if(!_parsed_parameters_cache_rwlock)
-      {
+      if(!_parsed_parameters_cache_rwlock) {
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          return -1;
       }
@@ -125,11 +118,9 @@ static int16_t _parsed_parameters_add_to_cache(char **parameters_to_find, char *
    pthread_rwlock_wrlock(_parsed_parameters_cache_rwlock);
 
    HASH_FIND(hh, _parsed_parameters_cache_list, parameters_to_find, parsed_parameters->nb * sizeof(char *), s);
-   if(!s)
-   {
+   if(!s) {
       s = malloc(sizeof(struct _parsed_parameters_cache_list_s));
-      if(!s)
-      {
+      if(!s) {
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          goto _parsed_parameters_add_to_cache_clean_exit;
       }
@@ -140,21 +131,17 @@ static int16_t _parsed_parameters_add_to_cache(char **parameters_to_find, char *
    }
 
    HASH_FIND(hh, s->parsed_parameters_cache_elems, parameters_string, strlen(parameters_string), e);
-   if(e)
-   {
+   if(e) {
       DEBUG_SECTION mea_log_printf("%s (%s) : id key duplicated (%s)\n",DEBUG_STR, __func__, parameters_string);
    }
-   else
-   {
+   else {
       e = malloc(sizeof(struct _parsed_parameters_cache_elems_s));
-      if(!e)
-      {
+      if(!e) {
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          goto _parsed_parameters_add_to_cache_clean_exit;
       }
       e->parameters_string = mea_string_alloc_and_copy(parameters_string);
-      if(!e->parameters_string)
-      {
+      if(!e->parameters_string) {
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          free(e);
          e=NULL;
@@ -235,11 +222,9 @@ int16_t parsed_parameters_clean_older_than(time_t t)
 int16_t parsed_parameters_init()
 {
 #ifdef PARSED_PARAMETERS_CACHING_ENABLED
-   if(_parsed_parameters_cache_rwlock==NULL)
-   {
+   if(_parsed_parameters_cache_rwlock==NULL) {
       _parsed_parameters_cache_rwlock=(pthread_rwlock_t *)malloc(sizeof(pthread_rwlock_t));
-      if(!_parsed_parameters_cache_rwlock)
-      {
+      if(!_parsed_parameters_cache_rwlock) {
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          return -1;
       }
@@ -270,8 +255,7 @@ char *getToken(char *str)
       return NULL;
    
    // vérification des caractères
-   for(int i=0;str[i];i++)
-   {
+   for(int i=0;str[i];i++) {
       if(!(isalpha(str[i]) || isdigit(str[i]) || str[i]=='_' || str[i]=='.' || str[i]==':'))
          return NULL;
       
@@ -284,12 +268,9 @@ char *getToken(char *str)
 
 static void _clean_parsed_parameters(parsed_parameters_t *params)
 {
-   for(int i=0;i<params->nb;i++)
-   {
-      if(params->parameters[i].type==STRING)
-      {
-         if(params->parameters[i].value.s)
-         {
+   for(int i=0;i<params->nb;i++) {
+      if(params->parameters[i].type==STRING) {
+         if(params->parameters[i].value.s) {
             free(params->parameters[i].value.s);
             params->parameters[i].value.s=NULL;
          }
@@ -300,20 +281,17 @@ static void _clean_parsed_parameters(parsed_parameters_t *params)
 
 void release_parsed_parameters(parsed_parameters_t **params)
 {
-   if(*params)
-   {
+   if(*params) {
       (*params)->in_use--;
 
 #ifdef PARSED_PARAMETERS_CACHING_ENABLED
-      if((*params)->from_cache==1)
-      {
+      if((*params)->from_cache==1) {
          *params=NULL;
          return;
       }
 #endif
 
-      if((*params)->in_use==0)
-      {
+      if((*params)->in_use==0) {
          _clean_parsed_parameters(*params);
 
          free(*params);
@@ -600,8 +578,7 @@ int main(int argc, char *argv[])
    release_parsed_parameters(&params1_1);
 
    double t0=millis();
-   for(int i=0;i<1000000;i++)
-   {
+   for(int i=0;i<1000000;i++) {
       params1_2=alloc_parsed_parameters(test2_str, params1_str, &nb_params, &err, 0);   
       release_parsed_parameters(&params1_2);
    }

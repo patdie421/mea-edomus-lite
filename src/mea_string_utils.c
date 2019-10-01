@@ -15,8 +15,7 @@
 
 void mea_strcpylower(char *d, char *s)
 {
-   while(*s)
-   {
+   while(*s) {
       *d=tolower(*s);
       ++d;
       ++s;
@@ -29,8 +28,7 @@ void mea_strncpylower(char *d, char *s, int n)
 {
    if(n<0)
       return;
-   while(*s && n)
-   {
+   while(*s && n) {
       *d=tolower(*s);
       --n;
       ++d;
@@ -47,8 +45,7 @@ void mea_strcpytrim(char *d, char *s)
 
    while(*s && *s==' ') ++s;
 
-   while(*s)
-   {
+   while(*s) {
       *d=*s;
       ++d;
       if(*s!=' ')
@@ -65,8 +62,7 @@ void mea_strcpytrimlower(char *d, char *s)
 
    while(*s && *s==' ') ++s;
 
-   while(*s)
-   {
+   while(*s) {
       *d=tolower(*s);
       ++d;
       if(*s!=' ')
@@ -85,8 +81,7 @@ void mea_strncpytrim(char *d, char *s, int n)
    char *p=d;
    while(*s && *s==' ') ++s;
 
-   while(*s && n)
-   {
+   while(*s && n) {
       *d=*s;
       --n;
       ++d;
@@ -107,8 +102,7 @@ void mea_strncpytrimlower(char *d, char *s, int n)
    char *p=d;
    while(*s && *s==' ') ++s;
 
-   while(*s && n)
-   {
+   while(*s && n) {
       *d=tolower(*s);
       --n;
       ++d;
@@ -193,8 +187,7 @@ char *mea_strltrim_alloc(char *s)
    s_trimed=mea_strltrim(s);
    
    s_trimed=mea_string_alloc_and_copy(s_trimed);
-   if(!s_trimed)
-   {
+   if(!s_trimed) {
       return NULL;
    }
    else
@@ -244,19 +237,16 @@ char *mea_strrtrim_alloc(char *s)
       return NULL;
 
    s_trimed=mea_string_alloc_and_copy(s);
-   if(!s_trimed)
-   {
+   if(!s_trimed) {
       return NULL;
    }
-   else
-   {
+   else {
       mea_strrtrim(s_trimed);
       s_new=(char *)realloc(s_trimed, strlen(s_trimed)+1);
 
       if(s_new)
          return s_new;
-      else
-      {
+      else {
          free(s_trimed);
          s_trimed=NULL;
          return NULL;
@@ -306,13 +296,11 @@ char *mea_strtrim_alloc(char *s)
       return NULL;
 
    s_trimed=mea_strltrim(s);
-   if(s_trimed)
-   {
+   if(s_trimed) {
       s_trimed=mea_strrtrim_alloc(s_trimed);
       if(s_trimed)
          return s_trimed;
-      else
-      {
+      else {
          return NULL;
       }
    }
@@ -410,12 +398,10 @@ int16_t mea_strcmplower2(char *str1, char *str2)
          return 1;
    }
 
-   if(str1[i] && !str2[i])
-   {
+   if(str1[i] && !str2[i]) {
       return 1;
    }
-   else if(!str1[i] && str2[i])
-   {
+   else if(!str1[i] && str2[i]) {
       return -1;
    }
    return 0;
@@ -477,8 +463,7 @@ int16_t mea_strsplit(char str[], char separator, char *tokens[], uint16_t l_toke
    int i=0;
    for(;str[i];i++)
    {
-      if(str[i]==separator)
-      {
+      if(str[i]==separator) {
          str[i]=0;
          j++;
          if(j<l_tokens)
@@ -530,10 +515,10 @@ int mea_strncat(char *dest, int max_test, char *source)
 {
    int l_dest = (int)strlen(dest);
    int l_source = (int)strlen(source);
-   if((l_dest+l_source)>max_test)
+   if((l_dest+l_source)>max_test) {
       return -1;
-   else
-   {
+   }
+   else {
       strcat(dest, source);
    }
    return 0;
@@ -552,8 +537,7 @@ void mea_strremovespaces(char *str)
    char c, *p;
 
    p = str;
-   do
-   {
+   do {
       while ((c = *p++) == ' ');
    }
    while ((*str++ = c) != 0);
@@ -573,10 +557,10 @@ char *mea_string_alloc_and_copy(char *str)
  */
 {
    char *new_str=(char *)malloc(strlen(str)+1);
-   if(new_str)
+   if(new_str) {
       strcpy(new_str, str);
-   else
-   {  
+   }
+   else {  
       return NULL;
    }
    return new_str;
@@ -595,8 +579,7 @@ char *mea_string_free_alloc_and_copy(char **org_str, char *str)
  * \return    pointeur sur la nouvelle chaine.
  */
 {
-   if(*org_str)
-   {
+   if(*org_str) {
       free(*org_str);
       *org_str=NULL;
    }
@@ -604,8 +587,7 @@ char *mea_string_free_alloc_and_copy(char **org_str, char *str)
    *org_str=(char *)malloc(strlen(str)+1);
    if(*org_str)
       strcpy(*org_str, str);
-   else
-   {
+   else {
       return NULL;
    }
    return *org_str;
@@ -615,8 +597,7 @@ char *mea_string_free_alloc_and_copy(char **org_str, char *str)
 int mea_strisnumeric(char *str)
 {
    int i=0;
-   for(;str[i];i++)
-   {
+   for(;str[i];i++) {
       if(!isdigit(str[i]))
          return -1;
    }
@@ -627,15 +608,12 @@ int mea_strisnumeric(char *str)
 int mea_strcpy_escs(char *dest, char *source)
 {
    int i=0,j=0;
-   for(;source[i];i++,j++)
-   {
+   for(;source[i];i++,j++) {
       char c=source[i];
-      if(c=='\\')
-      {
+      if(c=='\\') {
          i++;
          c=source[i];
-         switch(c)
-         {
+         switch(c) {
             case '\\':
             case '"':
             case '#':
@@ -662,12 +640,10 @@ int mea_strcpy_escs(char *dest, char *source)
 int mea_strcpy_escd(char *dest, char *source)
 {
    int i=0, j=0;
-   for(;source[i];i++,j++)
-   {
+   for(;source[i];i++,j++) {
       char c=source[i];
 
-      switch(c)
-      {
+      switch(c) {
          case '\\':
          case '"':
          case '#':
@@ -695,10 +671,8 @@ int mea_strlen_escaped(char *s)
 {
    int i=0,j=0;
 
-   for(;s[i];i++)
-   {
-      switch(s[i])
-      {
+   for(;s[i];i++) {
+      switch(s[i]) {
          case '\\':
          case '"':
          case 10:
@@ -725,13 +699,11 @@ char *mea_unescape(char *result, char *data)
 
    result[0]=0;
 
-   while ((ch = *data++) != 0)
-   {
+   while ((ch = *data++) != 0) {
       if (ch == '\\') {
 	      if ((ch = *data++) == 0)
 		      break;
-	         switch (ch)
-	         {
+	         switch (ch) {
 	            case 'a':				/* \a -> audible bell */
 		            ch = '\a';
 		            break;
@@ -761,8 +733,7 @@ char *mea_unescape(char *result, char *data)
 	            case '5':
 	            case '6':
 	            case '7':
-		            for (oval = ch - '0', i = 0; i < 2 && ((ch = *data) != 0) && ISOCTAL(ch); i++, data++)
-		            {
+		            for (oval = ch - '0', i = 0; i < 2 && ((ch = *data) != 0) && ISOCTAL(ch); i++, data++) {
 		               oval = (oval << 3) | (ch - '0');
 		            }
 		            ch = oval;

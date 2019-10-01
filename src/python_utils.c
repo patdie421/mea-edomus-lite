@@ -21,27 +21,23 @@ PyObject *mea_getMemory(PyObject *self, PyObject *args, PyObject *mea_memory)
    PyObject *key;
    PyObject *mem;
    
-   if(PyTuple_Size(args)!=1)
-   {
+   if(PyTuple_Size(args)!=1) {
       DEBUG_SECTION mea_log_printf("%s (%s) :  arguments error.\n", DEBUG_STR ,__func__);
       PyErr_BadArgument(); // à replacer
       return NULL;
    }
    
    key=PyTuple_GetItem(args, 0);
-   if(!key)
-   {
+   if(!key) {
       DEBUG_SECTION mea_log_printf("%s (%s) :  bad mem id.\n", DEBUG_STR ,__func__);
       PyErr_BadArgument(); // à remplacer
       return NULL;
    }
          
    mem=PyDict_GetItem(mea_memory, key);
-   if(!mem)
-   {
+   if(!mem) {
       mem = PyDict_New();
-      if(PyDict_SetItem(mea_memory, key, mem)==-1)
-      {
+      if(PyDict_SetItem(mea_memory, key, mem)==-1) {
          Py_DECREF(mem);
          
          return NULL;
@@ -113,22 +109,18 @@ int mea_call_python_function3(PyObject *pFunc, PyObject *plugin_params_dict, PyO
    PyObject *pArgs, *pValue=NULL;
    int retour=0;
 
-   if (pFunc && PyCallable_Check(pFunc))
-   {
+   if (pFunc && PyCallable_Check(pFunc)) {
       pArgs = PyTuple_New(1);
       Py_INCREF(plugin_params_dict); // PyTuple_SetItem va voler la référence, on en rajoute une pour pouvoir ensuite faire un Py_DECREF
       PyTuple_SetItem(pArgs, 0, plugin_params_dict);
 
       pValue = PyObject_CallObject(pFunc, pArgs); // appel du plugin
-      if (pValue != NULL)
-      {
+      if (pValue != NULL) {
          *res=pValue;
          retour=0;
       }
-      else
-      {
-         if (PyErr_Occurred())
-         {
+      else {
+         if (PyErr_Occurred()) {
             VERBOSE(5) {
                mea_log_printf("%s (%s) : python error - ", ERROR_STR, __func__ );
                PyErr_Print();
@@ -143,8 +135,7 @@ int mea_call_python_function3(PyObject *pFunc, PyObject *plugin_params_dict, PyO
 
       return retour;
    }
-   else
-   {
+   else {
       return -1;
    }
 }
@@ -155,23 +146,19 @@ int mea_call_python_function2(PyObject *pFunc, PyObject *plugin_params_dict)
    PyObject *pArgs, *pValue=NULL;
    int retour=-1;
 
-   if (pFunc && PyCallable_Check(pFunc))
-   {
+   if (pFunc && PyCallable_Check(pFunc)) {
       pArgs = PyTuple_New(1);
       Py_INCREF(plugin_params_dict); // PyTuple_SetItem va voler la référence, on en rajoute une pour pouvoir ensuite faire un Py_DECREF
       PyTuple_SetItem(pArgs, 0, plugin_params_dict);
 
       pValue = PyObject_CallObject(pFunc, pArgs); // appel du plugin
-      if (pValue != NULL)
-      {
+      if (pValue != NULL) {
          retour=(int)PyInt_AsLong(pValue);
          Py_DECREF(pValue);
          DEBUG_SECTION mea_log_printf("%s (%s) : Result of call : %d\n", DEBUG_STR, __func__, retour);
       }
-      else
-      {
-         if (PyErr_Occurred())
-         {
+      else {
+         if (PyErr_Occurred()) {
             VERBOSE(5) {
                mea_log_printf("%s (%s) : python error - ", ERROR_STR, __func__ );
                PyErr_Print();
@@ -184,8 +171,7 @@ int mea_call_python_function2(PyObject *pFunc, PyObject *plugin_params_dict)
 
       return retour;
    }
-   else
-   {
+   else {
       return -1;
    }
 }
@@ -197,22 +183,18 @@ int mea_call_python_function_from_module(PyObject *module, char *plugin_func, Py
    int retour=0;
    PyErr_Clear();
 
-   if(!module)
-   {
+   if(!module) {
       VERBOSE(5) mea_log_printf("%s (%s) : not found\n", ERROR_STR, __func__);
       retour=-1;
    }
-   else
-   {
+   else {
       PyObject *pFunc = PyObject_GetAttrString(module, plugin_func);
-      if(pFunc)
-      {
+      if(pFunc) {
          retour=mea_call_python_function2(pFunc, plugin_params_dict);
 
          Py_XDECREF(pFunc);
       }
-      else
-      {
+      else {
          VERBOSE(5) mea_log_printf("%s (%s) : %s not fount\n", ERROR_STR, __func__, plugin_func);
          retour=-1;
       }
@@ -230,33 +212,27 @@ int mea_call_python_function(char *plugin_name, char *plugin_func, PyObject *plu
    int retour=-1;
 
    pName = PyString_FromString(plugin_name);
-   if(!pName)
-   {
+   if(!pName) {
       return -1;
    }
 
    pModule = PyImport_Import(pName);
 /*
-   if(!pModule)
-   {
+   if(!pModule) {
       VERBOSE(5) mea_log_printf("%s (%s) : %s not found\n", ERROR_STR, __func__, plugin_name);
    }
-   else
-   {
+   else {
       pFunc = PyObject_GetAttrString(pModule, plugin_func);
-      if(pFunc)
-      {
+      if(pFunc) {
          retour=mea_call_python_function2(pFunc, plugin_params_dict);
       }
-      else
-      {
+      else {
          VERBOSE(5) mea_log_printf("%s (%s) : %s not fount in %s module\n", ERROR_STR, __func__, plugin_func, plugin_name);
       }
       Py_XDECREF(pFunc);
    }
 */
-   if(pModule)
-   {
+   if(pModule) {
       retour=mea_call_python_function_from_module(pModule, plugin_func, plugin_params_dict);
 
       Py_XDECREF(pModule);
@@ -282,8 +258,7 @@ PyObject *mea_xplMsgToPyDict2(cJSON *xplMsgJson)
    pyXplMsg = PyDict_New();
    PyObject *pyBody=PyDict_New();
 
-   if(!pyXplMsg || !pyBody)
-   {
+   if(!pyXplMsg || !pyBody) {
       PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_xplMSgToPyDict) : PyDict_New error");
       return NULL;
    }
@@ -293,25 +268,20 @@ PyObject *mea_xplMsgToPyDict2(cJSON *xplMsgJson)
    Py_DECREF(l);
  
    cJSON *e=xplMsgJson->child; 
-   while(e)
-   {
-      if(e->string)
-      {
+   while(e) {
+      if(e->string) {
          if(strcmp(e->string, XPLSOURCE_STR_C)==0 ||
             strcmp(e->string, XPLTARGET_STR_C)==0 ||
             strcmp(e->string, XPLMSGTYPE_STR_C)==0 ||
-            strcmp(e->string, XPLSCHEMA_STR_C)==0)
-         {
+            strcmp(e->string, XPLSCHEMA_STR_C)==0) {
             s=PyString_FromString(e->valuestring);
             PyDict_SetItemString(pyXplMsg, e->string, s);
             Py_DECREF(s);
          }
-         else
-         {
+         else {
             if (e->valuestring != NULL)
                s=PyString_FromString(e->valuestring);
-            else
-            {
+            else {
                s=Py_None;
                Py_INCREF(s);
             }

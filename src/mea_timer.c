@@ -22,14 +22,12 @@ void mea_nanosleep(uint32_t ns)
    req.tv_sec=0;
    req.tv_nsec=ns;
 
-   if(req.tv_nsec>1000000000L) // 1.000.000.000 ns = 1 seconde
-   {
+   if(req.tv_nsec>1000000000L) { // 1.000.000.000 ns = 1 seconde
       req.tv_sec++;
       req.tv_nsec=req.tv_nsec - 1000000000L;
    }
 
-   while ( nanosleep(&req,&res) == -1 )
-   {
+   while ( nanosleep(&req,&res) == -1 ) {
       req.tv_sec  = res.tv_sec;
       req.tv_nsec = res.tv_nsec;
    }
@@ -43,14 +41,12 @@ void mea_microsleep(uint32_t usecs)
    delay_time.tv_sec = 0;
    delay_time.tv_nsec = usecs * 1000;
 
-   if(delay_time.tv_nsec>1000000000L) // 1.000.000.000 ns = 1 seconde
-   {
+   if(delay_time.tv_nsec>1000000000L) { // 1.000.000.000 ns = 1 seconde
       delay_time.tv_sec++;
       delay_time.tv_nsec=delay_time.tv_nsec - 1000000000L;
    }
 
-   while ( nanosleep(&delay_time,&remaining) == -1 )
-   {
+   while ( nanosleep(&delay_time,&remaining) == -1 ) {
       delay_time.tv_sec  = remaining.tv_sec;
       delay_time.tv_nsec = remaining.tv_nsec;
    }
@@ -67,8 +63,7 @@ int16_t mea_init_timer(mea_timer_t *aTimer, uint32_t aDelay, uint16_t restartSta
  * \return    0 initialisation réalisée, -1 sinon
  */
 {
-   if(aTimer)
-   {
+   if(aTimer) {
       aTimer->stat=0;
       aTimer->start_time=0;
       aTimer->delay=aDelay;
@@ -112,22 +107,18 @@ int16_t mea_test_timer(mea_timer_t *aTimer)
  * \return    0 le temps est dépassé (le temps est passé), -1 sinon
  */
 {
-   if(aTimer->stat==1)
-   {
+   if(aTimer->stat==1) {
       time_t now;
       double diff_time;
 	  
       time(&now);
 	    
       diff_time=difftime(now, aTimer->start_time);
-      if(diff_time > (double)(aTimer->delay))
-      {
-         if(aTimer->autorestart==1)
-         {
+      if(diff_time > (double)(aTimer->delay)) {
+         if(aTimer->autorestart==1) {
             time(&(aTimer->start_time));
          }
-         else
-         {
+         else {
             aTimer->stat=0;
             aTimer->start_time=0;
          }

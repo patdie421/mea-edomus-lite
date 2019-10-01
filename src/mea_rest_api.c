@@ -515,15 +515,15 @@ int mea_rest_api_device_POST_PUT(struct mg_connection *conn, int method, char *i
             return returnResponse(conn, 200, 0, msg);
          }
          else {
-            return returnResponse(conn, 404, 1, NULL);
+            return returnResponse(conn, 404, 2, NULL);
          }
       }
       else {
-         return returnResponse(conn, 400, 1, NO_VALID_JSON_DATA);
+         return returnResponse(conn, 400, 3, NO_VALID_JSON_DATA);
       }
    }
    else {
-      return returnResponse(conn, 404, 1, NULL);
+      return returnResponse(conn, 404, 4, NULL);
    }
 }
 
@@ -595,23 +595,18 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
 
    switch(method) {
       case HTTP_DELETE_ID:
-
          if(l_tokens==0) {
             return returnResponse(conn, 404, 1, NULL);
          }
-         else if(l_tokens==1) {
-            cJSON *jsonData=getData_alloc(conn);
-            if(jsonData) {
+         else {
             if(deleteInterface(tokens[0])>=0) {
-                  return returnResponse(conn, 200, 0, NULL);
-               }
-               else {
-                  return returnResponse(conn, 404, 1, NULL);
-               }
+               return returnResponse(conn, 200, 0, NULL);
+            }
+            else {
+               return returnResponse(conn, 404, 1, NULL);
             }
          }
-         return returnResponse(conn, 404, 1, NULL);
-
+         break;
 
       case HTTP_GET_ID:
          if(l_tokens==0) {
@@ -625,7 +620,7 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
                return returnResponse(conn, 404, 1, NULL);
             }
          }
-         else if(l_tokens==1) {
+         else {
             char *s=getInterfaceAsStringByName_alloc(tokens[0]);
             if(s) {
                httpResponse(conn, 200, NULL, s);
@@ -636,7 +631,7 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
                return returnResponse(conn, 404, 1, NULL);
             }
          }
-         return returnResponse(conn, 500, 1, NULL);
+         break;
 
       case HTTP_POST_ID:
          if(l_tokens==0) {
@@ -656,6 +651,8 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
          else {
             return mea_rest_api_device(conn, method, tokens[0], &(tokens[1]), l_tokens-1);
          }
+         break;
+
 
       case HTTP_PUT_ID:
          if(l_tokens==0) {
@@ -675,10 +672,13 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
                return returnResponse(conn, 400, 1, NO_VALID_JSON_DATA);
             }
          }
+         break;
 
       default:
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
+   
+   return returnResponse(conn, 500, 1, NULL);
 }
 
 

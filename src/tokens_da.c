@@ -22,11 +22,9 @@ struct tokens_strings_da_s *tokens_string_da = NULL;
 int16_t init_strings_da()
 {
 #if TOKENS_STRING_DA == 1
-   if(tokens_string_da == NULL)
-   {
+   if(tokens_string_da == NULL) {
       tokens_string_da = (struct tokens_strings_da_s *)malloc(sizeof(struct tokens_strings_da_s));
-      if(tokens_string_da == NULL)
-      {
+      if(tokens_string_da == NULL) {
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          return -1;
       }
@@ -112,8 +110,7 @@ int16_t init_strings_da()
 void release_strings_da()
 {
 #if TOKENS_STRING_DA == 1
-   if(tokens_string_da)
-   {
+   if(tokens_string_da) {
       free(tokens_string_da);
       tokens_string_da=NULL;
    }
@@ -144,10 +141,8 @@ int main(int argc, char *argv[])
    init_strings_da();
 
    t0=millis();
-   for(int i=0;i<1000;i++)
-   {
-      for(int j=1;j<=_END;j++)
-      {
+   for(int i=0;i<1000;i++) {
+      for(int j=1;j<=_END;j++) {
          char *str=get_token_string_by_id(j);
          int id=(int)get_token_id_by_string(str);
          if(j!=id)

@@ -467,11 +467,11 @@ int updateInterface(char *interface, cJSON *jsonData) /* TO TEST */
       return -1;
 
    cJSON *jsonInterfaceTemplate=cJSON_Parse(interface_template);
+
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
 
    cJSON *jsonInterface=cJSON_GetObjectItem(jsonInterfaces, interface);
-
    if(jsonInterface) {
       id_interface=(int)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
       cJSON *e=jsonInterface->child;
@@ -493,23 +493,19 @@ int updateInterface(char *interface, cJSON *jsonData) /* TO TEST */
       mea_strncpytrimlower(devName, (char *)cJSON_GetObjectItem(jsonInterface, "dev")->valuestring, sizeof(devName)-1);
 
       cJSON_DeleteItemFromObject(jsonInterfaces, interface);
+      cJSON_AddItemToObject(jsonInterfaces, interface, _jsonInterface);
 
       struct devs_index_s *_e = NULL;
-
       HASH_FIND_STR(devs_index, devName, _e);
       if(_e) {
          HASH_DEL(devs_index, _e);
       }
-      cJSON_AddItemToObject(jsonInterfaces, interface, _jsonInterface);
-
-      //
-      // A REVOIR
-      //
-      // mea_strncpytrimlower(e->devName, (char *)cJSON_GetObjectItem(_jsonInterface, "dev")->valuestring, sizeof(e->devName)-1);
-      // e->interface=_jsonInterface;
-      //
-      // HASH_ADD_STR(devs_index, devName, e); 
-      //
+      else {
+         _e=(struct devs_index_s *)malloc(sizeof(struct devs_index_s));
+      }
+      mea_strncpytrimlower(_e->devName, (char *)cJSON_GetObjectItem(_jsonInterface, "dev")->valuestring, sizeof(_e->devName)-1);
+      _e->interface=_jsonInterface;
+      HASH_ADD_STR(devs_index, devName, _e);
 
       ret=0;
    }

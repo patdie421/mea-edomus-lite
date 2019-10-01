@@ -83,8 +83,7 @@ void timespecAdd(struct timespec *t, struct timespec *t1, struct timespec *t2)
    t->tv_sec  = t1->tv_sec  + t2->tv_sec;
    t->tv_nsec = t1->tv_nsec + t2->tv_nsec;
 
-   if(t->tv_nsec >= ONESECONDNS)
-   {
+   if(t->tv_nsec >= ONESECONDNS) {
       t->tv_sec  +=1;
       t->tv_nsec -=ONESECONDNS;
    }
@@ -97,8 +96,7 @@ void timespecDiff(struct timespec *t, struct timespec *t1, struct timespec *t2)
    t->tv_sec  = t1->tv_sec  - t2->tv_sec;
    t->tv_nsec = t1->tv_nsec - t2->tv_nsec;
 
-   if(t->tv_nsec < 0)
-   {
+   if(t->tv_nsec < 0) {
       t->tv_sec  -=1;
       t->tv_nsec +=ONESECONDNS;
    }
@@ -108,15 +106,13 @@ void timespecDiff(struct timespec *t, struct timespec *t1, struct timespec *t2)
 
 int timespecCmp(struct timespec *a, struct timespec *b)
 {
-   if (a->tv_sec != b->tv_sec)
-   {
+   if (a->tv_sec != b->tv_sec) {
       if (a->tv_sec > b->tv_sec)
          return 1;
       else
          return -1;
    }
-   else
-   {
+   else {
       if (a->tv_nsec > b->tv_nsec)
          return 1;
       else if (a->tv_nsec < b->tv_nsec)
@@ -161,8 +157,7 @@ time_t mea_datetime_time(time_t *v)
 
 struct tm *mea_localtime_r(const time_t *timep, struct tm *result)
 {
-   if(result)
-   {
+   if(result) {
       memcpy(result, &mea_tm, sizeof(struct tm));
    }
 
@@ -177,18 +172,15 @@ int mea_timeFromStr(char *str, time_t *t)
 
    HASH_FIND_STR(mea_datetime_values_cache, str, e);
 
-   if(e)
-   {
+   if(e) {
       e->last_access = mea_time_value;
       *t = e->time_value;
       return 0;
    }
-   else
-   {
+   else {
       memcpy(&tm, &mea_tm, sizeof(struct tm));
       char *p=strptime(str, "%H:%M:%S", &tm); // va juste remplacer les heures, minutes et secondes dans tm
-      if(p!=NULL && *p==0)
-      {
+      if(p!=NULL && *p==0) {
          struct mea_datetime_value_s *newTime=(struct mea_datetime_value_s *)malloc(sizeof(struct mea_datetime_value_s));
          if(newTime==NULL)
             return -1;
@@ -211,14 +203,11 @@ int mea_timeFromStr(char *str, time_t *t)
 
 static int mea_clean_datetime_values_cache()
 {
-   if(mea_datetime_values_cache)
-   {
+   if(mea_datetime_values_cache) {
       struct mea_datetime_value_s  *current, *tmp;
 
-      HASH_ITER(hh, mea_datetime_values_cache, current, tmp)
-      {
-         if((mea_time_value - current->last_access) > 3600)
-         {
+      HASH_ITER(hh, mea_datetime_values_cache, current, tmp) {
+         if((mea_time_value - current->last_access) > 3600) {
             HASH_DEL(mea_datetime_values_cache, current);
             free(current);
          }
@@ -233,16 +222,13 @@ static int update_datetime_values_cache()
 {
    struct tm tm;
 
-   if(mea_datetime_values_cache)
-   {
+   if(mea_datetime_values_cache) {
       struct mea_datetime_value_s  *current, *tmp;
 
       memcpy(&tm, &mea_tm, sizeof(struct tm));
 
-      HASH_ITER(hh, mea_datetime_values_cache, current, tmp)
-      {
-         if(current->type == DATETIME_TIME)
-         {
+      HASH_ITER(hh, mea_datetime_values_cache, current, tmp) {
+         if(current->type == DATETIME_TIME) {
             strptime(current->dateTimeStr, "%H:%M:%S", &tm);
             memcpy(&(current->tm), &tm, sizeof(struct tm));
             current->time_value = mktime(&tm);
@@ -277,10 +263,8 @@ static int getSunRiseSetOrTwilingStartEnd(double lon, double lat, time_t *_start
 
    int rh=0,rm=0,sh=0,sm=0;
 
-   switch(rs)
-   {
-      case 0:
-      {
+   switch(rs) {
+      case 0: {
          // conversion en heure/minute
          rh=(int)start;
          rm=(int)((start - (double)rh)*60);
@@ -332,19 +316,15 @@ static int getSunRiseSetOrTwilingStartEnd(double lon, double lat, time_t *_start
 
 static void updateTimersStates()
 {
-   if(mea_datetime_timers_list!=NULL)
-   {
+   if(mea_datetime_timers_list!=NULL) {
       struct timespec now;
       mea_getTime(&now);
 
       struct mea_datetime_timer_s  *current, *tmp = NULL;
 
-      HASH_ITER(hh, mea_datetime_timers_list, current, tmp)
-      {
-         if(current->state == TIMER_RUNNING)
-         {
-            if(timespecCmp(&(current->end), &now)==-1)
-            {
+      HASH_ITER(hh, mea_datetime_timers_list, current, tmp) {
+         if(current->state == TIMER_RUNNING) {
+            if(timespecCmp(&(current->end), &now)==-1) {
                current->state = TIMER_FALLED;
                if(current->callback)
                   current->callback(current->name, current->userdata); 
@@ -357,18 +337,14 @@ static void updateTimersStates()
 
 static struct mea_datetime_timer_s * findNextTimerToFall()
 {
-   if(mea_datetime_timers_list!=NULL)
-   {
+   if(mea_datetime_timers_list!=NULL) {
       struct mea_datetime_timer_s  *current, *tmp, *last = NULL;
 
-      HASH_ITER(hh, mea_datetime_timers_list, current, tmp)
-      {
-         if(current->state == TIMER_RUNNING)
-         {
+      HASH_ITER(hh, mea_datetime_timers_list, current, tmp) {
+         if(current->state == TIMER_RUNNING) {
             if(last == NULL)
                last = current;
-            else
-            {
+            else {
                if(timespecCmp(&(current->end), &(last->end))==1)
                   last = current;
             } 
@@ -391,11 +367,9 @@ static int _startAlarm(char *name, time_t date, datetime_timer_callback_f f, voi
    pthread_mutex_lock(&timeServer_startTimer_lock);
 
    HASH_FIND_STR(mea_datetime_timers_list, name, e);
-   if(!e)
-   {
+   if(!e) {
       e = (struct mea_datetime_timer_s *)malloc(sizeof(struct mea_datetime_timer_s));
-      if(!e)
-      {
+      if(!e) {
          retour = -1;
          goto startAlarm_clean_exit;   
       }
@@ -466,11 +440,9 @@ static int _startTimer(char *name, long duration, enum datetime_timer_unit_e uni
    pthread_mutex_lock(&timeServer_startTimer_lock);
 
    HASH_FIND_STR(mea_datetime_timers_list, name, e);
-   if(!e)
-   {
+   if(!e) {
       e = (struct mea_datetime_timer_s *)malloc(sizeof(struct mea_datetime_timer_s));
-      if(!e)
-      {
+      if(!e) {
          retour = -1;
          goto startTimer_clean_exit;   
       }
@@ -550,8 +522,7 @@ int mea_datetime_removeAllTimers()
    pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&timeServer_startTimer_lock);
    pthread_mutex_lock(&timeServer_startTimer_lock);
 
-   HASH_ITER(hh, mea_datetime_timers_list, e, tmp)
-   {
+   HASH_ITER(hh, mea_datetime_timers_list, e, tmp) {
       HASH_DEL(mea_datetime_timers_list, e);
       free(e);
       e=NULL;
@@ -577,8 +548,7 @@ int mea_datetime_removeTimer(char *name)
    pthread_mutex_lock(&timeServer_startTimer_lock);
 
    HASH_FIND_STR(mea_datetime_timers_list, name, e);
-   if(e)
-   {
+   if(e) {
       HASH_DEL(mea_datetime_timers_list, e);
       free(e);
       e=NULL;
@@ -602,8 +572,7 @@ int mea_datetime_stopTimer(char *name)
    pthread_mutex_lock(&timeServer_startTimer_lock);
 
    HASH_FIND_STR(mea_datetime_timers_list, name, e);
-   if(!e)
-   {
+   if(!e) {
       retour = -1;
       goto stopTimer_clean_exit;
    }
@@ -637,29 +606,24 @@ void *_timeServer_thread(void *data)
    mea_time_value=te.tv_sec;
    localtime_r(&(mea_time_value), &mea_tm); // conversion en tm
    int hour_job_done = 0; 
-   while(1)
-   {
+   while(1) {
       mea_getTime(&te);
 
       updateTimersStates();
 
-      if(last_te_tv_sec != te.tv_sec) // toutes les secondes
-      {
+      if(last_te_tv_sec != te.tv_sec) { // toutes les secondes
          mea_time_value=te.tv_sec;
       }
 
-      if((last_te_tv_sec != te.tv_sec) && (te.tv_sec % 60) == 0) // toutes les minutes
-      {
+      if((last_te_tv_sec != te.tv_sec) && (te.tv_sec % 60) == 0) { // toutes les minutes
          DEBUG_SECTION2(DEBUGFLAG) {
             mea_log_printf("%s (%s) : Traitement minute\n", INFO_STR, __func__);
          }
          localtime_r(&(mea_time_value), &mea_tm); // conversion en tm
       }
 
-      if((te.tv_sec % 3600) == 0) // toutes les heures;
-      {
-         if(hour_job_done == 0) // pour pas begailler
-         {
+      if((te.tv_sec % 3600) == 0) { // toutes les heures;
+         if(hour_job_done == 0) { // pour pas begailler
             DEBUG_SECTION2(DEBUGFLAG) {
                mea_log_printf("%s (%s) : Traitement heure\n", INFO_STR, __func__);
             }
@@ -675,8 +639,7 @@ void *_timeServer_thread(void *data)
       else
          hour_job_done=0;
 
-      if(mea_tm.tm_wday != current_day) // 1x par jour
-      {
+      if(mea_tm.tm_wday != current_day) { // 1x par jour
          DEBUG_SECTION2(DEBUGFLAG) {
             mea_log_printf("%s (%s) : Traitement jour\n", INFO_STR, __func__);
          }
@@ -689,13 +652,11 @@ void *_timeServer_thread(void *data)
          double lat = 48.8534100;
          double lon = 2.3488000;
          time_t s=0, e=0;
-         if(getSunRiseSetOrTwilingStartEnd(lon, lat, &s, &e,0)==0)
-         {
+         if(getSunRiseSetOrTwilingStartEnd(lon, lat, &s, &e,0)==0) {
             mea_sunrise_value = s;
             mea_sunset_value = e;
          }
-         if(getSunRiseSetOrTwilingStartEnd(lon, lat, &s, &e,1)==0)
-         {
+         if(getSunRiseSetOrTwilingStartEnd(lon, lat, &s, &e,1)==0) {
             mea_twilightstart_value = s;
             mea_twilightend_value = e;
          }
@@ -716,8 +677,7 @@ void *_timeServer_thread(void *data)
 
       // un timer arrive-t-il a échéance avant le temps de sommeil calculé ?
       nextTimer=findNextTimerToFall();
-      if(nextTimer)
-      {
+      if(nextTimer) {
          timespecDiff(&t, &(nextTimer->end), &te);
          if(t.tv_sec == 0 && t.tv_nsec < sleep_time_ns) // oui, on ajuste le temps de sommeil en concéquence
             sleep_time_ns = t.tv_nsec;
@@ -725,8 +685,7 @@ void *_timeServer_thread(void *data)
 
       req.tv_sec = te.tv_sec;
       req.tv_nsec = te.tv_nsec + sleep_time_ns;
-      if(req.tv_nsec > ONESECONDNS)
-      {
+      if(req.tv_nsec > ONESECONDNS) {
          ++(req.tv_sec);
          req.tv_nsec-=ONESECONDNS;
       }
@@ -735,8 +694,7 @@ void *_timeServer_thread(void *data)
       pthread_mutex_lock(&timeServer_startTimer_lock);
 
       int ret=pthread_cond_timedwait(&timerServer_startTimer_cond, &timeServer_startTimer_lock, &req);
-      if(ret != 0)
-      {
+      if(ret != 0) {
       }
 
       pthread_mutex_unlock(&timeServer_startTimer_lock);
@@ -756,8 +714,7 @@ pthread_t *timeServer()
    pthread_t *timeServer_thread=NULL;
 
    timeServer_thread=(pthread_t *)malloc(sizeof(pthread_t));
-   if(!timeServer_thread)
-   {
+   if(!timeServer_thread) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ",FATAL_ERROR_STR, __func__, MALLOC_ERROR_STR);
          perror("");
@@ -765,8 +722,7 @@ pthread_t *timeServer()
       goto timeServer_clean_exit;
    }
    
-   if(pthread_create (timeServer_thread, NULL, _timeServer_thread, NULL))
-   {
+   if(pthread_create (timeServer_thread, NULL, _timeServer_thread, NULL)) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : pthread_create - can't start thread - ", FATAL_ERROR_STR, __func__);
          perror("");
@@ -780,8 +736,7 @@ pthread_t *timeServer()
       return timeServer_thread;
 
 timeServer_clean_exit:
-   if(timeServer_thread)
-   {
+   if(timeServer_thread) {
       free(timeServer_thread);
       timeServer_thread=NULL;
    }
