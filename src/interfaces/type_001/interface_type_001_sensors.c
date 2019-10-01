@@ -276,7 +276,7 @@ struct sensor_s *interface_type_001_sensors_valid_and_malloc_sensor(int16_t id_s
       
       if(_valide_sensor_i001(type_id,pin_id,compute_id,algo_id,&err))
       {
-         strncpy(sensor->name, sizeof(sensor->name)-1, (char *)name);
+         strncpy(sensor->name, (char *)name, sizeof(sensor->name)-1);
          sensor->name[sizeof(sensor->name)-1]=0;
          mea_strtolower(sensor->name);
          sensor->sensor_id=id_sensor_actuator;

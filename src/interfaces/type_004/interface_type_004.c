@@ -380,7 +380,7 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
    {
       getLightStateByName(i004->currentHueLightsState, (char *)e->huename, &on, &reachable);
       if(e->sensorname) {
-         l_sensor=strlen(e->sensorname)+1;
+         int l_sensor=strlen(e->sensorname)+1;
          sensor = (char *)malloc(l_sensor);
          sensor[l_sensor-1]=0;
          strncpy(sensor, e->sensorname, l_sensor-1);
@@ -836,7 +836,7 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
                   goto load_interface_type_004_clean_exit;
                }
                _huename[_l_huename-1]=0;
-               strcpy(_huename, hue_params->parameters[PARAMS_HUELIGH].value.s, _l_huename-1);
+               strncpy(_huename, hue_params->parameters[PARAMS_HUELIGH].value.s, _l_huename-1);
                e->huename = _huename;
                e->sensorname=NULL;
                e->actuatorname=NULL;
@@ -849,7 +849,7 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
             }
             
             char *_name=NULL;
-            _l_name=strlen((char *)name)+1;
+            int _l_name=strlen((char *)name)+1;
             _name=malloc(_l_name);
             if(_name==NULL) {
                VERBOSE(2) {
