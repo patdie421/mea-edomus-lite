@@ -49,12 +49,17 @@ def mea_xplCmndMsg(data):
    except:
       verbose(2, "ERROR (", fn_name, ") - parameters error")
       return False
+   if typeoftype!=1:
+      return False
 
    mem_actuator=mea.getMemory(id_actuator)
    mem_interface=mea.getMemory("interface"+str(interface_id))
 
    x=data["xplmsg"]
    body=x["body"]
+
+   if not "action" in body:
+      return False
 
    target="*"
    if "source" in x:
@@ -67,8 +72,12 @@ def mea_xplCmndMsg(data):
          verbose(2, "ERROR (", fn_name, ") - no cmnd")
          return False
 
-      _cmnd=[cmnd]
-      p = subprocess.Popen(_cmnd)
+      _cmnd=[cmnd, body["action"]]
+      p = subprocess.Popen(_cmnd, stdout=subprocess.PIPE)
+      mea.interfaceAPI(api_key, "mea_writeData", str(p.communicate()[0]))
+      return True
+
+   return False
 
 
 def mea_dataFromSensor(data):
@@ -91,6 +100,9 @@ def mea_dataFromSensor(data):
 
    except:
       verbose(2, "ERROR (", fn_name, ") - invalid data")
+      return False
+
+   if typeoftype!=0:
       return False
 
    if not "value" in params:

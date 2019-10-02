@@ -1,7 +1,7 @@
 {
    "I002" : {
       "id_type":200,
-      "description":"",
+      "description":"xbee controler",
       "dev":"SERIAL://ttyUSB1:9600",
       "parameters":"",
       "state":1,
@@ -16,15 +16,21 @@
       "state":1,
       "devices": {
          "I010S001": {
-            "id_type":1,
-            "description":"",
-            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:TOTO",
+            "id_type":0,
+            "description":"Demo input 1",
+            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:IN1",
             "state":1
          },
          "I010S002": {
+            "id_type":0,
+            "description":"Demo input 2",
+            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:IN2",
+            "state":1
+         },
+         "I010A001": {
             "id_type":1,
-            "description":"",
-            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:TITI",
+            "description":"Demo output 1",
+            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=cmnd:ls",
             "state":1
          }
       }

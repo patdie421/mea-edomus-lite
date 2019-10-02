@@ -106,7 +106,6 @@ int16_t _interface_type_010_xPL_callback2(cJSON *xplMsgJson, struct device_info_
          release_parsed_parameters(&plugin_params);
       return -1;
    }
-
    plugin_queue_elem_t *plugin_qelem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
    if(plugin_qelem) {
       plugin_qelem->type_elem=XPLMSG;

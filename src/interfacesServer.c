@@ -301,7 +301,6 @@ cJSON *findDeviceByNameThroughIndex_alloc(struct devices_index_s *devices_index,
       return NULL;
  
    cJSON *d = NULL;
- 
    HASH_FIND_STR(devices_index, name, e);
    if(e) {
       d=cJSON_Duplicate(e->device, 1);
@@ -314,6 +313,7 @@ cJSON *findDeviceByNameThroughIndex_alloc(struct devices_index_s *devices_index,
 cJSON *findTypeByIdThroughIndex(struct types_index_s *types_index, int id)
 {
    struct types_index_s *e = NULL;
+
    if(!types_index)
       return NULL;
  
@@ -435,6 +435,7 @@ int addInterface(cJSON *jsonData)
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
 
+
    if(ret==0) {
       pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
       pthread_rwlock_rdlock(&interfaces_queue_rwlock);
@@ -547,7 +548,7 @@ int updateDevice(char *interface, char *name, cJSON *device)
    if(obj && obj->type==cJSON_Number) {
       id_type=(int)obj->valuedouble;
       cJSON *jsonType=findTypeByIdThroughIndex(types_index, id_type);
-      if(jsonType==NULL || (int)cJSON_GetObjectItem(jsonType, "typeoftype")->valuedouble == 10)
+      if(jsonType==NULL || (int)cJSON_GetObjectItem(jsonType, "typeoftype")->valuedouble == TYPEOFTYPE_INTERFACE)
          return -3;
    }
 
@@ -675,7 +676,7 @@ int addDevice(char *interface, cJSON *device)
    if(obj && obj->type==cJSON_Number) {
       id_type=(int)obj->valuedouble;
       cJSON *jsonType=findTypeByIdThroughIndex(types_index, id_type);
-      if(jsonType==NULL || (int)cJSON_GetObjectItem(jsonType, "typeoftype")->valuedouble == 10)
+      if(jsonType==NULL || (int)cJSON_GetObjectItem(jsonType, "typeoftype")->valuedouble == TYPEOFTYPE_INTERFACE)
          return -3;
    }
    else
@@ -1026,7 +1027,7 @@ int checkJsonTypes(cJSON *jsonTypes)
    }
    else {
 //
-// ajouter ici le controle de la structure et des types de données
+// TODO: ajouter ici le controle de la structure et des types de données
 //
       return 0;
    }
@@ -1084,7 +1085,7 @@ cJSON *jsonTypesLoad(char *file)
 
 int resyncDevices(cJSON *jsonInterfaces, char *file)
 {
-   // à faire
+   // TODO: 
 
    return 0;
 }
@@ -1092,7 +1093,7 @@ int resyncDevices(cJSON *jsonInterfaces, char *file)
  
 int jsonInterfacesSave()
 {
-   // à faire
+   // TODO:
 
    return 0;
 }
@@ -1100,36 +1101,35 @@ int jsonInterfacesSave()
 
 int jsonTypesSave()
 {
-   // à faire
+   // TODO:
 
    return 0;
 }
 
-
-/*
-* end new functions
-*/
- 
 
 int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, cJSON *jsonInterface, cJSON *jsonType)
 {
    if(!device_info)
       return -1;
 
-   if(!jsonInterface)
-      jsonInterface = cJSON_GetObjectItem(jsonDevice, "interface");
-
+   // BUG:
+   if(!jsonInterface) {
+      cJSON *_id_interface = cJSON_GetObjectItem(jsonDevice, "id_interface");
+      if(!_id_interface)
+         return -2;
+      int id_interface=(int)_id_interface->valuedouble;
+      jsonInterface=findInterfaceById(jsonInterfaces, id_interface);
+   }
    if(!jsonInterface)
       return -1;
 
    int type_id = (int)cJSON_GetObjectItem(jsonDevice, "id_type")->valuedouble;
-
    if(!jsonType) {
       jsonType = findTypeByIdThroughIndex(types_index, type_id);
    }
 
    if(!jsonType)
-      return -1;
+      return -4;
 
    device_info->name              = (char *)jsonDevice->string;
    device_info->id                =    (int)cJSON_GetObjectItem(jsonDevice, "id_sensor_actuator")->valuedouble;
@@ -1156,7 +1156,6 @@ int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, 
 int dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson)
 {
    int ret=0;
- 
    interfaces_queue_elem_t *iq;
  
    DEBUG_SECTION mea_log_printf("%s (%s) : reception message xPL\n", INFO_STR, __func__);
@@ -1198,9 +1197,8 @@ int dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson)
    id_interface=(int)cJSON_GetObjectItem(jsonDevice, "id_interface")->valuedouble;
    struct device_info_s device_info;
    ret=device_info_from_json(&device_info, jsonDevice, NULL, NULL);
-   cJSON_Delete(jsonDevice);
-   if(ret==-1)  {
-      DEBUG_SECTION mea_log_printf("%s (%s) : can't create device info\n", INFO_STR, __func__);
+   if(ret<0)  {
+      DEBUG_SECTION mea_log_printf("%s (%s) : can't create device info (%d)\n", INFO_STR, __func__, ret);
       goto exit;
    }
 
@@ -1235,6 +1233,8 @@ int dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson)
 
    pthread_rwlock_unlock(&interfaces_queue_rwlock);
    pthread_cleanup_pop(0);
+
+   cJSON_Delete(jsonDevice);
 
 exit:
    cJSON_Delete(xplMsgJson);
@@ -1336,7 +1336,6 @@ int init_interfaces_list(cJSON *jsonInterfaces, cJSON *jsonType)
  
    cJSON *jsonInterface=jsonInterfaces->child;
    while( jsonInterface ) {
- 
       int  state=cJSON_GetObjectItem(jsonInterface, "state")->valuedouble;
       int  id_type=cJSON_GetObjectItem(jsonInterface, "id_type")->valuedouble;
 
@@ -1497,7 +1496,7 @@ int16_t interfacesServer_call_interface_api(int id_interface, char *cmnd, void *
 
 int start_interface(int id_interface)
 {
-   // à faire
+   // TODO:
 
    return 0;
 }
@@ -1505,7 +1504,7 @@ int start_interface(int id_interface)
 
 int stop_interface(int id_interface)
 {
-   // à faire
+   // TODO:
 
    return 0;
 }
@@ -1671,18 +1670,17 @@ void stop_interfaces()
  
 int clean_not_linked(mea_queue_t *interfaces_list)
 {
-   // à faire
+   // TODO:
  
    return 0;
 }
  
-
-int remove_delegate_links(mea_queue_t *interfaces_list, char *interface) // A controler
+/*
+int remove_delegate_links(mea_queue_t *interfaces_list, char *interface) // BUG:
 {
    int ret = 0;
    interfaces_queue_elem_t *iq;
- 
-//   interfaces_queue_elem_t *iq_clone;
+   interfaces_queue_elem_t *iq_clone;
  
    mea_queue_first(interfaces_list);
    while(1) {
@@ -1694,13 +1692,45 @@ int remove_delegate_links(mea_queue_t *interfaces_list, char *interface) // A co
  
          ret=sscanf(iq->dev,"%[^:]://%[^\n]%n\n", name, more, &n);
          if(ret>0 && strlen(iq->dev) == n) {
-//            if(iq_clone->context && iq_clone->delegate_flag == 0) { // /!\ iq_clone n'est pas initialisé !!!! A CORRIGER
+            if(iq_clone->context && iq_clone->delegate_flag == 0) {
                if(mea_strcmplower(name, interface) == 0) {
                   iq->context = NULL;
                   iq->fns = NULL;
                }
             }
-//         }
+         }
+      }
+ 
+      ret=mea_queue_next(interfaces_list);
+      if(ret<0)
+         break;
+   }
+
+   return 0;
+}
+*/
+
+
+int remove_delegate_links(mea_queue_t *interfaces_list, char *interface)
+{
+   int ret = 0;
+   interfaces_queue_elem_t *iq;
+ 
+   mea_queue_first(interfaces_list);
+   while(1) {
+      mea_queue_current(interfaces_list, (void **)&iq);
+ 
+      if(iq && iq->delegate_flag == 1) {
+         char name[256], more[256];
+         int n;
+ 
+         ret=sscanf(iq->dev,"%[^:]://%[^\n]%n\n", name, more, &n);
+         if(ret>0 && strlen(iq->dev) == n) {
+            if(mea_strcmplower(name, interface) == 0) {
+               iq->context = NULL;
+               iq->fns = NULL;
+            }
+         }
       }
  
       ret=mea_queue_next(interfaces_list);
@@ -1946,12 +1976,10 @@ mea_queue_t *start_interfaces(cJSON *params_list)
 {
    int16_t ret;
    int sortie=0;
-
    _params_list=params_list;
 
    pthread_rwlock_init(&interfaces_queue_rwlock, NULL);
    pthread_rwlock_init(&jsonInterfaces_rwlock, NULL);
-
  
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
@@ -1960,7 +1988,6 @@ mea_queue_t *start_interfaces(cJSON *params_list)
 
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
-
 
    if(ret==-1 || !jsonInterfaces || !jsonTypes) {
       goto start_interfaces_clean_exit_S3;
@@ -1977,7 +2004,6 @@ mea_queue_t *start_interfaces(cJSON *params_list)
 
    memset(interfacesFns, 0, sizeof(struct interfacesServer_interfaceFns_s)*interfacesFns_max);
    init_statics_interfaces_fns(interfacesFns, &interfacesFns_nb);
-
  
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
    pthread_rwlock_wrlock(&interfaces_queue_rwlock);
@@ -2021,7 +2047,7 @@ start_interfaces_clean_exit_S3:
  
    // associer ici les délégués aux interfaces réelles ou suppression si pas d'interface réelle chargée
    link_delegates(_interfaces);
-//   clean_not_linked(_interfaces);
+   clean_not_linked(_interfaces);
  
    return _interfaces;
 }
