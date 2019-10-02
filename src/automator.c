@@ -475,8 +475,8 @@ enum function_e function_getNum(char *str, char *params, int l_params)
       int16_t middle=(end + start) / 2;
       if(middle<0)
          return -1;
-
-      _cmpres=(int)strcmp(functionsList2[functions_index[middle]].name, fn);
+//      _cmpres=(int)strcmp(functionsList2[functions_index[middle]].name, fn);
+      _cmpres=(int)strcmp(functionsList2[middle].name, fn);
       if(_cmpres==0) {
          while(*str && *str!=']' && l_params) {
             *params=*str;
@@ -486,8 +486,10 @@ enum function_e function_getNum(char *str, char *params, int l_params)
          }
          *params=0;
 
-         if(*str==']' && *(str+1)==0)
-            return functionsList2[functions_index[middle]].num;
+         if(*str==']' && *(str+1)==0) {
+            // return functionsList2[functions_index[middle]].num;
+            return functionsList2[middle].num;
+         }
          else
             return -1;
       }
@@ -1275,7 +1277,7 @@ int automator_playOutputRules(cJSON *rules)
 {
    int xplout_cntr=0;
    if(rules==NULL) {
-      DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : NO OUTPUT RULE\n", DEBUG_STR, __func__);
+//      DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : NO OUTPUT RULE\n", DEBUG_STR, __func__);
       return -1;
    }
 
@@ -1457,7 +1459,7 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
    struct timespec last_update_time;
 
    if(rules==NULL) {
-      DEBUG_SECTION2(DEBUGFLAG)  mea_log_printf("%s (%s) : NO INPUT RULE\n", DEBUG_STR, __func__);
+//      DEBUG_SECTION2(DEBUGFLAG)  mea_log_printf("%s (%s) : NO INPUT RULE\n", DEBUG_STR, __func__);
       return -1;
    }
 
@@ -2226,11 +2228,11 @@ cJSON *automator_load_rules_from_file(char *file)
 {
    cJSON *rules_json = NULL;
    FILE *fd = NULL;
-   
+
    fd = fopen(file, "r");
-   if(fd == NULL)
+   if(fd == NULL) {
       return NULL;
-   
+   }
    int d = fileno(fd); //if you have a stream (e.g. from fopen), not a file descriptor.
    struct stat buf;
    fstat(d, &buf);
@@ -2249,8 +2251,9 @@ cJSON *automator_load_rules_from_file(char *file)
 
          return NULL;
       }
-      else
+      else {
          rules_json = automator_load_rules_from_string(rules);
+      }
    }
 
    fclose(fd);
@@ -2477,7 +2480,6 @@ int automator_init(char *rulesfile)
       _inputs_rules = NULL;
       _outputs_rules = NULL;
    }
-   
    _rules = automator_load_rules_from_file(rulesfile);
    if(_rules) {
       _inputs_rules = cJSON_GetObjectItem(_rules, "inputs");

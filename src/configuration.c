@@ -113,7 +113,7 @@ int updateAppParameter(char *name, cJSON *jsonData)
 
 char *getAppParameterAsString_alloc(char *name)
 {
-   char *_s=NULL;
+//   char *_s=NULL;
    char *s=NULL;
 
    if(appParameters) {

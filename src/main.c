@@ -129,9 +129,9 @@ void init_param_names(char *names[])
    names[LOG_PATH]             = "LOGPATH";
    names[PLUGINS_PATH]         = "PLUGINPATH";
    names[DRIVERS_PATH]         = "DRIVERSPATH";
-   names[XPL_VENDORID]            = "XPL_VENDORID";
-   names[XPL_DEVICEID]            = "XPL_DEVICEID";
-   names[XPL_INSTANCEID]          = "XPL_INSTANCEID";
+   names[XPL_VENDORID]         = "XPL_VENDORID";
+   names[XPL_DEVICEID]         = "XPL_DEVICEID";
+   names[XPL_INSTANCEID]       = "XPL_INSTANCEID";
    names[VERBOSELEVEL]         = "VERBOSELEVEL";
    names[HTTP_PORT]            = "HTTP_PORT";
    names[INTERFACE]            = "INTERFACE";

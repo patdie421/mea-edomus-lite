@@ -806,10 +806,10 @@ int main(int argc, const char * argv[])
         free(files[i]);
      }
      free(files);
+     nl(out);
+     indent(out,1);
+     fputc(']',out);
   }
-  nl(out);
-  indent(out,1);
-  fputc(']',out);
 
   nl(out);
   fputc('}', out);

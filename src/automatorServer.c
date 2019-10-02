@@ -219,6 +219,7 @@ void *_automator_thread(void *data)
          ts.tv_nsec = (tv.tv_usec * 1000) + ns_timeout;
          if(ts.tv_nsec>1000000000L) { // 1.000.000.000 ns = 1 seconde
             ts.tv_sec++;
+//            ts.tv_sec+=10; // for debug only
             ts.tv_nsec=ts.tv_nsec - 1000000000L;
          }
          ret=pthread_cond_timedwait(&automator_msg_queue_cond, &automator_msg_queue_lock, &ts);

@@ -1,7 +1,7 @@
 {
    "I002" : {
       "id_type":200,
-      "description":"xbee controler",
+      "description":"",
       "dev":"SERIAL://ttyUSB1:9600",
       "parameters":"",
       "state":1,
@@ -11,7 +11,7 @@
    "I010" : {
       "id_type":3010,
       "description":"",
-      "dev":"PIPE://tmp/meapipe",
+      "dev":"PIPE:///tmp/meapipe",
       "parameters":"PLUGIN=mea_text_inout;FSTARTSTR={{{;FENDSTR=}}};DIRECTION=BOTH",
       "state":1,
       "devices": {
@@ -29,7 +29,7 @@
          },
          "I010A001": {
             "id_type":1,
-            "description":"Demo output 1",
+            "description":"Demo actuator 1",
             "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=cmnd:ls",
             "state":1
          }

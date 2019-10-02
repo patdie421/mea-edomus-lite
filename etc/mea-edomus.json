@@ -1,4 +1,21 @@
 {
-  "MEAPATH": "."
+  "MEAPATH": "/Data/test",
+  "PHPCGIPATH": "/Data/test/bin",
+  "PHPINIPATH": "/Data/test/etc",
+  "GUIPATH": "/Data/test/lib/mea-gui",
+  "LOGPATH": "/Data/test/var/log",
+  "PLUGINPATH": "/Data/test/lib/mea-plugins",
+  "DRIVERSPATH": "/Data/test/lib/mea-drivers",
+  "VENDORID": "mea",
+  "DEVICEID": "edomus",
+  "INSTANCEID": "hometest2",
+  "VERBOSELEVEL": "1",
+  "GUIPORT": "8083",
+  "PHPSESSIONSPATH": "/Data/test/var/sessions",
+  "PARAMSDBVERSION": "0",
+  "INTERFACE": "en0",
+  "RULESFILE": "/Data/test/lib/mea-rules/automator.rules",
+  "RULESFILESPATH": "/Data/test/lib/mea-rules",
+  "SQLITE3DBPARAMPATH": "/Data/test/var/db/params.db"
 }
 
