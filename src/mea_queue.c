@@ -564,8 +564,10 @@ int main(int argc, char *argv[])
    printf("\nTEST1 : construction queue\n");
    int i=0;
    for(;d1[i];i++) {
-      char *_d=(char *)malloc(strlen(d1[i])+1);
-      strcpy(_d,d1[i]);
+      int _l_d=strlen(d1[i])+1;
+      char *_d=(char *)malloc(_l_d);
+      strncpy(_d,d1[i],_l_d-1);
+      _d[_l_d-1]=0; 
       mea_queue_in_elem(&q, _d);
    }
    printf("queue index status = %d\n", mea_queue_get_index_status(&q));
@@ -585,8 +587,10 @@ int main(int argc, char *argv[])
    printf("\nTEST4 : ajout de nouveaux éléments\n");
    i=0;
    for(;d2[i];i++) {
-      char *_d=(char *)malloc(strlen(d2[i])+1);
-      strcpy(_d,d2[i]);
+      int _l_d=strlen(d2[i])+1;
+      char *_d=(char *)malloc(_l_d);
+      strncpy(_d,d2[i],_l_d-1);
+      _d[_l_d-1]=0; 
       mea_queue_in_elem(&q, _d);
    }
    printf("queue index status = %d\n", mea_queue_get_index_status(&q));

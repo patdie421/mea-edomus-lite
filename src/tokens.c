@@ -479,7 +479,8 @@ enum token_id_e get_token_id_by_string(char *str)
    if(_token_string_buf == NULL)
       return _UNKNOWN;
 
-   strcpy(_token_string_buf, str);
+   strncpy(_token_string_buf, str, _token_max_string_size-1);
+   _token_string_buf[_token_max_string_size-1]=0;
    mea_strtolower(_token_string_buf); 
 
    HASH_FIND(hh_token_by_string, tokens_hash_by_string, _token_string_buf, strlen(_token_string_buf), s);

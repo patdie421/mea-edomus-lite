@@ -64,7 +64,7 @@ int mea_xPLConnectBroadcast(char *xPLInterfaceName, char *ip, int l_ip, struct s
    // Init the interface info request
    bzero(&interfaceInfo, sizeof(struct ifreq));
    interfaceInfo.ifr_addr.sa_family = AF_INET;
-   strcpy(interfaceInfo.ifr_name, xPLInterfaceName);
+   strncpy(interfaceInfo.ifr_name, xPLInterfaceName,sizeof(interfaceInfo.ifr_name));
    
    // Get our interface address
    if (ioctl(sockfd, SIOCGIFADDR, &interfaceInfo) != 0) {

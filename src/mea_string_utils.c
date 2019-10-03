@@ -556,9 +556,11 @@ char *mea_string_alloc_and_copy(char *str)
  *            NULL si la nouvelle zone n'a pas pu être allouée
  */
 {
-   char *new_str=(char *)malloc(strlen(str)+1);
+   int l_new_str=strlen(str)+1;
+   char *new_str=(char *)malloc(l_new_str);
    if(new_str) {
-      strcpy(new_str, str);
+      strncpy(new_str, str, l_new_str-1);
+      new_str[l_new_str-1]=0;
    }
    else {  
       return NULL;
@@ -583,10 +585,13 @@ char *mea_string_free_alloc_and_copy(char **org_str, char *str)
       free(*org_str);
       *org_str=NULL;
    }
-   
-   *org_str=(char *)malloc(strlen(str)+1);
-   if(*org_str)
-      strcpy(*org_str, str);
+  
+   int l_org_str=strlen(str)+1; 
+   *org_str=(char *)malloc(l_org_str);
+   if(*org_str) {
+      strncpy(*org_str, str, l_org_str-1);
+      org_str[l_org_str-1]=0;
+   }
    else {
       return NULL;
    }
