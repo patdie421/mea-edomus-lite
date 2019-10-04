@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 CC = gcc
-YACC = yacc
+YACC = yacc -y
 LEX = lex
 
 DEBUGFLAGS = -g 
@@ -11,8 +11,7 @@ CFLAGS = -std=gnu99 \
 	 -D_DEFAULT_SOURCE \
 	 $(DEBUGFLAGS)
 
-	LDFLAGS = -lm \
-	          -lfl
+	LDFLAGS = -lm -lfl
 
 MYPATH=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 

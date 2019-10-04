@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 CC = gcc
-MEAINCLUDESDIR=../../src
+MEAINCLUDESDIR=-I ../../src -I ../../lib/xPLLib
 MEALIB=../../lib/mealib/linux/mealib.a
 
 DEBUGFLAGS = -g \
@@ -9,11 +9,12 @@ DEBUGFLAGS = -g \
 CFLAGS = -std=c99 \
 	-std=gnu99 \
 	-O2 \
-        -I$(MEAINCLUDESDIR) \
+        $(MEAINCLUDESDIR) \
 	-D_DEFAULT_SOURCE \
 	$(DEBUGFLAGS)
 
-	LDFLAGS = -lpthread \
+	LDFLAGS = -L ../../lib/xPLLib \
+        -lpthread \
 	-lm \
 	-ldl \
 	-lxPL

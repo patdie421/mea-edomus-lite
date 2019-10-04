@@ -100,6 +100,9 @@ build-xplhub:
 build-xPL_Hub:
 	make -C complements/xPL_Hub -f xPL_Hub.mk SOURCE="$(MYPATH)"
 
+build-nodejs:
+	make -C complements/nodejs -f nodejs.mk SOURCE="$(MYPATH)"
+
 build-package: build-all
 	package/build-package.sh "$(MYPATH)" $(TECHNO)
 

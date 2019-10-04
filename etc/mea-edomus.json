@@ -1,21 +1,15 @@
 {
-  "MEAPATH": "/Data/test",
-  "PHPCGIPATH": "/Data/test/bin",
-  "PHPINIPATH": "/Data/test/etc",
-  "GUIPATH": "/Data/test/lib/mea-gui",
-  "LOGPATH": "/Data/test/var/log",
-  "PLUGINPATH": "/Data/test/lib/mea-plugins",
-  "DRIVERSPATH": "/Data/test/lib/mea-drivers",
-  "VENDORID": "mea",
-  "DEVICEID": "edomus",
-  "INSTANCEID": "hometest2",
+  "MEAPATH": "/data/dev/mea-edomus-lite",
+  "LOGPATH": "/data/dev/mea-edomus-lite/var/log",
+  "PLUGINPATH": "/data/dev/mea-edomus-lite/lib/mea-plugins",
+  "DRIVERSPATH": "/data/dev/mea-edomus-lite/lib/mea-drivers",
+  "XPL_VENDORID": "mea",
+  "XPL_DEVICEID": "edomus",
+  "XPL_INSTANCEID": "homedev1",
   "VERBOSELEVEL": "1",
-  "GUIPORT": "8083",
-  "PHPSESSIONSPATH": "/Data/test/var/sessions",
-  "PARAMSDBVERSION": "0",
-  "INTERFACE": "en0",
-  "RULESFILE": "/Data/test/lib/mea-rules/automator.rules",
-  "RULESFILESPATH": "/Data/test/lib/mea-rules",
-  "SQLITE3DBPARAMPATH": "/Data/test/var/db/params.db"
+  "HTTP_PORT": "8083",
+  "INTERFACE": "eth0",
+  "RULESFILE": "/data/dev/mea-edomus-lite/lib/mea-rules/automator.rules",
+  "RULESFILESPATH": "/data/dev/mea-edomus-lite/lib/mea-rules"
 }
 

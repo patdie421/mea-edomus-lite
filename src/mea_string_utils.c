@@ -581,16 +581,16 @@ char *mea_string_free_alloc_and_copy(char **org_str, char *str)
  * \return    pointeur sur la nouvelle chaine.
  */
 {
+   int l_org_str=strlen(str)+1;
    if(*org_str) {
       free(*org_str);
       *org_str=NULL;
    }
   
-   int l_org_str=strlen(str)+1; 
    *org_str=(char *)malloc(l_org_str);
    if(*org_str) {
       strncpy(*org_str, str, l_org_str-1);
-      org_str[l_org_str-1]=0;
+      (*org_str)[l_org_str-1]=0;
    }
    else {
       return NULL;

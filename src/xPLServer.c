@@ -396,8 +396,6 @@ int16_t set_xpl_address(cJSON *params_list)
    mea_setXPLDeviceID(appParameters_get("XPL_DEVICEID", params_list));
    mea_setXPLInstanceID(appParameters_get("XPL_INSTANCEID", params_list));
 
-   sprintf(xpl_my_addr,"%s-%s.%s", xpl_vendorID, xpl_deviceID, xpl_instanceID);
- 
    return 0;
 }
 

@@ -9,7 +9,7 @@ $(error - BASEDIR is unset)
 endif
 
 #COMMANDS=$(shell ls -d $(BASEDIR)/commands/*/)
-COMMANDS=mea-compilr mea-enocean
+COMMANDS=mea-compilr mea-enocean mea-xpllogger
 .DEFAULT_GOAL = all
 
 printenv:
