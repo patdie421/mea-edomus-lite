@@ -9,7 +9,7 @@
          "on": {"device":"o02a","current":"high","type":"output"},
          "off": {"device":"o02a","current":"low","type":"output"},
          "filters":  [
-            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+            { "device": "o02a", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
          ]
       },
       "o02b" : {
@@ -18,7 +18,7 @@
          "on": {"device":"o02b","current":"high","type":"output"},
          "off": {"device":"o02b","current":"low","type":"output"},
          "filters":  [
-            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+            { "device": "o02b", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
          ]
       },
       "o03a" : {
@@ -27,7 +27,7 @@
          "on": {"device":"o03a","current":"high","type":"output"},
          "off": {"device":"o03a","current":"low","type":"output"},
          "filters":  [
-            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+            { "device": "o03a", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
          ]
       },
       "o03b" : {
@@ -36,7 +36,7 @@
          "on": {"device":"o03b","current":"high","type":"output"},
          "off": {"device":"o03b","current":"low","type":"output"},
          "filters":  [
-            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+            { "device": "o03b", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
          ]
       }
    }

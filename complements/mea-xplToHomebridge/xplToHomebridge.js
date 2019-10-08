@@ -8,9 +8,9 @@ var fs = require("fs");
  
 const contentType={'content-type':'application/json'}
 const defaultTimeOut=5000
-const HTTP_PORT=7104
 
 var defaults={
+   "apiport":8080,
    "networkInterface":"eth0",
    "notifHost":"localhost",
    "notifPort":7103,
@@ -19,8 +19,9 @@ var defaults={
 
 var notifServer=false
 var notifPort=false
+var http_port=false
 
-
+/*
 var devices={
    "o02a" : {
       "id":"device",
@@ -41,7 +42,9 @@ var devices={
       ]
    }
 };
+*/
 
+var devices={}
 
 commander.version('0.0.1');
 commander.option("-c --cfgFile <file>", "Specify a configuration file");
@@ -49,8 +52,9 @@ commander.option("-n --networkInterface <name>", "Specify the network interface 
 commander.option("-d --hubPingDelaySecond <sec>", "");
 commander.option("-s --xplSource <name>", "Specify the source in XPL message");
 commander.option("-t --xplTarget <name>", "Specify the target in XPL message");
-commander.option("-t --notifHost <name>", "notify server name or ip");
-commander.option("-t --notifPort <n>", "notif server port");
+commander.option("-p --apiport <n>", "http api port");
+commander.option("-i --notifHost <name>", "notify server name or ip");
+commander.option("-f --notifPort <n>", "notif server port");
 commander.parse(process.argv);
 
 
@@ -63,7 +67,6 @@ if(commander.cfgFile) {
       devices=config.devices;
    }
 }
-console.log(devices)
 
 for(var i in defaults) {
    if(!commander[i]) {
@@ -79,6 +82,8 @@ for(var i in defaults) {
 
 notifServer=commander.notifHost
 notifPort=commander.notifPort
+http_port=commander.apiport
+
 
 var responses_queue=[]
 setInterval(manageResponsesQueue, 100);
@@ -86,8 +91,8 @@ setInterval(manageResponsesQueue, 100);
  
 var xpl = new Xpl(commander);
 var server = http.createServer(requestHandler);
-server.listen(HTTP_PORT, function() {
-      console.log("Server listening on port #"+HTTP_PORT);
+server.listen(http_port, function() {
+      console.log("Server listening on port #"+http_port);
    }
 );
  
@@ -314,7 +319,7 @@ function doRequest(surl, request, response, data) {
 
 function doDevice(surl, request, response, data)
 {
-   console.log(surl.length, surl)
+//   console.log(surl.length, surl)
    if(request.method!="GET")
    {
       response.writeHead(400);
@@ -330,7 +335,7 @@ function doDevice(surl, request, response, data)
 
    if(surl.length==0) {
       response.writeHead(200);
-      response.end('{"msg":"todo"}');
+      response.end('{"devices":'+JSON.stringify(devices)+'}');
       return;
    }
 
@@ -346,7 +351,6 @@ function doDevice(surl, request, response, data)
 
    var statusData={
       "body": {
-         "device": id,
          "request": d.value },
       "target":"*",
       "schema":"sensor.request",
@@ -356,6 +360,7 @@ function doDevice(surl, request, response, data)
          "timeout":5000
       }
    }
+   statusData.body[d.id]=id
 
    if(surl.length==1) {
       try {
@@ -457,7 +462,7 @@ function requestHandler(request, response)
             case "xpl":
                doXpl(surl, request, response, data);
                break;
-            case "test":
+            case "":
                response.writeHead(200, contentType);
                response.end(JSON.stringify(data));
                break;
@@ -488,7 +493,7 @@ xpl.bind( xplIsInit );
  
  
 function xplIsInit() {
-   console.log("XPLISINIT")
+   console.log("Xpl initialized")
 }
  
  
@@ -599,7 +604,14 @@ function msgToNotify(message) {
       message.body[i]=message.body[i].toLowerCase()
    }
 
-   for (var i in devices) { 
+   for (var i in devices) {
+
+      if(!devices[i].id in message.body)
+         continue;
+
+      if(!devices[i].value in message.body)
+         continue;
+
       for (var j in devices[i].filters) {
          var rep=checkFilter(devices[i].filters[j], message);
          if (rep[0]==true) {

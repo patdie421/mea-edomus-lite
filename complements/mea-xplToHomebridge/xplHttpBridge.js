@@ -14,9 +14,12 @@ commander.option("--networkInterface <name>", "Specify the network interface nam
 commander.option("--hubPingDelaySecond <sec>", "");
 commander.option("--xplSource <name>", "Specify the source in XPL message");
 commander.option("--xplTarget <name>", "Specify the target in XPL message");
+commander.option("--xplLog", "Verbose XPL layer");
+
 commander.parse(process.argv);
 
 var xpl = new Xpl(commander);
+
 /*
 var msgHistoryDb={}
 setInterval(manageMsgHistoryDb, 5*60*1000);
@@ -489,6 +492,7 @@ xpl.bind( xplIsInit );
 
 
 function xplIsInit() {
+   console.log("xpl is initialized");
 }
 
 /*
@@ -665,8 +669,9 @@ function msgToResponse(message) {
 
 
 function xplMessage(message) {
-   var source=message.header.source;
 
+   var source=message.header.source;
+   
    if(source == xpl._configuration.xplSource)
       return;
 
@@ -677,8 +682,7 @@ function xplMessage(message) {
       msgHistoryDb[source]=[]
    msgHistoryDb[source].unshift({timestamp: tsp, message: message})
 */
-//   console.log(message);
-
+   console.log(message);
    msgToResponse(message);
    msgToCallback(message);
 }

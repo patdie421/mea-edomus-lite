@@ -397,10 +397,6 @@ int main(int argc, const char * argv[])
    }
 
 
-#ifdef __MEA_DEBUG_ON__
-   appParameters_display();
-#endif
-
    //
    // stdout et stderr vers fichier log
    //
@@ -434,6 +430,10 @@ int main(int argc, const char * argv[])
    logfile_rotation_job(-1, (void *)log_file, NULL, 0);
 
    DEBUG_SECTION mea_log_printf("INFO  (main) Starting MEA-EDOMUS %s\n",__MEA_EDOMUS_VERSION__);
+   
+#ifdef __MEA_DEBUG_ON__
+   appParameters_display();
+#endif
 
    //
    // initialisation gestions des signaux (arrêt de l'appli et réinitialisation)

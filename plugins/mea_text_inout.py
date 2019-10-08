@@ -32,7 +32,7 @@ def mea_xplCmndMsg(data):
    verbose(9, "DEBUG (", fn_name, ") data = ", data)
 
    try:
-      id_actuator=data["device_id"]
+      id_device=data["device_id"]
    except:
       verbose(2, "ERROR (", fn_name, ") - device_id not found")
       return False
@@ -49,23 +49,36 @@ def mea_xplCmndMsg(data):
    except:
       verbose(2, "ERROR (", fn_name, ") - parameters error")
       return False
-   if typeoftype!=1:
-      return False
 
-   mem_actuator=mea.getMemory(id_actuator)
+   mem_device=mea.getMemory(id_device)
    mem_interface=mea.getMemory("interface"+str(interface_id))
-
    x=data["xplmsg"]
    body=x["body"]
-
-   if not "action" in body:
-      return False
 
    target="*"
    if "source" in x:
       target=x["source"]
 
-   if x["schema"]=="control.basic":
+   if x["msgtype"]!='xpl-cmnd':
+      return False
+
+   if x["schema"]=="sensor.request":
+      if typeoftype!=0:
+         return False
+      if "request" in body:
+         if body["request"]=="current":
+            if "current" in mem_device:
+               xplMsg=mea_utils.xplMsgNew("me", "*", "xpl-stat", "sensor", "basic")
+               mea_utils.xplMsgAddValue(xplMsg, "device", device_name)
+               mea_utils.xplMsgAddValue(xplMsg, "current", mem_device["current"])
+               mea.xplSendMsg(xplMsg)
+               return True
+      return False
+   elif x["schema"]=="control.basic":
+      if typeoftype!=1:
+         return False
+      if not "action" in body:
+         return False
       try:
          cmnd=params["cmnd"];
       except:
@@ -117,16 +130,18 @@ def mea_dataFromSensor(data):
    pdata = mea_utils.parseKeyValueDatasToDictionary(str(data['data']).strip().lower(),";","=")
 
    if value in pdata:
-      v = pdata[value]
-      f = 0.0
+      v = pdata[value].lower()
+      f = 0
       if type(v) == str:
          try:
             f=float(v)
          except:
-            return False
+            if v in ["on", "off", "high", "low", "true", "false" ]:
+               f=v
+            else:
+               return False
 
          mem_device["current"]=f
-
          mea.addDataToSensorsValuesTable(device_id, f, 0,0,"")
 
          xplMsg=mea_utils.xplMsgNew("me", "*", "xpl-trig", "sensor", "basic")
