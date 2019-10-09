@@ -65,23 +65,17 @@ def mea_xplCmndMsg(data):
    if x["schema"]=="sensor.request":
       if "request" in body:
          if body["request"]=="current":
-            verbose(9, "[[["+device_name+"?current]]]")
             mea.interfaceAPI(api_key, "mea_writeData", "[[["+device_name+"?current]]]\n")
-#               xplMsg=mea_utils.xplMsgNew("me", "*", "xpl-stat", "sensor", "basic")
-#               mea_utils.xplMsgAddValue(xplMsg, "device", device_name)
-#               mea_utils.xplMsgAddValue(xplMsg, "current", mem_device["current"])
-#               mea.xplSendMsg(xplMsg)
             return True
       return False
+
    elif x["schema"]=="control.basic":
       if typeoftype!=1:
          verbose(2, "ERROR (", fn_name, ") - device ("+devicename+") is not an output")
          return False
-
       if not "current" in body:
          verbose(2, "ERROR (", fn_name, ") - no current in body")
          return False
-
       v=body["current"].lower()
       try:
          f=float(v)
@@ -91,13 +85,7 @@ def mea_xplCmndMsg(data):
          else:
             verbose(2, "ERROR (", fn_name, ") - invalid current ("+v+") value")
             return False
-
       mea.interfaceAPI(api_key, "mea_writeData", "[[["+device_name+"="+str(f)+"]]]\n")
-      mem_device["current"]=v
-#      xplMsg=mea_utils.xplMsgNew("me", "*", "xpl-stat", "control", "basic")
-#      mea_utils.xplMsgAddValue(xplMsg, "device", device_name)
-#      mea_utils.xplMsgAddValue(xplMsg, "current", f)
-#      mea.xplSendMsg(xplMsg)
       return True
    return False
 
@@ -124,9 +112,6 @@ def mea_dataFromSensor(data):
       verbose(2, "ERROR (", fn_name, ") - invalid data")
       return False
 
-#   if typeoftype!=0:
-#      return False
-
    if not "value" in params:
       verbose(2, "ERROR (", fn_name, ") - no value parameter")
       return False
@@ -149,10 +134,6 @@ def mea_dataFromSensor(data):
                f=v
             else:
                return False
-
-         mem_device["current"]=f
-         mea.addDataToSensorsValuesTable(device_id, f, 0,0,"")
-
          xplMsg=mea_utils.xplMsgNew("me", "*", "xpl-trig", "sensor", "basic")
          mea_utils.xplMsgAddValue(xplMsg, "device", device_name)
          mea_utils.xplMsgAddValue(xplMsg, "current", str(f))
@@ -227,18 +208,20 @@ if __name__ == "__main__":
          data=data.strip()
          print "IN:", data
          _data=data.upper()
+
          if _data[:3]=="[[[" and _data[-3:]=="]]]":
             cmnd=re.split("([\?=\!])", _data[3:-3])
             if not cmnd[0] in sensors and not cmnd[0] in actuators:
                continue
             if not cmnd[1] in [ '?', '=', '!' ]:
                continue
-            if not cmnd[2] in values and not cmnd[2] in results and not cmnd[2] in actions and not is_number(cmnd[2]):
-               continue
+#            if not cmnd[2] in values and not cmnd[2] in results and not cmnd[2] in actions and not is_number(cmnd[2]):
+#               continue
 
          if cmnd[1]=='=' and (cmnd[2] in values or is_number(cmnd[2])):
-            stats[cmnd[0]]=cmnd[2]
+            stats[cmnd[0]]=str(cmnd[2])
             fifoout=open(FIFO_OUT, "w")
+            print "OUT:", "{{{"+cmnd[0]+"="+stats[cmnd[0]]+"}}}"
             fifoout.write("{{{"+data[3:-3]+"}}}")
             fifoout.close()
 

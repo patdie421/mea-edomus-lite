@@ -1,0 +1,11 @@
+*.o
+*.so
+*.dep
+*.a
+*.tar
+*.tgz
+*.gz
+*.bz2
+lex.yy.*
+y.tab.*
+complements/*/src/*

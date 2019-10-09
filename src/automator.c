@@ -5,7 +5,7 @@
 //
 //
 
-#define DEBUGFLAG 0
+#define DEBUGFLAG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1528,11 +1528,19 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
       if(conditions!=NULL) {
          DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :    CONDITIONS : \n",  DEBUG_STR, __func__);
          cJSON *c=conditions->child;
+         int cptr=0;
          while(c) {
+
+            cptr++;
+            if(cptr>100)
+               exit(1);
+
             int operator=-1;
+            c=conditions->child;
             cJSON *value1 = cJSON_GetObjectItem(c, "value1");
             cJSON *op     = cJSON_GetObjectItem(c, "op");
             cJSON *value2 = cJSON_GetObjectItem(c, "value2");
+
             if(!value1 || !op || !value2) {
                automator_printRuleDebugInfo(e, "incorrect condition, check JSON (rule removed)");
 
@@ -1579,20 +1587,26 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
                goto next_loop;
             }
 
+            DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :         %s %s %s\n",  DEBUG_STR, __func__, value1->valuestring, op->valuestring, value2->valuestring);
+            fprintf(stderr,"\n");
+            value_print(&val1);
+            fprintf(stderr,"\n");
+            value_print(&val2);
+            fprintf(stderr,"\n");
             // comparaison
             int cmpr=value_cmp(&val1, operator, &val2);
             if(cmpr < 1) {
                match=0; // ça ne match pas
                break; // pas la peine de tester les autres conditions
             }
-
+            printf("LA1\n");
             c=c->next; // on passe à la condition suivante
          }
       }
       else {
          DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :    NO CONDITION\n",  DEBUG_STR, __func__);
       }
-
+      printf("LALA1\n");
       // récupération de la "valeur" à affecter à la règle (celle de is: ou elseis: en fonction de match)
       char *_value;
       if(match==1)
