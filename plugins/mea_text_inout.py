@@ -4,6 +4,7 @@ import re
 import string
 import sys
 import subprocess
+import json
 
 try:
    import mea
@@ -45,7 +46,6 @@ def mea_xplCmndMsg(data):
       params=mea_utils.parseKeyValueDatasToDictionary(parameters, ",", ":")
       typeoftype=data["typeoftype"]
       api_key=data["api_key"]
-
    except:
       verbose(2, "ERROR (", fn_name, ") - parameters error")
       return False
@@ -63,33 +63,42 @@ def mea_xplCmndMsg(data):
       return False
 
    if x["schema"]=="sensor.request":
-      if typeoftype!=0:
-         return False
       if "request" in body:
          if body["request"]=="current":
-            if "current" in mem_device:
-               xplMsg=mea_utils.xplMsgNew("me", "*", "xpl-stat", "sensor", "basic")
-               mea_utils.xplMsgAddValue(xplMsg, "device", device_name)
-               mea_utils.xplMsgAddValue(xplMsg, "current", mem_device["current"])
-               mea.xplSendMsg(xplMsg)
-               return True
+            verbose(9, "[[["+device_name+"?current]]]")
+            mea.interfaceAPI(api_key, "mea_writeData", "[[["+device_name+"?current]]]\n")
+#               xplMsg=mea_utils.xplMsgNew("me", "*", "xpl-stat", "sensor", "basic")
+#               mea_utils.xplMsgAddValue(xplMsg, "device", device_name)
+#               mea_utils.xplMsgAddValue(xplMsg, "current", mem_device["current"])
+#               mea.xplSendMsg(xplMsg)
+            return True
       return False
    elif x["schema"]=="control.basic":
       if typeoftype!=1:
+         verbose(2, "ERROR (", fn_name, ") - device ("+devicename+") is not an output")
          return False
-      if not "action" in body:
+
+      if not "current" in body:
+         verbose(2, "ERROR (", fn_name, ") - no current in body")
          return False
+
+      v=body["current"].lower()
       try:
-         cmnd=params["cmnd"];
+         f=float(v)
       except:
-         verbose(2, "ERROR (", fn_name, ") - no cmnd")
-         return False
+         if v in ["on", "off", "high", "low", "true", "false" ]:
+            f=v
+         else:
+            verbose(2, "ERROR (", fn_name, ") - invalid current ("+v+") value")
+            return False
 
-      _cmnd=[cmnd, body["action"]]
-      p = subprocess.Popen(_cmnd, stdout=subprocess.PIPE)
-      mea.interfaceAPI(api_key, "mea_writeData", str(p.communicate()[0]))
+      mea.interfaceAPI(api_key, "mea_writeData", "[[["+device_name+"="+str(f)+"]]]\n")
+      mem_device["current"]=v
+#      xplMsg=mea_utils.xplMsgNew("me", "*", "xpl-stat", "control", "basic")
+#      mea_utils.xplMsgAddValue(xplMsg, "device", device_name)
+#      mea_utils.xplMsgAddValue(xplMsg, "current", f)
+#      mea.xplSendMsg(xplMsg)
       return True
-
    return False
 
 
@@ -115,8 +124,8 @@ def mea_dataFromSensor(data):
       verbose(2, "ERROR (", fn_name, ") - invalid data")
       return False
 
-   if typeoftype!=0:
-      return False
+#   if typeoftype!=0:
+#      return False
 
    if not "value" in params:
       verbose(2, "ERROR (", fn_name, ") - no value parameter")
@@ -149,7 +158,7 @@ def mea_dataFromSensor(data):
          mea_utils.xplMsgAddValue(xplMsg, "current", str(f))
          mea.xplSendMsg(xplMsg)
 
-#         mea.interfaceAPI(api_key, "mea_writeData", "{{{OK}}}")
+         mea.interfaceAPI(api_key, "mea_writeData", "[[["+device_name+"!OK]]]\n")
  
       else:
          return -1
@@ -169,3 +178,83 @@ def mea_init(data):
    mem_interface=mea.getMemory("interface_"+str(interface_id))
 
    return True
+
+
+def is_number(s):
+    """ Returns True is string is a number. """
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+if __name__ == "__main__":
+   import re
+   import random
+
+   FIFO_IN  = '/tmp/meapipe-out'
+   FIFO_OUT = '/tmp/meapipe-in'
+
+   actuators=["I010A001"]
+   sensors=["I010S001", "I010S002", "o02a"]
+   values=["false", "true", "off", "on", "low", "high"]
+   results=["OK", "KO"]
+   actions=["current"]
+   stats={}
+   stats["I010A001"]="false"
+
+   for i in range(len(actuators)):
+      actuators[i]=actuators[i].upper()
+
+   for i in range(len(sensors)):
+      sensors[i]=sensors[i].upper()
+
+   for i in range(len(values)):
+      values[i]=values[i].upper()
+
+   for i in range(len(results)):
+      results[i]=results[i].upper()
+
+   for i in range(len(actions)):
+      actions[i]=actions[i].upper()
+
+   with open(FIFO_IN) as fifoin:
+      while True:
+         data = fifoin.readline()
+         if len(data) == 0:
+            break
+         data=data.strip()
+         print "IN:", data
+         _data=data.upper()
+         if _data[:3]=="[[[" and _data[-3:]=="]]]":
+            cmnd=re.split("([\?=\!])", _data[3:-3])
+            if not cmnd[0] in sensors and not cmnd[0] in actuators:
+               continue
+            if not cmnd[1] in [ '?', '=', '!' ]:
+               continue
+            if not cmnd[2] in values and not cmnd[2] in results and not cmnd[2] in actions and not is_number(cmnd[2]):
+               continue
+
+         if cmnd[1]=='=' and (cmnd[2] in values or is_number(cmnd[2])):
+            stats[cmnd[0]]=cmnd[2]
+            fifoout=open(FIFO_OUT, "w")
+            fifoout.write("{{{"+data[3:-3]+"}}}")
+            fifoout.close()
+
+         if cmnd[1]=='?':
+            if cmnd[2]=='CURRENT':
+               try:
+                  if cmnd[0] in actuators:
+                     print "OUT:", "{{{"+cmnd[0]+"="+stats[cmnd[0]]+"}}}"
+                     fifoout=open(FIFO_OUT, "w")
+                     fifoout.write("{{{"+cmnd[0]+"="+stats[cmnd[0]]+"}}}")
+                     fifoout.close()
+                  elif cmnd[0] in sensors:
+                     v=random.uniform(0, 20)
+                     print "OUT:", "{{{"+cmnd[0]+"="+str(v)+"}}}"
+                     fifoout=open(FIFO_OUT, "w")
+                     fifoout.write("{{{"+cmnd[0]+"="+str(v)+"}}}")
+                     fifoout.close()
+               except:
+                  pass

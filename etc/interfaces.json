@@ -18,19 +18,25 @@
          "I010S001": {
             "id_type":0,
             "description":"Demo input 1",
-            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:IN1",
+            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S001",
             "state":1
          },
          "I010S002": {
             "id_type":0,
             "description":"Demo input 2",
-            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:IN2",
+            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S002",
+            "state":1
+         },
+         "o02a": {
+            "id_type":0,
+            "description":"Demo input 3",
+            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:o02a",
             "state":1
          },
          "I010A001": {
             "id_type":1,
             "description":"Demo actuator 1",
-            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=cmnd:ls",
+            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010A001",
             "state":1
          }
       }

@@ -645,6 +645,8 @@ function msgToNotify(message) {
  
 function xplMessage(message) {
    var source=message.header.source;
+
+   console.log(message);
  
    if(source == xpl._configuration.xplSource) {
       return;
