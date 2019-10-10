@@ -1,0 +1,15 @@
+{
+  "MEAPATH": "###SERVICE_HOMEDIR###",
+  "LOGPATH": "###SERVICE_HOMEDIR###/var/log",
+  "PLUGINPATH": "###SERVICE_HOMEDIR###/lib/mea-plugins",
+  "DRIVERSPATH": "###SERVICE_HOMEDIR###/lib/mea-drivers",
+  "XPL_VENDORID": "mea",
+  "XPL_DEVICEID": "edomus",
+  "XPL_INSTANCEID": "demo",
+  "VERBOSELEVEL": "1",
+  "HTTP_PORT": "8083",
+  "INTERFACE": "eth0",
+  "RULESFILE": "###SERVICE_HOMEDIR###/lib/mea-rules/automator.rules",
+  "RULESFILESPATH": "###SERVICE_HOMEDIR###/lib/mea-rules"
+}
+

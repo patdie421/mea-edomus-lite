@@ -32,8 +32,6 @@ then
 fi
 mkdir -p $SOURCE/package/tmp/var
 mkdir -p $SOURCE/package/tmp/var/log
-mkdir -p $SOURCE/package/tmp/var/db
-mkdir -p $SOURCE/package/tmp/html
 
 chmod -R 775 $SOURCE/package/tmp/*
 chmod -R g+x $SOURCE/package/tmp/*

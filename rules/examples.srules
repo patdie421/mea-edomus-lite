@@ -3,10 +3,10 @@
 STARTUP     is: $startup[]
 NOW         is: $now[]
 
-FILTRE1     is: <NOP>   if: ($xplmsgdata[] == &false)    onmatch: moveforward NEXT
-FILTRE2     is: <NOP>   if: (schema == 'hbeat.app')      onmatch: break
-FILTRE3     is: <NOP>   if: (schema == 'watchdog.basic') onmatch: break
-FILTRE4     is: <NOP>   if: (schema == 'sensor.request') onmatch: break
+FILTRE1     is: <NOVAL>   if: ($xplmsgdata[] == &false)    onmatch: moveforward NEXT
+FILTRE2     is: <NOVAL>   if: (schema == 'hbeat.app')      onmatch: break
+FILTRE3     is: <NOVAL>   if: (schema == 'watchdog.basic') onmatch: break
+FILTRE4     is: <NOVAL>   if: (schema == 'sensor.request') onmatch: break
 
 ** Compteurs électrique
 CONSO       is: current if: (device == 'conso', type == 'power' ) onmatch: moveforward NEXT
@@ -50,7 +50,7 @@ HUMI009     is: current if: (device == 'humi009')     onmatch: moveforward NEXT
 CO2009      is: current if: (device == 'co2009')      onmatch: moveforward NEXT
 
 ** PHILIPS HUE
-LAMPE001S   is: current if: (device == 'lampe001s')   onmatch: moveforward NEXT
+LAMPE001S    is: current if: (device == 'lampe001s')    onmatch: moveforward NEXT
 CHAMBRE001DS is: current if: (device == 'chambre001ds') onmatch: moveforward NEXT
 CHAMBRE001GS is: current if: (device == 'chambre001gs') onmatch: moveforward NEXT
 
@@ -147,6 +147,7 @@ TEST2 is: &true  if: ($fall['TEST1']==&true)
 ** Timer1 : declenché toutes les 5 secondes
 T1 do: timerCtrl with: (command = 'start', name = 'timer1', unit = 'msec', value=#5000) when: STARTUP   rise
 T1 do: timerCtrl with: (command = 'start', name = 'timer1', unit = 'msec', value=#5000) when: TIMER1    rise
+
 ** desactivation du timer avec un boutton (switch on/off)
 T1 do: timerCtrl with: (command = 'stop',  name = 'timer1')                             when: BUTTON003 fall
 T1 do: timerCtrl with: (command = 'start', name = 'timer1', unit = 'msec', value=#5000) when: BUTTON003 rise

@@ -40,30 +40,17 @@ then
 fi
 DIR=`pwd`
 
-if [ ! -f package.json ]
-then
-   npm init -y
-fi
-npm install homebridge
-npm install homebridge-http-notification-server
-npm install homebridge-http-lightbulb
-npm install homebridge-http-outlet
-npm install homebridge-http-switch
-npm install homebridge-http-temperature-sensor
-npm install homebridge-http-humidity-sensor
-npm install homebridge-notification
-
 mkdir bin 2> /dev/null
 mkdir config 2> /dev/null
 mkdir var 2> /dev/null
 mkdir var/log 2> /dev/null
 mkdir var/pid 2> /dev/null
-ln -s ../node_modules/homebridge/bin/homebridge bin/homebridge 2> /dev/null
+cp "$ORG"/src/xplhub/xplhub bin
 
 _DIR=`escape "$DIR"`
 REGEX1="s/###SERVICE_HOMEDIR###/$_DIR/g"
-PROG=homebridge
-PROG_OPTIONS="-U $DIR/config"
+PROG=xplhub
+PROG_OPTIONS=""
 _PROG_OPTIONS=`escape "$PROG_OPTIONS"`
 REGEX2="s/###SERVICE###/$PROG/g"
 REGEX3="s/###SERVICE_OPTIONS###/$_PROG_OPTIONS/g"

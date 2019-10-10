@@ -1,0 +1,16 @@
+{
+   "xplSource": "mea-xpltohb.home",
+   "notifHost":"localhost",
+   "notifPort":7103,
+   "devices": {
+      "o02a" : {
+         "id":"device",
+         "value":"current",
+         "on":  {"device":"I010A001","current":"high","type":"output"},
+         "off": {"device":"I010A001","current":"low","type":"output"},
+         "filters":  [
+            { "device": "I010A001", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      }
+   }
+}

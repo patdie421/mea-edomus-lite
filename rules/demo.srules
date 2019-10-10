@@ -1,15 +1,15 @@
 STARTUP     is: $startup[]
 NOW         is: $now[]
 
-FILTRE1     is: <NOP>   if: ($xplmsgdata[] == &false)    onmatch: moveforward NEXT
-FILTRE2     is: <NOP>   if: (schema == 'hbeat.app')      onmatch: break
-FILTRE3     is: <NOP>   if: (schema == 'watchdog.basic') onmatch: break
-FILTRE4     is: <NOP>   if: (schema == 'sensor.request') onmatch: break
+FILTRE1     is: <NOVAL>   if: ($xplmsgdata[] == &false)    onmatch: moveforward NEXT
+FILTRE2     is: <NOVAL>   if: (schema == 'hbeat.app')      onmatch: break
+FILTRE3     is: <NOVAL>   if: (schema == 'watchdog.basic') onmatch: break
+FILTRE4     is: <NOVAL>   if: (schema == 'sensor.request') onmatch: break
 
 I1          is: current if: (device == 'I010S001') onmatch: moveforward NEXT
 
 NEXT is: <LABEL>
-O1 is: &true if: ({S1}>#12)
-O1 is: &false if: ({S1}<#8)
+O1 is: &true  if: ({I1} > #12)
+O1 is: &false if: ({I1} < #8)
 
 A1 do: xPLSend  with: ( device = 'I010A001',  schema = 'control.basic', current={O1}, type='output' ) when: O1 change

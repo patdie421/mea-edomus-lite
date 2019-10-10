@@ -40,34 +40,28 @@ then
 fi
 DIR=`pwd`
 
-if [ ! -f package.json ]
-then
-   npm init -y
-fi
-npm install homebridge
-npm install homebridge-http-notification-server
-npm install homebridge-http-lightbulb
-npm install homebridge-http-outlet
-npm install homebridge-http-switch
-npm install homebridge-http-temperature-sensor
-npm install homebridge-http-humidity-sensor
-npm install homebridge-notification
-
-mkdir bin 2> /dev/null
-mkdir config 2> /dev/null
-mkdir var 2> /dev/null
-mkdir var/log 2> /dev/null
-mkdir var/pid 2> /dev/null
-ln -s ../node_modules/homebridge/bin/homebridge bin/homebridge 2> /dev/null
+mkdir tmp
+cp "$ORG"/package/mea-edomus.tar.pkg.bz2 tmp
+cd tmp
+tar xvf mea-edomus.tar.pkg.bz2
+/bin/bash install.sh "$DIR"
+cd "$DIR"
+cp "$ORG"/etc/*.json etc
+cp "$ORG"/rules/* lib/mea-rules
+bin/mea-compilr -d -i lib/mea-rules/demo.srules > lib/mea-rules/automator.rules
+cp scripts/demo_device bin
+chmod +x demo_device
 
 _DIR=`escape "$DIR"`
 REGEX1="s/###SERVICE_HOMEDIR###/$_DIR/g"
-PROG=homebridge
-PROG_OPTIONS="-U $DIR/config"
+PROG=mea-edomus
+PROG_OPTIONS=""
 _PROG_OPTIONS=`escape "$PROG_OPTIONS"`
 REGEX2="s/###SERVICE###/$PROG/g"
 REGEX3="s/###SERVICE_OPTIONS###/$_PROG_OPTIONS/g"
-cat "$ORG"/scripts/_ctrl.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" > "bin/ctrl_$PROG.sh"
+REGEX4="s/###INTERPRETER###/python27/g"
+cat "$ORG"/scripts/_ctrl.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" -e "$REGEX4" > "bin/ctrl_$PROG.sh"
+cat "$ORG"/etc/_mea-edomus.json.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" -e "$REGEX4" > "etc/mea-edomus.json"
 chmod +x "bin/ctrl_$PROG.sh"
 
 cd "$ORG"

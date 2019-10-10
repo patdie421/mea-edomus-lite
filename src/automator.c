@@ -5,7 +5,7 @@
 //
 //
 
-#define DEBUGFLAG 1
+#define DEBUGFLAG 0
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -992,6 +992,7 @@ static int automator_evalStr(char *str, struct value_s *v, cJSON *xplMsgJson)
          if(ret==1)
             return 1;
       }
+      break;
       case '<': {
 /*
          int l=strlen(p);
@@ -1016,6 +1017,7 @@ static int automator_evalStr(char *str, struct value_s *v, cJSON *xplMsgJson)
          else
             return -1;
       }
+      break;
       default: {
          _automatorEvalStrOperation = 'x';
          if(xplMsgJson==NULL)
@@ -1277,7 +1279,7 @@ int automator_playOutputRules(cJSON *rules)
 {
    int xplout_cntr=0;
    if(rules==NULL) {
-//      DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : NO OUTPUT RULE\n", DEBUG_STR, __func__);
+      DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : NO OUTPUT RULE\n", DEBUG_STR, __func__);
       return -1;
    }
 
@@ -1295,7 +1297,6 @@ int automator_playOutputRules(cJSON *rules)
       struct inputs_table_s *i = NULL;
       int ret = 0;
       int actionFlag=0; 
-
       pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&inputs_table_lock);
       pthread_mutex_lock(&inputs_table_lock);
       HASH_FIND_STR(inputs_table, cond->child->string, i);
@@ -1323,11 +1324,11 @@ int automator_playOutputRules(cJSON *rules)
                break;
             default:
                automator_printRuleDebugInfo(e, "Incorrect output rule condition - not rise, fall, change or new (rule removed)");
-               cJSON *c;
-               c=e;
+               cJSON *_c;
+               _c=e;
                e=e->next;
-               c=cJSON_DetachItemFromItem(rules, c);
-               cJSON_Delete(c);
+               _c=cJSON_DetachItemFromItem(rules, _c);
+               cJSON_Delete(_c);
                ret = -2;
          }
       }
@@ -1489,7 +1490,6 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
    if(schema == NULL)
       schema = "";
 
-//   int cntr=0;
    cJSON *e=rules->child;
    while(e) { // balayage des règles
       int match=1; // on part du principe que ça va matcher ...
@@ -1507,11 +1507,10 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
          automator_printRuleDebugInfo(e, "incomplete rule, no name or value (rule removed)");
 
          // pas de nom ou pas de valeur, pas la peine de relire à chaque fois, on supprime la règle.
-         cJSON *c = e;
+         cJSON *_c = e;
          e=e->next;
-         c=cJSON_DetachItemFromItem(rules, c);
-         cJSON_Delete(c); 
-
+         _c=cJSON_DetachItemFromItem(rules, _c);
+         cJSON_Delete(_c); 
          continue;
       }
       
@@ -1528,26 +1527,22 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
       if(conditions!=NULL) {
          DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :    CONDITIONS : \n",  DEBUG_STR, __func__);
          cJSON *c=conditions->child;
-         int cptr=0;
          while(c) {
-
-            cptr++;
-            if(cptr>100)
-               exit(1);
-
             int operator=-1;
             c=conditions->child;
             cJSON *value1 = cJSON_GetObjectItem(c, "value1");
             cJSON *op     = cJSON_GetObjectItem(c, "op");
             cJSON *value2 = cJSON_GetObjectItem(c, "value2");
 
+            DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :         %s %s %s\n",  DEBUG_STR, __func__, value1->valuestring, op->valuestring, value2->valuestring);
+
             if(!value1 || !op || !value2) {
                automator_printRuleDebugInfo(e, "incorrect condition, check JSON (rule removed)");
 
-               cJSON *c = e;
+               cJSON *_c = e;
                e=e->next;
-               c=cJSON_DetachItemFromItem(rules, c);
-               cJSON_Delete(c);
+               _c=cJSON_DetachItemFromItem(rules, _c);
+               cJSON_Delete(_c);
 
                goto next_loop;
             }
@@ -1557,10 +1552,10 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
             if(operator<0) {
                automator_printRuleDebugInfo(e, "incorrect condition, unknown operator (rule removed)");
 
-               cJSON *c = e;
+               cJSON *_c = e;
                e=e->next;
-               c=cJSON_DetachItemFromItem(rules, c);
-               cJSON_Delete(c);
+               _c=cJSON_DetachItemFromItem(rules, _c);
+               cJSON_Delete(_c);
 
                goto next_loop;
             }
@@ -1568,10 +1563,10 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
             if(automator_evalStr(value1->valuestring, &val1, xplMsgJson)<0) {
                automator_printRuleDebugInfo(e, "incorrect value1, in condition (rule removed)");
 
-               cJSON *c = e;
+               cJSON *_c = e;
                e=e->next;
-               c=cJSON_DetachItemFromItem(rules, c);
-               cJSON_Delete(c);
+               _c=cJSON_DetachItemFromItem(rules, _c);
+               cJSON_Delete(_c);
 
                goto next_loop;
             }
@@ -1579,34 +1574,27 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
             if(automator_evalStr(value2->valuestring, &val2, xplMsgJson)<0) {
                automator_printRuleDebugInfo(e, "incorrect value2, in condition (rule removed)");
 
-               cJSON *c = e;
+               cJSON *_c = e;
                e=e->next;
-               c=cJSON_DetachItemFromItem(rules, c);
-               cJSON_Delete(c);
+               _c=cJSON_DetachItemFromItem(rules, _c);
+               cJSON_Delete(_c);
 
                goto next_loop;
             }
 
-            DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :         %s %s %s\n",  DEBUG_STR, __func__, value1->valuestring, op->valuestring, value2->valuestring);
-            fprintf(stderr,"\n");
-            value_print(&val1);
-            fprintf(stderr,"\n");
-            value_print(&val2);
-            fprintf(stderr,"\n");
             // comparaison
             int cmpr=value_cmp(&val1, operator, &val2);
             if(cmpr < 1) {
+               DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :         NOT MATCH\n",  DEBUG_STR, __func__);
                match=0; // ça ne match pas
                break; // pas la peine de tester les autres conditions
             }
-            printf("LA1\n");
             c=c->next; // on passe à la condition suivante
          }
       }
       else {
          DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :    NO CONDITION\n",  DEBUG_STR, __func__);
       }
-      printf("LALA1\n");
       // récupération de la "valeur" à affecter à la règle (celle de is: ou elseis: en fonction de match)
       char *_value;
       if(match==1)
@@ -1626,11 +1614,11 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
             DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : [%s] incorrect value\n",  DEBUG_STR, __func__, _value);
             automator_printRuleDebugInfo(e, "incorrect rule value (rule removed)");
 
-            cJSON *c = NULL;
-            c=e;
+            cJSON *_c = NULL;
+            _c=e;
             e=e->next;
-            c=cJSON_DetachItemFromItem(rules, c);
-            cJSON_Delete(c);
+            _c=cJSON_DetachItemFromItem(rules, _c);
+            cJSON_Delete(_c);
 
             continue;
          }
@@ -1774,7 +1762,6 @@ next_loop: {}
          mea_log_printf("%s (%s) : inputs rules processing time=%ld us\n", DEBUG_STR, __func__, exectime);
          automator_print_inputs_table();
       }
-//      automator_print_inputs_table();
    }
 
    startupStatus = 0;

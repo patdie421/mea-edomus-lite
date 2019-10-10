@@ -221,7 +221,7 @@ void *_automator_thread(void *data)
             ts.tv_sec++;
             ts.tv_nsec=ts.tv_nsec - 1000000000L;
          }
-         ts.tv_sec+=5; // for debug only
+//         ts.tv_sec+=5; // for debug only
          ret=pthread_cond_timedwait(&automator_msg_queue_cond, &automator_msg_queue_lock, &ts);
          if(ret!=0) {
             if(ret==ETIMEDOUT) {

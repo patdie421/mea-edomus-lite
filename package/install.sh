@@ -88,59 +88,29 @@ else
    sudo tar --owner="$MEAUSER" --group="$MEAGROUP" -xpf "$CURRENTPATH"/mea-edomus.tar
 fi
 
-sudo ./bin/mea-edomus --autoinit --basepath="$BASEPATH" $OPTIONS
-
 if [ $ARCH != "Darwin" ]
 then
-   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/lib/mea-gui
-   sudo chmod -R 775 "$BASEPATH"/lib/mea-gui
-   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/lib/mea-gui/maps
    sudo chmod -R 775 "$BASEPATH"/lib/mea-plugins
-   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/lib/mea-plugins
+#   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/lib/mea-plugins
    sudo chmod -R 775 "$BASEPATH"/lib/mea-rules
-   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/lib/mea-rules
+#   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/lib/mea-rules
    sudo chmod -R 775 "$BASEPATH"/lib/mea-plugins
-   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/var/log
+#   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/var/log
    sudo chmod -R 775 "$BASEPATH"/var/log
-   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/var/db
-   sudo chmod -R 775 "$BASEPATH"/var/db
-   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/var/sessions
-   sudo chmod -R 775 "$BASEPATH"/var/sessions
-   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/var/backup
-   sudo chmod -R 775 "$BASEPATH"/var/backup
-   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/etc
+#   sudo chown -R "$MEAUSER":"$MEAGROUP" "$BASEPATH"/etc
    sudo chmod -R 775 "$BASEPATH"/etc
-fi
-
-# recherche un PHP-CGI dans le PATH si non fourni
-if [ ! -f ./bin/php-cgi ]
-then
-   PHPCGI=`which php-cgi`
-   PHPCGI=`dirname $PHPCIG`
-   if [ ! -z $PHPCGI ]
-   then
-      sudo ./bin/mea-edomus --update --basepath="$BASEPATH" --phpcgipath="$PHPCGI"
-   else
-      echo "No php-cgi provided or found."
-      echo "install one if you need the mea-edomus gui and excute $0 --basepath=\""$BASEPATH"\" --update --phpcgipath=\"<PATH_TO_CGI_BIN>\""
-   fi
-fi
-
-# un node.js est fourni dans le package
-if [ -f $BASEPATH/bin/node ]
-then
-   sudo ./bin/mea-edomus --update --basepath="$BASEPATH" --nodejspath="$BASEPATH/bin/node"
-else
-   echo "No nodejs provided or found."
-   echo "install one if you need the mea-edomus gui and excute $0 --basepath=\""$BASEPATH"\" --update --nodejspath=\"<PATH_TO_NODEJS>\""
 fi
 
 
 # pour l'instant on install pas de service Mac OS X
 if [ "$ARCH" == "Darwin" ]
 then
+   cd "$CURRENTPATH"
    exit 0
 fi
+
+cd "$CURRENTPATH"
+exit 0
 
 # déclaration du service
 BASEPATH4SED=`echo "$BASEPATH" | sed -e 's/\\//\\\\\\//g'`
