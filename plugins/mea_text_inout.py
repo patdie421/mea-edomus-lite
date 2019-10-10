@@ -140,10 +140,9 @@ def mea_dataFromSensor(data):
          mea.xplSendMsg(xplMsg)
 
          mea.interfaceAPI(api_key, "mea_writeData", "[[["+device_name+"!OK]]]\n")
- 
-      else:
-         return -1
-
+         return True
+   return False
+   
 
 def mea_init(data):
    fn_name=sys._getframe().f_code.co_name
