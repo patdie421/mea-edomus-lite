@@ -49,8 +49,6 @@ cd "$DIR"
 cp "$ORG"/etc/*.json etc
 cp "$ORG"/rules/* lib/mea-rules
 bin/mea-compilr -d -i lib/mea-rules/demo.srules > lib/mea-rules/automator.rules
-cp scripts/demo_device bin
-chmod +x demo_device
 
 _DIR=`escape "$DIR"`
 REGEX1="s/###SERVICE_HOMEDIR###/$_DIR/g"
@@ -59,9 +57,18 @@ PROG_OPTIONS=""
 _PROG_OPTIONS=`escape "$PROG_OPTIONS"`
 REGEX2="s/###SERVICE###/$PROG/g"
 REGEX3="s/###SERVICE_OPTIONS###/$_PROG_OPTIONS/g"
-REGEX4="s/###INTERPRETER###/python27/g"
-cat "$ORG"/scripts/_ctrl.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" -e "$REGEX4" > "bin/ctrl_$PROG.sh"
-cat "$ORG"/etc/_mea-edomus.json.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" -e "$REGEX4" > "etc/mea-edomus.json"
+cat "$ORG"/scripts/_ctrl.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" > "bin/ctrl_$PROG.sh"
+cat "$ORG"/etc/_mea-edomus.json.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" > "etc/mea-edomus.json"
 chmod +x "bin/ctrl_$PROG.sh"
+
+REGEX1="s/###SERVICE_HOMEDIR###/$_DIR/g"
+PROG=demo_device
+PROG_OPTIONS=""
+_PROG_OPTIONS=`escape "$PROG_OPTIONS"`
+REGEX2="s/###SERVICE###/$PROG/g"
+REGEX3="s/###SERVICE_OPTIONS###/$_PROG_OPTIONS/g"
+REGEX4="s/###INTERPRETER###/python27/g"
+cat "$ORG"/scripts/_demo_device.template | sed -e "$REGEX1" -e "$REGEX4" > "bin/$PROG"
+chmod +x "bin/demo_device"
 
 cd "$ORG"

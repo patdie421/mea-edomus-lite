@@ -1,0 +1,43 @@
+{
+   "xplSource": "mea-xpltohb.home",
+   "notifHost":"localhost",
+   "notifPort":7103,
+   "devices": {
+      "o02a" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o02a","current":"high","type":"output"},
+         "off": {"device":"o02a","current":"low","type":"output"},
+         "filters":  [
+            { "device": "o02a", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      },
+      "o02b" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o02b","current":"high","type":"output"},
+         "off": {"device":"o02b","current":"low","type":"output"},
+         "filters":  [
+            { "device": "o02b", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      },
+      "o03a" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o03a","current":"high","type":"output"},
+         "off": {"device":"o03a","current":"low","type":"output"},
+         "filters":  [
+            { "device": "o03a", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      },
+      "o03b" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o03b","current":"high","type":"output"},
+         "off": {"device":"o03b","current":"low","type":"output"},
+         "filters":  [
+            { "device": "o03b", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      }
+   }
+}
