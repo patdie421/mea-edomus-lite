@@ -43,7 +43,7 @@ static void parseConfig(xPL_ServicePtr theService) {
   }
 
   /* Convert text to a number */
-  newTickRate = strtol(newRate, &endChar, 10);
+  newTickRate = (int)strtol(newRate, &endChar, 10);
   if (*endChar != '\0') {
     /* Bad value -- override it */
     xPL_setServiceConfigValue(theService, TICK_RATE_CFG_NAME, intToStr(tickRate));

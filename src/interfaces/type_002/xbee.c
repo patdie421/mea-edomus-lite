@@ -766,16 +766,16 @@ _xbee_add_new_to_hosts_table_with_addr64_error:
 
 
 mea_error_t _xbee_update_hosts_tables(xbee_hosts_table_t *table, char *addr_64_h, char *addr_64_l,  char *addr_16, char *name)
+/**
+ * \brief     ajoute ou met à jour la table host avec les éléments transmis en paramètre.
+ * \details   recherche dans la table une entrée avec l'adresse 64bits spécifiées et modifie les éléments en concéquence si l'entrée existe. Si l'entrée n'existe pas elle est créée.
+ * \param     addr_64_h  mot haut de l'adresse xbee 64 bits
+ * \param     addr_64_l  mot bas de l'adresse xbee 64 bits
+ * \param     addr_16  adresse 16 bits de l'xbee
+ * \param     name  nom (NI) de l'xbee
+ * \return    0 si la mise à jour a été effectuée, -1 si un nouvel xbee n'a pas pu être créée.
+ */
 {
-   /**
-    * \brief     ajoute ou met à jour la table host avec les éléments transmis en paramètre.
-    * \details   recherche dans la table une entrée avec l'adresse 64bits spécifiées et modifie les éléments en concéquence si l'entrée existe. Si l'entrée n'existe pas elle est créée.
-    * \param     addr_64_h  mot haut de l'adresse xbee 64 bits
-    * \param     addr_64_l  mot bas de l'adresse xbee 64 bits
-    * \param     addr_16  adresse 16 bits de l'xbee
-    * \param     name  nom (NI) de l'xbee
-    * \return    0 si la mise à jour a été effectuée, -1 si un nouvel xbee n'a pas pu être créée.
-    */
    uint16_t l_addr_16;
    uint32_t l_addr_64_h,l_addr_64_l;
    int16_t nerr;

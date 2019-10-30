@@ -1596,7 +1596,7 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
          DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :    NO CONDITION\n",  DEBUG_STR, __func__);
       }
       // récupération de la "valeur" à affecter à la règle (celle de is: ou elseis: en fonction de match)
-      char *_value;
+      char *_value=NULL;
       if(match==1)
          _value = value->valuestring;
       else {

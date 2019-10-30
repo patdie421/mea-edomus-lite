@@ -37,7 +37,8 @@ Bool parseSourceIdent() {
   String dashPtr, periodPtr;
 
   /* Make sure we have something to work with */
-  if ((msgSource == NULL) || (strlen(msgSource) < 5)) {
+//    if ((msgSource == NULL) || (strlen(msgSource) < 5)) {
+    if (strlen(msgSource) < 5) {
     fprintf(stderr, "Empty or too short message source ID\n");
     return FALSE;
   }

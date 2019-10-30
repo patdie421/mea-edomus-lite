@@ -3,7 +3,11 @@
 //  Created by Patrice DIETSCH on 17/10/12.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

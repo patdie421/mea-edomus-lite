@@ -284,7 +284,7 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
                detail_flag=1;
          }
          ret=mg_get_var(request_info->query_string, strlen(request_info->query_string), "type", buff, sizeof(buff));
-         l_buff=strlen(buff);
+         l_buff=(int)strlen(buff);
          if(ret && l_buff>0) {
             if(mea_strcmplower(buff, "all")==0 || mea_strcmplower(buff, "-1")==0) {
                type=-1;
@@ -339,8 +339,8 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
 int mea_rest_api_service_PUT(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
    int ret=0;
-   char json[2048]="";
-   char *s=NULL;
+//   char json[2048]="";
+//   char *s=NULL;
    int id=0;
 
    if(l_tokens==1) {
@@ -451,10 +451,10 @@ int mea_rest_api_service(struct mg_connection *conn, int method, char *tokens[],
       return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
    }
 
-   int ret=0;
-   char json[2048]="";
-   char *s=NULL;
-   int id=0;
+//   int ret=0;
+//   char json[2048]="";
+//   char *s=NULL;
+//   int id=0;
 
    switch(method) {
       case HTTP_GET_ID:
@@ -805,7 +805,7 @@ int mea_rest_api_session(struct mg_connection *conn, int method, char *tokens[],
 
 int mea_rest_api_init()
 {
-   srand(time(NULL));
+   srand((unsigned int)time(NULL));
    sessions=cJSON_CreateObject();
    users2=cJSON_Parse(_users2);
 

@@ -127,9 +127,8 @@ int16_t interface_type_001_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
 int load_interface_type_001(interface_type_001_t *i001, cJSON *jsonInterface)
 {
    int16_t nb_sensors_actuators=0;
-   int ret;
-  
-   int interface_id=(int)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
+//   int ret;
+//   int interface_id=(int)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
  
    // préparation des éléments de contexte de l'interface
 // i001->interface_id=interface_id;
@@ -326,7 +325,7 @@ interface_type_001_t *malloc_and_init2_interface_type_001(int id_driver, cJSON *
    int id_interface=(int)cJSON_GetObjectItem(jsonInterface,"id_interface")->valuedouble;
    char *name=jsonInterface->string;
    char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
-   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
+//   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
    char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
  
    // initialisation contexte de l'interface

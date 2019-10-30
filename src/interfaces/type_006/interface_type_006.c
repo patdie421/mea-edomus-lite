@@ -5,7 +5,11 @@
 //  Created by Patrice Dietsch on 16/11/2015.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include "interface_type_006.h"
 
@@ -452,7 +456,7 @@ void *_thread_interface_type_006_genericserial_data(void *args)
       }
 
       if(params->i006->fd>=0) {
-         char c;
+         char c=0;
 
          char buffer[4096];
          int buffer_ptr=0;

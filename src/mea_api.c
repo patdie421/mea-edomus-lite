@@ -4,7 +4,11 @@
 //  Created by Patrice Dietsch on 09/05/13.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 #include <stdio.h>
 
 #include "globals.h"
@@ -31,9 +35,9 @@ static PyObject *mea_sendAtCmd(PyObject *self, PyObject *args);
 //static PyObject *mea_sendEnoceanPacketAndWaitResp(PyObject *self, PyObject *args);
 //static PyObject *mea_enoceanCRC(PyObject *self, PyObject *args);
 //static PyObject *mea_sendEnoceanRadioErp1Packet(PyObject *self, PyObject *args);
-static PyObject *mea_xplGetVendorID();
-static PyObject *mea_xplGetDeviceID();
-static PyObject *mea_xplGetInstanceID();
+static PyObject *mea_xplGetVendorID(void);
+static PyObject *mea_xplGetDeviceID(void);
+static PyObject *mea_xplGetInstanceID(void);
 static PyObject *mea_xplSendMsg2(PyObject *self, PyObject *args);
 static PyObject *mea_addDataToSensorsValuesTable(PyObject *self, PyObject *args);
 static PyObject *mea_interface_api(PyObject *self, PyObject *args);

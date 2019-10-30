@@ -4,7 +4,11 @@
 //  Created by Patrice DIETSCH on 08/07/12.
 //  Copyright (c) 2012 -. All rights reserved.
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -342,7 +346,7 @@ int main(int argc, const char * argv[])
    int16_t _v=-1;
    int option_index = 0; // getopt_long function need int
    int c = 0; // getopt_long function need int
-   cJSON *cmdlineParameters = appParameters_create();
+//   cJSON *cmdlineParameters = appParameters_create();
 
    while ((c = getopt_long(argc, (char * const *)argv, "hp:v:g:", long_options, &option_index)) != -1)
    {

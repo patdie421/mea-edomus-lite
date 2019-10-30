@@ -4,7 +4,11 @@
  *  Copyright 2012 -. All rights reserved.
  *
  */
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include "interface_type_002.h"
 
@@ -336,7 +340,7 @@ PyObject *json_to_pydict_interface(cJSON *jsonInterface)
 int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_s *device_info, void *userValue)
 {
    char *device;
-   int ret;
+//   int ret;
    int err;
    
    interface_type_002_t *interface=(interface_type_002_t *)userValue;
@@ -438,7 +442,7 @@ mea_error_t _inteface_type_002_xbeedata_callback(int id, unsigned char *cmd, uin
 mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *cmd, uint16_t l_cmd, void *data, char *addr_h, char *addr_l)
 {
    struct xbee_node_identification_response_s *nd_resp;
-   int rval=0;
+//   int rval=0;
    int err;
    
    struct callback_commissionning_data_s *callback_commissionning=(struct callback_commissionning_data_s *)data;
@@ -573,7 +577,7 @@ mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, st
       int id_type=(int)cJSON_GetObjectItem(jsonDevice, "id_type")->valuedouble;
       char *parameters=(char*)cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
       char *dev=(char*)cJSON_GetObjectItem(jsonInterface, "dev")->valuestring;
-      int todbflag=0;
+//      int todbflag=0;
 
       printf("@@@@@ %s %d %d %s %s\n", name, id_sensor_actuator, id_type, parameters, dev);
 
@@ -961,7 +965,7 @@ interface_type_002_t *malloc_and_init2_interface_type_002(int id_driver, cJSON *
    strncpy(i002->dev, (char *)dev, sizeof(i002->dev)-1);
    strncpy(i002->name, (char *)name, sizeof(i002->name)-1);
    i002->id_interface=id_interface;
-   int l_parameters=strlen((char *)parameters)+1;
+   int l_parameters=(int)strlen((char *)parameters)+1;
    i002->parameters=(char *)malloc(l_parameters);
    i002->parameters[l_parameters-1]=0;
    strncpy(i002->parameters, (char *)parameters, l_parameters-1);
@@ -1289,8 +1293,8 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    }
    
    // récupération de l'adresse de l'xbee connecter au PC (pas forcement le coordinateur).
-   uint32_t addr_64_h;
-   uint32_t addr_64_l;
+//   uint32_t addr_64_h;
+//   uint32_t addr_64_l;
       
    ret=get_local_xbee_addr(xd, local_xbee);
    if(ret==-1)

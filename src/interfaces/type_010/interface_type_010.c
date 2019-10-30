@@ -5,7 +5,11 @@
 //  Created by Patrice Dietsch on 21/02/2015.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include "interface_type_010.h"
 

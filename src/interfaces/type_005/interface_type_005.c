@@ -1,4 +1,8 @@
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -532,7 +536,7 @@ int load_interface_type_005(interface_type_005_t *i005, cJSON *jsonInterface)
    parsed_parameters_t *netatmo_sa_params=NULL;
    int nb_netatmo_sa_params=0;
    int nerr=0;
-   int ret;
+//   int ret;
 
    if(mea_queue_nb_elem(&(i005->devices_list))!=0) {
       clean_queues(&(i005->devices_list));

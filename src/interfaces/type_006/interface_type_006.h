@@ -16,7 +16,11 @@
 #endif
 */
 #include <signal.h>
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include "interfacesServer.h"
 #include "xPLServer.h"

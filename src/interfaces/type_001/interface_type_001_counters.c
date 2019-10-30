@@ -5,7 +5,11 @@
 //  Created by Patrice DIETSCH on 29/11/12.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -222,7 +226,7 @@ void counter_to_xpl2(interface_type_001_t *i001, struct electricity_counter_s *c
 
 int16_t counter_read(interface_type_001_t *i001, struct electricity_counter_s *counter)
 {
-   uint32_t c;
+   uint32_t c=0;
 
    char buffer[4];
 
@@ -252,8 +256,7 @@ int16_t counter_read(interface_type_001_t *i001, struct electricity_counter_s *c
       else
       {
          (i001->indicators.nbcountersreaderr)++;
-         if(comio2_err == COMIO2_ERR_DOWN)
-         {
+         if(comio2_err == COMIO2_ERR_DOWN) {
             return -1;
          }
       }
@@ -261,8 +264,7 @@ int16_t counter_read(interface_type_001_t *i001, struct electricity_counter_s *c
    }
    while(ret && retry<5);
 
-   if(ret==0)
-   {
+   if(ret==0) {
       counter->last_counter=counter->counter;
       counter->wh_counter=c;
       counter->kwh_counter=c / 1000;

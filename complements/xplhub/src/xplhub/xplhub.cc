@@ -83,7 +83,7 @@ unsigned int xPLParser(const char* xplmsg, struct xpl_msg_struc * pxpl_msg)
    
    w = XPL_IN_SECTION;
    z = 0;
-   y = strlen(xplmsg);
+   y = (int)strlen(xplmsg);
    for (c=0;c<y;c++) {
       
       switch(w) {
@@ -288,7 +288,7 @@ int main(int argc, char* argv[])
       // receive packet
       size=-1;
       while(size==-1) {
-         size = recvfrom(udpSocket, mesg, MAX_MESSAGE_SIZE, 0,(struct sockaddr *)&FromName, &FromNameLen);
+         size = (int)recvfrom(udpSocket, mesg, MAX_MESSAGE_SIZE, 0,(struct sockaddr *)&FromName, &FromNameLen);
          if(size < -1) {
             return(-1);
          }

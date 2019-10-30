@@ -8,7 +8,11 @@
 #ifndef mea_api_h
 #define mea_api_h
 
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 void mea_api_init(void);
 void mea_api_release(void);

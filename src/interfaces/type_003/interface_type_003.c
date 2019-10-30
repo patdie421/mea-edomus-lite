@@ -5,7 +5,11 @@
 //  Created by Patrice Dietsch on 21/02/2015.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include "interface_type_003.h"
 
@@ -311,7 +315,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
       pthread_cleanup_pop(0);
 
       if(!ret) {
-         char sql[2048];
+//         char sql[2048];
          uint32_t addr;
 
          params->i003->indicators.enoceandatain++;
@@ -749,7 +753,7 @@ interface_type_003_t *malloc_and_init_interface_type_003(int id_driver, cJSON *j
    strncpy(i003->name, (char *)name, sizeof(i003->name)-1);
    i003->id_interface=id_interface;
    i003->id_driver=id_driver;
-   int l_parameters=strlen((char *)parameters)+1;
+   int l_parameters=(int)strlen((char *)parameters)+1;
    i003->parameters=(char *)malloc(l_parameters);
    i003->parameters[l_parameters-1]=0;
    strncpy(i003->parameters,(char *)parameters,l_parameters-1);
