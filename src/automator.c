@@ -44,7 +44,7 @@
 #include "cJSON.h"
 #include "uthash.h"
 
-#define DEBUG
+#define DEBUG_AUTOMATOR
 #define USEALLOCA
 
 /*
@@ -422,7 +422,7 @@ static int value_cmp(struct value_s *v1, int comparator, struct value_s *v2)
 }
 
 
-#ifdef DEBUG
+#ifdef DEBUG_AUTOMATOR
 static int value_print(struct value_s *v)
 {
    if(v->type==0)
@@ -1593,7 +1593,7 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
          DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :    NO CONDITION\n",  DEBUG_STR, __func__);
       }
       // récupération de la "valeur" à affecter à la règle (celle de is: ou elseis: en fonction de match)
-      char *_value;
+      char *_value=NULL;
       if(match==1)
          _value = value->valuestring;
       else {
@@ -2040,7 +2040,7 @@ char *automator_inputs_table_to_json_string_alloc()
 }
 
 
-#ifdef DEBUG
+#ifdef DEBUG_AUTOMATOR
 static int automator_print_inputs_table()
 {
    struct inputs_table_s *s = NULL;

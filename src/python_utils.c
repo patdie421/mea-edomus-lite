@@ -5,7 +5,11 @@
 //  Created by Patrice Dietsch on 04/06/13.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 #include <stdio.h>
 
 #include "cJSON.h"

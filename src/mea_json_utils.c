@@ -46,7 +46,7 @@ cJSON *loadJson(char *file)
    if(sz>=0) {
       data=(char *)malloc(sz);
       fseek(fp, 0L, SEEK_SET);
-      uint32_t l=fread(data, sz, 1, fp);
+      uint32_t l=(uint32_t)fread(data, sz, 1, fp);
       fclose(fp);
       if(l>0) {
          return cJSON_Parse((const char *)data);

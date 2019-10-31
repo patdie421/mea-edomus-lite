@@ -81,7 +81,7 @@ void setAutomatorRulesFile(char *file)
       rules_file=NULL;
    }
 
-   int l=strlen(file); 
+   int l=(int)strlen(file); 
    rules_file=malloc(l+1);
    rules_file[l]=0;
   

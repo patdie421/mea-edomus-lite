@@ -5,7 +5,11 @@
 //  Created by Patrice DIETSCH on 29/11/12.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -546,7 +550,7 @@ mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i0
       {
          char value[20];
          value[sizeof(value)-1]=0;
-         char *unit;
+         char *unit=NULL;
          if(no_type==1) // pas de type demandé, on "calcule" le type du capteur
          {
             if(sensor->arduino_pin_type==ANALOG_ID)

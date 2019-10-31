@@ -5,7 +5,11 @@
 //  Created by Patrice Dietsch on 21/02/2015.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include "interface_type_XXX.h"
 
@@ -29,7 +33,6 @@
 #include "mea_verbose.h"
 #include "macros.h"
 #include "mea_string_utils.h"
-#include "dbServer.h"
 #include "parameters_utils.h"
 #include "cJSON.h"
 #include "processManager.h"
@@ -71,9 +74,9 @@ void set_interface_type_XXX_isnt_running(void *data)
 
 int16_t _interface_type_XXX_xPL_callback2(cJSON *xplMsgJson, struct device_info_s *device_info, void *userValue)
 {
-   char *device = NULL;
-   int ret = -1;
-   int err = 0;
+//   char *device = NULL;
+//   int ret = -1;
+//   int err = 0;
 
    interface_type_XXX_t *interface=(interface_type_XXX_t *)userValue;
    struct callback_xpl_data_s *params=(struct callback_xpl_data_s *)interface->xPL_callback_data;
@@ -293,7 +296,7 @@ void *_thread_interface_type_XXX(void *args)
    params->iXXX->thread_is_running=1;
    process_heartbeat(params->iXXX->monitoring_id);
 
-   sqlite3 *params_db=params->param_db;
+//   sqlite3 *params_db=params->param_db;
    int ret;
 
    while(1)
@@ -453,7 +456,7 @@ clean_exit:
    return -1; 
 }
 
-
+/*
 #ifndef ASPLUGIN
 int get_fns_interface_type_XXX(struct interfacesServer_interfaceFns_s *interfacesFns)
 {
@@ -474,3 +477,4 @@ int get_fns_interface_type_XXX(struct interfacesServer_interfaceFns_s *interface
    return 0;
 }
 #endif
+*/

@@ -1,42 +1,36 @@
 SHELL = /bin/bash
 CC = gcc
+MEAINCLUDESDIR=-I ../../src -I ../../lib/xPLLib
+MEALIB=../../lib/mealib/macosx/mealib.a
+
+DEBUGFLAGS = -g \
+	-D__DEBUG_ON__
+
+CFLAGS = -std=c99 \
+	-std=gnu99 \
+	-O2 \
+        $(MEAINCLUDESDIR) \
+	-D_DEFAULT_SOURCE \
+	$(DEBUGFLAGS)
+
+	LDFLAGS = -L ../../lib/xPLLib \
+        -lpthread \
+	-lm \
+	-ldl
+
+MYPATH=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 SOURCES=$(shell echo *.c)
 OBJECTS=$(SOURCES:.c=.o)
+EXECUTABLE=mea-xpllogger mea-xpllogger2
 
-MEAXPLINCLUDESDIR=../../src/xPLLib-mac ../../src
-MEAXPLLIB = ../../lib/meaxpllib/macosx/meaxpllib.a
+all: $(SOURCES) $(EXECUTABLE)
 
-DEBUGFLAGS = -g \
-             -D__DEBUG_ON__
-CFLAGS = -std=c99 \
-         -std=gnu99 \
-         -O2 \
-         -D_BSD_SOURCE \
-         -I $(MEAXPLINCLUDESDIR) \
-         $(DEBUGFLAGS)
+mea-xpllogger: mea-xpllogger.o
+	$(CC) $(LDFLAGS) mea-xpllogger.o $(MEALIB) -o $@
 
-LDFLAGS = -lpthread \
-          -lm \
-          -ldl
-          
-
-EXECUTABLE=mea-xpllogger
-
-all: .deps $(SOURCES) $(EXECUTABLE)
-
-.deps:
-	@mkdir -p .deps
-        
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) $(MEAXPLLIB) -o $@
-
-%.o: %.c
-	@$(CC) -c $(CFLAGS) -MM -MT $*.o $*.c > .deps/$*.dep
-	$(CC) -c $(CFLAGS) $*.c -o $@
+mea-xpllogger2: mea-xpllogger2.o
+	$(CC) $(LDFLAGS) mea-xpllogger2.o $(MEALIB) -o $@
 
 clean:
 	-rm -f $(OBJECTS)
-
--include .deps/*.dep
-

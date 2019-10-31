@@ -9,7 +9,11 @@
 #define __interface_type_002_h
 
 #include <signal.h>
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include "mea_verbose.h"
 #include "xbee.h"

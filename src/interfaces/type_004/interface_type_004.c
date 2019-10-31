@@ -50,8 +50,6 @@ char *valid_hue_params[]={"S:HUELIGHT", "I:REACHABLE_USE", "S:HUEGROUP", NULL};
 #define PARAMS_REACHABLE 1
 #define PARAMS_HUEGROUP 2
 
-#define DEBUG_FLAG 1
-
 char *interface_type_004_xplin_str="XPLIN";
 char *interface_type_004_xplout_str="XPLOUT";
 char *interface_type_004_lightschanges_str="NBTRANSITIONS";
@@ -380,7 +378,7 @@ int16_t interface_type_004_xPL_actuator2(interface_type_004_t *i004, cJSON *xplM
    {
       getLightStateByName(i004->currentHueLightsState, (char *)e->huename, &on, &reachable);
       if(e->sensorname) {
-         int l_sensor=strlen(e->sensorname)+1;
+         int l_sensor=(int)strlen(e->sensorname)+1;
          sensor = (char *)malloc(l_sensor);
          sensor[l_sensor-1]=0;
          strncpy(sensor, e->sensorname, l_sensor-1);
@@ -774,7 +772,7 @@ int _interface_type_004_clean_configs_lists(interface_type_004_t *i004)
 
 int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
 {
-   int ret = -1;
+//   int ret = -1;
    parsed_parameters_t *hue_params=NULL;
    int nb_hue_params=0;
    int nerr=0;
@@ -826,7 +824,7 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
             if (e == NULL) {
                // elle n'existe pas on va la créer
                e = (struct lightsListElem_s *)malloc(sizeof(struct lightsListElem_s));
-               int _l_huename=strlen(hue_params->parameters[PARAMS_HUELIGH].value.s)+1;
+               int _l_huename=(int)strlen(hue_params->parameters[PARAMS_HUELIGH].value.s)+1;
                char *_huename=malloc(_l_huename);
                if(_huename==NULL) {
                   VERBOSE(2) {
@@ -849,7 +847,7 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
             }
             
             char *_name=NULL;
-            int _l_name=strlen((char *)name)+1;
+            int _l_name=(int)strlen((char *)name)+1;
             _name=malloc(_l_name);
             if(_name==NULL) {
                VERBOSE(2) {
@@ -908,18 +906,19 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
             if (g == NULL) {
                // il n'existe pas on va le créer
                g = (struct groupsListElem_s *)malloc(sizeof(struct groupsListElem_s));
-               int _l_groupname=strlen((char *)name)+1;
+               int _l_groupname=(int)strlen((char *)name)+1;
                char *_groupname=malloc(_l_groupname);
                if(_groupname==NULL) {
                   VERBOSE(2) {
                      mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                      perror("");
                   }
+                  free(g);
                   goto load_interface_type_004_clean_exit;
                }
                _groupname[_l_groupname]=0;
                
-               int _l_huegroupname=strlen(hue_params->parameters[PARAMS_HUEGROUP].value.s)+1;
+               int _l_huegroupname=(int)strlen(hue_params->parameters[PARAMS_HUEGROUP].value.s)+1;
                char *_huegroupname=malloc(strlen(hue_params->parameters[PARAMS_HUEGROUP].value.s)+1);
                if(_huegroupname==NULL) {
                   VERBOSE(2) {
@@ -1081,7 +1080,7 @@ interface_type_004_t *malloc_and_init2_interface_type_004(int id_driver, cJSON *
    }
 
    char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
-   int l_parameters=strlen((char *)parameters)+1;
+   int l_parameters=(int)strlen((char *)parameters)+1;
    i004->parameters=(char *)malloc(l_parameters);
    i004->parameters[l_parameters-1]=0;
    if(!i004->parameters) {

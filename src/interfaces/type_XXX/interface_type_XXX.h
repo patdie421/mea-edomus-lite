@@ -11,7 +11,6 @@
 #include <sqlite3.h>
 
 #include "interfacesServer.h"
-#include "dbServer.h"
 #include "xPLServer.h"
 #include "pythonPluginServer.h"
 

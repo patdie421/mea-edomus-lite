@@ -220,12 +220,12 @@ int gui_ping(struct mg_connection *conn)
 static int _begin_request_handler(struct mg_connection *conn)
 {
    const struct mg_request_info *request_info = mg_get_request_info(conn);
-   char phpsessid[80];
+//   char phpsessid[80];
    
    httpin_indicator++;
    process_update_indicator(_httpServer_monitoring_id, "HTTPIN", httpin_indicator);
 
-   int l_uri=strlen((char *)request_info->uri)+1;
+   int l_uri=(int)strlen((char *)request_info->uri)+1;
    char *uri=alloca(l_uri);
    uri[l_uri-1]=0;
    strncpy(uri, request_info->uri, l_uri-1);
@@ -294,7 +294,7 @@ mea_error_t _start_httpServer(uint16_t port, char *home)
    val_listening_ports[5]=0;
    snprintf(val_listening_ports,5,"%d",port);
   
-   int l_val_document_root=strlen(home)+1; 
+   int l_val_document_root=(int)strlen(home)+1; 
    val_document_root=malloc(l_val_document_root);
    val_document_root[l_val_document_root-1]=0;
    strncpy(val_document_root, home, l_val_document_root-1);
@@ -339,7 +339,7 @@ int start_httpServer(int my_id, void *data, char *errmsg, int l_errmsg)
    mea_error_t err=0;
 
    struct httpServerData_s *httpServerData = (struct httpServerData_s *)data;
-   char *phpcgibin=NULL;
+//   char *phpcgibin=NULL;
 
    if(appParameters_get("HTML_PATH", httpServerData->params_list) &&
       appParameters_get("HTTP_PORT", httpServerData->params_list)) {

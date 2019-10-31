@@ -556,7 +556,7 @@ char *mea_string_alloc_and_copy(char *str)
  *            NULL si la nouvelle zone n'a pas pu être allouée
  */
 {
-   int l_new_str=strlen(str)+1;
+   int l_new_str=(int)strlen(str)+1;
    char *new_str=(char *)malloc(l_new_str);
    if(new_str) {
       strncpy(new_str, str, l_new_str-1);
@@ -581,7 +581,7 @@ char *mea_string_free_alloc_and_copy(char **org_str, char *str)
  * \return    pointeur sur la nouvelle chaine.
  */
 {
-   int l_org_str=strlen(str)+1;
+   int l_org_str=(int)strlen(str)+1;
    if(*org_str) {
       free(*org_str);
       *org_str=NULL;

@@ -1,5 +1,5 @@
 ORG=`pwd`
-DEMODIR=/data/dev/demo1
+DEMODIR=$1
 
 mkdir "$DEMODIR"
 

@@ -207,11 +207,11 @@ extern void xPL_clearServiceGroups(xPL_ServicePtr);
 
 extern void xPL_setHeartbeatInterval(xPL_ServicePtr, int);
 extern int xPL_getHeartbeatInterval(xPL_ServicePtr);
-extern void xPL_sendTimelyHeartbeats();
+extern void xPL_sendTimelyHeartbeats(void);
 
 extern Bool xPL_sendServiceMessage(xPL_ServicePtr, xPL_MessagePtr);
 
-extern int xPL_getServiceCount();
+extern int xPL_getServiceCount(void);
 extern xPL_ServicePtr xPL_getServiceAt(int);
 
 /* xPL Service Configuration Support */
@@ -310,26 +310,26 @@ extern Bool xPL_removeServiceListener(xPL_ServicePtr, xPL_ServiceListener);
 
 /* General Library support */
 extern void xPL_setDebugging(Bool);
-extern Bool xPL_isDebugging();
+extern Bool xPL_isDebugging(void);
 extern void xPL_Debug(String, ...);
 extern void xPL_Error(String, ...);
 
 extern Bool xPL_initialize(xPL_ConnectType);
-extern Bool xPL_shutdown();
+extern Bool xPL_shutdown(void);
 
-extern int xPL_getFD();
-extern int xPL_getPort();
-extern xPL_ConnectType xPL_getConnectType();
+extern int xPL_getFD(void);
+extern int xPL_getPort(void);
+extern xPL_ConnectType xPL_getConnectType(void);
 
-extern Bool xPL_isHubConfirmed();
+extern Bool xPL_isHubConfirmed(void);
 
 extern String xPL_formatMessage(xPL_MessagePtr);
 
-extern String xPL_getBroadcastInterface();
+extern String xPL_getBroadcastInterface(void);
 extern void xPL_setBroadcastInterface(String);
-extern String xPL_getBroadcastIPAddr();
+extern String xPL_getBroadcastIPAddr(void);
 
-extern String xPL_getListenerIPAddr();
+extern String xPL_getListenerIPAddr(void);
 
 extern Bool xPL_processMessages(int);
 
@@ -355,7 +355,7 @@ extern String xPL_intToStr(int);
 extern Bool xPL_strToInt(String, int *);
 
 extern Bool xPL_parseCommonArgs(int *, String[], Bool);
-extern xPL_ConnectType xPL_getParsedConnectionType();
+extern xPL_ConnectType xPL_getParsedConnectionType(void);
 
 /* Name/value list support */
 
@@ -411,7 +411,7 @@ extern Bool xPL_removeMessageListener(xPL_messageListener);
 /** Built-in hub support **/
 /* NOTE: The xPLLib must be initialize in xcStandalone mode */
 /* in order to use a hub.                                   */
-extern Bool xPL_startHub();
-extern void xPL_stopHub();
-extern Bool xPL_isHubRunning();
+extern Bool xPL_startHub(void);
+extern void xPL_stopHub(void);
+extern Bool xPL_isHubRunning(void);
 

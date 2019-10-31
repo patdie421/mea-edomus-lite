@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#ifdef __linux__
 #include <signal.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -160,3 +161,10 @@ int main(int argc, char *argv[])
       exit(1);
    }
 }
+#else
+int main(int argc, char *argv[])
+{
+   fprintf(stderr,"doesn't work on MacOS X now\n");
+   exit(1);
+}
+#endif

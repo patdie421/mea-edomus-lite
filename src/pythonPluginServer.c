@@ -4,8 +4,11 @@
 //  Created by Patrice Dietsch on 04/05/13.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
-
+#endif
 #include <stdio.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -314,7 +317,7 @@ void *_pythonPlugin_thread(void *data)
 {
    int ret;
    
-   pythonPlugin_cmd_t *e;
+   pythonPlugin_cmd_t *e=NULL;
    PyThreadState *mainThreadState, *myThreadState=NULL;
    
    pthread_cleanup_push( (void *)_pythonPluginServer_clean_threadState, (void *)myThreadState );

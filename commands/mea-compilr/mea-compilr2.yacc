@@ -40,7 +40,7 @@ char rulesset_file[255] = "";
 int yylex (void);
 void yyerror(char *s);
 
-int nl(FILE *fd);
+int _nl(FILE *fd);
 int space(FILE *fd, int nb);
 int indent(FILE *fd, int nb);
 
@@ -115,8 +115,8 @@ Rules:
   ;
 
 Rule:
-    InputRule  { nl(fdi); indent(fdi, 2); fputc('}', fdi); /* nl(fdi); */}
-  | OutputRule { nl(fdo); indent(fdo, 2); fputc('}', fdo); /* nl(fdo); */}
+    InputRule  { _nl(fdi); indent(fdi, 2); fputc('}', fdi); /* nl(fdi); */}
+  | OutputRule { _nl(fdo); indent(fdo, 2); fputc('}', fdo); /* nl(fdo); */}
   ;
 
 InputRule:
@@ -129,11 +129,11 @@ OutputRule:
   DoBloc
 
 OnmatchBloc:
-  | INSTRUCTION_ONMATCH { fputc(',', fdi); nl(fdi); indent(fdi,3); fputs("\"onmatch\":", fdi); space(fdi, 1); } MatchActions
+  | INSTRUCTION_ONMATCH { fputc(',', fdi); _nl(fdi); indent(fdi,3); fputs("\"onmatch\":", fdi); space(fdi, 1); } MatchActions
   ;
   
 OnnotmatchBloc:
-  | INSTRUCTION_ONNOTMATCH { fputc(',', fdi); nl(fdi); indent(fdi, 3); fputs("\"onnotmatch\":", fdi); space(fdi, 1); } MatchActions
+  | INSTRUCTION_ONNOTMATCH { fputc(',', fdi); _nl(fdi); indent(fdi, 3); fputs("\"onnotmatch\":", fdi); space(fdi, 1); } MatchActions
   ;
 
 MatchActions:
@@ -143,7 +143,7 @@ MatchActions:
   ;
 
 DoBloc:
-    DoIdentifiant INSTRUCTION_DO DoAction INSTRUCTION_WITH PARENTHESE_O { fputc(',',fdo); nl(fdo); indent(fdo, 3); fputs("\"parameters\":", fdo); space(fdo, 1); fputc('{', fdo); nl(fdo); } DoActionParametres { nl(fdo); indent(fdo, 3); fputc('}', fdo); } PARENTHESE_F INSTRUCTION_WHEN DoCondition { space(fdo, 1); fputc('}', fdo); }
+    DoIdentifiant INSTRUCTION_DO DoAction INSTRUCTION_WITH PARENTHESE_O { fputc(',',fdo); _nl(fdo); indent(fdo, 3); fputs("\"parameters\":", fdo); space(fdo, 1); fputc('{', fdo); _nl(fdo); } DoActionParametres { _nl(fdo); indent(fdo, 3); fputc('}', fdo); } PARENTHESE_F INSTRUCTION_WHEN DoCondition { space(fdo, 1); fputc('}', fdo); }
     ; 
 
 DoIdentifiant:
@@ -151,13 +151,13 @@ DoIdentifiant:
                    if(nbOutput>0)
                    {
                       fputc(',',fdo);
-                      nl(fdo);
+                      _nl(fdo);
                    }
                    nbOutput++;
 
                    indent(fdo, 2);
                    fputc('{',fdo);
-                   nl(fdo);
+                   _nl(fdo);
                    indent(fdo, 3);
                    fputs("\"name\":",fdo);
                    space(fdo, 1);
@@ -166,12 +166,12 @@ DoIdentifiant:
                    if(debug_flag == 1)
                    {
                       fputc(',',fdo);
-                      nl(fdo);
+                      _nl(fdo);
                       indent(fdo, 3);
                       fputs("\"file\":", fdo);
                       space(fdo, 1);
                       fprintf(fdo, "%d,", filenum);
-                      nl(fdo);
+                      _nl(fdo);
                       indent(fdo, 3);
                       fputs("\"line\":", fdo);
                       space(fdo, 1);
@@ -180,13 +180,13 @@ DoIdentifiant:
                 }
 
 DoAction:
-    IDENTIFIANT { fputc(',',fdo); nl(fdo); indent(fdo, 3); fputs( "\"action\":", fdo); space(fdo, 1); fprintf(fdo, "\"%s\"", $1); }
+    IDENTIFIANT { fputc(',',fdo); _nl(fdo); indent(fdo, 3); fputs( "\"action\":", fdo); space(fdo, 1); fprintf(fdo, "\"%s\"", $1); }
 
 DoCondition:
    DoConditionIdentifiant DoEdge
 
 DoConditionIdentifiant:
-    IDENTIFIANT { fputc(',',fdo); nl(fdo); indent(fdo, 3); fputs("\"condition\":",fdo); space(fdo, 1); fputc('{',fdo); space(fdo,1); fprintf(fdo,"\"%s\":", $1); space(fdo, 1); }
+    IDENTIFIANT { fputc(',',fdo); _nl(fdo); indent(fdo, 3); fputs("\"condition\":",fdo); space(fdo, 1); fputc('{',fdo); space(fdo,1); fprintf(fdo,"\"%s\":", $1); space(fdo, 1); }
 
 DoEdge:
     RISE   { fprintf(fdo, "1"); }
@@ -195,7 +195,7 @@ DoEdge:
 
 DoActionParametres:
   | DoActionParametre
-  | DoActionParametres VIRGULE { fputc(',', fdo); nl(fdo); } DoActionParametre
+  | DoActionParametres VIRGULE { fputc(',', fdo); _nl(fdo); } DoActionParametre
   ;
 
 DoActionParametre:
@@ -207,23 +207,23 @@ IsBloc:
                                           if(nbInput>0)
                                           {
                                              fputc(',', fdi);
-                                             nl(fdi);
+                                             _nl(fdi);
                                           }
                                           nbInput++;
 
                                           indent(fdi, 2);
                                           fputc('{', fdi);
-                                          nl(fdi);
+                                          _nl(fdi);
                                           indent(fdi, 3); 
                                           fputs("\"name\":", fdi);
                                           space(fdi, 1);
                                           fprintf(fdi,"\"%s\",", $1);
-                                          nl(fdi);
+                                          _nl(fdi);
                                           indent(fdi, 3);
                                           fputs("\"value\":",fdi);
                                           space(fdi, 1);
                                           fprintf(fdi,"\"%s\",", $3);
-                                          nl(fdi);
+                                          _nl(fdi);
                                           indent(fdi, 3);
                                           fputs("\"num\":", fdi);
                                           space(fdi, 1);
@@ -232,12 +232,12 @@ IsBloc:
                                           if(debug_flag == 1)
                                           {
                                              fputc(',',fdi); 
-                                             nl(fdi);
+                                             _nl(fdi);
                                              indent(fdi, 3);
                                              fputs("\"file\":", fdi);
                                              space(fdi, 1);
                                              fprintf(fdi, "%d,", filenum);
-                                             nl(fdi);
+                                             _nl(fdi);
                                              indent(fdi, 3);
                                              fputs("\"line\":", fdi);
                                              space(fdi, 1);
@@ -251,23 +251,23 @@ IsBloc:
                                           if(nbInput>0)
                                           {
                                              fputc(',', fdi);
-                                             nl(fdi);
+                                             _nl(fdi);
                                           }
                                           nbInput++;
 
                                           indent(fdi, 2);
                                           fputc('{', fdi);
-                                          nl(fdi);
+                                          _nl(fdi);
                                           indent(fdi, 3);
                                           fputs("\"name\":", fdi);
                                           space(fdi, 1);
                                           fprintf(fdi,"\"%s\",", $1);
-                                          nl(fdi);
+                                          _nl(fdi);
                                           indent(fdi, 3);
                                           fputs("\"value\":",fdi);
                                           space(fdi, 1);
                                           fprintf(fdi,"\"%s\",", $3);
-                                          nl(fdi);
+                                          _nl(fdi);
                                           indent(fdi, 3);
                                           fputs("\"num\":", fdi);
                                           space(fdi, 1);
@@ -276,12 +276,12 @@ IsBloc:
                                           if(debug_flag == 1)
                                           {
                                              fputc(',',fdi);
-                                             nl(fdi);
+                                             _nl(fdi);
                                              indent(fdi, 3);
                                              fputs("\"file\":", fdi);
                                              space(fdi, 1);
                                              fprintf(fdi, "%d,", filenum);
-                                             nl(fdi);
+                                             _nl(fdi);
                                              indent(fdi, 3);
                                              fputs("\"line\":", fdi);
                                              space(fdi, 1);
@@ -293,16 +293,16 @@ IsBloc:
   ;
 
 IfBloc:
-    INSTRUCTION_IF PARENTHESE_O { fputc(',',fdi); nl(fdi); indent(fdi, 3); fputs("\"conditions\":[", fdi); nl(fdi); } Conditions PARENTHESE_F { nl(fdi); indent(fdi, 3); fputc(']', fdi); }
+    INSTRUCTION_IF PARENTHESE_O { fputc(',',fdi); _nl(fdi); indent(fdi, 3); fputs("\"conditions\":[", fdi); _nl(fdi); } Conditions PARENTHESE_F { _nl(fdi); indent(fdi, 3); fputc(']', fdi); }
   ;
 
 ElseisBloc:
-    INSTRUCTION_ELSEIS Valeur { fputc(',',fdi); nl(fdi); indent(fdi, 3); fputs("\"altvalue\":", fdi); space(fdi, 1); fprintf(fdi, "\"%s\"", $2); free($2); }
+    INSTRUCTION_ELSEIS Valeur { fputc(',',fdi); _nl(fdi); indent(fdi, 3); fputs("\"altvalue\":", fdi); space(fdi, 1); fprintf(fdi, "\"%s\"", $2); free($2); }
   ;
  
 Conditions:
     { indent(fdi, 4); fputc('{',fdi); } Condition { fputc('}',fdi); };
-  | Conditions VIRGULE { fputc(',', fdi); nl(fdi); indent(fdi, 4); fputc('{', fdi); } Condition { fputc('}', fdi); }
+  | Conditions VIRGULE { fputc(',', fdi); _nl(fdi); indent(fdi, 4); fputc('{', fdi); } Condition { fputc('}', fdi); }
   ;
 
 Condition:
@@ -420,7 +420,7 @@ int space(FILE *fd, int nb)
 }
 
 
-int nl(FILE *fd)
+int _nl(FILE *fd)
 {
    if(indent_flag == 1)
       fprintf(fd, "\n");
@@ -590,7 +590,7 @@ int main(int argc, const char * argv[])
      rsfd = fopen(rulesset_file, "r");
      while(!feof(rsfd))
      {
-        int nb=fread(rs_buff, 1, sizeof(rs_buff)-1, rsfd);
+        int nb=(int)fread(rs_buff, 1, sizeof(rs_buff)-1, rsfd);
         rs_buff[nb]=0;
         if((rs_count + nb) >= rs_size)
         {
@@ -731,10 +731,10 @@ int main(int argc, const char * argv[])
 
   // constitution du fichier final
   fputc('{', out);
-  nl(out);
+  _nl(out);
 
   // entrees
-  indent(out,1); fprintf(out, "\"inputs\":["); nl(out);
+  indent(out,1); fprintf(out, "\"inputs\":["); _nl(out);
   for(filenum=0;files[filenum];filenum++)
   {
      sprintf(ifname, "/tmp/input.%d.%d.tmp", filenum, pid);
@@ -756,16 +756,16 @@ int main(int argc, const char * argv[])
 
      unlink(ifname); // suppression du fichier temporaire
   }
-  nl(out);
+  _nl(out);
   indent(out,1);
   fputc(']', out);
 
 
   fputc(',', out);
-  nl(out);
+  _nl(out);
 
   // sorties
-  indent(out,1); fprintf(out, "\"outputs\":["); nl(out);
+  indent(out,1); fprintf(out, "\"outputs\":["); _nl(out);
   for(filenum=0;files[filenum];filenum++)
   {
      sprintf(ofname, "/tmp/output.%d.%d.tmp", filenum, pid);
@@ -784,7 +784,7 @@ int main(int argc, const char * argv[])
      }
      unlink(ofname); // suppression du fichier temporaire
   }
-  nl(out);
+  _nl(out);
   indent(out,1);
   fputc(']',out);
 
@@ -792,28 +792,28 @@ int main(int argc, const char * argv[])
   if(files && debug_flag == 1)
   {
      fputc(',', out);
-     nl(out);
+     _nl(out);
      indent(out, 1);
      fputs("\"files\":[", out);
      for(int i=0;files[i];i++)
      {
         if(i!=0)
            fputc(',', out);
-        nl(out);
+        _nl(out);
         indent(out, 2);
         fprintf(out, "\"%s\"", files[i]);
      
         free(files[i]);
      }
      free(files);
-     nl(out);
+     _nl(out);
      indent(out,1);
      fputc(']',out);
   }
 
-  nl(out);
+  _nl(out);
   fputc('}', out);
-  nl(out);
+  _nl(out);
 
   if(out_open_flag == 1)
      fclose(out);

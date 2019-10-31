@@ -7,7 +7,11 @@
 
 #ifndef __pythonPluginServer_h
 #define __pythonPluginServer_h
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include <pthread.h>
 

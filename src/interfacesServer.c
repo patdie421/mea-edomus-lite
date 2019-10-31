@@ -5,7 +5,11 @@
 //  Created by Patrice Dietsch on 04/11/2013.
 //
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
 #include <Python.h>
+#endif
 
 #include <stdio.h>
 #include <termios.h>
@@ -1459,8 +1463,8 @@ int load_interface(int type, char *driversPath)
  
 int16_t interfacesServer_call_interface_api(int id_interface, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
 {
-   int ret;
-   interfaces_queue_elem_t *iq;
+   int ret=-1;
+   interfaces_queue_elem_t *iq=NULL;
    int found=0;
  
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
@@ -1481,8 +1485,6 @@ int16_t interfacesServer_call_interface_api(int id_interface, char *cmnd, void *
             break;
       }
    }
-   else
-      ret=-1;
  
    if(found)
       ret=iq->fns->api(iq->context, cmnd, args, nb_args, res, nerr, err, l_err);
@@ -1873,7 +1875,6 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
    if(!params_list || !jsonInterface)
       return -1; 
 
-   int ret=-1;
    interfaces_queue_elem_t *iq=NULL;
 
    char *name=jsonInterface->string;
@@ -1881,9 +1882,8 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
    int  id_interface=cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
    int  id_type=cJSON_GetObjectItem(jsonInterface, "id_type")->valuedouble;
    char *dev=cJSON_GetObjectItem(jsonInterface, "dev")->valuestring;
-   char *parameters=cJSON_GetObjectItem(jsonInterface, "parameters")->valuestring;
-   char *description=cJSON_GetObjectItem(jsonInterface, "description")->valuestring;
-   char *driversPath=appParameters_get("DRIVERSPATH", params_list);
+//   char *parameters=cJSON_GetObjectItem(jsonInterface, "parameters")->valuestring;
+//   char *description=cJSON_GetObjectItem(jsonInterface, "description")->valuestring;
 
    if(state==1) {
       iq=(interfaces_queue_elem_t *)malloc(sizeof(interfaces_queue_elem_t));
@@ -1899,7 +1899,9 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
       int monitoring_id=-1;
  
 #ifdef ASPLUGIN
-      ret=load_interface(id_type, driversPath);
+      char *driversPath=appParameters_get("DRIVERSPATH", params_list);
+
+      int ret=load_interface(id_type, driversPath);
       if(ret<0) {
          VERBOSE(2) mea_log_printf("%s (%s) : can't load interface type %d\n", ERROR_STR, __func__, id_type);
       }
@@ -1928,6 +1930,8 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
             monitoring_id = iq->fns->get_monitoring_id(ptr);
          }
          else {
+            free(iq);
+            iq=NULL;
             return -1;
          }
       }
@@ -2022,7 +2026,7 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
 
  
-   char *driversPath=appParameters_get("DRIVERSPATH", params_list);
+//   char *driversPath=appParameters_get("DRIVERSPATH", params_list);
    cJSON *jsonInterface=jsonInterfaces->child;
    while( jsonInterface ) {
       if(prepare_interface(_interfaces, params_list, jsonInterface, 1)<0)
