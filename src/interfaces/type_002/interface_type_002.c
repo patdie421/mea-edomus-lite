@@ -1353,7 +1353,8 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
                DEBUG_SECTION mea_log_printf("%s (%s) : Result of call of mea_init : %ld\n", DEBUG_STR, __func__, PyInt_AsLong(pValue));
             }
             PyErr_Clear(); // à remplacer
-            Py_DECREF(pValue);
+            if(pValue != NULL)
+               Py_DECREF(pValue);
             Py_DECREF(pArgs);
             Py_DECREF(plugin_params_dict);
          }

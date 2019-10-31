@@ -1930,6 +1930,8 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
             monitoring_id = iq->fns->get_monitoring_id(ptr);
          }
          else {
+            free(iq);
+            iq=NULL;
             return -1;
          }
       }

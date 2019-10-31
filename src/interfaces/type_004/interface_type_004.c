@@ -913,6 +913,7 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
                      mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
                      perror("");
                   }
+                  free(g);
                   goto load_interface_type_004_clean_exit;
                }
                _groupname[_l_groupname]=0;
