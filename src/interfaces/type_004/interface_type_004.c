@@ -50,8 +50,6 @@ char *valid_hue_params[]={"S:HUELIGHT", "I:REACHABLE_USE", "S:HUEGROUP", NULL};
 #define PARAMS_REACHABLE 1
 #define PARAMS_HUEGROUP 2
 
-#define DEBUG_FLAG 1
-
 char *interface_type_004_xplin_str="XPLIN";
 char *interface_type_004_xplout_str="XPLOUT";
 char *interface_type_004_lightschanges_str="NBTRANSITIONS";

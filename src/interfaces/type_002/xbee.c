@@ -94,8 +94,7 @@ uint16_t
 int _xbee_open(xbee_xd_t *xd, char *dev, int speed)
 {
    int fd=serial_open(dev, speed);
-   if(fd != -1)
-   {
+   if(fd != -1) {
       strncpy(xd->serial_dev_name, dev,sizeof(xd->serial_dev_name)-1);
       xd->serial_dev_name[sizeof(xd->serial_dev_name)-1]=0;
       xd->speed=speed;
@@ -133,8 +132,7 @@ int   xbee_init(xbee_xd_t *xd, char *dev, int speed)
    pthread_mutex_init(&xd->xd_lock, NULL);
                       
    xd->queue=(mea_queue_t *)malloc(sizeof(mea_queue_t));
-   if(!xd->queue)
-   {
+   if(!xd->queue) {
       close(xd->fd);
       return -1;
    }
@@ -142,10 +140,8 @@ int   xbee_init(xbee_xd_t *xd, char *dev, int speed)
    mea_queue_init(xd->queue); // initialisation de la file
    
    xd->hosts=_hosts_table_create(XBEE_MAX_HOSTS, &nerr);
-   if(!xd->hosts)
-   {
-      if(xd->queue)
-      {
+   if(!xd->hosts) {
+      if(xd->queue) {
          free(xd->queue);
          xd->queue=NULL;
       }
@@ -160,10 +156,8 @@ int   xbee_init(xbee_xd_t *xd, char *dev, int speed)
    xd->frame_id=1;
    xd->signal_flag=0;
 
-   if(pthread_create (&(xd->read_thread), NULL, _xbee_thread, (void *)xd))
-   {
-      if(xd->queue)
-      {
+   if(pthread_create (&(xd->read_thread), NULL, _xbee_thread, (void *)xd)) {
+      if(xd->queue) {
          free(xd->queue);
          xd->queue=NULL;
       }
@@ -445,12 +439,9 @@ xbee_host_t *_xbee_host_find_host_by_addr64(xbee_hosts_table_t *table, uint32_t 
    if(!table)
       return NULL;
    
-   for(uint16_t i=0;i<table->max_hosts;i++)
-   {
-      if(nb<table->nb_hosts && table->hosts_table[i])
-      {
-         if(table->hosts_table[i]->l_addr_64_l==addr64_l && table->hosts_table[i]->l_addr_64_h==addr64_h)
-         {
+   for(uint16_t i=0;i<table->max_hosts;i++) {
+      if(nb<table->nb_hosts && table->hosts_table[i]) {
+         if(table->hosts_table[i]->l_addr_64_l==addr64_l && table->hosts_table[i]->l_addr_64_h==addr64_h) {
             return table->hosts_table[i];
          }
          nb++;
@@ -477,12 +468,9 @@ xbee_host_t *_xbee_host_find_host_by_name(xbee_hosts_table_t *table, char *name)
    if(!table)
       return NULL;
 
-   for(uint16_t i=0;i<table->max_hosts;i++)
-   {
-      if(nb<table->nb_hosts && table->hosts_table[i])
-      {
-         if(strcmp(table->hosts_table[i]->name,name)==0)
-         {
+   for(uint16_t i=0;i<table->max_hosts;i++) {
+      if(nb<table->nb_hosts && table->hosts_table[i]) {
+         if(strcmp(table->hosts_table[i]->name,name)==0) {
             return table->hosts_table[i];
          }
          nb++;
@@ -577,8 +565,7 @@ mea_error_t xbee_get_host_by_name(xbee_xd_t *xd, xbee_host_t *host, char *name, 
    h=_xbee_host_find_host_by_name(xd->hosts, name);
    if(h)
       memcpy(host,h,sizeof(xbee_host_t));
-   else
-   {
+   else {
       DEBUG_SECTION mea_log_printf("%s (%s) : %s not found in xbee hosts table.\n",DEBUG_STR,__func__,name);
       
       *nerr=XBEE_ERR_HOSTNOTFUND;
@@ -606,8 +593,7 @@ mea_error_t xbee_get_host_by_addr_64(xbee_xd_t *xd, xbee_host_t *host, uint32_t 
    h=_xbee_host_find_host_by_addr64(xd->hosts, addr_64_h, addr_64_l);
    if(h)
       memcpy(host,h,sizeof(xbee_host_t));
-   else
-   {
+   else {
       _xbee_host_init_addr_64(host, addr_64_h, addr_64_l);
       
       DEBUG_SECTION mea_log_printf("%s (%s) : %08lx-%08lx not found in xbee hosts table.\n", DEBUG_STR,__func__,(unsigned long int)addr_64_h,(unsigned long int)addr_64_l);
@@ -631,15 +617,13 @@ xbee_hosts_table_t *_hosts_table_create(int max_nb_hosts, int16_t *nerr)
    xbee_hosts_table_t *t;
    
    t=malloc(sizeof(xbee_hosts_table_t));
-   if(!t)
-   {
+   if(!t) {
       *nerr=XBEE_ERR_SYS;
       return 0;
    }
    
    t->hosts_table=(xbee_host_t **)malloc(sizeof(xbee_host_t *)*max_nb_hosts);
-   if(!t->hosts_table)
-   {
+   if(!t->hosts_table) {
       free(t);
       t=NULL;
       *nerr=XBEE_ERR_SYS;
@@ -666,10 +650,8 @@ void _hosts_table_delete(xbee_hosts_table_t *table)
 {
    uint16_t nb=0;
 
-   for(uint16_t i=0;i<table->max_hosts;i++)
-   {
-      if(nb<table->nb_hosts && table->hosts_table[i])
-      {
+   for(uint16_t i=0;i<table->max_hosts;i++) {
+      if(nb<table->nb_hosts && table->hosts_table[i]) {
          free(table->hosts_table[i]);
          table->hosts_table[i]=NULL;
       }
@@ -699,10 +681,8 @@ mea_error_t hosts_table_display(xbee_hosts_table_t *table)
       if(!table)
          return ERROR;
 
-      for(uint16_t i=0;i<table->max_hosts;i++)
-      {
-         if(nb<table->nb_hosts && table->hosts_table[i])
-         {
+      for(uint16_t i=0;i<table->max_hosts;i++) {
+         if(nb<table->nb_hosts && table->hosts_table[i]) {
             printf("%s (%s) : [%02d] %s %lx-%lx %lx\n",DEBUG_STR,__func__,i,
                    table->hosts_table[i]->name,
                    (long unsigned int)table->hosts_table[i]->l_addr_64_h,
@@ -730,16 +710,14 @@ xbee_host_t *_xbee_add_new_to_hosts_table_with_addr64(xbee_hosts_table_t *table,
 {
    xbee_host_t *host;
    
-   if(!table)
-   {
+   if(!table) {
       host=NULL;
       *nerr=XBEE_ERR_SYS; // à remplacer par une autre erreur
       return 0;
    }
    
    host=malloc(sizeof(xbee_host_t));
-   if(!host)
-   {
+   if(!host) {
       *nerr=XBEE_ERR_SYS;
       return 0;
    }
@@ -747,10 +725,8 @@ xbee_host_t *_xbee_add_new_to_hosts_table_with_addr64(xbee_hosts_table_t *table,
    
    _xbee_host_init_addr_64(host, addr_64_h, addr_64_l);
    
-   for(uint16_t i=0;i<table->max_hosts;i++)
-   {
-      if(table->hosts_table[i]==0)
-      {
+   for(uint16_t i=0;i<table->max_hosts;i++) {
+      if(table->hosts_table[i]==0) {
          table->hosts_table[i]=host;
          table->nb_hosts++;
          return host;
@@ -795,8 +771,7 @@ mea_error_t _xbee_update_hosts_tables(xbee_hosts_table_t *table, char *addr_64_h
       l_addr_64_l=l_addr_64_l+((unsigned char)addr_64_l[i] << (3-i)*8);
    
    host=_xbee_host_find_host_by_addr64(table, l_addr_64_h, l_addr_64_l);
-   if(!host)
-   {
+   if(!host) {
       host=_xbee_add_new_to_hosts_table_with_addr64(table, l_addr_64_h, l_addr_64_l, &nerr);
       if(!host)
          return ERROR;
@@ -831,10 +806,10 @@ int16_t xbee_start_network_discovery(xbee_xd_t *xd, int16_t *nerr)
 
 
 int16_t xbee_atCmdSend(xbee_xd_t *xd,
-                      xbee_host_t *destination,
-                      unsigned char *frame_data, // zone donnee d'une trame
-                      uint16_t l_frame_data, // longueur zone donnee
-                      int16_t *xbee_err)
+                       xbee_host_t *destination,
+                       unsigned char *frame_data, // zone donnee d'une trame
+                       uint16_t l_frame_data, // longueur zone donnee
+                       int16_t *xbee_err)
 /**
  * \brief     Transmet une commande (AT) à un xbee sans attendre de réponse.
  * \details   Si destination == NULL, la commande est transmise à l'xbee local, sinon elle est transmise à un xbee distant
@@ -850,17 +825,14 @@ int16_t xbee_atCmdSend(xbee_xd_t *xd,
    uint16_t l_xbee_frame;
    int16_t nerr;
    
-   if(xd->signal_flag<0)
-   {
-      if(xbee_err)
-      {
+   if(xd->signal_flag<0) {
+      if(xbee_err) {
          *xbee_err=XBEE_ERR_DOWN;
          return -1;
       }
    }
    
-   if(pthread_self()==xd->read_thread) // risque de dead lock si appeler par un call back => on interdit
-   {
+   if(pthread_self()==xd->read_thread) { // risque de dead lock si appeler par un call back => on interdit
       if(xbee_err)
       {
          *xbee_err=XBEE_ERR_IN_CALLBACK;
@@ -875,8 +847,7 @@ int16_t xbee_atCmdSend(xbee_xd_t *xd,
    else
       l_xbee_frame=_xbee_build_at_cmd(xbee_frame, frame_data_id, frame_data, l_frame_data);
    
-   if(_xbee_write_cmd(xd->fd, xbee_frame, l_xbee_frame, &nerr)==0) // envoie de l'ordre
-   {
+   if(_xbee_write_cmd(xd->fd, xbee_frame, l_xbee_frame, &nerr)==0) { // envoie de l'ordre
       return 0;
    }
 
@@ -911,16 +882,14 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
    int16_t nerr;
    int16_t return_val=1;
 
-   if(xd->signal_flag<0)
-   {
+   if(xd->signal_flag<0) {
       if(xbee_err) {
          *xbee_err=XBEE_ERR_DOWN;
       }
       return -1;
    }
 
-   if(pthread_self()==xd->read_thread) // risque de dead lock si appeler par un call back => on interdit
-   {
+   if(pthread_self()==xd->read_thread) { // risque de dead lock si appeler par un call back => on interdit
       if(xbee_err) {
          *xbee_err=XBEE_ERR_IN_CALLBACK;
       }
@@ -934,18 +903,15 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
    else
       l_xbee_frame=_xbee_build_at_cmd(xbee_frame, frame_data_id, frame_data, l_frame_data);
 
-   if(_xbee_write_cmd(xd->fd, xbee_frame, l_xbee_frame, &nerr)==0) // envoie de l'ordre
-   {
+   if(_xbee_write_cmd(xd->fd, xbee_frame, l_xbee_frame, &nerr)==0) {  // envoie de l'ordre
       int16_t ret;
       int16_t boucle=XBEE_NB_RETRY; // 5 tentatives de 1 secondes
       uint16_t notfound=0;
-      do
-      {
+      do {
          // on va attendre le retour dans la file des reponses
          pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&(xd->sync_lock) );
          pthread_mutex_lock(&(xd->sync_lock));
-         if(xd->queue->nb_elem==0 || notfound==1)
-         {
+         if(xd->queue->nb_elem==0 || notfound==1) {
             // rien a lire => on va attendre que quelque chose soit mis dans la file
             struct timeval tv;
             struct timespec ts;
@@ -954,8 +920,7 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
             ts.tv_nsec = 0;
             
             ret=pthread_cond_timedwait(&xd->sync_cond, &xd->sync_lock, &ts);
-            if(ret)
-            {
+            if(ret) {
                if(ret!=ETIMEDOUT) {
                   if(xbee_err) {
                      *xbee_err=XBEE_ERR_SYS;
@@ -969,16 +934,11 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
          // a ce point il devrait y avoir quelque chose dans la file ou TIMEOUT.
          uint32_t tsp=_xbee_get_timestamp();
          
-         if(mea_queue_first(xd->queue)==0) // parcours de la liste jusqu'a trouver une reponse pour nous
-         {
-            do
-            {
-               if(mea_queue_current(xd->queue, (void **)&e)==0)
-               {
-                  if((uint16_t)(e->cmd[1] & 0xFF)==frame_data_id) // le deuxieme octet d'une reponse doit contenir le meme id que celui de la question
-                  {
-                     if(e->xbee_err!=XBEE_ERR_NOERR) // la reponse est une erreur
-                     {
+         if(mea_queue_first(xd->queue)==0) { // parcours de la liste jusqu'a trouver une reponse pour nous
+            do {
+               if(mea_queue_current(xd->queue, (void **)&e)==0) {
+                  if((uint16_t)(e->cmd[1] & 0xFF)==frame_data_id) {  // le deuxieme octet d'une reponse doit contenir le meme id que celui de la question
+                     if(e->xbee_err!=XBEE_ERR_NOERR) { // la reponse est une erreur
                         if(xbee_err) {
                            *xbee_err=e->xbee_err; // on la retourne directement
                         }  
@@ -991,8 +951,7 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
                         goto next_or_return;
                      }
                      
-                     if((tsp - e->tsp)<=10) // la reponse est pour nous et dans les temps
-                     {
+                     if((tsp - e->tsp)<=10) { // la reponse est pour nous et dans les temps
                         // recuperation des donnees
                         memcpy(resp,e->cmd,e->l_cmd);
                         *l_resp=e->l_cmd;
@@ -1015,8 +974,7 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
 //                     _xbee_free_queue_elem(e);
 //                     e=NULL;
                   }
-                  else
-                  {
+                  else {
                      DEBUG_SECTION mea_log_printf("%s (%s) : data aren't for me (%d != %d)\n", DEBUG_STR,__func__, e->cmd[1], frame_data_id);
                      e=NULL;
                   }
@@ -1051,18 +1009,13 @@ void xbee_clean_xd(xbee_xd_t *xd)
  * \param     xd           descripteur de communication xbeeio
  */
 {
-   if(xd)
-   {
-      if(xd->queue)
-      {
+   if(xd) {
+      if(xd->queue) {
          mea_queue_cleanup(xd->queue,_xbee_free_queue_elem);
          free(xd->queue);
          xd->queue=NULL;
       }
-      
-
-      if(xd->hosts)
-      {
+      if(xd->hosts) {
          _hosts_table_delete(xd->hosts);
          xd->hosts=NULL;
       }
@@ -1092,8 +1045,7 @@ void xbee_close(xbee_xd_t *xd)
 void _xbee_display_frame(int ret, unsigned char *resp, uint16_t l_resp)
 {
    DEBUG_SECTION {
-      if(!ret)
-      {
+      if(!ret) {
          for(int i=0;i<l_resp;i++)
             fprintf(stderr, "%02x-[%c] ", resp[i], resp[i]);
          printf("\n");
@@ -1150,14 +1102,12 @@ int _xbee_read_cmd(int fd, char unsigned *frame, uint16_t *l_frame, int16_t *ner
    
    *nerr=0;
    
-   while(1)
-   {
+   while(1) {
       timeout.tv_sec  = 1; // timeout après 1 secondes
       timeout.tv_usec = 0;
 
       ret = select(fd+1, &input_set, NULL, NULL, &timeout);
-      if (ret <= 0)
-      {
+      if (ret <= 0) {
          if(ret == 0)
             *nerr=XBEE_ERR_TIMEOUT;
          else
@@ -1166,10 +1116,8 @@ int _xbee_read_cmd(int fd, char unsigned *frame, uint16_t *l_frame, int16_t *ner
       }
       
       ret=(int)read(fd,&c,1);
-      if(ret!=1)
-      {
-         if(ntry>(XBEE_NB_RETRY-1)) // 5 essais si pas de caratères lus
-         {
+      if(ret!=1) {
+         if(ntry>(XBEE_NB_RETRY-1)) { // 5 essais si pas de caratères lus
             *nerr=XBEE_ERR_READ;
             goto on_error_exit_xbee_read;
          }
@@ -1181,8 +1129,7 @@ int _xbee_read_cmd(int fd, char unsigned *frame, uint16_t *l_frame, int16_t *ner
       switch(step)
       {
          case 0:
-            if(c==0x7E)
-            {
+            if(c==0x7E) {
                step++;
                break;
             }
@@ -1205,20 +1152,17 @@ int _xbee_read_cmd(int fd, char unsigned *frame, uint16_t *l_frame, int16_t *ner
                step=10; // read checksum
             break;
          case 10:
-            for(i=0;i<(*l_frame);i++)
-            {
+            for(i=0;i<(*l_frame);i++) {
                checksum+=frame[i];
             }
-            if(((checksum+c) & 0xFF) == 0xFF)
-            {
+            if(((checksum+c) & 0xFF) == 0xFF) {
                 /* DEBUG_SECTION {
                 mea_log_printf("%s (%s) : new frame recept\n", DEBUG_STR,__func__);
                  _xbee_display_frame(0, frame, *l_frame);
                } */
                return 0;
             }
-            else
-            {
+            else {
                VERBOSE(9) mea_log_printf("%s  (%s) : xbee return an error - checksum error.\n",INFO_STR,__func__);
                *nerr=XBEE_ERR_CHECKSUM;
                return -1;
@@ -1292,14 +1236,10 @@ void _xbee_flush_old_responses_queue(xbee_xd_t *xd)
    pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&(xd->sync_lock) );
    pthread_mutex_lock(&xd->sync_lock);
    
-   if(mea_queue_first(xd->queue)==0)
-   {
-      while(1)
-      {
-         if(mea_queue_current(xd->queue, (void **)&e)==0)
-         {
-            if((tsp - e->tsp) > 10)
-            {
+   if(mea_queue_first(xd->queue)==0) {
+      while(1) {
+         if(mea_queue_current(xd->queue, (void **)&e)==0) {
+            if((tsp - e->tsp) > 10) {
                _xbee_free_queue_elem(e);
                mea_queue_remove_current(xd->queue); // remove current passe sur le suivant
             }
@@ -1324,8 +1264,7 @@ int16_t _xbee_add_response_to_queue(xbee_xd_t *xd, unsigned char *cmd, uint16_t 
       return -1;
 
    e=malloc(sizeof(xbee_queue_elem_t));
-   if(e)
-   {
+   if(e) {
       memcpy(e->cmd,cmd,l_cmd);
       e->l_cmd=l_cmd;
       e->xbee_err=XBEE_ERR_NOERR;
@@ -1364,26 +1303,22 @@ int _xbee_reopen(xbee_xd_t *xd)
    
    close(xd->fd);
    
-   for(int i=0;i<XBEE_NB_RETRY;i++) // 5 tentatives pour rétablir les communications
-   {
+   for(int i=0;i<XBEE_NB_RETRY;i++) {  // 5 tentatives pour rétablir les communications
       fd = _xbee_open(xd, dev, speed);
-      if (fd == -1)
-      {
+      if (fd == -1) {
          VERBOSE(2) {
             mea_log_printf("%s (%s) : try #%d/%d, unable to open serial port (%s) - ",ERROR_STR,__func__, i+1, XBEE_NB_RETRY, dev);
             perror("");
          }
       }
-      else
-      {
+      else {
          flag=1;
          break;
       }
       sleep(5);
    }
    
-   if(!flag)
-   {
+   if(!flag) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't recover communication now\n", ERROR_STR,__func__);
       return -1;
    }
@@ -1421,23 +1356,18 @@ void *_xbee_thread(void *args)
    xbee_xd_t *xd=(xbee_xd_t *)args;
    
    VERBOSE(5) mea_log_printf("%s  (%s) : starting \"xbee reading thread\" on %s\n",INFO_STR,__func__,xd->serial_dev_name);
-   while(1)
-   {
+   while(1) {
       _xbee_flush_old_responses_queue(xd);
       
       ret=_xbee_read_cmd(xd->fd, cmd, &l_cmd, &nerr);
-      if(ret==0)
-      {
-         switch((uint8_t)cmd[0])
-         {
+      if(ret==0) {
+         switch((uint8_t)cmd[0]) {
             case 0x88: // response for local AT (0x08)
             {
                struct xbee_cmd_response_s *mcmd=(struct xbee_cmd_response_s *)cmd;
                
-               if(mcmd->frame_id>XBEE_MAX_USER_FRAME_ID) // la requete est interne elle ne sera pas retransmise
-               {
-                  switch (mcmd->frame_id)
-                  {
+               if(mcmd->frame_id>XBEE_MAX_USER_FRAME_ID) { // la requete est interne elle ne sera pas retransmise{ // la requete est interne elle ne sera pas retransmise
+                  switch (mcmd->frame_id) {
                      case XBEE_ND_FRAME_ID:
                         if(status==0)
                            _xbee_network_discovery_resp(xd, (char *)mcmd->at_cmd_data,l_cmd-5);
@@ -1446,27 +1376,23 @@ void *_xbee_thread(void *args)
                         break;
                   }
                }
-               else
-               {
+               else {
                   _xbee_add_response_to_queue(xd, cmd, l_cmd);
                }
                break;
             }
                
-            case 0x97: // response for remote AT (0x97)
-            {
+            case 0x97:
+            { // response for remote AT (0x97)
                struct xbee_remote_cmd_response_s *mcmd=(struct xbee_remote_cmd_response_s *)cmd;
                
-               if(mcmd->frame_id>XBEE_MAX_USER_FRAME_ID) // la requete est interne elle ne sera pas retransmise
-               {
-                  switch (mcmd->frame_id) // pas encore de commande interne
-                  {
+               if(mcmd->frame_id>XBEE_MAX_USER_FRAME_ID) { // la requete est interne elle ne sera pas retransmise{ // la requete est interne elle ne sera pas retransmise
+                  switch (mcmd->frame_id) {  // pas encore de commande interne
                      default:
                         break;
                   }
                }
-               else
-               {
+               else {
                   _xbee_add_response_to_queue(xd, cmd, l_cmd);
                }
                // on va quand meme récupérer les info addr64 et addr16 pour mettre a jour
@@ -1515,8 +1441,7 @@ void *_xbee_thread(void *args)
                break;
          }
       }
-      if(ret<0)
-      {
+      if(ret<0) {
          switch(nerr)
          {
             case XBEE_ERR_TIMEOUT:
@@ -1528,8 +1453,7 @@ void *_xbee_thread(void *args)
                   mea_log_printf("%s (%s) : communication error (nerr=%d).\n", ERROR_STR,__func__,nerr);
                   perror("");
                }
-               if(_xbee_reopen(xd)<0)
-               {
+               if(_xbee_reopen(xd)<0) {
                   VERBOSE(1) {
                      mea_log_printf("%s (%s) : xbee thread is down\n", ERROR_STR,__func__);
                   }

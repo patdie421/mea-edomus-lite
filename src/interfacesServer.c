@@ -1875,7 +1875,6 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
    if(!params_list || !jsonInterface)
       return -1; 
 
-//   int ret=-1;
    interfaces_queue_elem_t *iq=NULL;
 
    char *name=jsonInterface->string;
@@ -1885,7 +1884,6 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
    char *dev=cJSON_GetObjectItem(jsonInterface, "dev")->valuestring;
 //   char *parameters=cJSON_GetObjectItem(jsonInterface, "parameters")->valuestring;
 //   char *description=cJSON_GetObjectItem(jsonInterface, "description")->valuestring;
-//   char *driversPath=appParameters_get("DRIVERSPATH", params_list);
 
    if(state==1) {
       iq=(interfaces_queue_elem_t *)malloc(sizeof(interfaces_queue_elem_t));
@@ -1901,7 +1899,9 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
       int monitoring_id=-1;
  
 #ifdef ASPLUGIN
-      ret=load_interface(id_type, driversPath);
+      char *driversPath=appParameters_get("DRIVERSPATH", params_list);
+
+      int ret=load_interface(id_type, driversPath);
       if(ret<0) {
          VERBOSE(2) mea_log_printf("%s (%s) : can't load interface type %d\n", ERROR_STR, __func__, id_type);
       }

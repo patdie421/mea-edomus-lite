@@ -44,7 +44,7 @@
 #include "cJSON.h"
 #include "uthash.h"
 
-#define DEBUG
+#define DEBUG_AUTOMATOR
 #define USEALLOCA
 
 /*
@@ -361,7 +361,7 @@ static int value_cmp(struct value_s *v1, int comparator, struct value_s *v2)
 }
 
 
-#ifdef DEBUG
+#ifdef DEBUG_AUTOMATOR
 static int value_print(struct value_s *v)
 {
    if(v->type==0)
@@ -2190,7 +2190,7 @@ char *automator_inputs_table_to_json_string_alloc()
 }
 
 
-#ifdef DEBUG
+#ifdef DEBUG_AUTOMATOR
 static int automator_print_inputs_table()
 {
    struct inputs_table_s *s = NULL;
