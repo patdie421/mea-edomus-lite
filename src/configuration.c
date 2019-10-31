@@ -120,15 +120,6 @@ char *getAppParameterAsString_alloc(char *name)
       cJSON *p=cJSON_GetObjectItem(appParameters, name);
       if(p) {
          s=cJSON_Print(p);
-/*
-         if(_s) {
-            #define KEYVALUE "{\"value\":%s}"
-            s=malloc(strlen(_s)+sizeof(KEYVALUE)+1);
-            if(s)
-               sprintf(s, KEYVALUE, _s);
-            free(_s); 
-         } 
-*/
       }
    }
    return s;

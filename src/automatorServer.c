@@ -292,7 +292,7 @@ void *_automator_thread(void *data)
              DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : timer wakeup signal\n", INFO_STR, __func__);
          }
 
-/*
+/* For DEBUG
          if(e->type == 1 && e->msg_json) {
             char *tmp = cJSON_Print(e->msg_json);
             mea_log_printf("xpl:%s\n", tmp);

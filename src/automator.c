@@ -103,6 +103,67 @@
 # A6 do: timerCtrl  with: (command='stop', name='timer1') when: E1 fall
 */
 
+enum function_e {
+   F_NOW=0,
+   F_NOT,
+   F_CALCN,
+   F_EXIST,
+   F_RISE,
+   F_FALL,
+   F_STARTUP,
+   F_STAY,
+   F_CHANGE,
+   F_DATE,
+   F_SECOND,
+   F_TIME,
+   F_TIMER,
+   F_TIMERSTATUS,
+   F_SUNRISE,
+   F_SUNSET, 
+   F_TWILIGHTSTART,
+   F_TWILIGHTEND,
+   F_XPLMSGDATA,
+   F_TOHLSTR,
+   F_TOTFSTR,
+   _FN_LIST_END
+};
+
+
+struct function_def_s
+{
+   char *name;
+   enum function_e num;
+   uint16_t l;
+};
+
+int16_t functions_index[_FN_LIST_END];
+
+struct function_def_s functionsList2[]={
+   { "calcn", F_CALCN, 5 },
+   { "change", F_CHANGE, 5 },
+   { "date", F_DATE, 4 },
+   { "exist", F_EXIST, 5 },
+   { "fall", F_FALL, 4 },
+   { "not", F_NOT, 3 },
+   { "now", F_NOW, 3 },
+   { "rise", F_RISE, 4 },
+   { "second", F_SECOND, 6 },
+   { "startup", F_STARTUP, 7 },
+   { "stay", F_STAY, 4 },
+   { "sunrise", F_SUNRISE, 7 },
+   { "sunset", F_SUNSET, 6 },
+   { "timerstatus", F_TIMERSTATUS, 11 },
+   { "timer", F_TIMER, 5 },
+   { "time", F_TIME, 4 },
+   { "tohlstr", F_TOHLSTR, 7 },
+   { "totfstr", F_TOTFSTR, 7 },
+   { "twilightstart", F_TWILIGHTSTART, 13 },
+   { "twilightend", F_TWILIGHTEND, 11 },
+   { "xplmsgdata", F_XPLMSGDATA, 10 },
+   { NULL, 0, 0 }
+};
+
+
 cJSON *_rules = NULL;
 cJSON *_inputs_rules = NULL;
 cJSON *_outputs_rules = NULL;
@@ -375,67 +436,6 @@ static int value_print(struct value_s *v)
 }
 #endif
 
-enum function_e {
-   F_NOW=0,
-   F_NOT,
-   F_CALCN,
-   F_EXIST,
-   F_RISE,
-   F_FALL,
-   F_STARTUP,
-   F_STAY,
-   F_CHANGE,
-   F_DATE,
-   F_SECOND,
-   F_TIME,
-   F_TIMER,
-   F_TIMERSTATUS,
-   F_SUNRISE,
-   F_SUNSET, 
-   F_TWILIGHTSTART,
-   F_TWILIGHTEND,
-   F_XPLMSGDATA,
-   F_TOHLSTR,
-   F_TOTFSTR,
-   _FN_LIST_END
-};
-
-
-struct function_def_s
-{
-   char *name;
-   enum function_e num;
-   uint16_t l;
-};
-
-int16_t functions_index[_FN_LIST_END];
-
-struct function_def_s functionsList2[]={
-   { "calcn", F_CALCN, 5 },
-   { "change", F_CHANGE, 5 },
-   { "date", F_DATE, 4 },
-   { "exist", F_EXIST, 5 },
-   { "fall", F_FALL, 4 },
-   { "not", F_NOT, 3 },
-   { "now", F_NOW, 3 },
-   { "rise", F_RISE, 4 },
-   { "second", F_SECOND, 6 },
-   { "startup", F_STARTUP, 7 },
-   { "stay", F_STAY, 4 },
-   { "sunrise", F_SUNRISE, 7 },
-   { "sunset", F_SUNSET, 6 },
-   { "timerstatus", F_TIMERSTATUS, 11 },
-   { "timer", F_TIMER, 5 },
-   { "time", F_TIME, 4 },
-   { "tohlstr", F_TOHLSTR, 7 },
-   { "totfstr", F_TOTFSTR, 7 },
-   { "twilightstart", F_TWILIGHTSTART, 13 },
-   { "twilightend", F_TWILIGHTEND, 11 },
-   { "xplmsgdata", F_XPLMSGDATA, 10 },
-   { NULL, 0, 0 }
-};
-
-
 int function_qsort_compare_names(const void * a, const void * b)
 {
    return strcmp(functionsList2[functions_index[*(int16_t *)a]].name, functionsList2[functions_index[*(int16_t *)b]].name);
@@ -475,8 +475,8 @@ enum function_e function_getNum(char *str, char *params, int l_params)
       int16_t middle=(end + start) / 2;
       if(middle<0)
          return -1;
-//      _cmpres=(int)strcmp(functionsList2[functions_index[middle]].name, fn);
-      _cmpres=(int)strcmp(functionsList2[middle].name, fn);
+      _cmpres=(int)strcmp(functionsList2[functions_index[middle]].name, fn);
+//      _cmpres=(int)strcmp(functionsList2[middle].name, fn);
       if(_cmpres==0) {
          while(*str && *str!=']' && l_params) {
             *params=*str;
@@ -487,8 +487,8 @@ enum function_e function_getNum(char *str, char *params, int l_params)
          *params=0;
 
          if(*str==']' && *(str+1)==0) {
-            // return functionsList2[functions_index[middle]].num;
-            return functionsList2[middle].num;
+            return functionsList2[functions_index[middle]].num;
+//            return functionsList2[middle].num;
          }
          else
             return -1;
@@ -634,8 +634,6 @@ void input_resetIds()
 }
 
 
-#define MAX_STR_FUNCTION_SIZE 4096 
-
 static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
 {
    char *f = NULL;
@@ -648,6 +646,7 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
    char *params=(char *)alloca(str_l);
    f = str;
    int fn=function_getNum(f, params, str_l);
+   
    switch(fn) {
       case F_NOW:
          if(params[0]==0) {
@@ -778,7 +777,6 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
          break;
       case F_TIMER: {
          struct value_s r;
-
          int ret=automator_evalStr(params, &r, xplMsgJson);
          if(ret==0 && r.type==1) {
             int state = 0;
@@ -1114,18 +1112,18 @@ static int automator_timerCtrl(cJSON *parameters)
             timerunitval = TIMER_CSEC;
          else
             return -1;
-//         VERBOSE(9) mea_log_printf("%s (%s) : start timer %s\n", INFO_STR, __func__, timername);
+         VERBOSE(9) mea_log_printf("%s (%s) : start timer %s\n", INFO_STR, __func__, timername);
          int ret=mea_datetime_startTimer2(timername, (int)v.val.floatval, timerunitval, automatorServer_timer_wakeup, NULL); 
          return ret;
       }
       else {
-//         VERBOSE(9) mea_log_printf("%s (%s) : start alarm\n", INFO_STR, __func__, timername);
+         VERBOSE(9) mea_log_printf("%s (%s) : start alarm\n", INFO_STR, __func__, timername);
          int ret=mea_datetime_startAlarm2(timername, (time_t)v.val.floatval, automatorServer_timer_wakeup, NULL); 
          return ret;
       }
    }
    else if(command->type == cJSON_String && strcmp(timercommand,"stop")==0) {
-//      VERBOSE(9) mea_log_printf("%s (%s) : stop timer/alarm\n", INFO_STR, __func__, timername);
+      VERBOSE(9) mea_log_printf("%s (%s) : stop timer/alarm\n", INFO_STR, __func__, timername);
       mea_strcpytrimlower(timername, n.val.strval);
       int ret=mea_datetime_stopTimer(timername);
       return ret;
@@ -1345,7 +1343,6 @@ int automator_playOutputRules(cJSON *rules)
          cJSON *parameters = cJSON_GetObjectItem(e,"parameters");
 
          if(mea_strcmplower(action->valuestring, "xPLSend")==0) {
-            //automator_sendxpl(parameters);
             if(automator_sendxpl2(parameters)>=0)
                xplout_cntr++;
          }
@@ -1515,7 +1512,7 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
       }
       
       // si <LABEL> on passe
-      if(strncmp(value->valuestring,"<LABEL>",7)==0) {
+      if(strncmp(value->valuestring, "<LABEL>", 7)==0) {
          e=e->next;
          continue;
       }
@@ -1523,17 +1520,17 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
       DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : RULE - %s\n", DEBUG_STR, __func__, name->valuestring);
 
       // évaluation des conditions
-      cJSON *conditions=cJSON_GetObjectItem(e,"conditions");
+      cJSON *conditions=cJSON_GetObjectItem(e, "conditions");
       if(conditions!=NULL) {
          DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :    CONDITIONS : \n",  DEBUG_STR, __func__);
          cJSON *c=conditions->child;
          while(c) {
             int operator=-1;
             c=conditions->child;
+
             cJSON *value1 = cJSON_GetObjectItem(c, "value1");
             cJSON *op     = cJSON_GetObjectItem(c, "op");
             cJSON *value2 = cJSON_GetObjectItem(c, "value2");
-
             DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) :         %s %s %s\n",  DEBUG_STR, __func__, value1->valuestring, op->valuestring, value2->valuestring);
 
             if(!value1 || !op || !value2) {
@@ -1611,9 +1608,8 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
       if(match>=0) { // une valeur de is: ou de elseis: à évaluer
          int ret=automator_evalStr(_value, &res, xplMsgJson);
          if(ret<0) {
-            DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : [%s] incorrect value\n",  DEBUG_STR, __func__, _value);
-            automator_printRuleDebugInfo(e, "incorrect rule value (rule removed)");
-
+            DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : [%s] incorrect rule value\n",  DEBUG_STR, __func__, _value);
+            automator_printRuleDebugInfo(e, "incorrect rule value : (rule removed)");
             cJSON *_c = NULL;
             _c=e;
             e=e->next;
@@ -1629,11 +1625,6 @@ int automator_matchInputsRules(cJSON *rules, cJSON *xplMsgJson)
             mea_log_printf("%s (AUTOMATOR MESSAGE) : \"%s\"\n", INFO_STR, &(res.val.strval[i]));
          }
          else if(strncmp(res.val.strval, "<NOVAL>", 7)!=0) {
-/*
-            fprintf(stderr,"%s = ", name->valuestring);
-            value_print(&res);
-            fprintf(stderr,"\n");
-*/
             automator_add_to_inputs_table(name->valuestring, &res, &last_update_time);
          }
          else {
@@ -1770,7 +1761,7 @@ next_loop: {}
 }
 
 int timespec2str(char *buf, uint len, struct timespec *ts) {
-// 2016-02-29 15:37:15.699650549
+    // 2016-02-29 15:37:15.699650549
     int ret;
     int l;
     struct tm t;
@@ -1797,60 +1788,6 @@ int timespec2str(char *buf, uint len, struct timespec *ts) {
 int send_change(char *name, struct value_s *v, struct timespec *t)
 {
    int ret=0;
-/* NODEJSSERVER
-   static int port = -1;
-   int sock = -1;
-   int ret = -1;
-
-   if(port==-1)
-      port = get_nodejsServer_socketdata_port();
-   if(port==0) {
-      port=-1;
-      return -1;
-   } 
-
-   char str[VALUE_MAX_STR_SIZE+1]="";
-
-   if(v->type == 0) {
-      snprintf(str, VALUE_MAX_STR_SIZE, "%f",v->val.floatval);
-      str[VALUE_MAX_STR_SIZE]=0;
-   }
-   if(v->type == 1)
-      sprintf(str, "\"%s\"", v->val.strval);
-   if(v->type == 2) {
-      if(v->val.booleanval==0) 
-         strncpy(str,FALSE_STR_C, sizeof(str)-1);
-      else
-         strncpy(str,TRUE_STR_C, sizeof(str)-1);
-      str[sizeof(str)-1]=0;
-   }
-
-   char last_update_str[VALUE_MAX_STR_SIZE+1]="N/A";
-   int r=4;
-   if(t && t->tv_sec) {
-      r=timespec2str(last_update_str, VALUE_MAX_STR_SIZE, t);
-      if(r<0)
-         return -1;
-   }
-
-   int l_data = (int)(strlen(str)+strlen(name)+r+18);
-   char *msg = alloca(l_data+1);
-   sprintf(msg,"{\"%s\":{\"v\":%s,\"t\":\"%s\"}}",name, str, last_update_str);
-   msg[l_data]=0;
-   
-   if(mea_socket_connect(&sock, localhost_const, port)<0) {
-      ret=-1;
-   }
-   else {
-      l_data=l_data+4; // 4 pour AUT:
-      char *message = (char *)alloca(l_data+9);
-
-      sprintf(message,"$$$%c%cAUT:%s###", (char)(l_data%128), (char)(l_data/128), msg);
-
-      ret = mea_socket_send(&sock, message, l_data+9);
-      close(sock);
-   }
-*/
    return ret;
 }
 
@@ -1858,86 +1795,6 @@ int send_change(char *name, struct value_s *v, struct timespec *t)
 int automator_send_all_inputs()
 {
    int ret=0;
-/* NODEJSSERVER
-   static int port = -1;
-
-   struct inputs_table_s *s;
-   char *msg;
-   char tmpStr[VALUE_MAX_STR_SIZE * 3];
-   char tmpVal[VALUE_MAX_STR_SIZE];
-   int startflag = 1; 
-   int sock = -1;
-   int ret = -1;
-
-   if(port==-1)
-      port = get_nodejsServer_socketdata_port();
-
-   pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&inputs_table_lock);
-   pthread_mutex_lock(&inputs_table_lock);
-   int l_msg = HASH_COUNT(inputs_table)*(sizeof(tmpStr)+1)+3;
-   msg=(char *)alloca(l_msg);
-   if(!msg)
-      ret= -1;
-   else {
-      msg[l_msg-1]=0;
-      stnrcpy(msg,"{",l_msg-1);
-      for(s=inputs_table; s != NULL; s=s->hh.next) {
-         struct value_s *v = &(s->v);
-
-         if(!startflag)
-            strncat(msg,",",l_msg-1);
-         if(s->state == UNKNOWN)
-            sprintf(tmpVal, "\"???\"");
-         else {
-            if(v->type == 0)
-               snprintf(tmpVal, sizeof(tmpVal)-1, "%f", v->val.floatval);
-            if(v->type == 1)
-               snprintf(tmpVal, sizeof(tmpVal)-1, "\"%s\"", v->val.strval);
-            if(v->type == 2) {
-               if(v->val.booleanval==0)
-                  strncpy(tmpVal, FALSE_STR_C, sizeof(tmpVal)-1);
-               else
-                  strncpy(tmpVal, TRUE_STR_C, sizeof(tmpVal)-1);
-            }
-            tmpVal[sizeof(tmpVal)-1]=0;
-         }
-
-         char last_update_str[VALUE_MAX_STR_SIZE+1]="N/A";
-         int r=4;
-         struct timespec *t = &(s->last_update);
-         if(t && t->tv_sec) {
-            r=timespec2str(last_update_str, VALUE_MAX_STR_SIZE, t);
-            if(r<0)
-               return -1;
-         }
-
-         sprintf(tmpStr, "\"%s\":{\"v\":%s,\"t\":\"%s\"}", s->name, tmpVal, last_update_str);
-         strncat(msg, tmpStr,l_msg-1);
-         startflag=0;
-         ret=0;
-      }
-      strncat(msg,"}", l_msg-1);
-   }
-   pthread_mutex_unlock(&inputs_table_lock);
-   pthread_cleanup_pop(0);
-
-   if(ret==-1)
-      return -1;
-
-   if(mea_socket_connect(&sock, localhost_const, port)<0) {
-      return -1;
-   }
-   else {
-      int l_data = (int)strlen(msg);
-      l_data=l_data+4; // 4 pour AUT:
-      char *message = (char *)alloca(l_data+9);
-
-      sprintf(message,"$$$%c%cAUT:%s###", (char)(l_data%128), (char)(l_data/128), msg);
-
-      ret = mea_socket_send(&sock, message, l_data+9);
-      close(sock);
-   }
-*/
    return ret;
 }
 
@@ -1949,13 +1806,6 @@ struct inputs_table_s *_automator_add_to_inputs_table(char *_name, struct value_
 
    pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&inputs_table_lock);
    pthread_mutex_lock(&inputs_table_lock);
-/*
-   if(strcmp(_name, "EVERY10S") == 0) {
-      fprintf(stderr,"IN: %s = ", _name);
-      value_print(v);
-      fprintf(stderr,"\n");
-   }
-*/
    HASH_FIND_STR(inputs_table, _name, e);
    if(e) {
       if(v == NULL)
