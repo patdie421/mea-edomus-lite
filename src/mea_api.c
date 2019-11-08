@@ -35,9 +35,9 @@ static PyObject *mea_sendAtCmd(PyObject *self, PyObject *args);
 //static PyObject *mea_sendEnoceanPacketAndWaitResp(PyObject *self, PyObject *args);
 //static PyObject *mea_enoceanCRC(PyObject *self, PyObject *args);
 //static PyObject *mea_sendEnoceanRadioErp1Packet(PyObject *self, PyObject *args);
-static PyObject *mea_xplGetVendorID(void);
-static PyObject *mea_xplGetDeviceID(void);
-static PyObject *mea_xplGetInstanceID(void);
+static PyObject *mea_xplGetVendorID(PyObject *self, PyObject *args);
+static PyObject *mea_xplGetDeviceID(PyObject *self, PyObject *args);
+static PyObject *mea_xplGetInstanceID(PyObject *self, PyObject *args);
 static PyObject *mea_xplSendMsg2(PyObject *self, PyObject *args);
 static PyObject *mea_addDataToSensorsValuesTable(PyObject *self, PyObject *args);
 static PyObject *mea_interface_api(PyObject *self, PyObject *args);
@@ -330,19 +330,19 @@ mea_sendEnoceanPacketAndWaitResp_arg_err:
 */
 
 
-static PyObject *mea_xplGetVendorID()
+static PyObject *mea_xplGetVendorID(PyObject *self, PyObject *args)
 {
    return PyString_FromString(mea_getXPLVendorID());
 }
 
 
-static PyObject *mea_xplGetDeviceID()
+static PyObject *mea_xplGetDeviceID(PyObject *self, PyObject *args)
 {
    return  PyString_FromString(mea_getXPLDeviceID());
 }
 
 
-static PyObject *mea_xplGetInstanceID()
+static PyObject *mea_xplGetInstanceID(PyObject *self, PyObject *args)
 {
    return PyString_FromString(mea_getXPLInstanceID());
 }

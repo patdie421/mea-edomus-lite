@@ -44,7 +44,7 @@ tar cf - . | ( cd $SOURCE/package/tmp/lib/mea-plugins ; tar xf - )
 rm $SOURCE/package/tmp/lib/mea-plugins/*.pyc 2> /dev/null
 
 cd $SOURCE/src/interfaces
-cp type_*/interface*.dylib type_*/interface*.so $SOURCE/package/tmp/lib/mea-drivers 2>/dev/null
+cp type_*/interface*.dylib type_*/interface*.so type_*/interface*.idrv $SOURCE/package/tmp/lib/mea-drivers 2>/dev/null
 if [ "$TECHNO" == "macosx" ]
 then
    dynext=".dylib"
@@ -82,6 +82,11 @@ then
    cp $SOURCE/complements/xPL_Hub/install/init.d/xPLHub $SOURCE/package/tmp/etc/init.d
 fi
 
+if [ -f $SOURCE/complements/nodejs/src/node-v8.9.3/out/Release/node ]
+then
+   cp $SOURCE/complements/nodejs/src/node-v8.9.3/out/Release/node $SOURCE/package/tmp/bin
+fi
+
 if [ -f $SOURCE/commands/mea-compilr/mea-compilr ]
 then
    cp $SOURCE/commands/mea-compilr/mea-compilr $SOURCE/package/tmp/bin
@@ -114,7 +119,7 @@ cd $SOURCE/package/tmp
 tar cf $SOURCE/package/mea-edomus.tar *
 
 cd $SOURCE/package
-tar cjf $SOURCE/package/mea-edomus.tar.pkg.bz2 mea-edomus.tar install.sh update.sh
+tar cjf $SOURCE/package/mea-edomus.tar.pkg.bz2 mea-edomus.tar install.sh
 
 #rm mea-edomus.tar > /dev/null 2>&1
 #rm -r $SOURCE/package/tmp > /dev/null 2>&1

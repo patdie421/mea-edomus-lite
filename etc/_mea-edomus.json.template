@@ -12,4 +12,3 @@
   "RULESFILE": "###SERVICE_HOMEDIR###/lib/mea-rules/automator.rules",
   "RULESFILESPATH": "###SERVICE_HOMEDIR###/lib/mea-rules"
 }
-

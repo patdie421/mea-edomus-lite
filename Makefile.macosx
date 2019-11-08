@@ -84,7 +84,7 @@ clean-all: clean
 	make -C src -f utilslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) clean
 	make -C src/interfaces/drivers -f driverslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) clean
 
-build-all: build-commands all
+build-all: all build-mealib build-commands build-xplhub build-package build-nodejs
 
 build-xplhub:
 	make -C complements/xplhub -f xplhub.mk SOURCE="$(MYPATH)"

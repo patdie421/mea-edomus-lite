@@ -4,7 +4,7 @@ ORG=`pwd`
 
 usage()
 {
-   echo $1 [install_dir]
+   echo $1 [install_dir [cmd_path]]
 }
 
 escape()
@@ -17,13 +17,13 @@ escape()
 }
 
 
-if [ ! 0 -eq $# ] && [ ! 1 -eq $# ]
+if [ ! 0 -eq $# ] && [ ! 1 -eq $# ] && [ ! 2 -eq $# ]
 then
    usage $0
    exit 1
 fi
 
-if [ 1 -eq $# ]
+if [ $# -gt 0 ]
 then
    DIR="$1"
    if [ ! -d "$DIR" ]
@@ -39,6 +39,13 @@ then
    fi
 fi
 DIR=`pwd`
+
+if [ 2 -eq $# ]
+then
+   CMD_PATH="$2"
+else
+   CMD_PATH="$DIR"
+fi
 
 if [ ! -f package.json ]
 then
@@ -60,14 +67,13 @@ mkdir var/log 2> /dev/null
 mkdir var/pid 2> /dev/null
 ln -s ../node_modules/homebridge/bin/homebridge bin/homebridge 2> /dev/null
 
-_DIR=`escape "$DIR"`
+_DIR=`escape "$CMD_PATH"`
 REGEX1="s/###SERVICE_HOMEDIR###/$_DIR/g"
 PROG=homebridge
-PROG_OPTIONS="-U $DIR/config"
+PROG_OPTIONS="-U $CMD_PATH/config"
 _PROG_OPTIONS=`escape "$PROG_OPTIONS"`
 REGEX2="s/###SERVICE###/$PROG/g"
 REGEX3="s/###SERVICE_OPTIONS###/$_PROG_OPTIONS/g"
 cat "$ORG"/scripts/_ctrl.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" > "bin/ctrl_$PROG.sh"
 chmod +x "bin/ctrl_$PROG.sh"
-
 cd "$ORG"

@@ -524,13 +524,6 @@ void _rawXPLMessageHandler(char *s, int l)
 
    cJSON *msg_json = xPLParser(s, type, schema, source, target);
    if(msg_json != NULL) {
-/*
-      DEBUG_SECTION {
-         char *s = cJSON_Print(msg_json);
-         fprintf(stderr,"%s\n", s);
-         free(s);
-      }
-*/
       mea_start_timer(&xPLnoMsgReceivedTimer);
 
       DEBUG_SECTION {
@@ -539,24 +532,53 @@ void _rawXPLMessageHandler(char *s, int l)
             fromMe=0;
 
          if(strcmp(schema,"watchdog.basic")== 0 && fromMe == 0) {
-            DEBUG_SECTION mea_log_printf("%s (%s) : watchdog xpl\n", DEBUG_STR, __func__);
+            mea_log_printf("%s (%s) : watchdog xpl\n", DEBUG_STR, __func__);
          }
       }
 
+      cJSON *_msg_json=NULL; // le message que l'on va envoyer a l'automate
+      if(strcmp(type, XPL_CMND_STR_C) != 0) { // on aura pas a faire traiter le message par les interfaces
+         _msg_json=msg_json; // donc on ne le transmettra qu'a l'automate
+         msg_json=NULL;
+      }
+      else {
+         _msg_json=cJSON_Duplicate(msg_json, 1); // duplication car il sera traiter par les interfaces et l'automate
+      }
+      
+      if(_msg_json) { // on envoie tous les messages valides à l'automate (à lui de filtrer ...)
+         if(automatorServer_add_msg(_msg_json)==ERROR) {
+            DEBUG_SECTION mea_log_printf("%s (%s) : to automator error\n", DEBUG_STR, __func__);
+         }
+      }
+      
+      if(msg_json) {
+         dispatchXPLMessageToInterfaces2(msg_json);
+      }
+      
+/*
       // on envoie tous les messages à l'automate (à lui de filtrer ...)
       cJSON *xplMsgJson_automator = cJSON_Duplicate(msg_json, 1);
-      if(msg_json) {
+      if(xplMsgJson_automator) {
          if(automatorServer_add_msg(xplMsgJson_automator)==ERROR) {
             DEBUG_SECTION mea_log_printf("%s (%s) : to automator error\n", DEBUG_STR, __func__);
          }
+         else {
+            cJSON_Delete(xplMsgJson_automator);
+         }
+      }
+      else {
+         DEBUG_SECTION mea_log_printf("%s (%s) : can't duplicate json xpl message\n", DEBUG_STR, __func__);
       }
 
       // pour les autres on filtre un peu avant de transmettre pour traitement
       // on ne traite que les cmnd au niveau des interfaces
-      if(strcmp(type, XPL_CMND_STR_C) != 0)
+      if(strcmp(type, XPL_CMND_STR_C) != 0) {
+         cJSON_Delete(msg_json);
          return;
+      }
 
       dispatchXPLMessageToInterfaces2(msg_json);
+*/
    }
 }
 

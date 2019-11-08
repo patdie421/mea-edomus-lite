@@ -39,12 +39,14 @@
 
 #include "interfacesServer.h"
 #include "interface_type_001.h"
+#ifndef ASPLUGIN
 #include "interface_type_002.h"
 #include "interface_type_003.h"
-#include "interface_type_004.h"
-#include "interface_type_005.h"
+// #include "interface_type_004.h"
+// #include "interface_type_005.h"
 #include "interface_type_006.h"
-
+#include "interface_type_010.h"
+#endif
 
 int update_interface_devices(int id);
 
@@ -1270,9 +1272,10 @@ int16_t init_statics_interfaces_fns(struct interfacesServer_interfaceFns_s *ifns
 #ifndef ASPLUGIN
    get_fns_interface_type_002(&(ifns[i++]));
    get_fns_interface_type_003(&(ifns[i++]));
-   get_fns_interface_type_004(&(ifns[i++]));
-   get_fns_interface_type_005(&(ifns[i++]));
+//   get_fns_interface_type_004(&(ifns[i++]));
+//   get_fns_interface_type_005(&(ifns[i++]));
    get_fns_interface_type_006(&(ifns[i++]));
+   get_fns_interface_type_010(&(ifns[i++]));
 #endif
  
 // chargement des interfaces "externes"
@@ -1304,8 +1307,8 @@ struct plugin_info_s *plugins_list = NULL;
 struct plugin_info_s plugin_info_defaults[] = {
    { "interface_type_002" DYN_EXT, INTERFACE_TYPE_002, 0 },
    { "interface_type_003" DYN_EXT, INTERFACE_TYPE_003, 0 },
-   { "interface_type_004" DYN_EXT, INTERFACE_TYPE_004, 0 },
-   { "interface_type_005" DYN_EXT, INTERFACE_TYPE_005, 0 },
+//   { "interface_type_004" DYN_EXT, INTERFACE_TYPE_004, 0 },
+//   { "interface_type_005" DYN_EXT, INTERFACE_TYPE_005, 0 },
    { "interface_type_006" DYN_EXT, INTERFACE_TYPE_006, 0 },
    { NULL, -1, -1 }
 };

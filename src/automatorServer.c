@@ -107,13 +107,16 @@ mea_error_t automatorServer_add_msg(cJSON *msg_json)
       if(automator_msg_queue->nb_elem>=1)
          pthread_cond_broadcast(&automator_msg_queue_cond);
    }
-   else
+   else {
+      cJSON_Delete(msg_json);
       ret=ERROR;
+   }
    pthread_mutex_unlock(&automator_msg_queue_lock);
    pthread_cleanup_pop(0);
 
-   if(ret!=ERROR)
+   if(ret!=ERROR) {
       return NOERROR;
+   }
    
 automatorServer_add_msg_clean_exit:
    if(e) {

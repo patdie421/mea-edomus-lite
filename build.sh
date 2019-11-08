@@ -4,8 +4,9 @@ ORG=`pwd`
 
 usage()
 {
-   echo $1 [install_dir]
+   echo $1 [install_dir [cmd_path]]
 }
+
 
 escape()
 {
@@ -17,13 +18,13 @@ escape()
 }
 
 
-if [ ! 0 -eq $# ] && [ ! 1 -eq $# ]
+if [ ! 0 -eq $# ] && [ ! 1 -eq $# ] && [ ! 2 -eq $# ]
 then
    usage $0
    exit 1
 fi
 
-if [ 1 -eq $# ]
+if [ $# -gt 0 ]
 then
    DIR="$1"
    if [ ! -d "$DIR" ]
@@ -40,24 +41,45 @@ then
 fi
 DIR=`pwd`
 
+if [ 2 -eq $# ]
+then
+   CMD_PATH="$2"
+else
+   CMD_PATH="$DIR"
+fi
+
 mkdir tmp
 cp "$ORG"/package/mea-edomus.tar.pkg.bz2 tmp
 cd tmp
 tar xvf mea-edomus.tar.pkg.bz2
-/bin/bash install.sh "$DIR"
+echo "Y" | /bin/bash install.sh "$DIR"
 cd "$DIR"
 cp "$ORG"/etc/*.json etc
 cp "$ORG"/rules/* lib/mea-rules
 bin/mea-compilr -d -i lib/mea-rules/demo.srules > lib/mea-rules/automator.rules
 
-_DIR=`escape "$DIR"`
+PYTHON=python
+which python2.7 > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+   PYTHON="python2.7"
+else
+   which python27 > /dev/null 2>&1
+   if [ $? -eq 0 ]
+   then
+      PYTHON="python27"
+   fi
+fi
+
+_DIR=`escape "$CMD_PATH"`
 REGEX1="s/###SERVICE_HOMEDIR###/$_DIR/g"
 PROG=mea-edomus
 PROG_OPTIONS=""
 _PROG_OPTIONS=`escape "$PROG_OPTIONS"`
 REGEX2="s/###SERVICE###/$PROG/g"
 REGEX3="s/###SERVICE_OPTIONS###/$_PROG_OPTIONS/g"
-cat "$ORG"/scripts/_ctrl.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" > "bin/ctrl_$PROG.sh"
+REGEX4="s/###INTERPRETER###//g"
+cat "$ORG"/scripts/_ctrl.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" -e "$REGEX4" > "bin/ctrl_$PROG.sh"
 cat "$ORG"/etc/_mea-edomus.json.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" > "etc/mea-edomus.json"
 chmod +x "bin/ctrl_$PROG.sh"
 
@@ -67,7 +89,7 @@ PROG_OPTIONS=""
 _PROG_OPTIONS=`escape "$PROG_OPTIONS"`
 REGEX2="s/###SERVICE###/$PROG/g"
 REGEX3="s/###SERVICE_OPTIONS###/$_PROG_OPTIONS/g"
-REGEX4="s/###INTERPRETER###/python27/g"
+REGEX4="s/###INTERPRETER###/$PYTHON/g"
 cat "$ORG"/scripts/_demo_device.template | sed -e "$REGEX1" -e "$REGEX4" > "bin/$PROG"
 chmod +x "bin/demo_device"
 

@@ -4,7 +4,7 @@ ORG=`pwd`
 
 usage()
 {
-   echo $1 [install_dir]
+   echo $1 [install_dir [cmd_path]]
 }
 
 escape()
@@ -17,13 +17,13 @@ escape()
 }
 
 
-if [ ! 0 -eq $# ] && [ ! 1 -eq $# ]
+if [ ! 0 -eq $# ] && [ ! 1 -eq $# ] && [ ! 2 -eq $# ]
 then
    usage $0
    exit 1
 fi
 
-if [ 1 -eq $# ]
+if [ $# -gt 0 ]
 then
    DIR="$1"
    if [ ! -d "$DIR" ]
@@ -40,6 +40,12 @@ then
 fi
 DIR=`pwd`
 
+if [ 2 -eq $# ]
+then
+   CMD_PATH="$2"
+else
+   CMD_PATH="$DIR"
+fi
 
 mkdir config 2> /dev/null
 mkdir var 2> /dev/null
@@ -59,11 +65,11 @@ cp -R "$ORG"/node_modules "$DIR"
 cp "$ORG"/xplDeviceMsgLogger.js "$ORG"/xplHttpBridge.js "$ORG"/xplToHomebridge.js "$DIR"/bin
 cp "$ORG"/config/demo.json "$DIR"/config
 
-_DIR=`escape "$DIR"`
+_DIR=`escape "$CMD_PATH"`
 REGEX1="s/###SERVICE_HOMEDIR###/$_DIR/g"
 
 PROG=xplToHomebridge.js
-PROG_OPTIONS="--cfgFile config/demo.json -p 8081"
+PROG_OPTIONS="--cfgFile \"$CMD_PATH/config/demo.json\" -p 8081"
 _PROG_OPTIONS=`escape "$PROG_OPTIONS"`
 REGEX2="s/###SERVICE###/$PROG/g"
 REGEX3="s/###SERVICE_OPTIONS###/$_PROG_OPTIONS/g"

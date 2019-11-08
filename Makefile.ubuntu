@@ -14,7 +14,8 @@ OBJECTS=$(addprefix $(TECHNO).objects/, $(SOURCES:.c=.o))
 
 EXECUTABLE=mea-edomus.$(TECHNO)
 
-INTERFACES=type_001 type_002 type_003 type_004 type_005 type_006 type_010
+# INTERFACES=type_001 type_002 type_003 type_004 type_005 type_006 type_010
+INTERFACES=type_001 type_002 type_003 type_006 type_010
 INTERFACES_NOTPLUGIN=type_001
 
 INTERFACES_PATH=$(addprefix src/interfaces/, $(INTERFACES))
@@ -92,7 +93,7 @@ clean-all: clean
 	make -C src/interfaces/drivers -f driverslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) clean
 	-rm -f lib/mealib/$(TECHNO)/mealib.a
 
-build-all: build-commands all
+build-all: all build-mealib build-commands build-xplhub build-package build-nodejs
 
 build-xplhub:
 	make -C complements/xplhub -f xplhub.mk SOURCE="$(MYPATH)"

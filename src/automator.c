@@ -82,7 +82,7 @@
 # S2 is: &false    if: ($timer['timer1']==&true) onmatch: continue
 # S3 is: $timer['timer2']
 
-# des exemples de règles "compliqués"
+# des exemples de règles "compliquées"
 # T1_last is: {T1}   if: (source == mea-edomus.home, schema == sensor.basic, device == "BUTTON2", current == &high)
 # T1      is: $now[] if: (source == mea-edomus.home, schema == sensor.basic, device == "BUTTON2", current == &high)
 # DIFF    is: $calcn[{T2} - {T2_last}] if: (source == mea-edomus.home, schema == sensor.basic, device == "BUTTON2", current == &high)
@@ -398,7 +398,7 @@ static int value_cmp(struct value_s *v1, int comparator, struct value_s *v2)
 
    switch(comparator) {
       case O_EQ:
-         if(cmp==0) return 1; 
+         if(cmp==0) return 1;
          break;
       case O_NE:
          if(cmp!=0) return 1;
@@ -980,13 +980,7 @@ static int automator_evalStr(char *str, struct value_s *v, cJSON *xplMsgJson)
             ret=1;
          pthread_mutex_unlock(&inputs_table_lock);
          pthread_cleanup_pop(0);
-/*
-         if(strcmp(name, "EVERY10S")==0) {
-            fprintf(stderr,"OUT %s = ",name);
-            value_print(v);
-            fprintf(stderr,"\n");
-         }
-*/
+
          if(ret==1)
             return 1;
       }
@@ -1788,6 +1782,7 @@ int timespec2str(char *buf, uint len, struct timespec *ts) {
 int send_change(char *name, struct value_s *v, struct timespec *t)
 {
    int ret=0;
+
    return ret;
 }
 
@@ -1795,6 +1790,7 @@ int send_change(char *name, struct value_s *v, struct timespec *t)
 int automator_send_all_inputs()
 {
    int ret=0;
+
    return ret;
 }
 

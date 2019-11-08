@@ -1,15 +1,14 @@
 {
-  "MEAPATH": "/data/dev/mea-edomus-lite",
-  "LOGPATH": "/data/dev/mea-edomus-lite/var/log",
-  "PLUGINPATH": "/data/dev/mea-edomus-lite/lib/mea-plugins",
-  "DRIVERSPATH": "/data/dev/mea-edomus-lite/lib/mea-drivers",
+  "MEAPATH": "/app",
+  "LOGPATH": "/app/var/log",
+  "PLUGINPATH": "/app/lib/mea-plugins",
+  "DRIVERSPATH": "/app/lib/mea-drivers",
   "XPL_VENDORID": "mea",
   "XPL_DEVICEID": "edomus",
-  "XPL_INSTANCEID": "homedev1",
+  "XPL_INSTANCEID": "demo",
   "VERBOSELEVEL": "1",
   "HTTP_PORT": "8083",
   "INTERFACE": "eth0",
-  "RULESFILE": "/data/dev/mea-edomus-lite/lib/mea-rules/automator.rules",
-  "RULESFILESPATH": "/data/dev/mea-edomus-lite/lib/mea-rules"
+  "RULESFILE": "/app/lib/mea-rules/automator.rules",
+  "RULESFILESPATH": "/app/lib/mea-rules"
 }
-
