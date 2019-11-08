@@ -28,23 +28,25 @@ echo "\"$DIR\"/bin/demo_device"
 }
 
 ORG=`pwd`
-#SOURCE="/data/dev/app2"
+REALPATH=`realpath "$0"`
+BASEPATH=`dirname "$REALPATH"`
 SOURCE="$1"
 DEST="/app"
 
+cd "$BASEPATH"
+mkdir -p "$SOURCE"
 docker rmi mea_edomus
-
 gen_start_sh "$DEST" > start.sh.tmp
 gen_dockerfile "$DEST" > Dockerfile.tmp
 cp .dockerignore "$SOURCE"
-cp Dockerfile.tmp "SOURCE"/Dockerfile
-cp start.sh.tmp "$SOURCE"/start.sh
+mv Dockerfile.tmp "$SOURCE"/Dockerfile
+mv start.sh.tmp "$SOURCE"/start.sh
 chmod +x "$SOURCE"/start.sh
 
-echo "BUILD_DEMO"
 cd ..
 ./build_demo.sh "$SOURCE" "$DEST"
 
-echo "BUILD_DOCKER"
 cd "$SOURCE"
 docker build -t mea_edomus .
+
+cd "$ORG"
