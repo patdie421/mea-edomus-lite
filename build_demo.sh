@@ -32,7 +32,7 @@ cd "$BASEPATH"
 ./build.sh "$DEMODIR" "$DEMOPATH"
 
 cd "$BASEPATH"/complements/xplhub
-"$BASEPATH"/build.sh "$DEMODIR" "$DEMOPATH"
+./build.sh "$DEMODIR" "$DEMOPATH"
 
 cd "$BASEPATH"/complements/mea-homebridge
 ./build.sh "$DEMODIR" "$DEMOPATH"

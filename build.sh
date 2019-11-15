@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 ORG=`pwd`
 
@@ -80,6 +80,7 @@ REGEX2="s/###SERVICE###/$PROG/g"
 REGEX3="s/###SERVICE_OPTIONS###/$_PROG_OPTIONS/g"
 REGEX4="s/###INTERPRETER###//g"
 cat "$ORG"/scripts/_ctrl.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" -e "$REGEX4" > "bin/ctrl_$PROG.sh"
+cat "$ORG"/etc/_mea-edomus.json.template
 cat "$ORG"/etc/_mea-edomus.json.template | sed -e "$REGEX1" -e "$REGEX2" -e "$REGEX3" > "etc/mea-edomus.json"
 chmod +x "bin/ctrl_$PROG.sh"
 
