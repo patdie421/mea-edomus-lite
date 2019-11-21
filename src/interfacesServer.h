@@ -15,6 +15,7 @@
 
 #include "mea_queue.h"
 #include "cJSON.h"
+#include "uthash.h"
 
 #define INTERFACE_TYPE_001 100
 #define INTERFACE_TYPE_002 200
@@ -45,6 +46,26 @@ struct device_info_s
    uint16_t todbflag;
 };
 
+struct devices_index_s
+{
+   char name[41];
+   cJSON *device;
+   UT_hash_handle hh;
+};
+
+struct types_index_s
+{
+   int id_type;
+   cJSON *type;
+   UT_hash_handle hh;
+};
+
+struct devs_index_s
+{
+   char devName[81];
+   cJSON *interface;
+   UT_hash_handle hh;
+};
 
 typedef int16_t (*xpl2_f)(cJSON *xplMsgJson, struct device_info_s *device_info, void *userdata);
 

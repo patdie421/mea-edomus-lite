@@ -1,1 +1,1 @@
-Makefile.macosx
+Makefile.ubuntu

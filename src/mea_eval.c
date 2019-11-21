@@ -840,4 +840,3 @@ int main(int argc, char *argv[])
    fprintf(stderr,"#%f\n", d);
 }
 #endif
-

@@ -89,32 +89,9 @@ static cJSON *_params_list=NULL;
 int nextDeviceId = -1;
 int nextInterfaceId = -1;
 
-struct devices_index_s
-{
-   char name[41];
-   cJSON *device;
-   UT_hash_handle hh;
-};
 struct devices_index_s *devices_index = NULL;
-
-
-struct types_index_s
-{
-   int id_type;
-   cJSON *type;
-   UT_hash_handle hh;
-};
 struct types_index_s *types_index = NULL;
-
-
-struct devs_index_s
-{
-   char devName[81];
-   cJSON *interface;
-   UT_hash_handle hh;
-};
 struct devs_index_s *devs_index = NULL;
-
 
 
 void deleteDevicesIndex(struct devices_index_s **devices_index)
@@ -2070,4 +2047,3 @@ int restart_interfaces(int my_id, void *data, char *errmsg, int l_errmsg)
  
    return 0;
 }
-

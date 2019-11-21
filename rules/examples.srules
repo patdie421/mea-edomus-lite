@@ -25,6 +25,7 @@ XHUMI01     is: current if: (device == 'xhumi01')     onmatch: moveforward NEXT
 XHUMI02     is: current if: (device == 'xhumi02')     onmatch: moveforward NEXT
 
 ** Netatmo (capteurs)
+
 ** Thermostat
 TEMP005     is: current if: (device == 'temp005')     onmatch: moveforward NEXT
 BRULEUR005  is: current if: (device == 'bruleur005')  onmatch: moveforward NEXT
@@ -65,7 +66,6 @@ BUTTON002   is: current if: (device == 'button002')   onmatch: moveforward NEXT
 BUTTON003   is: current if: (device == 'button003')   onmatch: moveforward NEXT
 
 SWITCH001   is: current if: (device == 'switch001')   onmatch: moveforward NEXT
-SWITCH002   is: current if: (device == 'switch002')   onmatch: moveforward NEXT
 SWITCH002   is: current if: (device == 'switch002')   onmatch: moveforward NEXT
 
 GSWITCH001  is: current if: (device == 'gswitch001')  onmatch: moveforward NEXT

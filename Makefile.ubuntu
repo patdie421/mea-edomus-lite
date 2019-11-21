@@ -92,6 +92,7 @@ clean-all: clean
 	make -C src -f utilslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) clean
 	make -C src/interfaces/drivers -f driverslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) clean
 	-rm -f lib/mealib/$(TECHNO)/mealib.a
+	-rm -f package/mea-edomus.tar.pkg.bz2
 
 build-all: all build-mealib build-commands build-xplhub build-package build-nodejs
 

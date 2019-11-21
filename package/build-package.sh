@@ -121,5 +121,5 @@ tar cf $SOURCE/package/mea-edomus.tar *
 cd $SOURCE/package
 tar cjf $SOURCE/package/mea-edomus.tar.pkg.bz2 mea-edomus.tar install.sh
 
-#rm mea-edomus.tar > /dev/null 2>&1
-#rm -r $SOURCE/package/tmp > /dev/null 2>&1
+rm mea-edomus.tar > /dev/null 2>&1
+rm -r $SOURCE/package/tmp > /dev/null 2>&1

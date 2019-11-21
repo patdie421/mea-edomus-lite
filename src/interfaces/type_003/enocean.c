@@ -58,8 +58,7 @@ unsigned long _enocean_diffMillis(unsigned long chrono, unsigned long now)
 int16_t _enocean_open(enocean_ed_t *ed, char *dev)
 {
    int fd=serial_open(dev, B57600);
-   if(fd != -1)
-   {
+   if(fd != -1) {
       strncpy(ed->serial_dev_name,dev,sizeof(ed->serial_dev_name)-1);
       ed->serial_dev_name[sizeof(ed->serial_dev_name)-1]=0;
       ed->fd=fd;
@@ -107,8 +106,7 @@ int16_t enocean_init(enocean_ed_t *ed, char *dev)
    mea_queue_init(ed->queue); // initialisation de la file
    ed->signal_flag=0;
    
-   if(pthread_create (&(ed->read_thread), NULL, _enocean_thread, (void *)ed))
-   {
+   if(pthread_create (&(ed->read_thread), NULL, _enocean_thread, (void *)ed)) {
       enocean_close(ed);
       free(ed->queue);
       ed->queue=NULL;
@@ -124,8 +122,7 @@ int16_t enocean_init(enocean_ed_t *ed, char *dev)
    ed->in_buffer.timestamp = 0;
    ed->in_buffer.err = 0;
 
-   if(enocean_get_baseid(ed, &ed->id,&nerr)<0) // pas de reponse correct
-   {
+   if(enocean_get_baseid(ed, &ed->id,&nerr)<0) {  // pas de reponse correct
       enocean_close(ed);
       free(ed->queue);
       ed->queue=NULL;
@@ -149,10 +146,8 @@ void enocean_clean_ed(enocean_ed_t *ed)
  * \param     ad   descripteur de communication comio
  */
 {
-   if(ed)
-   {
-      if(ed->queue)
-      {
+   if(ed) {
+      if(ed->queue) {
          free(ed->queue);
          ed->queue=NULL;
       }
@@ -167,8 +162,7 @@ void enocean_free_ed(enocean_ed_t *ed)
  * \param     ad   descripteur de communication comio
  */
 {
-   if(ed)
-   {
+   if(ed) {
       enocean_clean_ed(ed);
       free(ed);
       ed=NULL;
@@ -306,27 +300,22 @@ int16_t _enocean_uart_read(int16_t fd, int32_t timeoutms, int16_t *nerr)
    uint8_t c;
    
    ret = select(fd+1, &input_set, NULL, NULL, &timeout);
-   if(ret<=0)
-   {
-      if(ret == 0)
-      {
+   if(ret<=0) {
+      if(ret == 0) {
          *nerr = ENOCEAN_ERR_TIMEOUT;
       }
-      else
-      {
+      else {
          *nerr = ENOCEAN_ERR_SELECT;
       }
       goto on_error_exit_uart_read;
    }
    
    ret = (int)read(fd,&c,1);
-   if(ret!=1)
-   {
+   if(ret!=1) {
       *nerr = ENOCEAN_ERR_SYS;
       return -1;
    }
-   else
-   {
+   else {
       *nerr = ENOCEAN_ERR_NOERR;
       return c;
    }
@@ -349,8 +338,7 @@ int16_t _enocean_process_data(uint16_t *step, uint8_t c, uint8_t *data, uint16_t
    switch(*step)
    {
       case 0:
-         if(c==0x55)
-         {
+         if(c==0x55) {
             crc8h = 0;
             crc8d = 0;
             enocean_data_l=0;
@@ -373,8 +361,7 @@ int16_t _enocean_process_data(uint16_t *step, uint8_t c, uint8_t *data, uint16_t
       case 2:
          enocean_data_l=(enocean_data_l << 8) + c;
          crc8h = proc_crc8(crc8h,c);
-         if(enocean_data_l == 0)
-         {
+         if(enocean_data_l == 0) {
             *step = 0;
             *nerr = ENOCEAN_ERR_DATALENGTH;
             goto on_error_exit_enocean_process_data;
@@ -398,8 +385,7 @@ int16_t _enocean_process_data(uint16_t *step, uint8_t c, uint8_t *data, uint16_t
          break;
 
       case 5:
-         if(c != crc8h)
-         {
+         if(c != crc8h) {
             *nerr = ENOCEAN_ERR_CRC8H;
             *step = 0;
             goto on_error_exit_enocean_process_data;
@@ -417,8 +403,7 @@ int16_t _enocean_process_data(uint16_t *step, uint8_t c, uint8_t *data, uint16_t
          i++;
          crc8d = proc_crc8(crc8d,c);
          enocean_data[enocean_dataPtr++]=c;
-         if(i>=enocean_data_l)
-         {
+         if(i>=enocean_data_l) {
             if(enocean_optional_l)
                *step=*step+1;
             else
@@ -436,8 +421,7 @@ int16_t _enocean_process_data(uint16_t *step, uint8_t c, uint8_t *data, uint16_t
          break;
 
       case 8:
-         if(c != crc8d)
-         {
+         if(c != crc8d) {
             *nerr = ENOCEAN_ERR_CRC8D;
             *step = 0;
             goto on_error_exit_enocean_process_data;
@@ -445,14 +429,12 @@ int16_t _enocean_process_data(uint16_t *step, uint8_t c, uint8_t *data, uint16_t
          enocean_data[enocean_dataPtr++]=c;
          *step=*step+1;
       
-         if(enocean_dataPtr <= *l_data)
-         {
+         if(enocean_dataPtr <= *l_data) {
             *l_data = enocean_dataPtr;
             memcpy(data, enocean_data, enocean_dataPtr);
             *nerr = ENOCEAN_ERR_NOERR;
          }
-         else
-         {
+         else {
             *l_data = 0;
             *nerr = ENOCEAN_ERR_OUTOFRAGE;
             *step = 0;
@@ -480,13 +462,11 @@ int16_t _enocean_read_packet(int16_t fd, uint8_t *data, uint16_t *l_data, int16_
 
    *nerr = 0;
 
-   while(1)
-   {
+   while(1) {
       *nerr=ENOCEAN_ERR_NOERR;
       
       rc=_enocean_uart_read(fd, ENOCEAN_TIMEOUT_DELAY1_MS, nerr);
-      if(rc<0)
-      {
+      if(rc<0) {
          *l_data=0;
          return -1;
       }
@@ -503,38 +483,31 @@ int16_t _enocean_read_packet(int16_t fd, uint8_t *data, uint16_t *l_data, int16_
          resyncBuffer[resyncBufferPtr++]=c; // on garde trace des données pour pouvoir les rejouer en cas d'erreur de CRC
 
       ret=_enocean_process_data(&step, c, data, l_data, nerr);
-      if(ret<0) //  && step < 6
-      {
-         if(*nerr == ENOCEAN_ERR_CRC8H) // erreur de CRC, problème de synchro de début de trame ?
-         {
+      if(ret<0) {  //  && step < 6
+         if(*nerr == ENOCEAN_ERR_CRC8H) {  // erreur de CRC, problème de synchro de début de trame ?
             step=0; // réinitialisation de l'automate
-            for(int j=1;j<resyncBufferPtr;j++) // on rejout tout (sauf le premier caractère) sans ce poser de question
-            {
+            for(int j=1;j<resyncBufferPtr;j++) { // on rejoue tout (sauf le premier caractère) sans ce poser de question
                _enocean_process_data(&step, resyncBuffer[j], data, l_data, nerr);
             }
             resyncBufferPtr=0; // on vide le buffer
          }
-         else if(*nerr == ENOCEAN_ERR_STARTFRAME)
-         {
+         else if(*nerr == ENOCEAN_ERR_STARTFRAME) {
             resyncBufferPtr=0;
             
             // envisager ici de mettre un timeout ...
             
             continue; // tant qu'on a pas eu de start, on reboucle
          }
-         else
-         {
+         else {
             // pour toutes autres erreurs on s'arrête
             *l_data=0;
             return -1;
          }
       }
-      else if(ret == 1)
-      {
+      else if(ret == 1) {
          return 0;
       }
-      else
-      {
+      else {
          // une erreur à traiter
       }
    }
@@ -604,8 +577,7 @@ int16_t _enocean_build_radio_erp1_packet(uint8_t rorg, uint32_t source, uint32_t
    crc8d = proc_crc8(crc8d, rorg);
    
    // données
-   for(int i=0;i<l_data;i++)
-   {
+   for(int i=0;i<l_data;i++) {
       crc8d = proc_crc8(crc8d, data[i]);
       packet[ptr++] = data[i];
    }
@@ -687,8 +659,7 @@ int16_t enocean_send_packet(enocean_ed_t *ed, uint8_t *packet, uint16_t l_packet
    struct timespec ts;
   
    int wr=(int)write(ed->fd, packet, l_packet);
-   if(wr!=-1)
-   {
+   if(wr!=-1) {
       pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&(ed->sync_lock) );
       pthread_mutex_lock(&(ed->sync_lock));
 
@@ -701,8 +672,7 @@ int16_t enocean_send_packet(enocean_ed_t *ed, uint8_t *packet, uint16_t l_packet
       ts.tv_sec = tv.tv_sec + 2;
       ts.tv_nsec = 0;
       int pr=pthread_cond_timedwait(&ed->sync_cond, &ed->sync_lock, &ts);
-      if(pr)
-      {
+      if(pr) {
          if(pr!=ETIMEDOUT)
             *nerr=ENOCEAN_ERR_SYS;
          else
@@ -710,20 +680,16 @@ int16_t enocean_send_packet(enocean_ed_t *ed, uint8_t *packet, uint16_t l_packet
          *l_response = 0;
          ret=-1;
       }
-      else
-      {
-         if(ed->in_buffer.err == 0)
-         {
+      else {
+         if(ed->in_buffer.err == 0) {
             int16_t i = 0;
-            for(i=0;i<*l_response && i< ed->in_buffer.packet_l;i++)
-            {
+            for(i=0;i<*l_response && i< ed->in_buffer.packet_l;i++) {
                response[i]= ed->in_buffer.packet[i];
             }
             *l_response=i;
             ret = 0;
          }
-         else
-         {
+         else {
             *nerr = ed->in_buffer.err;
             ret = -1;
          }
@@ -731,8 +697,7 @@ int16_t enocean_send_packet(enocean_ed_t *ed, uint8_t *packet, uint16_t l_packet
       pthread_mutex_unlock(&(ed->sync_lock));
       pthread_cleanup_pop(0);
    }
-   else
-   {
+   else {
       *l_response=0;
       *nerr=ENOCEAN_ERR_SYS;
       ret=-1;
@@ -782,8 +747,7 @@ int16_t enocean_get_chipid(enocean_ed_t *ed, uint32_t *chipid, int16_t *nerr)
    
    *nerr=0;
    int r = enocean_send_packet(ed, request, ptr, response, &l_response, nerr);
-   if(r!=-1)
-   {
+   if(r!=-1) {
       VERBOSE(5) {
          mea_log_printf("%s ENOCEAN_RD_VERSION : Description  = %s\n",INFO_STR,&response[23]);
          mea_log_printf("%s ENOCEAN_RD_VERSION : Version APP  = %02d, %02d, %02d, %02d\n",INFO_STR,response[7],response[8],response[9],response[10]);
@@ -794,8 +758,7 @@ int16_t enocean_get_chipid(enocean_ed_t *ed, uint32_t *chipid, int16_t *nerr)
 
       *chipid = enocean_calc_addr(response[15],response[16],response[17],response[18]);
    }
-   else
-   {
+   else {
       return -1;
    }
 
@@ -843,8 +806,7 @@ int16_t enocean_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr)
    crc8d = proc_crc8(crc8d, request[ptr]);
    ptr++;
 
-   for(int i=0;i<4;i++) // Timeout : 0 => valeur par defaut : 60 s (60000 ms)
-   {
+   for(int i=0;i<4;i++) { // Timeout : 0 => valeur par defaut : 60 s (60000 ms)
       request[ptr++] = 0;
       crc8d = proc_crc8(crc8d, 0);
    }
@@ -857,15 +819,13 @@ int16_t enocean_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr)
 
    *nerr=0;
    l_reponse=40;
-   if(enocean_send_packet(ed, request, ptr, reponse, &l_reponse, nerr)!=-1)
-   {
+   if(enocean_send_packet(ed, request, ptr, reponse, &l_reponse, nerr)!=-1) {
       VERBOSE(9) {
          // traiter ici la réponse
          mea_log_printf("%s RESPONSE = %d %x\n",INFO_STR, reponse[6], reponse[6]);
       }
    }
-   else
-   {
+   else {
       return -1;
    }
 
@@ -916,8 +876,7 @@ int16_t enocean_sa_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr)
    request[ptr++] = 0; // Simple learnmode
    crc8d = proc_crc8(crc8d, 0);
 
-   for(int i=0;i<4;i++) // Timeout : 0 => valeur par defaut : 60 s (60000 ms)
-   {
+   for(int i=0;i<4;i++) { // Timeout : 0 => valeur par defaut : 60 s (60000 ms) 
       request[ptr++] = 0;
       crc8d = proc_crc8(crc8d, 0);
    }
@@ -926,15 +885,13 @@ int16_t enocean_sa_learning_onoff(enocean_ed_t *ed, int onoff, int16_t *nerr)
    request[ptr++] = crc8d;
 
    *nerr=0;
-   if(enocean_send_packet(ed, request, ptr, response, &l_response, nerr)!=-1)
-   {
+   if(enocean_send_packet(ed, request, ptr, response, &l_response, nerr)!=-1) {
       VERBOSE(9) {
          mea_log_printf("%s RESPONSE = %d\n",INFO_STR, response[6]);
       }
       ret=response[6];
    }
-   else
-   {
+   else {
       ret=-1;
    }
 
@@ -985,8 +942,7 @@ int16_t enocean_sa_confirm_learn_response(enocean_ed_t *ed, uint16_t response_ti
    request[ptr++] = confirm & 0xFF;
    crc8d = proc_crc8(crc8d, confirm & 0xFF);
 
-   for(int i=0;i<4;i++) // Timeout : 0 => valeur par defaut : 60 s (60000 ms)
-   {
+   for(int i=0;i<4;i++) { // Timeout : 0 => valeur par defaut : 60 s (60000 ms)
       request[ptr++] = 0;
       crc8d = proc_crc8(crc8d, 0);
    }
@@ -995,14 +951,12 @@ int16_t enocean_sa_confirm_learn_response(enocean_ed_t *ed, uint16_t response_ti
    request[ptr++] = crc8d;
 
    *nerr=0;
-   if(enocean_send_packet(ed, request, ptr, response, &l_response, nerr)!=-1)
-   {
+   if(enocean_send_packet(ed, request, ptr, response, &l_response, nerr)!=-1) {
       VERBOSE(9) {
          mea_log_printf("%s RESPONSE = %d\n",INFO_STR, response[6]);
       }
    }
-   else
-   {
+   else {
       return -1;
    }
    return 0;
@@ -1045,23 +999,19 @@ int16_t enocean_get_baseid(enocean_ed_t *ed, uint32_t *baseid, int16_t *nerr)
    request[ptr++] = crc8d;
 
    *nerr=0;
-   if(enocean_send_packet(ed, request, ptr, response, &l_response, nerr)!=-1)
-   {
-         if(response[6]==0)
-         {
+   if(enocean_send_packet(ed, request, ptr, response, &l_response, nerr)!=-1) {
+         if(response[6]==0) {
             VERBOSE(9) {
                mea_log_printf("%s CO_RD_IDBASE : BASEID    = %02x-%02x-%02x-%02x\n",INFO_STR,response[7],response[8],response[9],response[10]);
                mea_log_printf("%s CO_RD_IDBASE : REMAINING = %d\n",INFO_STR, response[8]);
             }
             *baseid = enocean_calc_addr(response[7],response[8],response[9],response[10]);
          }
-         else
-         {
+         else {
             return -1;
          }
    }
-   else
-   {
+   else {
       return -1;
    }
 
@@ -1089,13 +1039,11 @@ int16_t enocean_send_radio_erp1_packet(enocean_ed_t *ed, uint8_t rorg, uint32_t 
 //         fprintf(stderr,"%02d %02x %03d\n", i, packet[i], packet[i]); 
 //   }
    return_val=enocean_send_packet(ed, packet, l_packet, response, &l_response, nerr);
-   if(return_val==0)
-   {
+   if(return_val==0) {
       return_val = response[6];
       // voir s'il y a d'autre données à lire pour ce type de packet
    }
-   else
-   {
+   else {
       VERBOSE(1) {
          mea_log_printf("%s (%s) : request error = %d\n", ERROR_STR, __func__,  *nerr);
       }
@@ -1120,26 +1068,22 @@ int _enocean_reopen(enocean_ed_t *ed)
    
    close(ed->fd);
    
-   for(int i=0;i<ENOCEAN_NB_RETRY;i++) // 5 tentatives pour rétablir les communications
-   {
+   for(int i=0;i<ENOCEAN_NB_RETRY;i++) { // 5 tentatives pour rétablir les communications
       fd = _enocean_open(ed, dev);
-      if (fd == -1)
-      {
+      if (fd == -1) {
          VERBOSE(1) {
             mea_log_printf("%s (%s) : try #%d/%d, unable to open serial port (%s) - ",ERROR_STR,__func__, i+1, ENOCEAN_NB_RETRY, dev);
             perror("");
          }
       }
-      else
-      {
+      else {
          flag=1;
          break;
       }
       sleep(5);
    }
    
-   if(!flag)
-   {
+   if(!flag) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't recover communication now\n", ERROR_STR,__func__);
       return -1;
    }
@@ -1170,8 +1114,7 @@ uint32_t _enocean_get_addr_from_packet(uint8_t *data, int16_t l_data)
 {
    uint32_t addr=0;
    
-   if(data[4]==ENOCEAN_RADIO_ERP1)
-   {
+   if(data[4]==ENOCEAN_RADIO_ERP1) {
 //      int16_t addr_index = 5 + (data[1] << 8) + data[2] - 4;
       int16_t addr_index = (data[1] << 8) + data[2] + 1;
       addr = enocean_calc_addr(data[addr_index],data[addr_index+1],data[addr_index+2],data[addr_index+3]);
@@ -1191,25 +1134,20 @@ void *_enocean_thread(void *args)
    enocean_ed_t *ed=(enocean_ed_t *)args;
    
    VERBOSE(5) mea_log_printf("%s (%s) : starting enocean read thread %s\n", INFO_STR, __func__, ed->serial_dev_name);
-   while(1)
-   {
+   while(1) {
       l_packet = sizeof(packet);
       ret=_enocean_read_packet(ed->fd, (uint8_t *)packet, &l_packet, &nerr);
-      if(ret==0)
-      {
-         switch(packet[4]) // type de trame
-         {
+      if(ret==0) {
+         switch(packet[4]) {  // type de trame
             case ENOCEAN_RADIO_ERP1:
-               if(ed->enocean_callback)
-               {
+               if(ed->enocean_callback) {
                   uint32_t addr = 0;
                   addr = _enocean_get_addr_from_packet(packet,l_packet);
                   ed->enocean_callback(packet,l_packet, addr, ed->enocean_callback_data);
                }
                break;
             case ENOCEAN_EVENT:
-               if(ed->enocean_callback)
-               {
+               if(ed->enocean_callback) {
                   ed->enocean_callback(packet,l_packet, 0, ed->enocean_callback_data);
                }
                break;
@@ -1218,17 +1156,14 @@ void *_enocean_thread(void *args)
                 pthread_mutex_lock(&ed->sync_lock);
 
                 unsigned long now = _enocean_millis();
-                if( _enocean_diffMillis(ed->in_buffer.timestamp, now) < 500)
-                {
+                if( _enocean_diffMillis(ed->in_buffer.timestamp, now) < 500) {
                    ed->in_buffer.packet_l = l_packet;
-                   for(int i=0;i<sizeof(ed->in_buffer.packet) && i<l_packet;i++)
-                   {
+                   for(int i=0;i<sizeof(ed->in_buffer.packet) && i<l_packet;i++) {
                       ed->in_buffer.packet[i]=packet[i];
                    }
                    ed->in_buffer.err = 0;
                 }
-                else
-                {
+                else {
                    ed->in_buffer.packet_l = 0;
                    ed->in_buffer.err=ENOCEAN_ERR_TIMEOUT;
                 }
@@ -1239,8 +1174,7 @@ void *_enocean_thread(void *args)
             default:
                VERBOSE(1) {
                   mea_log_printf("%s (%s) : unsupported packet recepted\n", ERROR_STR, __func__);
-                  for(int i=0; i<l_packet; i++)
-                  {
+                  for(int i=0; i<l_packet; i++) {
                      if(i && (i % 10) == 0)
                         fprintf(stderr, "\n");
                      fprintf(stderr, "0x%02x ", packet[i]);
@@ -1249,8 +1183,7 @@ void *_enocean_thread(void *args)
          }
       }
       
-      if(ret<0)
-      {
+      if(ret<0) {
          switch(nerr)
          {
             case ENOCEAN_ERR_TIMEOUT:
@@ -1262,8 +1195,7 @@ void *_enocean_thread(void *args)
                   mea_log_printf("%s (%s) : communication error (nerr=%d) - ", ERROR_STR, __func__, nerr);
                   perror("");
                }
-               if(_enocean_reopen(ed)<0)
-               {
+               if(_enocean_reopen(ed)<0) {
                   ed->signal_flag=1;
                   VERBOSE(1) {
                      mea_log_printf("%s (%s) : enocean thread goes down\n", ERROR_STR,__func__);
