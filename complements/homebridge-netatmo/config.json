@@ -5,7 +5,7 @@
       "port": 51826,
       "pin": "031-45-153"
    },
-   "description": "This is an example configuration file with one fake accessory and one fake platform. You can use this as a template for creating your own configuration file containing devices you actually own.",
+   "description": "Hombrige-netatmo configuaration",
    "ports": {
       "start": 52100,
       "end": 52150,
