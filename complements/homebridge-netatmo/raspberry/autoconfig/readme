@@ -1,0 +1,15 @@
+voir : https://raspberrypi.stackexchange.com/questions/33817/use-boot-cmdline-txt-for-creating-first-boot-script
+
+mount sd card
+
+$ cd <sd_card_mountpoint>/boot
+
+update params file
+
+$ ./auconfig/prepareinit.sh
+
+unmount sd card
+
+insert sd card in raspberry
+
+power on  raspberry
