@@ -23,35 +23,33 @@ int16_t pairing_as_f60201(enocean_ed_t *ed, uint32_t addr_dec, uint32_t device_a
 
 int16_t enocean_f6_02_01(enocean_ed_t *ed, uint32_t addr_dec, uint32_t device_addr, uint16_t channel, int16_t value)
 {
-      uint8_t data[1];
-      uint8_t status;
-      int16_t nerr;
-      int ret;
+   uint8_t data[1];
+   uint8_t status;
+   int16_t nerr;
+   int ret;
 
-      if(channel==0)
-      {
-         if(value!=0)
-            data[0]=0b00010000; // AI appuyé
-         else
-            data[0]=0b00110000; // A0 appuyé
-      }
+   if(channel==0) {
+      if(value!=0)
+         data[0]=0b00010000; // AI appuyé
       else
-      {
-         if(value!=0)
-            data[0]=0b01010000; // BI appuyé
-         else
-            data[0]=0b01110000; // B0 appuyé
-      }
-      status=0b0110000; // status: T21=1, NU=1
+         data[0]=0b00110000; // A0 appuyé
+   }
+   else {
+      if(value!=0)
+         data[0]=0b01010000; // BI appuyé
+      else
+         data[0]=0b01110000; // B0 appuyé
+   }
+   status=0b0110000; // status: T21=1, NU=1
 
-      ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_RPS_TELEGRAM, ed->id+addr_dec, 0, device_addr, data, 1, status, &nerr);
+   ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_RPS_TELEGRAM, ed->id+addr_dec, 0, device_addr, data, 1, status, &nerr);
 //      usleep(1000000/20);
 
-      data[0]=0b00000000;
-      status=0b00100000; // status: T21=1, NU=0
-      ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_RPS_TELEGRAM, ed->id+addr_dec, 0, device_addr, data, 1, status, &nerr);
+   data[0]=0b00000000;
+   status=0b00100000; // status: T21=1, NU=0
+   ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_RPS_TELEGRAM, ed->id+addr_dec, 0, device_addr, data, 1, status, &nerr);
 
-      return ret;
+   return ret;
 }
 
 
@@ -60,14 +58,12 @@ int16_t enocean_d2(enocean_ed_t *ed, uint32_t addr_dec, uint32_t device_addr, ui
    uint8_t data[3];
    int16_t nerr;
 
-   if(reverse == 0)
-   {
+   if(reverse == 0) {
       data[0]=0x01;
       data[1]=channel & 0b11111;
       data[2]=value & 0b1111111;
    }
-   else
-   {
+   else {
       data[0]=value & 0b1111111;
       data[1]=channel & 0b11111;
       data[2]=0x01;
@@ -142,16 +138,13 @@ int16_t teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, uint16_t l
    fprintf(stderr, "rq         : %u (%s)\n", request, requestStr);
    fprintf(stderr, "cmnd       : %u\n", cmnd);
 
-   if(asf60201==1)
-   {
+   if(asf60201==1)    {
       enocean_f6_02_01(ed, addr_dec, device_addr, 0, 1);
    }
-   else
-   {
+   else {
       if((request  != 3) &&
          (response == 0) &&
-         (cmnd     == 0))
-      {
+         (cmnd     == 0)) {
          int16_t nerr = -1;
 
          uint8_t resp[7];
@@ -407,8 +400,7 @@ int16_t learning_callback(uint8_t *data, uint16_t l_data, uint32_t addr, void *c
          break;
       } 
    }
-   else // quand on ne sais pas analyser le packet, on le dump
-   {
+   else {  // quand on ne sais pas analyser le packet, on le dump
       for(int i=0; i<l_data; i++)
       {
          if(i && (i % 10) == 0)
@@ -440,24 +432,22 @@ int main(int argc, char *argv[])
    int16_t asf60201=0;
    verbose_level=1;
  
-   if(argc!=3 && argc!=4)
-   {
+   if(argc!=3 && argc!=4) {
       usage(argv[0]);
       exit(1);
    }
- 
+
    dev = argv[1];
+   
    if(strcmp(argv[2],"teachin")==0)
       teach=0;
    else if(strcmp(argv[2],"teachout")==0)
       teach=1;
-   else
-   {
+   else {
       usage(argv[0]);
    }
 
-   if(argc==4)
-   {
+   if(argc==4) {
       if(strcmp(argv[3], "asf60201")==0)
          asf60201 = 1;
       else
@@ -465,14 +455,13 @@ int main(int argc, char *argv[])
    }
  
    uint8_t data[0xFFFF]; // taille maximum d'un packet ESP3 = 65536
-   uint16_t l_data;
+   uint16_t l_data = 0;
    int16_t nerr = 0;
 
    ed = enocean_new_ed();
    enocean_fd = enocean_init(ed, dev);
 
-   if(enocean_fd<0)
-   {
+   if(enocean_fd<0) {
       fprintf(stderr,"enocean_init error: ");
       perror("");
       exit(1);
@@ -480,19 +469,17 @@ int main(int argc, char *argv[])
 
    enocean_set_data_callback2(ed, learning_callback, ed);
 
-   fprintf(stderr,"asf60201 = %d\n", asf60201);
+//   fprintf(stderr,"asf60201 = %d\n", asf60201);
 
-//   ret=enocean_learning_onoff(ed, 1, &nerr);
-   ret=enocean_sa_learning_onoff(ed, 1, &nerr);
    learning_state = 1;
    int16_t teach_delay = 60;
-   if(ret==0)
-   {   
+
+   ret=enocean_sa_learning_onoff(ed, 1, &nerr);
+
+   if(ret==0) {   
       int i=0; 
-      for(i=0;i<(teach_delay*10) && learning_state == 1;i++)
-      {
-         if(device_found==0)
-         {
+      for(i=0;i<(teach_delay*10) && learning_state == 1;i++) {
+         if(device_found==0) {
             if(device_data[7]!=0xd2)
                teachinout(ed, 0, device_data, device_l_data, teach, asf60201);
             else
@@ -500,27 +487,22 @@ int main(int argc, char *argv[])
 
             learning_state = 0;
          }
-         else if(device_found==1)
-         {
+         else if(device_found==1) {
             enocean_sa_confirm_learn_response(ed, 1000 /* ms */, 0, &nerr);
-
             learning_state = 0;
          }
-         else if(device_found==2)
-         {
+         else if(device_found==2) {
             learning_state = 0;
          }
-         else
-         {
-            if(i%10==0)
-            {
+         else {
+            if(i%10==0) {
                fprintf(stderr,"\rTEACHING REMAINING TIME: %3d s", teach_delay - i/10); 
                fflush(stderr);
             }
             usleep(100000);
          }
       }
-//      enocean_learning_onoff(ed, 0, &nerr);
+
       learning_state = 0;
       enocean_sa_learning_onoff(ed, 0, &nerr);
    }

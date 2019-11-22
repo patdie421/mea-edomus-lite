@@ -36,6 +36,8 @@ void mea_addDouble_to_pydict(PyObject *data_dict, char *key, double value);
 void mea_addString_to_pydict(PyObject *data_dict, char *key, char *value);
 void mea_addpydict_to_pydict(PyObject *data_dict, char *key, PyObject *adict);
 
+PyObject *mea_jsonToPyDict(cJSON *j);
+
 PyObject *mea_device_info_to_pydict_device(struct device_info_s *device_info);
 
 //PyObject *mea_xplMsgToPyDict(xPL_MessagePtr xplMsg);

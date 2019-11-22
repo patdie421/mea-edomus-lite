@@ -4,7 +4,8 @@ mount -t tmpfs tmp /run
 mount / -o remount,rw
 mkdir -p /run/systemd
 
-sed -i 's| init=.*||' /boot/cmdline.txt
+#sed -i 's| init=.*||' /boot/cmdline.txt
+cp /boot/cmdline.txt.org /boot/cmdline.txt
 
 source /boot/autoconfig/rasp/raspconfig.sh
 
