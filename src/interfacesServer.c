@@ -1343,7 +1343,7 @@ int init_interfaces_list(cJSON *jsonInterfaces, cJSON *jsonType)
          ret=sscanf(p, "[%[^]]]%*[^\n]", lib_name);
          if(ret == 1) {
             if(p[strlen(lib_name)+1]==']') {
-               int l=strlen(mea_strtrim(lib_name));
+               int l=(int)strlen(mea_strtrim(lib_name));
                if(l>0) {
                   plugins_list = (struct plugin_info_s *)realloc(plugins_list, sizeof(struct plugin_info_s)*(next_int+2));
                   plugins_list[next_int].name = malloc(l+1);

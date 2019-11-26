@@ -322,7 +322,7 @@ PyObject *mea_jsonToPyDict(cJSON *j)
       return NULL;
    }
    
-   cJSON *e=j->child;
+//   cJSON *e=j->child;
    if(!j->child) {
       return mea_jsonObjectToPyObject(j);
    }

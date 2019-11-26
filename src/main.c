@@ -151,11 +151,12 @@ int16_t read_all_application_parameters(char *cfgfile)
    if(p) {
       cJSON *c = p->child;
       while(c) {
-	 if(c->type == cJSON_String) {
-	    appParameters_set(c->string, c->valuestring, NULL);
-	 } 
+         if(c->type == cJSON_String) {
+            appParameters_set(c->string, c->valuestring, NULL);
+	      }
          c = c->next;
       }
+      cJSON_Delete(p);
       return 0;
    }
 

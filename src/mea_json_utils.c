@@ -6,16 +6,16 @@
 
 #include "mea_json_utils.h"
 
+
 int writeJson(char *file, cJSON *j)
 {
    FILE *fp;
    int ret=-1;
 
    char *s = cJSON_Print(j);
-
-   printf("write %s\n", file);
-   printf("%s\n", s);
-
+   if(!s)
+      return -1;
+      
    fp=fopen(file, "w");
    if(fp) {
       fwrite(s, strlen(s), 1, fp);
@@ -45,18 +45,25 @@ cJSON *loadJson(char *file)
    int32_t sz = (uint32_t)ftell(fp);
    if(sz>=0) {
       data=(char *)malloc(sz);
+      if(!data)
+         return NULL;
+         
       fseek(fp, 0L, SEEK_SET);
       uint32_t l=(uint32_t)fread(data, sz, 1, fp);
       fclose(fp);
+      
+      cJSON *j=NULL;
       if(l>0) {
-         return cJSON_Parse((const char *)data);
+         j=cJSON_Parse((const char *)data);
       }
       else {
-         return NULL;
+         j=NULL;
       }
+      free(data);
+      data=NULL;
+      return j;
    }
    else {
       return NULL;
    }
 }
-
