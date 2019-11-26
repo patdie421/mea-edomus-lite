@@ -19,6 +19,8 @@
 #include "tokens.h"
 #include "tokens_da.h"
 
+#include "python_utils.h"
+
 
 PyObject *mea_getMemory(PyObject *self, PyObject *args, PyObject *mea_memory)
 {
@@ -245,6 +247,100 @@ int mea_call_python_function(char *plugin_name, char *plugin_func, PyObject *plu
    Py_DECREF(pName);
 
    return retour;
+}
+
+
+PyObject *mea_jsonObjectToPyObject(cJSON *e)
+{
+   PyObject *p = NULL;
+   
+   switch(e->type) {
+      case cJSON_False:
+         p=Py_False;
+         Py_INCREF(p);
+         break;
+
+      case cJSON_True:
+         p=Py_True;
+         Py_INCREF(p);
+         break;
+            
+      case cJSON_NULL:
+         p=Py_None;
+         Py_INCREF(p);
+         break;
+               
+      case cJSON_Number:
+         p = PyFloat_FromDouble((double)e->valuedouble);
+         break;
+
+      case cJSON_String:
+         p = PyString_FromString(e->valuestring);
+         break;
+               
+      case cJSON_Array:
+         break;
+               
+      case cJSON_Object:
+         p=mea_jsonToPyDict(e->child);
+         break;
+      
+      default:
+         return NULL;
+   }
+   
+   return p;
+}
+
+
+PyObject *mea_jsonArrayToPyList(cJSON *j)
+{
+   if(j->type!=cJSON_Array)
+      return NULL;
+      
+   if(!j->child)
+      return NULL;
+      
+   PyObject *p = PyList_New(0);
+   
+   cJSON *e=j->child;
+   while(e) {
+      PyObject *s=mea_jsonObjectToPyObject(e);
+      PyList_Append(p,s);
+      Py_DECREF(s);
+      e=e->next;
+   }
+}
+
+
+PyObject *mea_jsonToPyDict(cJSON *j)
+{
+   if(!j) {
+      PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_jsonToPyDict) : PyDict_New error");
+      return NULL;
+   }
+   
+   cJSON *e=j->child;
+   if(!j->child) {
+      return mea_jsonObjectToPyObject(j);
+   }
+   else {
+      PyObject *p = PyDict_New();
+      cJSON *e=j->child;
+      while(e) {
+         PyObject *s = NULL;
+         if(e->type!=cJSON_Array) {
+            s=mea_jsonObjectToPyObject(e);
+         }
+         else {
+            s=mea_jsonArrayToPyList(e);
+         }
+         PyDict_SetItemString(p, e->string, s);
+         Py_DECREF(s);
+         e=e->next;
+      }
+      return p;
+   }
 }
 
 

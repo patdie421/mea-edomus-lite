@@ -276,7 +276,7 @@ int getPinDirection(int pinNum)
    int num=pinNum;
    unsigned char _ddrx=0;
 
-   if(pinNum>=0 && pinNum >=8)
+   if(pinNum>=0 && pinNum <=7)
       _ddrx=DDRD;
 
    else if(pinNum>=8 && pinNum<=13)

@@ -1,0 +1,16 @@
+mount -t proc proc /proc
+mount -t sysfs sys /sys
+mount -t tmpfs tmp /run
+mount / -o remount,rw
+mkdir -p /run/systemd
+
+#sed -i 's| init=.*||' /boot/cmdline.txt
+cp /boot/cmdline.txt.org /boot/cmdline.txt
+
+source /boot/autoconfig/rasp/raspconfig.sh
+
+source /boot/autoconfig/apps/install.sh
+
+mv /boot/autoconfig /boot/autoconfig.done
+
+/sbin/reboot

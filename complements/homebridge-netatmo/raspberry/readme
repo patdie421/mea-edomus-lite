@@ -1,0 +1,28 @@
+voir : https://raspberrypi.stackexchange.com/questions/33817/use-boot-cmdline-txt-for-creating-first-boot-script
+
+mount sd card
+
+$ cd <sd_card_mountpoint>/boot
+
+copy "autoconfig" in <sd_card_mountpoint>/boot
+
+$ cd <sd_card_mountpoint>/boot/autoconfig
+
+update params
+
+$ cd <sd_card_mountpoint>/boot/autoconfig/apps
+
+update config.json
+
+$ ./auconfig/preparesdcard.sh
+
+(on windows:
+cd <sd_card_mountpoint>/boot
+copy cmdline.txt cmdline.txt.org
+with notepad add init="/bin/bash -c mount /boot ; source /boot/autoconfig/rasp/raspfirstinit" at the end of the line present in cmdline.txt file)
+
+unmount sd card
+
+insert sd card in raspberry
+
+power on raspberry

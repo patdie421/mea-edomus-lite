@@ -20,10 +20,6 @@ commander.parse(process.argv);
 
 var xpl = new Xpl(commander);
 
-/*
-var msgHistoryDb={}
-setInterval(manageMsgHistoryDb, 5*60*1000);
-*/
 var responses_queue=[]
 setInterval(manageResponsesQueue, 100);
 var callbacks_queue={}
@@ -495,28 +491,6 @@ function xplIsInit() {
    console.log("xpl is initialized");
 }
 
-/*
-function manageMsgHistoryDb() {
-   var toDelete=[]
-   var now=Date.now()
-   for(var i in msgHistoryDb) {
-      var j = msgHistoryDb[i].length
-      while (j--) {
-         if((now - msgHistoryDb[i][j].timestamp) > 1000*60*60) {
-            msgHistory[i].slice(j,1);
-         }
-         else
-            break;
-      }
-      if(msgHistoryDb[i].length == 0) {
-         toDelete.push(i);
-      }
-   }
-   for(var i in toDelete) {
-      delete msgHistoryDb[i]
-   } 
-}
-*/
 
 function checkFilter(cond, message) {
    var _cond;
@@ -677,11 +651,6 @@ function xplMessage(message) {
 
    var tsp=Date.now()
 
-/*
-   if(msgHistoryDb[source]==undefined)
-      msgHistoryDb[source]=[]
-   msgHistoryDb[source].unshift({timestamp: tsp, message: message})
-*/
    console.log(message);
    msgToResponse(message);
    msgToCallback(message);
