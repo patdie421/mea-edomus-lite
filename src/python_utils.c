@@ -310,6 +310,8 @@ PyObject *mea_jsonArrayToPyList(cJSON *j)
       Py_DECREF(s);
       e=e->next;
    }
+
+   return p;
 }
 
 

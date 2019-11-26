@@ -586,7 +586,7 @@ void _rawXPLMessageHandler(char *s, int l)
 int16_t mea_xPLSendMessage2(char *data, int l_data)
 {
    if(xpl_sdb < 0 || xpl_broadcastAddr == NULL) {
-      DEBUG_SECTION mea_log_printf("%s (%s) : xplServer not ready (data=%s)\n", data);
+      // DEBUG_SECTION mea_log_printf("%s (%s) : xplServer not ready (data=%s)\n", data);
       return -1;
    }
 

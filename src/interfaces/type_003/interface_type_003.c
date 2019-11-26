@@ -52,7 +52,7 @@ char *interface_type_003_enoceandatain_str="ENOCEANIN";
 typedef void (*thread_f)(void *);
 
 // parametres valide pour les capteurs ou actionneurs pris en compte par le type 3.
-char *valid_enocean_plugin_params[]={"S:PLUGIN","S:PARAMETERS", NULL};
+char *valid_enocean_plugin_params[]={"S:PLUGIN","S:PLUGIN_PARAMETERS", NULL};
 #define ENOCEAN_PLUGIN_PARAMS_PLUGIN      0
 #define ENOCEAN_PLUGIN_PARAMS_PARAMETERS  1
 
@@ -158,7 +158,6 @@ int16_t _interface_type_003_xPL_callback2(cJSON *xplMsgJson, struct device_info_
          plugin_elem->aDict=mea_device_info_to_pydict_device(device_info);
 
          mea_addLong_to_pydict(plugin_elem->aDict, XPL_ENOCEAN_ADDR_STR_C, (long)enocean_addr);
-//         mea_addLong_to_pydict(plugin_elem->aDict, "api_key", (long)i003->id_interface);
          mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, (long)i003->id_interface);
 
          PyObject *dd=mea_xplMsgToPyDict2(xplMsgJson);
@@ -229,16 +228,17 @@ void *_thread_interface_type_003_enocean_data_cleanup(void *args)
       params->i003->myThreadState=NULL;
    }
 
-   if(params->plugin_params)
-      release_parsed_parameters(&(params->plugin_params));
-
-
    if(params->queue && params->queue->nb_elem>0) // on vide s'il y a quelque chose avant de partir
       mea_queue_cleanup(params->queue, _enocean_data_free_queue_elem);
 
    if(params->queue) {
       free(params->queue);
       params->queue=NULL;
+   }
+
+   if(params->plugin_params) {
+      release_parsed_parameters(&(params->plugin_params));
+      params->plugin_params=NULL;
    }
 
    free(params);
@@ -267,9 +267,6 @@ void *_thread_interface_type_003_enocean_data(void *args)
    enocean_ed_t *ed=params->ed;
    enocean_data_queue_elem_t *e;
    int ret;
-
-   params->plugin_params=NULL;
-   params->nb_plugin_params=0;
 
    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
    PyEval_AcquireLock();
@@ -315,7 +312,6 @@ void *_thread_interface_type_003_enocean_data(void *args)
       pthread_cleanup_pop(0);
 
       if(!ret) {
-//         char sql[2048];
          uint32_t addr;
 
          params->i003->indicators.enoceandatain++;
@@ -343,11 +339,10 @@ void *_thread_interface_type_003_enocean_data(void *args)
                while(jsonDevice) {
                   int err;
                   char *parameters = cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
+
                   params->plugin_params=alloc_parsed_parameters(parameters, valid_enocean_plugin_params, &(params->nb_plugin_params), &err, 0);
                   if(!params->plugin_params || !params->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
-                     if(params->plugin_params)
-                        release_parsed_parameters(&(params->plugin_params));
-                     continue; // si pas de paramètre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin
+                        goto _thread_interface_type_003_enocean_next_device_loop;
                   }
 
                   plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
@@ -365,12 +360,12 @@ void *_thread_interface_type_003_enocean_data(void *args)
                         PyThreadState *tempState = PyThreadState_Swap(params->i003->myThreadState);
 
                         struct device_info_s device_info;
+                        PyObject *value;
+
                         device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
                         plugin_elem->aDict = mea_device_info_to_pydict_device(&device_info);
 
                         mea_addLong_to_pydict(plugin_elem->aDict, XPL_ENOCEAN_ADDR_STR_C, (long)e->enocean_addr);
-
-                        PyObject *value;
 
                         value = PyByteArray_FromStringAndSize(plugin_elem->buff, (long)plugin_elem->l_buff);
                         // PyDict_SetItemString(plugin_elem->aDict, DATA_STR_C, value);
@@ -390,7 +385,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
                         pthread_testcancel(); // on test tout de suite pour être sûr qu'on a pas ratté une demande d'arrêt
                      } // fin appel des fonctions Python
 
-                     pythonPluginServer_add_cmd(params->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
+                  pythonPluginServer_add_cmd(params->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
                      params->i003->indicators.senttoplugin++;
                      free(plugin_elem);
                      plugin_elem=NULL;
@@ -406,7 +401,11 @@ void *_thread_interface_type_003_enocean_data(void *args)
                      }
                      pthread_exit(PTHREAD_CANCELED);
                   }
-                  release_parsed_parameters(&(params->plugin_params));
+
+_thread_interface_type_003_enocean_next_device_loop:
+                  if(params->plugin_params) {
+                     release_parsed_parameters(&(params->plugin_params));
+                  }
                   jsonDevice=jsonDevice->next;
                }
             }
