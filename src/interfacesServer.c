@@ -1320,7 +1320,7 @@ int init_interfaces_list(cJSON *jsonInterfaces, cJSON *jsonType)
  
    cJSON *jsonInterface=jsonInterfaces->child;
    while( jsonInterface ) {
-      int  state=cJSON_GetObjectItem(jsonInterface, "state")->valuedouble;
+//      int  state=cJSON_GetObjectItem(jsonInterface, "state")->valuedouble;
       int  id_type=cJSON_GetObjectItem(jsonInterface, "id_type")->valuedouble;
 
       cJSON *jsonType=findTypeByIdThroughIndex(types_index, id_type);
@@ -1395,7 +1395,7 @@ int load_interface(int type, char *driversPath)
  
    for(int i=0; plugins_list[i].name; i++) {
       if(type == plugins_list[i].type) {
-         struct interfacesServer_interfaceFns_s fns;
+//         struct interfacesServer_interfaceFns_s fns;
          get_fns_interface_f fn = NULL;
          char interface_so[256];
 

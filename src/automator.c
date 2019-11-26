@@ -468,6 +468,43 @@ enum function_e function_getNum(char *str, char *params, int l_params)
       return -1;
    ++str;
 
+   for(int i=0;functionsList2[i].name;i++) {
+      if(strcmp(fn,functionsList2[i].name)==0) {
+         while(*str && *str!=']' && l_params) {
+            *params=*str;
+            ++str;
+            ++params;
+            --l_params;
+         }
+         *params=0;
+
+         if(*str==']' && *(str+1)==0) {
+            return functionsList2[i].num;
+         }
+      }
+   }
+   return -1;
+}
+
+/*
+enum function_e function_getNum(char *str, char *params, int l_params)
+{
+   char fn[VALUE_MAX_STR_SIZE];
+   int l=VALUE_MAX_STR_SIZE;
+   char *fnPtr=fn;
+
+   while(l && isalnum(*str)) {
+      *fnPtr=*str;
+      ++fnPtr;
+      ++str;
+      --l;
+   }
+   *fnPtr=0;
+
+   if(*str!='[')
+      return -1;
+   ++str;
+
    int16_t start = 0;
    int16_t end = _FN_LIST_END - 1;
    int16_t _cmpres;
@@ -502,7 +539,7 @@ enum function_e function_getNum(char *str, char *params, int l_params)
 
    return -1;
 }
-
+*/
 
 static int input_getEdge(char *expr, int direction,  struct value_s *v, cJSON *xplMsgJson)
 {
@@ -646,7 +683,6 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
    char *params=(char *)alloca(str_l);
    f = str;
    int fn=function_getNum(f, params, str_l);
-   
    switch(fn) {
       case F_NOW:
          if(params[0]==0) {
