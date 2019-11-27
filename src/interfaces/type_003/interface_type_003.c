@@ -72,7 +72,7 @@ struct xpl_callback_data_s
 };
 
 
-struct enocean_thread_params_s
+struct enocean_thread_data_s
 {
    enocean_ed_t         *ed;
    mea_queue_t          *queue;
@@ -216,33 +216,33 @@ int16_t _inteface_type_003_enocean_data_callback(uint8_t *data, uint16_t l_data,
 
 void *_thread_interface_type_003_enocean_data_cleanup(void *args)
 {
-   struct enocean_thread_params_s *params=(struct enocean_thread_params_s *)args;
+   struct enocean_thread_data_s *udata=(struct enocean_thread_data_s *)args;
 
-   if(!params)
+   if(!udata)
       return NULL;
-   if(params->i003->myThreadState) {
+   if(udata->i003->myThreadState) {
       PyEval_AcquireLock();
-      PyThreadState_Clear(params->i003->myThreadState);
-      PyThreadState_Delete(params->i003->myThreadState);
+      PyThreadState_Clear(udata->i003->myThreadState);
+      PyThreadState_Delete(udata->i003->myThreadState);
       PyEval_ReleaseLock();
-      params->i003->myThreadState=NULL;
+      udata->i003->myThreadState=NULL;
    }
 
-   if(params->queue && params->queue->nb_elem>0) // on vide s'il y a quelque chose avant de partir
-      mea_queue_cleanup(params->queue, _enocean_data_free_queue_elem);
+   if(udata->queue && udata->queue->nb_elem>0) // on vide s'il y a quelque chose avant de partir
+      mea_queue_cleanup(udata->queue, _enocean_data_free_queue_elem);
 
-   if(params->queue) {
-      free(params->queue);
-      params->queue=NULL;
+   if(udata->queue) {
+      free(udata->queue);
+      udata->queue=NULL;
    }
 
-   if(params->plugin_params) {
-      release_parsed_parameters(&(params->plugin_params));
-      params->plugin_params=NULL;
+   if(udata->plugin_params) {
+      release_parsed_parameters(&(udata->plugin_params));
+      udata->plugin_params=NULL;
    }
 
-   free(params);
-   params=NULL;
+   free(udata);
+   udata=NULL;
 
    return NULL;
 }
@@ -256,22 +256,22 @@ void *_thread_interface_type_003_enocean_data(void *args)
  * \param     args   ensemble des parametres nécessaires au thread regroupé dans une structure de données (voir struct enocean_thread_params_s)
  */
 {
-   struct enocean_thread_params_s *params=(struct enocean_thread_params_s *)args;
+   struct enocean_thread_data_s *udata=(struct enocean_thread_data_s *)args;
 
-   pthread_cleanup_push( (void *)_thread_interface_type_003_enocean_data_cleanup, (void *)params );
-   pthread_cleanup_push( (void *)set_interface_type_003_isnt_running, (void *)params->i003 );
+   pthread_cleanup_push( (void *)_thread_interface_type_003_enocean_data_cleanup, (void *)udata );
+   pthread_cleanup_push( (void *)set_interface_type_003_isnt_running, (void *)udata->i003 );
 
-   params->i003->thread_is_running=1;
-   process_heartbeat(params->i003->monitoring_id);
+   udata->i003->thread_is_running=1;
+   process_heartbeat(udata->i003->monitoring_id);
 
-   enocean_ed_t *ed=params->ed;
+   enocean_ed_t *ed=udata->ed;
    enocean_data_queue_elem_t *e;
    int ret;
 
    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
    PyEval_AcquireLock();
-   params->i003->mainThreadState = PyThreadState_Get();
-   params->i003->myThreadState = PyThreadState_New(params->i003->mainThreadState->interp);
+   udata->i003->mainThreadState = PyThreadState_Get();
+   udata->i003->myThreadState = PyThreadState_New(udata->i003->mainThreadState->interp);
    PyEval_ReleaseLock();
    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
    pthread_testcancel();
@@ -280,22 +280,22 @@ void *_thread_interface_type_003_enocean_data(void *args)
       if(ed->signal_flag==1)
          goto _thread_interface_type_003_enocean_data_clean_exit;
 
-      process_heartbeat(params->i003->monitoring_id);
-      process_update_indicator(params->i003->monitoring_id, interface_type_003_senttoplugin_str, params->i003->indicators.senttoplugin);
-      process_update_indicator(params->i003->monitoring_id, interface_type_003_xplin_str, params->i003->indicators.xplin);
-      process_update_indicator(params->i003->monitoring_id, interface_type_003_enoceandatain_str, params->i003->indicators.enoceandatain);
+      process_heartbeat(udata->i003->monitoring_id);
+      process_update_indicator(udata->i003->monitoring_id, interface_type_003_senttoplugin_str, udata->i003->indicators.senttoplugin);
+      process_update_indicator(udata->i003->monitoring_id, interface_type_003_xplin_str, udata->i003->indicators.xplin);
+      process_update_indicator(udata->i003->monitoring_id, interface_type_003_enoceandatain_str, udata->i003->indicators.enoceandatain);
 
-      pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)(&params->callback_lock) );
-      pthread_mutex_lock(&params->callback_lock);
+      pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)(&udata->callback_lock) );
+      pthread_mutex_lock(&udata->callback_lock);
 
-      if(params->queue->nb_elem==0) {
+      if(udata->queue->nb_elem==0) {
          struct timeval tv;
          struct timespec ts;
          gettimeofday(&tv, NULL);
          ts.tv_sec = tv.tv_sec + 10; // timeout de 10 secondes
          ts.tv_nsec = 0;
 
-         ret=pthread_cond_timedwait(&params->callback_cond, &params->callback_lock, &ts);
+         ret=pthread_cond_timedwait(&udata->callback_cond, &udata->callback_lock, &ts);
          if(ret) {
             if(ret==ETIMEDOUT) {
 //               DEBUG_SECTION mea_log_printf("%s (%s) : Nb elements in queue after TIMEOUT : %ld)\n", DEBUG_STR, __func__, params->queue->nb_elem);
@@ -306,15 +306,15 @@ void *_thread_interface_type_003_enocean_data(void *args)
          }
       }
 
-      ret=mea_queue_out_elem(params->queue, (void **)&e);
+      ret=mea_queue_out_elem(udata->queue, (void **)&e);
 
-      pthread_mutex_unlock(&params->callback_lock);
+      pthread_mutex_unlock(&udata->callback_lock);
       pthread_cleanup_pop(0);
 
       if(!ret) {
          uint32_t addr;
 
-         params->i003->indicators.enoceandatain++;
+         udata->i003->indicators.enoceandatain++;
          addr = e->enocean_addr;
          uint8_t a,b,c,d;
          d=addr & 0xFF;
@@ -328,7 +328,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
          mea_log_printf("%s (%s) : enocean data from - %02x-%02x-%02x-%02x\n", INFO_STR, __func__, a, b, c, d);
 
          char interfaceName[81];
-         snprintf(interfaceName,sizeof(interfaceName)-1,"%s://%02x-%02x-%02x-%02x", params->i003->name, a, b, c, d);
+         snprintf(interfaceName,sizeof(interfaceName)-1,"%s://%02x-%02x-%02x-%02x", udata->i003->name, a, b, c, d);
          mea_strtolower(interfaceName);
 
          cJSON *jsonInterface = getInterfaceByDevName_alloc(interfaceName);
@@ -340,8 +340,8 @@ void *_thread_interface_type_003_enocean_data(void *args)
                   int err;
                   char *parameters = cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
 
-                  params->plugin_params=alloc_parsed_parameters(parameters, valid_enocean_plugin_params, &(params->nb_plugin_params), &err, 0);
-                  if(!params->plugin_params || !params->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
+                  udata->plugin_params=alloc_parsed_parameters(parameters, valid_enocean_plugin_params, &(udata->nb_plugin_params), &err, 0);
+                  if(!udata->plugin_params || !udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
                         goto _thread_interface_type_003_enocean_next_device_loop;
                   }
 
@@ -357,7 +357,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
                      { // appel des fonctions Python
                         PyEval_AcquireLock();
                         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); // trop compliquer de traiter avec pthread_cleanup => on interdit les arrêts lors des commandes python
-                        PyThreadState *tempState = PyThreadState_Swap(params->i003->myThreadState);
+                        PyThreadState *tempState = PyThreadState_Swap(udata->i003->myThreadState);
 
                         struct device_info_s device_info;
                         PyObject *value;
@@ -374,10 +374,10 @@ void *_thread_interface_type_003_enocean_data(void *args)
                         // mea_addLong_to_pydict(plugin_elem->aDict, "l_data", (long)plugin_elem->l_buff);
                         mea_addLong_to_pydict(plugin_elem->aDict, L_DATA_STR_C, (long)plugin_elem->l_buff);
                         // mea_addLong_to_pydict(plugin_elem->aDict, "api_key", (long)params->i003->id_interface);
-                        mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, (long)params->i003->id_interface);
+                        mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, (long)udata->i003->id_interface);
 
-                        if(params->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s)
-                           mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, params->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
+                        if(udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s)
+                           mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
 
                         PyThreadState_Swap(tempState);
                         PyEval_ReleaseLock();
@@ -385,8 +385,8 @@ void *_thread_interface_type_003_enocean_data(void *args)
                         pthread_testcancel(); // on test tout de suite pour être sûr qu'on a pas ratté une demande d'arrêt
                      } // fin appel des fonctions Python
 
-                  pythonPluginServer_add_cmd(params->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-                     params->i003->indicators.senttoplugin++;
+                  pythonPluginServer_add_cmd(udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
+                     udata->i003->indicators.senttoplugin++;
                      free(plugin_elem);
                      plugin_elem=NULL;
 
@@ -394,7 +394,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
                   }
                   else {
                      VERBOSE(2) {
-                        release_parsed_parameters(&(params->plugin_params));
+                        release_parsed_parameters(&(udata->plugin_params));
                         cJSON_Delete(jsonInterface);
                         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
                         perror("");
@@ -403,8 +403,9 @@ void *_thread_interface_type_003_enocean_data(void *args)
                   }
 
 _thread_interface_type_003_enocean_next_device_loop:
-                  if(params->plugin_params) {
-                     release_parsed_parameters(&(params->plugin_params));
+                  if(udata->plugin_params) {
+                     release_parsed_parameters(&(udata->plugin_params));
+                     udata->plugin_params=NULL;
                   }
                   jsonDevice=jsonDevice->next;
                }
@@ -430,7 +431,7 @@ _thread_interface_type_003_enocean_data_clean_exit:
    pthread_cleanup_pop(1);
    pthread_cleanup_pop(1);
 
-   process_async_stop(params->i003->monitoring_id);
+   process_async_stop(udata->i003->monitoring_id);
    for(;;) sleep(1);
 
    return NULL;
@@ -447,33 +448,33 @@ pthread_t *start_interface_type_003_enocean_data_thread(interface_type_003_t *i0
  **/
 {
    pthread_t *thread=NULL;
-   struct enocean_thread_params_s *params=NULL;
+   struct enocean_thread_data_s *udata=NULL;
    struct enocean_callback_data_s *enocean_callback_data=NULL;
 
-   params=malloc(sizeof(struct enocean_thread_params_s));
-   if(!params) {
+   udata=malloc(sizeof(struct enocean_thread_data_s));
+   if(!udata) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
          perror("");
       }
       goto clean_exit;
    }
-   params->queue=(mea_queue_t *)malloc(sizeof(mea_queue_t));
-   if(!params->queue) {
+   udata->queue=(mea_queue_t *)malloc(sizeof(mea_queue_t));
+   if(!udata->queue) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
          perror("");
       }
       goto clean_exit;
    }
-   mea_queue_init(params->queue);
+   mea_queue_init(udata->queue);
 
-   params->ed=ed;
-   pthread_mutex_init(&params->callback_lock, NULL);
-   pthread_cond_init(&params->callback_cond, NULL);
-   params->i003=(void *)i003;
-   params->i003->mainThreadState = NULL;
-   params->i003->myThreadState = NULL;
+   udata->ed=ed;
+   pthread_mutex_init(&udata->callback_lock, NULL);
+   pthread_cond_init(&udata->callback_cond, NULL);
+   udata->i003=(void *)i003;
+   udata->i003->mainThreadState = NULL;
+   udata->i003->myThreadState = NULL;
 
    // préparation des données pour les callback io_data et data_flow dont les données sont traitées par le même thread
    enocean_callback_data=(struct enocean_callback_data_s *)malloc(sizeof(struct enocean_callback_data_s));
@@ -482,9 +483,9 @@ pthread_t *start_interface_type_003_enocean_data_thread(interface_type_003_t *i0
       goto clean_exit;
    }
    enocean_callback_data->ed=ed;
-   enocean_callback_data->callback_lock=&params->callback_lock;
-   enocean_callback_data->callback_cond=&params->callback_cond;
-   enocean_callback_data->queue=params->queue;
+   enocean_callback_data->callback_lock=&udata->callback_lock;
+   enocean_callback_data->callback_cond=&udata->callback_cond;
+   enocean_callback_data->queue=udata->queue;
 
    enocean_set_data_callback2(ed, _inteface_type_003_enocean_data_callback, (void *)enocean_callback_data);
 
@@ -494,7 +495,7 @@ pthread_t *start_interface_type_003_enocean_data_thread(interface_type_003_t *i0
       goto clean_exit;
    }
 
-   if(pthread_create (thread, NULL, (void *)function, (void *)params))
+   if(pthread_create (thread, NULL, (void *)function, (void *)udata))
       goto clean_exit;
    pthread_detach(*thread);
 
@@ -511,16 +512,16 @@ clean_exit:
       enocean_callback_data=NULL;
    }
 
-   if(params && params->queue && params->queue->nb_elem>0) // on vide s'il y a quelque chose avant de partir
-      mea_queue_cleanup(params->queue, _enocean_data_free_queue_elem);
+   if(udata && udata->queue && udata->queue->nb_elem>0) // on vide s'il y a quelque chose avant de partir
+      mea_queue_cleanup(udata->queue, _enocean_data_free_queue_elem);
 
-   if(params) {
-      if(params->queue) {
-         free(params->queue);
-         params->queue=NULL;
+   if(udata) {
+      if(udata->queue) {
+         free(udata->queue);
+         udata->queue=NULL;
       }
-      free(params);
-      params=NULL;
+      free(udata);
+      udata=NULL;
    }
    return NULL;
 }
