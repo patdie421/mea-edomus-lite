@@ -51,7 +51,6 @@ struct callback_xpl_data_s
 
 struct thread_params_s
 {
-   sqlite3              *param_db;
    interface_type_XXX_t *iXXX;
 };
 
@@ -461,17 +460,19 @@ clean_exit:
 int get_fns_interface_type_XXX(struct interfacesServer_interfaceFns_s *interfacesFns)
 {
    interfacesFns->malloc_and_init = (malloc_and_init_f)&malloc_and_init_interface_type_XXX;
+   interfacesFns->get_type = (get_type_f)&get_type_interface_type_XXX;
+   interfacesFns->type = interfacesFns->get_type();
+//   interfacesFns->get_interface_id = (get_interface_id_f)&get_interface_id_interface_type_XXX;
    interfacesFns->get_monitoring_id = (get_monitoring_id_f)&get_monitoring_id_interface_type_XXX;
+   interfacesFns->set_monitoring_id = (set_monitoring_id_f)&set_monitoring_id_interface_type_XXX;
    interfacesFns->get_xPLCallback = (get_xPLCallback_f)&get_xPLCallback_interface_type_XXX;
+   interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_XXX;
    interfacesFns->update_devices = (update_devices_f)&update_devices_type_XXX;
    interfacesFns->clean = (clean_f)&clean_interface_type_XXX;
-   interfacesFns->set_monitoring_id = (set_monitoring_id_f)&set_monitoring_id_interface_type_XXX;
-   interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_XXX;
-   interfacesFns->get_type = (get_type_f)&get_type_interface_type_XXX;
-//   interfacesFns->get_interface_id = (get_interface_id_f)&get_interface_id_interface_type_XXX;
+
    interfacesFns->api = (api_f)&api_interface_type_XXX;
    interfacesFns->lib = NULL;
-   interfacesFns->type = interfacesFns->get_type();
+
    interfacesFns->plugin_flag = 0;
 
    return 0;

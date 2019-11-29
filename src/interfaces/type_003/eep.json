@@ -1,0 +1,2974 @@
+{
+    "telegrams": {
+        "telegram": [
+            {
+                "profiles": [
+                    {
+                        "profile": {
+                            "data": {
+                                "enum": {
+                                    "item": [
+                                        {
+                                            "_description": "Released",
+                                            "_value": "0"
+                                        },
+                                        {
+                                            "_description": "Pressed",
+                                            "_value": "1"
+                                        }
+                                    ],
+                                    "_description": "Status of the push button",
+                                    "_shortcut": "PB",
+                                    "_offset": "3",
+                                    "_size": "1"
+                                }
+                            },
+                            "_type": "0x01",
+                            "_description": "Push Button"
+                        },
+                        "_func": "0x01",
+                        "_description": "Switch Buttons"
+                    },
+                    {
+                        "profile": {
+                            "data": {
+                                "enum": [
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Button AI",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Button AO",
+                                                "_value": "1"
+                                            },
+                                            {
+                                                "_description": "Button BI",
+                                                "_value": "2"
+                                            },
+                                            {
+                                                "_description": "Button BO",
+                                                "_value": "3"
+                                            }
+                                        ],
+                                        "_description": "Rocker 1st action",
+                                        "_shortcut": "R1",
+                                        "_offset": "0",
+                                        "_size": "3"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "released",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "pressed",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_description": "Energy bow",
+                                        "_shortcut": "EB",
+                                        "_offset": "3",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Button AI",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Button AO",
+                                                "_value": "1"
+                                            },
+                                            {
+                                                "_description": "Button BI",
+                                                "_value": "2"
+                                            },
+                                            {
+                                                "_description": "Button BO",
+                                                "_value": "3"
+                                            }
+                                        ],
+                                        "_description": "Rocker 2nd action",
+                                        "_shortcut": "R2",
+                                        "_offset": "4",
+                                        "_size": "3"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "No 2nd action",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "2nd action valid",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_description": "2nd action",
+                                        "_shortcut": "SA",
+                                        "_offset": "7",
+                                        "_size": "1"
+                                    }
+                                ],
+                                "status": [
+                                    {
+                                        "_description": "T21",
+                                        "_shortcut": "T21",
+                                        "_offset": "2",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "_description": "NU",
+                                        "_shortcut": "NU",
+                                        "_offset": "3",
+                                        "_size": "1"
+                                    }
+                                ]
+                            },
+                            "_type": "0x02",
+                            "_description": "Light and Blind Control - Application Style 2"
+                        },
+                        "_func": "0x02",
+                        "_description": "Rocker Switch, 2 Rocker"
+                    },
+                    {
+                        "profile": {
+                            "data": {
+                                "enum": {
+                                    "rangeitem": [
+                                        {
+                                            "_description": "not specified",
+                                            "_start": "0",
+                                            "_end": "16"
+                                        },
+                                        {
+                                            "_description": "not specified",
+                                            "_start": "18",
+                                            "_end": "255"
+                                        }
+                                    ],
+                                    "item": {
+                                        "_description": "Water detected",
+                                        "_value": "17"
+                                    },
+                                    "_description": "Water Sensor",
+                                    "_shortcut": "WAS",
+                                    "_offset": "0",
+                                    "_size": "8"
+                                },
+                                "status": [
+                                    {
+                                        "_description": "T21",
+                                        "_shortcut": "T21",
+                                        "_offset": "2",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "_description": "NU",
+                                        "_shortcut": "NU",
+                                        "_offset": "3",
+                                        "_size": "1"
+                                    }
+                                ]
+                            },
+                            "_type": "0x01",
+                            "_description": "Liquid Leakage Sensor (mechanic harvester)"
+                        },
+                        "_func": "0x05",
+                        "_description": "Detectors"
+                    },
+                    {
+                        "profile": {
+                            "data": {
+                                "enum": {
+                                    "item": [
+                                        {
+                                            "_description": "Moved from up to vertical",
+                                            "_value": "0"
+                                        },
+                                        {
+                                            "_description": "Moved from vertical to up",
+                                            "_value": "1"
+                                        },
+                                        {
+                                            "_description": "Moved from down to vertical",
+                                            "_value": "2"
+                                        },
+                                        {
+                                            "_description": "Moved from vertical to down",
+                                            "_value": "3"
+                                        }
+                                    ],
+                                    "_description": "Window handle",
+                                    "_shortcut": "WIN",
+                                    "_offset": "2",
+                                    "_size": "2"
+                                },
+                                "status": [
+                                    {
+                                        "_description": "T21",
+                                        "_shortcut": "T21",
+                                        "_offset": "2",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "_description": "NU",
+                                        "_shortcut": "NU",
+                                        "_offset": "3",
+                                        "_size": "1"
+                                    }
+                                ]
+                            },
+                            "_type": "0x00",
+                            "_description": "Window Handle"
+                        },
+                        "_func": "0x10",
+                        "_description": "Mechanical Handle"
+                    }
+                ],
+                "_rorg": "0xF6",
+                "_type": "RPS",
+                "_description": "RPS Telegram"
+            },
+            {
+                "profiles": {
+                    "profile": {
+                        "data": {
+                            "enum": {
+                                "item": [
+                                    {
+                                        "_description": "open",
+                                        "_value": "0"
+                                    },
+                                    {
+                                        "_description": "closed",
+                                        "_value": "1"
+                                    }
+                                ],
+                                "_description": "Contact",
+                                "_shortcut": "CO",
+                                "_offset": "7",
+                                "_size": "1"
+                            }
+                        },
+                        "_type": "0x01",
+                        "_description": "Single Input Contact"
+                    },
+                    "_func": "0x00",
+                    "_description": "Contacts and Switches"
+                },
+                "_rorg": "0xD5",
+                "_type": "1BS",
+                "_description": "1BS Telegram"
+            },
+            {
+                "profiles": [
+                    {
+                        "profile": [
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-40.000000",
+                                            "max": "0.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x01",
+                                "_description": "Temperature Sensor Range -40°C to 0°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-30.000000",
+                                            "max": "10.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x02",
+                                "_description": "Temperature Sensor Range -30°C to +10°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-20.000000",
+                                            "max": "20.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x03",
+                                "_description": "Temperature Sensor Range -20°C to +20°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-10.000000",
+                                            "max": "30.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x04",
+                                "_description": "Temperature Sensor Range -10°C to +30°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "0.000000",
+                                            "max": "40.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x05",
+                                "_description": "Temperature Sensor Range 0°C to +40°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "10.000000",
+                                            "max": "50.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x06",
+                                "_description": "Temperature Sensor Range +10°C to +50°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "20.000000",
+                                            "max": "60.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x07",
+                                "_description": "Temperature Sensor Range +20°C to +60°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "30.000000",
+                                            "max": "70.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x08",
+                                "_description": "Temperature Sensor Range +30°C to +70°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "40.000000",
+                                            "max": "80.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x09",
+                                "_description": "Temperature Sensor Range +40°C to +80°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "50.000000",
+                                            "max": "90.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x0A",
+                                "_description": "Temperature Sensor Range +50°C to +90°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "60.000000",
+                                            "max": "100.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x0B",
+                                "_description": "Temperature Sensor Range +60°C to +100°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-60.000000",
+                                            "max": "20.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x10",
+                                "_description": "Temperature Sensor Range -60°C to +20°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-50.000000",
+                                            "max": "30.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x11",
+                                "_description": "Temperature Sensor Range -50°C to +30°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-40.000000",
+                                            "max": "40.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x12",
+                                "_description": "Temperature Sensor Range -40°C to +40°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-30.000000",
+                                            "max": "50.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x13",
+                                "_description": "Temperature Sensor Range -30°C to +50°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-20.000000",
+                                            "max": "60.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x14",
+                                "_description": "Temperature Sensor Range -20°C to +60°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-10.000000",
+                                            "max": "70.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x15",
+                                "_description": "Temperature Sensor Range -10°C to +70°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "0.000000",
+                                            "max": "80.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x16",
+                                "_description": "Temperature Sensor Range 0°C to +80°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "10.000000",
+                                            "max": "90.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x17",
+                                "_description": "Temperature Sensor Range +10°C to +90°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "20.000000",
+                                            "max": "100.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x18",
+                                "_description": "Temperature Sensor Range +20°C to +100°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "30.000000",
+                                            "max": "110.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x19",
+                                "_description": "Temperature Sensor Range +30°C to +110°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "40.000000",
+                                            "max": "120.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x1A",
+                                "_description": "Temperature Sensor Range +40°C to +120°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "255",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "50.000000",
+                                            "max": "130.000000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x1B",
+                                "_description": "Temperature Sensor Range +50°C to +130°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "1023",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-10.000000",
+                                            "max": "41.200000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "14",
+                                        "_size": "10",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x20",
+                                "_description": "10 Bit Temperature Sensor Range -10°C to +41.2°C"
+                            },
+                            {
+                                "data": {
+                                    "value": {
+                                        "range": {
+                                            "min": "1023",
+                                            "max": "0"
+                                        },
+                                        "scale": {
+                                            "min": "-40.000000",
+                                            "max": "62.300000"
+                                        },
+                                        "_description": "Temperature (linear)",
+                                        "_shortcut": "TMP",
+                                        "_offset": "14",
+                                        "_size": "10",
+                                        "_unit": "°C"
+                                    }
+                                },
+                                "_type": "0x30",
+                                "_description": "10 Bit Temperature Sensor Range -40°C to +62.3°C"
+                            }
+                        ],
+                        "_func": "0x02",
+                        "_description": "Temperature Sensors"
+                    },
+                    {
+                        "profile": [
+                            {
+                                "data": {
+                                    "value": [
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "250"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "100"
+                                            },
+                                            "_description": "Rel. Humidity (linear)",
+                                            "_shortcut": "HUM",
+                                            "_offset": "8",
+                                            "_size": "8",
+                                            "_unit": "%"
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "250"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "40"
+                                            },
+                                            "_description": "Temperature (linear)",
+                                            "_shortcut": "TMP",
+                                            "_offset": "16",
+                                            "_size": "8",
+                                            "_unit": "°C"
+                                        }
+                                    ],
+                                    "enum": {
+                                        "item": [
+                                            {
+                                                "_description": "not available",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "available",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_description": "Availability of the Temperature Sensor",
+                                        "_shortcut": "TSN",
+                                        "_offset": "30",
+                                        "_size": "1"
+                                    }
+                                },
+                                "_type": "0x01",
+                                "_description": "Range 0°C to +40°C and 0% to 100%"
+                            },
+                            {
+                                "data": {
+                                    "value": [
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "100"
+                                            },
+                                            "_description": "Rel. Humidity (linear)",
+                                            "_shortcut": "HUM",
+                                            "_offset": "0",
+                                            "_size": "8",
+                                            "_unit": "%"
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "1023"
+                                            },
+                                            "scale": {
+                                                "min": "-20",
+                                                "max": "+60"
+                                            },
+                                            "_description": "Temperature (linear)",
+                                            "_shortcut": "TMP",
+                                            "_offset": "14",
+                                            "_size": "10",
+                                            "_unit": "°C"
+                                        }
+                                    ],
+                                    "enum": {
+                                        "item": [
+                                            {
+                                                "_description": "Heartbeat",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Event triggered",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_description": "Telegram Type",
+                                        "_shortcut": "TTP",
+                                        "_offset": "31",
+                                        "_size": "1"
+                                    }
+                                },
+                                "_type": "0x03",
+                                "_description": "Range -20°C  to +60°C 10bit-measurement  and 0% to 100%"
+                            }
+                        ],
+                        "_func": "0x04",
+                        "_description": "Temperature and Humidity Sensor"
+                    },
+                    {
+                        "profile": {
+                            "data": {
+                                "value": [
+                                    {
+                                        "range": {
+                                            "min": "0",
+                                            "max": "255"
+                                        },
+                                        "scale": {
+                                            "min": "0.000000",
+                                            "max": "5.100000"
+                                        },
+                                        "_description": "Supply voltage (linear)",
+                                        "_shortcut": "SVC",
+                                        "_offset": "0",
+                                        "_size": "8",
+                                        "_unit": "V"
+                                    },
+                                    {
+                                        "range": {
+                                            "min": "0",
+                                            "max": "255"
+                                        },
+                                        "scale": {
+                                            "min": "300.000000",
+                                            "max": "30000.000000"
+                                        },
+                                        "_description": "Illumination 2 (linear)",
+                                        "_shortcut": "ILL2",
+                                        "_offset": "8",
+                                        "_size": "8",
+                                        "_unit": "lx"
+                                    },
+                                    {
+                                        "range": {
+                                            "min": "0",
+                                            "max": "255"
+                                        },
+                                        "scale": {
+                                            "min": "600.000000",
+                                            "max": "60000.000000"
+                                        },
+                                        "_description": "Illumination 1 (linear)",
+                                        "_shortcut": "ILL1",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "lx"
+                                    }
+                                ],
+                                "enum": {
+                                    "item": [
+                                        {
+                                            "_description": "Range acc. to DB_1 (ILL1)",
+                                            "_value": "0"
+                                        },
+                                        {
+                                            "_description": "Range acc. to DB_2 (ILL2)",
+                                            "_value": "1"
+                                        }
+                                    ],
+                                    "_description": "Range select",
+                                    "_shortcut": "RS",
+                                    "_offset": "31",
+                                    "_size": "1"
+                                }
+                            },
+                            "_type": "0x01",
+                            "_description": "Range 300lx to 60.000lx"
+                        },
+                        "_func": "0x06",
+                        "_description": "Light Sensor"
+                    },
+                    {
+                        "profile": {
+                            "data": {
+                                "value": {
+                                    "range": {
+                                        "min": "0",
+                                        "max": "250"
+                                    },
+                                    "scale": {
+                                        "min": "0",
+                                        "max": "5.000000"
+                                    },
+                                    "_shortcut": "SVC",
+                                    "_description": "Supply voltage (OPTIONAL)",
+                                    "_offset": "0",
+                                    "_size": "8",
+                                    "_unit": "V"
+                                },
+                                "enum": {
+                                    "item": [
+                                        {
+                                            "_description": "off",
+                                            "_value": "0"
+                                        },
+                                        {
+                                            "_description": "on",
+                                            "_value": "1"
+                                        }
+                                    ],
+                                    "_description": "PIR Status",
+                                    "_shortcut": "PIR",
+                                    "_offset": "16",
+                                    "_size": "1"
+                                }
+                            },
+                            "_type": "0x01",
+                            "_description": "Occupancy with Supply voltage monitor"
+                        },
+                        "_func": "0x07",
+                        "_description": "Occupancy Sensor"
+                    },
+                    {
+                        "profile": {
+                            "data": {
+                                "value": [
+                                    {
+                                        "range": {
+                                            "min": "0",
+                                            "max": "255"
+                                        },
+                                        "scale": {
+                                            "min": "0",
+                                            "max": "5.100000"
+                                        },
+                                        "_shortcut": "SVC",
+                                        "_description": "Supply voltage (linear)",
+                                        "_offset": "0",
+                                        "_size": "8",
+                                        "_unit": "V"
+                                    },
+                                    {
+                                        "range": {
+                                            "min": "0",
+                                            "max": "255"
+                                        },
+                                        "scale": {
+                                            "min": "0",
+                                            "max": "510"
+                                        },
+                                        "_shortcut": "ILL",
+                                        "_description": "Illumination (linear)",
+                                        "_offset": "8",
+                                        "_size": "8",
+                                        "_unit": "lx"
+                                    },
+                                    {
+                                        "range": {
+                                            "min": "0",
+                                            "max": "255"
+                                        },
+                                        "scale": {
+                                            "min": "0",
+                                            "max": "51"
+                                        },
+                                        "_shortcut": "TMP",
+                                        "_description": "Temperature (linear)",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "°C"
+                                    }
+                                ],
+                                "enum": [
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "PIR on",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "PIR off",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "PIRS",
+                                        "_description": "PIR Status",
+                                        "_offset": "30",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Button pressed",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Button released",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "OCC",
+                                        "_description": "Occupancy Button",
+                                        "_offset": "31",
+                                        "_size": "1"
+                                    }
+                                ]
+                            },
+                            "_description": "Range 0lx to 510lx, 0°C to +51°C and Occupancy Button",
+                            "_type": "0x01"
+                        },
+                        "_func": "0x08",
+                        "_description": "Light, Temperature and Occupancy Sensor"
+                    },
+                    {
+                        "profile": [
+                            {
+                                "data": {
+                                    "value": [
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "_shortcut": "SP",
+                                            "_description": "Set Point (linear)",
+                                            "_offset": "8",
+                                            "_size": "8",
+                                            "_unit": "%"
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "255",
+                                                "max": "0"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "40"
+                                            },
+                                            "_shortcut": "TMP",
+                                            "_description": "Temperature (linear)",
+                                            "_offset": "16",
+                                            "_size": "8",
+                                            "_unit": "°C"
+                                        }
+                                    ]
+                                },
+                                "_description": "Temperature Sensor and Set Point",
+                                "_type": "0x03"
+                            },
+                            {
+                                "data": {
+                                    "value": [
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "_shortcut": "SP",
+                                            "_description": "Set Point (linear)",
+                                            "_offset": "8",
+                                            "_size": "8",
+                                            "_unit": "%"
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "255",
+                                                "max": "0"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "40"
+                                            },
+                                            "_shortcut": "TMP",
+                                            "_description": "Temperature (linear)",
+                                            "_offset": "16",
+                                            "_size": "8",
+                                            "_unit": "°C"
+                                        }
+                                    ],
+                                    "enum": {
+                                        "item": [
+                                            {
+                                                "_description": "Button pressed",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Button released",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "OCC",
+                                        "_description": "Occupancy Button",
+                                        "_offset": "31",
+                                        "_size": "1"
+                                    }
+                                },
+                                "_description": "Temperature Sensor, Set Point and Occupancy Control",
+                                "_type": "0x05"
+                            },
+                            {
+                                "data": {
+                                    "value": [
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "_shortcut": "SP",
+                                            "_description": "Set Point (linear)",
+                                            "_offset": "8",
+                                            "_size": "8",
+                                            "_unit": "%"
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "255",
+                                                "max": "0"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "40"
+                                            },
+                                            "_shortcut": "TMP",
+                                            "_description": "Temperature (linear)",
+                                            "_offset": "16",
+                                            "_size": "8",
+                                            "_unit": "°C"
+                                        }
+                                    ],
+                                    "enum": {
+                                        "item": [
+                                            {
+                                                "_description": "Position I / Night / Off",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Position O / Day / On",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "SLSW",
+                                        "_description": "Slide switch",
+                                        "_offset": "31",
+                                        "_size": "1"
+                                    }
+                                },
+                                "_description": "Temperature Sensor, Set Point and Day/Night Control",
+                                "_type": "0x06"
+                            },
+                            {
+                                "data": {
+                                    "value": [
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "_shortcut": "SP",
+                                            "_description": "Set Point (linear)",
+                                            "_offset": "0",
+                                            "_size": "8",
+                                            "_unit": ""
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "250"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "100"
+                                            },
+                                            "_shortcut": "HUM",
+                                            "_description": "Rel. Humidity (linear)",
+                                            "_offset": "8",
+                                            "_size": "8",
+                                            "_unit": "%"
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "250"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "40"
+                                            },
+                                            "_shortcut": "TMP",
+                                            "_description": "Temperature (linear)",
+                                            "_offset": "16",
+                                            "_size": "8",
+                                            "_unit": "°C"
+                                        }
+                                    ],
+                                    "enum": {
+                                        "item": [
+                                            {
+                                                "_description": "Button pressed",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Button released",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "OCC",
+                                        "_description": "Occupancy Button",
+                                        "_offset": "31",
+                                        "_size": "1"
+                                    }
+                                },
+                                "_description": "Temperature and Humidity Sensor, Set Point and Occupancy Control",
+                                "_type": "0x10"
+                            },
+                            {
+                                "data": {
+                                    "value": [
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "_shortcut": "SP",
+                                            "_description": "Set Point (linear)",
+                                            "_offset": "0",
+                                            "_size": "8",
+                                            "_unit": ""
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "250"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "100"
+                                            },
+                                            "_shortcut": "HUM",
+                                            "_description": "Rel. Humidity (linear)",
+                                            "_offset": "8",
+                                            "_size": "8",
+                                            "_unit": "%"
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "250"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "40"
+                                            },
+                                            "_shortcut": "TMP",
+                                            "_description": "Temperature (linear)",
+                                            "_offset": "16",
+                                            "_size": "8",
+                                            "_unit": "°C"
+                                        }
+                                    ]
+                                },
+                                "_description": "Temperature and Humidity Sensor and Set Point",
+                                "_type": "0x12"
+                            }
+                        ],
+                        "_description": "Room Operating Panel",
+                        "_func": "0x10"
+                    },
+                    {
+                        "profile": {
+                            "data": {
+                                "value": [
+                                    {
+                                        "range": {
+                                            "min": "0",
+                                            "max": "255"
+                                        },
+                                        "scale": {
+                                            "min": "0",
+                                            "max": "100"
+                                        },
+                                        "_shortcut": "CVAR",
+                                        "_description": "Actual value of controller",
+                                        "_offset": "0",
+                                        "_size": "8",
+                                        "_unit": "%"
+                                    },
+                                    {
+                                        "range": {
+                                            "min": "0",
+                                            "max": "255"
+                                        },
+                                        "scale": {
+                                            "min": "0",
+                                            "max": "51.2"
+                                        },
+                                        "_shortcut": "ASP",
+                                        "_description": "Actual Setpoint",
+                                        "_offset": "16",
+                                        "_size": "8",
+                                        "_unit": "C"
+                                    }
+                                ],
+                                "enum": [
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "State 0 Manual",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "State 1 Manual",
+                                                "_value": "1"
+                                            },
+                                            {
+                                                "_description": "State 2 Manual",
+                                                "_value": "2"
+                                            },
+                                            {
+                                                "_description": "State 3 Manual",
+                                                "_value": "3"
+                                            },
+                                            {
+                                                "_description": "State 0 Automatic",
+                                                "_value": "16"
+                                            },
+                                            {
+                                                "_description": "State 1 Automatic",
+                                                "_value": "17"
+                                            },
+                                            {
+                                                "_description": "State 2 Automatic",
+                                                "_value": "18"
+                                            },
+                                            {
+                                                "_description": "State 3 Automatic",
+                                                "_value": "19"
+                                            },
+                                            {
+                                                "_description": "Not Available",
+                                                "_value": "255"
+                                            }
+                                        ],
+                                        "_shortcut": "FAN",
+                                        "_description": "Actual value of fan",
+                                        "_offset": "8",
+                                        "_size": "8",
+                                        "_unit": "%"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "No alarm",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Alarm",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "ALR",
+                                        "_description": "Alarm",
+                                        "_offset": "24",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Heating",
+                                                "_value": "1"
+                                            },
+                                            {
+                                                "_description": "Cooling",
+                                                "_value": "2"
+                                            },
+                                            {
+                                                "_description": "Off",
+                                                "_value": "3"
+                                            }
+                                        ],
+                                        "_shortcut": "CTM",
+                                        "_description": "Controller mode",
+                                        "_offset": "25",
+                                        "_size": "2"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Automatic",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Override",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "CTS",
+                                        "_description": "Controller state",
+                                        "_offset": "27",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Normal",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Energy hold-off / Dew point",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "ERH",
+                                        "_description": "Energy hold-off",
+                                        "_offset": "29",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Occupied",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "Unoccupied",
+                                                "_value": "1"
+                                            },
+                                            {
+                                                "_description": "StandBy",
+                                                "_value": "2"
+                                            },
+                                            {
+                                                "_description": "Frost",
+                                                "_value": "3"
+                                            }
+                                        ],
+                                        "_shortcut": "RO",
+                                        "_description": "Room occupancy",
+                                        "_offset": "30",
+                                        "_size": "2"
+                                    }
+                                ]
+                            },
+                            "_description": "Temperature Controller Output",
+                            "_type": "0x02"
+                        },
+                        "_description": "Controller Status",
+                        "_func": "0x11"
+                    },
+                    {
+                        "profile": {
+                            "data": {
+                                "value": {
+                                    "range": {
+                                        "min": "0",
+                                        "max": "250"
+                                    },
+                                    "scale": {
+                                        "min": "0",
+                                        "max": "5.0"
+                                    },
+                                    "_description": "Supply voltage / super cap. (linear); 251 - 255 reserved for error code",
+                                    "_shortcut": "SVC",
+                                    "_offset": "0",
+                                    "_size": "8",
+                                    "_unit": "V"
+                                },
+                                "enum": {
+                                    "item": [
+                                        {
+                                            "_description": "open",
+                                            "_value": "1"
+                                        },
+                                        {
+                                            "_description": "closed",
+                                            "_value": "0"
+                                        }
+                                    ],
+                                    "_description": "Contact",
+                                    "_shortcut": "CT",
+                                    "_offset": "31",
+                                    "_size": "1"
+                                }
+                            },
+                            "_type": "0x01",
+                            "_description": "Single Input Contact (Window/Door), Supply voltage monitor"
+                        },
+                        "_func": "0x14",
+                        "_description": "Multi-Func Sensor"
+                    },
+                    {
+                        "profile": {
+                            "data": [
+                                {
+                                    "value": [
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "100"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "100"
+                                            },
+                                            "_shortcut": "CV",
+                                            "_description": "Current Value",
+                                            "_offset": "0",
+                                            "_size": "8",
+                                            "_unit": "%"
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "40"
+                                            },
+                                            "_shortcut": "TMP",
+                                            "_description": "Temperature (linear)",
+                                            "_offset": "16",
+                                            "_size": "8",
+                                            "_unit": "°C"
+                                        }
+                                    ],
+                                    "enum": [
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "off",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "on",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "SO",
+                                            "_description": "Service On",
+                                            "_offset": "8",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "ENIE",
+                                            "_description": "Energy input enabled",
+                                            "_offset": "9",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "ES",
+                                            "_description": "Energy storage sufficiently charged",
+                                            "_offset": "10",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "BCAP",
+                                            "_description": "Battery capacity; change battery next days",
+                                            "_offset": "11",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "CCO",
+                                            "_description": "Contact, cover open",
+                                            "_offset": "12",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "FTS",
+                                            "_description": "Failure Temperature sensor, out of range",
+                                            "_offset": "13",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "DWO",
+                                            "_description": "Detection, window open",
+                                            "_offset": "14",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "ACO",
+                                            "_description": "Actuator obstructed",
+                                            "_offset": "15",
+                                            "_size": "1"
+                                        }
+                                    ],
+                                    "_direction": "1"
+                                },
+                                {
+                                    "value": [
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "100"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "100"
+                                            },
+                                            "_shortcut": "SP",
+                                            "_description": "Valve Position",
+                                            "_offset": "0",
+                                            "_size": "8",
+                                            "_unit": "%"
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "40"
+                                            },
+                                            "_shortcut": "TMP",
+                                            "_description": "Temperature from RCU",
+                                            "_offset": "8",
+                                            "_size": "8",
+                                            "_unit": "°C"
+                                        }
+                                    ],
+                                    "enum": [
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "RIN",
+                                            "_description": "Run init sequence",
+                                            "_offset": "16",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "LFS",
+                                            "_description": "Lift set",
+                                            "_offset": "17",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "VO",
+                                            "_description": "Valve open / maintenance",
+                                            "_offset": "18",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "VC",
+                                            "_description": "Valve closed",
+                                            "_offset": "19",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "SB",
+                                            "_description": "Summer bit, Reduction of energy consumption",
+                                            "_offset": "20",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Valve position",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Temperature set point",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "SPS",
+                                            "_description": "Set point selection",
+                                            "_offset": "21",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "false",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "true",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "SPN",
+                                            "_description": "Set point inverse",
+                                            "_offset": "22",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "RCU",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "service on",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_shortcut": "RCU",
+                                            "_description": "Select function",
+                                            "_offset": "23",
+                                            "_size": "1"
+                                        }
+                                    ],
+                                    "_direction": "2"
+                                }
+                            ],
+                            "_description": "Battery Powered Actuator (BI-DIR)",
+                            "_type": "0x01"
+                        },
+                        "_description": "HVAC Components",
+                        "_func": "0x20"
+                    },
+                    {
+                        "profile": {
+                            "data": {
+                                "value": [
+                                    {
+                                        "range": {
+                                            "min": "0",
+                                            "max": "16777215"
+                                        },
+                                        "scale": {
+                                            "min": "0.000000",
+                                            "max": "16777215"
+                                        },
+                                        "_shortcut": "MR",
+                                        "_description": "current value in W or cumulative value in kWh",
+                                        "_offset": "0",
+                                        "_size": "24",
+                                        "_unit": ""
+                                    },
+                                    {
+                                        "range": {
+                                            "min": "0",
+                                            "max": "15"
+                                        },
+                                        "scale": {
+                                            "min": "0",
+                                            "max": "15"
+                                        },
+                                        "_shortcut": "TI",
+                                        "_description": "Tariff info",
+                                        "_offset": "24",
+                                        "_size": "4",
+                                        "_unit": ""
+                                    }
+                                ],
+                                "enum": [
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "kWh",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "W",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "DT",
+                                        "_description": "Current value or cumulative value",
+                                        "_offset": "29",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "x/1",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "x/10",
+                                                "_value": "1"
+                                            },
+                                            {
+                                                "_description": "x/100",
+                                                "_value": "2"
+                                            },
+                                            {
+                                                "_description": "x/1000",
+                                                "_value": "3"
+                                            }
+                                        ],
+                                        "_shortcut": "DIV",
+                                        "_description": "Divisor for value",
+                                        "_offset": "30",
+                                        "_size": "2"
+                                    }
+                                ]
+                            },
+                            "_type": "0x01",
+                            "_description": "Electricity"
+                        },
+                        "_func": "0x12",
+                        "_description": "Atomated Meter Reading (AMR)"
+                    },
+                    {
+                        "profile": {
+                            "data": {
+                                "value": {
+                                    "range": {
+                                        "min": "255",
+                                        "max": "0"
+                                    },
+                                    "scale": {
+                                        "min": "0",
+                                        "max": "40"
+                                    },
+                                    "_shortcut": "TMP",
+                                    "_description": "Temperature (linear)",
+                                    "_offset": "8",
+                                    "_size": "8",
+                                    "_unit": "°C"
+                                },
+                                "enum": [
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Low",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "High",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "WA0",
+                                        "_description": "Value of wake signal",
+                                        "_offset": "19",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Low",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "High",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "DI3",
+                                        "_description": "Digital Input 3",
+                                        "_offset": "20",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Low",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "High",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "DI2",
+                                        "_description": "Digital Input 2",
+                                        "_offset": "21",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Low",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "High",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "DI1",
+                                        "_description": "Digital Input 1",
+                                        "_offset": "22",
+                                        "_size": "1"
+                                    },
+                                    {
+                                        "item": [
+                                            {
+                                                "_description": "Low",
+                                                "_value": "0"
+                                            },
+                                            {
+                                                "_description": "High",
+                                                "_value": "1"
+                                            }
+                                        ],
+                                        "_shortcut": "DI0",
+                                        "_description": "Digital Input 0",
+                                        "_offset": "23",
+                                        "_size": "1"
+                                    }
+                                ]
+                            },
+                            "_type": "0x03",
+                            "_description": "Digital Inputs, Wake and Temperature"
+                        },
+                        "_func": "0x30",
+                        "_description": "Digital Input"
+                    },
+                    {
+                        "profile": {
+                            "command": {
+                                "item": [
+                                    {
+                                        "_description": "Switching",
+                                        "_value": "1"
+                                    },
+                                    {
+                                        "_description": "Dimming",
+                                        "_value": "2"
+                                    }
+                                ],
+                                "_description": "Command ID",
+                                "_shortcut": "COM",
+                                "_offset": "0",
+                                "_size": "8"
+                            },
+                            "data": [
+                                {
+                                    "enum": [
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Command ID {value}",
+                                                "_start": "0",
+                                                "_end": "13"
+                                            },
+                                            "_shortcut": "COM",
+                                            "_description": "Command ID",
+                                            "_offset": "0",
+                                            "_size": "8"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Unlock",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Lock",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_description": "Lock for duration time if time >0, unlimited time of no time specified. Locking may be cleared with \"unlock\". During lock phase no other commands will be accepted or executed",
+                                            "_shortcut": "LCK",
+                                            "_offset": "29",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Duration",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Delay",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_description": "Delay or duration (if Time > 0); 0 = Duration (Execute switching command immediately and switch back after duration) 1 = Delay (Execute switching command after delay)",
+                                            "_shortcut": "DEL",
+                                            "_offset": "30",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Off",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "On",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_description": "Switching command ON/OFF",
+                                            "_shortcut": "SW",
+                                            "_offset": "31",
+                                            "_size": "1"
+                                        }
+                                    ],
+                                    "value": {
+                                        "range": {
+                                            "min": "1",
+                                            "max": "65535"
+                                        },
+                                        "scale": {
+                                            "min": "0.1",
+                                            "max": "6553.5"
+                                        },
+                                        "_shortcut": "TIM",
+                                        "_description": "Time in 1/10 seconds. 0 = no time specifed",
+                                        "_offset": "8",
+                                        "_size": "16",
+                                        "_unit": "s"
+                                    },
+                                    "_command": "1"
+                                },
+                                {
+                                    "enum": [
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Command ID {value}",
+                                                "_start": "0",
+                                                "_end": "13"
+                                            },
+                                            "_shortcut": "COM",
+                                            "_description": "Command ID",
+                                            "_offset": "0",
+                                            "_size": "8"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Absolute value",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Relative value",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_description": "Dimming Range",
+                                            "_shortcut": "EDIMR",
+                                            "_offset": "29",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "No",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Yes",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_description": "Store final value",
+                                            "_shortcut": "STR",
+                                            "_offset": "30",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Off",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "On",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_description": "Switching command",
+                                            "_shortcut": "SW",
+                                            "_offset": "31",
+                                            "_size": "1"
+                                        }
+                                    ],
+                                    "value": [
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "_shortcut": "EDIM",
+                                            "_description": "Dimming value (absolute [0...255] or relative [0...100])",
+                                            "_offset": "8",
+                                            "_size": "8",
+                                            "_unit": "%"
+                                        },
+                                        {
+                                            "range": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "scale": {
+                                                "min": "0",
+                                                "max": "255"
+                                            },
+                                            "_shortcut": "RMP",
+                                            "_description": "Ramping time in seconds, 0 = no ramping, 1...255 = seconds to 100%",
+                                            "_offset": "16",
+                                            "_size": "8",
+                                            "_unit": "s"
+                                        }
+                                    ],
+                                    "_command": "2"
+                                }
+                            ],
+                            "_type": "0x08",
+                            "_description": "Gateway"
+                        },
+                        "_func": "0x38",
+                        "_description": "Central Command"
+                    }
+                ],
+                "_rorg": "0xA5",
+                "_type": "4BS",
+                "_description": "4BS Telegram"
+            },
+            {
+                "profiles": [
+                    {
+                        "profile": {
+                            "command": {
+                                "item": [
+                                    {
+                                        "_description": "Actuator Set Output",
+                                        "_value": "1"
+                                    },
+                                    {
+                                        "_description": "Actuator Status Response",
+                                        "_value": "4"
+                                    }
+                                ],
+                                "_description": "command indentifier",
+                                "_shortcut": "CMD",
+                                "_offset": "4",
+                                "_size": "4"
+                            },
+                            "data": [
+                                {
+                                    "enum": [
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Power Failure Detection disabled/not supported",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Power Failure Detection enabled",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_description": "Power Failure",
+                                            "_shortcut": "PF",
+                                            "_offset": "0",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Power Failure Detection not detected/not supported/disabled",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Power Failure Detection Detected",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_description": "Power Failure Detection",
+                                            "_shortcut": "PFD",
+                                            "_offset": "1",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Command ID {value}",
+                                                "_start": "0",
+                                                "_end": "13"
+                                            },
+                                            "_description": "Command indentifier",
+                                            "_shortcut": "CMD",
+                                            "_offset": "4",
+                                            "_size": "4"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Over current switch off: ready / not supported",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Over current switch off: executed",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_description": "Over current switch off",
+                                            "_shortcut": "OC",
+                                            "_offset": "8",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Error level 0: hardware OK",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Error level 1: hardware warning",
+                                                    "_value": "1"
+                                                },
+                                                {
+                                                    "_description": "Error level 2: hardware failure",
+                                                    "_value": "2"
+                                                },
+                                                {
+                                                    "_description": "Error level not supported",
+                                                    "_value": "3"
+                                                }
+                                            ],
+                                            "_description": "Error level",
+                                            "_shortcut": "EL",
+                                            "_offset": "9",
+                                            "_size": "2"
+                                        },
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Output channel {value} (to load)",
+                                                "_start": "0",
+                                                "_end": "29"
+                                            },
+                                            "item": [
+                                                {
+                                                    "_description": "Not applicable, do not use",
+                                                    "_value": "30"
+                                                },
+                                                {
+                                                    "_description": "Input channel (from mains supply)",
+                                                    "_value": "31"
+                                                }
+                                            ],
+                                            "_description": "I/O channel",
+                                            "_shortcut": "IO",
+                                            "_offset": "11",
+                                            "_size": "5"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Local control disabled / not supported",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Local control enabled",
+                                                    "_value": "1"
+                                                }
+                                            ],
+                                            "_description": "Local control",
+                                            "_shortcut": "LC",
+                                            "_offset": "16",
+                                            "_size": "1"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Output value 0% or OFF",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "output value not valid / not set",
+                                                    "_value": "127"
+                                                }
+                                            ],
+                                            "rangeitem": [
+                                                {
+                                                    "_description": "Output value {value}% or ON",
+                                                    "_start": "1",
+                                                    "_end": "100"
+                                                },
+                                                {
+                                                    "_description": "Not used",
+                                                    "_start": "101",
+                                                    "_end": "126"
+                                                }
+                                            ],
+                                            "_description": "Output value",
+                                            "_shortcut": "OV",
+                                            "_offset": "17",
+                                            "_size": "7"
+                                        }
+                                    ],
+                                    "_command": "4",
+                                    "_bits": "3"
+                                },
+                                {
+                                    "enum": [
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Command ID {value}",
+                                                "_start": "0",
+                                                "_end": "13"
+                                            },
+                                            "_description": "Command indentifier",
+                                            "_shortcut": "CMD",
+                                            "_offset": "4",
+                                            "_size": "4"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Switch to new output value",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Dim to new output level - dim timer 1",
+                                                    "_value": "1"
+                                                },
+                                                {
+                                                    "_description": "Dim to new output level - dim timer 2",
+                                                    "_value": "2"
+                                                },
+                                                {
+                                                    "_description": "Dim to new output level - dim timer 3",
+                                                    "_value": "3"
+                                                },
+                                                {
+                                                    "_description": "Stop dimming",
+                                                    "_value": "4"
+                                                }
+                                            ],
+                                            "_description": "Dim value",
+                                            "_shortcut": "DV",
+                                            "_offset": "8",
+                                            "_size": "3"
+                                        },
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Output channel {value} (to load)",
+                                                "_start": "0",
+                                                "_end": "29"
+                                            },
+                                            "item": [
+                                                {
+                                                    "_description": "All output channels supported by the device",
+                                                    "_value": "30"
+                                                },
+                                                {
+                                                    "_description": "Input channel (from mains supply)",
+                                                    "_value": "31"
+                                                }
+                                            ],
+                                            "_description": "I/O channel",
+                                            "_shortcut": "IO",
+                                            "_offset": "11",
+                                            "_size": "5"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Output value 0% or OFF",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "output value not valid / not set",
+                                                    "_value": "127"
+                                                }
+                                            ],
+                                            "rangeitem": [
+                                                {
+                                                    "_description": "Output value {value}% or ON",
+                                                    "_start": "1",
+                                                    "_end": "100"
+                                                },
+                                                {
+                                                    "_description": "Not used",
+                                                    "_start": "101",
+                                                    "_end": "126"
+                                                }
+                                            ],
+                                            "_description": "Output value",
+                                            "_shortcut": "OV",
+                                            "_offset": "17",
+                                            "_size": "7"
+                                        }
+                                    ],
+                                    "_command": "1",
+                                    "_bits": "3"
+                                }
+                            ],
+                            "_type": "0x01",
+                            "_description": "Electronic switch with Local Control"
+                        },
+                        "_func": "0x01",
+                        "_description": "Electronic switches and dimmers with Energy Measurement and Local Control"
+                    },
+                    {
+                        "profile": {
+                            "command": {
+                                "item": [
+                                    {
+                                        "_description": "Go to Position and Angle",
+                                        "_value": "1"
+                                    },
+                                    {
+                                        "_description": "Stop",
+                                        "_value": "2"
+                                    },
+                                    {
+                                        "_description": "Query Position and Angle",
+                                        "_value": "3"
+                                    },
+                                    {
+                                        "_description": "Reply Position and Angle",
+                                        "_value": "4"
+                                    },
+                                    {
+                                        "_description": "Set parameters",
+                                        "_value": "5"
+                                    }
+                                ],
+                                "_description": "command indentifier",
+                                "_shortcut": "CMD",
+                                "_offset": "28",
+                                "_size": "4"
+                            },
+                            "data": [
+                                {
+                                    "enum": [
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Output position {value}%",
+                                                "_start": "0",
+                                                "_end": "100"
+                                            },
+                                            "item": {
+                                                "_description": "Do not change",
+                                                "_value": "127"
+                                            },
+                                            "_description": "Vertical position",
+                                            "_shortcut": "POS",
+                                            "_offset": "1",
+                                            "_size": "7"
+                                        },
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Output angle {value}%",
+                                                "_start": "0",
+                                                "_end": "100"
+                                            },
+                                            "item": {
+                                                "_description": "Do not change",
+                                                "_value": "127"
+                                            },
+                                            "_description": "Rotation angle",
+                                            "_shortcut": "ANG",
+                                            "_offset": "9",
+                                            "_size": "7"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Go directly to POS/ANG",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Go up (0%), then to POS/ANG",
+                                                    "_value": "1"
+                                                },
+                                                {
+                                                    "_description": "Go down (100%), then to POS/ANG",
+                                                    "_value": "2"
+                                                },
+                                                {
+                                                    "_description": "Reserved",
+                                                    "_value": "3"
+                                                }
+                                            ],
+                                            "_description": "Repositioning",
+                                            "_shortcut": "REPO",
+                                            "_offset": "17",
+                                            "_size": "3"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Do not change",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Set blockage mode",
+                                                    "_value": "1"
+                                                },
+                                                {
+                                                    "_description": "Set alarm mode",
+                                                    "_value": "2"
+                                                },
+                                                {
+                                                    "_description": "Reserved",
+                                                    "_value": "3"
+                                                },
+                                                {
+                                                    "_description": "Reserved",
+                                                    "_value": "4"
+                                                },
+                                                {
+                                                    "_description": "Reserved",
+                                                    "_value": "5"
+                                                },
+                                                {
+                                                    "_description": "Reserved",
+                                                    "_value": "6"
+                                                },
+                                                {
+                                                    "_description": "Deblockage",
+                                                    "_value": "7"
+                                                }
+                                            ],
+                                            "_description": "Locking modes",
+                                            "_shortcut": "LOCK",
+                                            "_offset": "21",
+                                            "_size": "3"
+                                        },
+                                        {
+                                            "item": {
+                                                "_description": "Channel 1",
+                                                "_value": "0"
+                                            },
+                                            "_description": "Channel",
+                                            "_shortcut": "CHN",
+                                            "_offset": "24",
+                                            "_size": "4"
+                                        },
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Command ID {value}",
+                                                "_start": "0",
+                                                "_end": "5"
+                                            },
+                                            "_description": "Command Id",
+                                            "_shortcut": "CMD",
+                                            "_offset": "28",
+                                            "_size": "4"
+                                        }
+                                    ],
+                                    "_command": "1",
+                                    "_bits": "4"
+                                },
+                                {
+                                    "enum": [
+                                        {
+                                            "item": {
+                                                "_description": "Channel 1",
+                                                "_value": "0"
+                                            },
+                                            "_description": "Channel",
+                                            "_shortcut": "CHN",
+                                            "_offset": "0",
+                                            "_size": "4"
+                                        },
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Command ID {value}",
+                                                "_start": "0",
+                                                "_end": "5"
+                                            },
+                                            "_description": "Command Id",
+                                            "_shortcut": "CMD",
+                                            "_offset": "4",
+                                            "_size": "4"
+                                        }
+                                    ],
+                                    "_command": "2",
+                                    "_bits": "1"
+                                },
+                                {
+                                    "enum": [
+                                        {
+                                            "item": {
+                                                "_description": "Channel 1",
+                                                "_value": "0"
+                                            },
+                                            "_description": "Channel",
+                                            "_shortcut": "CHN",
+                                            "_offset": "0",
+                                            "_size": "4"
+                                        },
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Command ID {value}",
+                                                "_start": "0",
+                                                "_end": "5"
+                                            },
+                                            "_description": "Command Id",
+                                            "_shortcut": "CMD",
+                                            "_offset": "4",
+                                            "_size": "4"
+                                        }
+                                    ],
+                                    "_command": "3",
+                                    "_bits": "1"
+                                },
+                                {
+                                    "enum": [
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Output position {value}%",
+                                                "_start": "0",
+                                                "_end": "100"
+                                            },
+                                            "item": {
+                                                "_description": "Do not change",
+                                                "_value": "127"
+                                            },
+                                            "_description": "Vertical position",
+                                            "_shortcut": "POS",
+                                            "_offset": "1",
+                                            "_size": "7"
+                                        },
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Output angle {value}%",
+                                                "_start": "0",
+                                                "_end": "100"
+                                            },
+                                            "item": {
+                                                "_description": "Do not change",
+                                                "_value": "127"
+                                            },
+                                            "_description": "Rotation angle",
+                                            "_shortcut": "ANG",
+                                            "_offset": "9",
+                                            "_size": "7"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Go directly to POS/ANG",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Go up (0%), then to POS/ANG",
+                                                    "_value": "1"
+                                                },
+                                                {
+                                                    "_description": "Go down (100%), then to POS/ANG",
+                                                    "_value": "2"
+                                                },
+                                                {
+                                                    "_description": "Reserved",
+                                                    "_value": "3"
+                                                }
+                                            ],
+                                            "_description": "Repositioning",
+                                            "_shortcut": "REPO",
+                                            "_offset": "17",
+                                            "_size": "3"
+                                        },
+                                        {
+                                            "item": [
+                                                {
+                                                    "_description": "Do not change",
+                                                    "_value": "0"
+                                                },
+                                                {
+                                                    "_description": "Set blockage mode",
+                                                    "_value": "1"
+                                                },
+                                                {
+                                                    "_description": "Set alarm mode",
+                                                    "_value": "2"
+                                                },
+                                                {
+                                                    "_description": "Reserved",
+                                                    "_value": "3"
+                                                },
+                                                {
+                                                    "_description": "Reserved",
+                                                    "_value": "4"
+                                                },
+                                                {
+                                                    "_description": "Reserved",
+                                                    "_value": "5"
+                                                },
+                                                {
+                                                    "_description": "Reserved",
+                                                    "_value": "6"
+                                                },
+                                                {
+                                                    "_description": "Deblockage",
+                                                    "_value": "7"
+                                                }
+                                            ],
+                                            "_description": "Locking modes",
+                                            "_shortcut": "LOCK",
+                                            "_offset": "21",
+                                            "_size": "3"
+                                        },
+                                        {
+                                            "item": {
+                                                "_description": "Channel 1",
+                                                "_value": "0"
+                                            },
+                                            "_description": "Channel",
+                                            "_shortcut": "CHN",
+                                            "_offset": "24",
+                                            "_size": "4"
+                                        },
+                                        {
+                                            "rangeitem": {
+                                                "_description": "Command ID {value}",
+                                                "_start": "0",
+                                                "_end": "5"
+                                            },
+                                            "_description": "Command Id",
+                                            "_shortcut": "CMD",
+                                            "_offset": "28",
+                                            "_size": "4"
+                                        }
+                                    ],
+                                    "_command": "4",
+                                    "_bits": "4"
+                                }
+                            ],
+                            "_type": "0x00",
+                            "_description": "Type 0x00"
+                        },
+                        "_func": "0x05",
+                        "_description": "Blinds Control for Position and Angle"
+                    }
+                ],
+                "_rorg": "0xD2",
+                "_type": "VLD",
+                "_description": "VLD Telegram"
+            }
+        ],
+        "_version": "2.6.4",
+        "_major_version": "2",
+        "_minor_version": "6",
+        "_revision": "4"
+    }
+}

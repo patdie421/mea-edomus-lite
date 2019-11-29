@@ -10,6 +10,8 @@
 
 #include <signal.h>
 
+#include "interface_type_003.h"
+
 #include "enocean.h"
 
 #include "interfacesServer.h"
