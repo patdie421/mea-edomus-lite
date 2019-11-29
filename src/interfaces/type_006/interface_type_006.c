@@ -18,30 +18,25 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
-#include <termios.h>
+// #include <termios.h>
 #include <time.h>
 #include <sys/time.h>
-#include <signal.h>
+// #include <signal.h>
 #include <errno.h>
 #include <pthread.h>
 
 #include "globals.h"
 #include "consts.h"
-
 #include "serial.h"
-
 #include "tokens.h"
 #include "tokens_da.h"
 #include "mea_string_utils.h"
 #include "mea_verbose.h"
 #include "macros.h"
-
 #include "parameters_utils.h"
 #include "pythonPluginServer.h"
 #include "python_utils.h"
-
 #include "processManager.h"
-
 #include "interfacesServer.h"
 
 
@@ -51,6 +46,13 @@ char *interface_type_006_xplout_str="XPLOUT";
 char *interface_type_006_serialin_str="SERIALIN";
 char *interface_type_006_serialout_str="SERIALOUT";
 
+char *c_data_str = "data";
+char *c_l_data_str = "l_data";
+char *c_api_key_str = "api_key";
+
+#define DATA_STR c_data_str
+#define L_DATA_STR c_l_data_str
+#define API_KEY_STR c_api_key_str
 
 typedef void (*thread_f)(void *);
 
@@ -89,12 +91,12 @@ int interface_type_006_call_serialDataPre(struct genericserial_thread_params_s *
       PyObject *aDict=PyDict_New();
       if(aDict) {
          PyObject *value = PyByteArray_FromStringAndSize((char *)data, l_data);
-         PyDict_SetItemString(aDict, "data", value);
+         PyDict_SetItemString(aDict, DATA_STR, value);
          Py_DECREF(value);
-         mea_addLong_to_pydict(aDict, "l_data", (long)l_data);
+         mea_addLong_to_pydict(aDict, L_DATA_STR, (long)l_data);
 
          mea_addLong_to_pydict(aDict, INTERFACE_ID_STR_C, params->i006->id_interface);
-         mea_addLong_to_pydict(aDict, "api_key", (long)params->i006->id_interface);
+         mea_addLong_to_pydict(aDict, API_KEY_STR, (long)params->i006->id_interface);
 
          if(params->i006->pParams)
             PyDict_SetItemString(aDict, "plugin_paramters", params->i006->pParams);
@@ -147,12 +149,12 @@ static int interface_type_006_data_to_plugin(PyThreadState *myThreadState, cJSON
 
          // les datas
          PyObject *value = PyByteArray_FromStringAndSize((char *)data, (long)l_data);
-         PyDict_SetItemString(plugin_elem->aDict, "data", value);
+         PyDict_SetItemString(plugin_elem->aDict, DATA_STR, value);
          Py_DECREF(value);
-         mea_addLong_to_pydict(plugin_elem->aDict, "l_data", (long)l_data);
+         mea_addLong_to_pydict(plugin_elem->aDict, L_DATA_STR, (long)l_data);
 
          // info api
-         mea_addLong_to_pydict(plugin_elem->aDict, "api_key", device_info.interface_id);
+         mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR, device_info.interface_id);
          
          // parametres spécifiques
          if(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s)

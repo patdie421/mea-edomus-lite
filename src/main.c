@@ -164,7 +164,7 @@ int16_t read_all_application_parameters(char *cfgfile)
 }
 
 
-void clean_all_and_exit()
+void clean_all_and_exit(int code)
 {
    if(xplServer_monitoring_id!=-1) {
       process_stop(xplServer_monitoring_id, NULL, 0);
@@ -208,7 +208,7 @@ void clean_all_and_exit()
    release_strings_da();
    release_tokens();
 
-   exit(0);
+   exit(code);
 }
 
 
@@ -262,7 +262,7 @@ static void _signal_STOP(int signal_number)
 {
    VERBOSE(9) mea_log_printf("%s (%s) : Stopping mea-edomus requested (signal = %d).\n", INFO_STR, __func__, signal_number);
 
-   clean_all_and_exit();
+   clean_all_and_exit(0);
 }
 
 
@@ -375,7 +375,7 @@ int main(int argc, const char * argv[])
          default:
             VERBOSE(1) mea_log_printf("%s (%s) : Paramètre \"%s\" inconnu.\n",ERROR_STR,__func__,optarg);
             usage((char *)argv[0]);
-            clean_all_and_exit();
+            clean_all_and_exit(1);
       }
    }
 
@@ -398,7 +398,7 @@ int main(int argc, const char * argv[])
 
    if(ret) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't load parameters (%s)\n",ERROR_STR,__func__,cfgfile);
-      clean_all_and_exit();
+      clean_all_and_exit(1);
    }
 
 
@@ -417,7 +417,7 @@ int main(int argc, const char * argv[])
       VERBOSE(1) {
          mea_log_printf("%s (%s) : snprintf - ", ERROR_STR,__func__);
          perror("");
-         clean_all_and_exit();
+         clean_all_and_exit(1);
       }
    }
 
@@ -425,7 +425,7 @@ int main(int argc, const char * argv[])
    if(fd<0) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't open log file (%s) - ",ERROR_STR,__func__,log_file);
       perror("");
-      clean_all_and_exit();
+      clean_all_and_exit(1);
    }
    
    dup2(fd, 1);
@@ -501,7 +501,7 @@ int main(int argc, const char * argv[])
    process_add_indicator(pythonPluginServer_monitoring_id, "PYCALLERR", 0);
    if(process_start(pythonPluginServer_monitoring_id, NULL, 0)<0) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't start python plugin server\n",ERROR_STR,__func__);
-      clean_all_and_exit();
+      clean_all_and_exit(1);
    }
    sleep(1);
 
@@ -520,7 +520,7 @@ int main(int argc, const char * argv[])
    process_add_indicator(xplServer_monitoring_id, xpl_server_readerr_str, 0);
    if(process_start(xplServer_monitoring_id, NULL, 0)<0) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't start xpl server\n",ERROR_STR,__func__);
-      clean_all_and_exit();
+      clean_all_and_exit(1);
    }
 
    //
@@ -538,7 +538,7 @@ int main(int argc, const char * argv[])
    process_add_indicator(automatorServer_monitoring_id, automator_err_str, 0);
    if(process_start(automatorServer_monitoring_id, NULL, 0)<0) {
       VERBOSE(1) mea_log_printf("%s (%s) : can't start automator server\n",ERROR_STR,__func__);
-      clean_all_and_exit();
+      clean_all_and_exit(1);
    }
 
 

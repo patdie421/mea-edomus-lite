@@ -32,7 +32,7 @@
 #define DRIVERS_PATH          20 
 #define MAX_LIST_SIZE         21
 
-#define CURRENT_PARAMS_DB_VERSION 0
+// #define CURRENT_PARAMS_DB_VERSION 0
 
 // voir ou mettre
 #define UNIT_WH 1 // Watt/Heure

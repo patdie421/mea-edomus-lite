@@ -47,6 +47,7 @@
 #define DEBUG_AUTOMATOR
 #define USEALLOCA
 
+
 /*
 # les règles sont évaluées dans l'ordre. Par defaut toutes les règles sont évaluées l'une après l'autre
 # ce comportement par défaut est modifiée par "onmatch:" (break, continue, moveforward, ...)
