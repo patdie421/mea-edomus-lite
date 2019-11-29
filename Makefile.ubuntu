@@ -94,7 +94,7 @@ clean-all: clean
 	-rm -f lib/mealib/$(TECHNO)/mealib.a
 	-rm -f package/mea-edomus.tar.pkg.bz2
 
-build-all: all build-mealib build-commands build-xplhub build-package build-nodejs
+build-all: all build-mealib build-commands build-xplhub build-xPL_Hub build-package
 
 build-xplhub:
 	make -C complements/xplhub -f xplhub.mk SOURCE="$(MYPATH)"

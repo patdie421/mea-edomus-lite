@@ -21,4 +21,5 @@ else
    DOCKER="docker"
 fi
 
+$DOCKER stop mea_edomus > /dev/null 2>&1
 $DOCKER run -it --network=host --rm --name mea_edomus --hostname mea_edomus mea_edomus

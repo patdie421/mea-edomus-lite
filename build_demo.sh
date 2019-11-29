@@ -22,7 +22,7 @@ DEMOPATH="$2"
 
 MAKEFILE=Makefile.ubuntu
 
-make -f $MAKEFILE clean-all
+#make -f $MAKEFILE clean-all
 make -f $MAKEFILE build-all
 
 mkdir "$DEMODIR" > /dev/null 2>&1
