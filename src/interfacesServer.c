@@ -206,7 +206,7 @@ int createTypesIndex(struct types_index_s **types_index, cJSON *jsonTypes)
 }
 
 
-cJSON *findInterfaceByIdThroughLoop_alloc(cJSON *jsonInterfaces, int id)
+cJSON *findInterfaceByIdThroughLoop_alloc(cJSON *jsonInterfaces, int _id)
 {
    if(!jsonInterfaces)
       return NULL;
@@ -215,7 +215,7 @@ cJSON *findInterfaceByIdThroughLoop_alloc(cJSON *jsonInterfaces, int id)
    while( jsonInterface ) {
       int id_interface = (int)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble;
 
-      if(id_interface==id) {
+      if(id_interface==_id) {
 	 return cJSON_Duplicate(jsonInterface, 1);
       }
 
@@ -266,7 +266,7 @@ cJSON *getInterfaceByName_alloc(char *name)
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
 
-   jsonInterface=findInterfaceByIdThroughLoop_alloc(jsonInterfaces, name);
+   jsonInterface=findInterfaceByNameThroughLoop_alloc(jsonInterfaces, name);
 
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);

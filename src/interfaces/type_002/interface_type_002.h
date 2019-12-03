@@ -79,7 +79,7 @@ struct interface_type_002_data_s
 };  
 
 
-#define PLUGIN_DATA_MAX_SIZE 80
+#define PLUGIN_DATA_MAX_SIZE 81
 
 
 typedef struct plugin_commissionning_queue_elem_s

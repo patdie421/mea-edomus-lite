@@ -1,7 +1,8 @@
-#include "interface_type_003_pairing2.h"
+#include "interface_type_003_pairing.h"
 #include "interface_type_003.h"
 
 #include <signal.h>
+#include <stdint.h>
 
 #include "enocean.h"
 #include "cJSON.h"
@@ -21,7 +22,7 @@ int16_t enocean_teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, ui
    uint8_t request    = (data[7] & 0b00110000) >> 4;
    uint8_t cmnd       = (data[7] & 0b00001111);
    uint32_t device_addr = enocean_calc_addr(data[14], data[15], data[16], data[17]);
-   uint32_t addr = ed->id;
+//   uint32_t addr = ed->id;
 
    uint8_t resp_request   = 0;
    uint8_t resp_operation = 0;
@@ -116,7 +117,7 @@ int16_t enocean_teachinout_reversed(enocean_ed_t *ed, int16_t addr_dec, uint8_t 
    uint8_t request    = (data[13] & 0b00110000) >> 4;
    uint8_t cmnd       = (data[13] & 0b00001111);
    uint32_t device_addr = enocean_calc_addr(data[14], data[15], data[16], data[17]);
-   uint32_t addr = ed->id;
+//   uint32_t addr = ed->id;
 
    uint8_t resp_request   = 0;
    uint8_t resp_operation = 0;
@@ -204,7 +205,7 @@ int16_t enocean_teachinout_reversed(enocean_ed_t *ed, int16_t addr_dec, uint8_t 
 
 int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, uint32_t addr, uint8_t *eep) /* TO TEST */
 {
-   char *data=e->data;
+   uint8_t *data=e->data;
    int16_t l_data=e->l_data;
    int16_t nerr=0;
    int ret=-1;
@@ -365,13 +366,13 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
 cJSON *enocean_pairing_get(void *context, void *parameters) /* TO TEST */
 {
    interface_type_003_t *i003 = (interface_type_003_t *)context;
-   cJSON *p=(cJSON *)parameters;
+//   cJSON *p=(cJSON *)parameters;
    cJSON *result=NULL;
 
    result=cJSON_CreateObject();
    if(result) {
       cJSON_AddItemToObject(result, "state", cJSON_CreateNumber((double)i003->pairing_state));
-      cJSON_AddItemToObject(result, "type",   cJSON_CreateNumber((double)0));
+      cJSON_AddItemToObject(result, "type",  cJSON_CreateNumber((double)0));
    }
    return result;
 }
@@ -490,7 +491,7 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
       }
    }
    else {
-      cJSON *_j=mea_call_python_function_json_alloc(pluginParams->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, "pairing_get_devices", j);
+      _j=mea_call_python_function_json_alloc(pluginParams->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, "pairing_get_devices", j);
    }
 
    if(_j && _j->type==cJSON_Object) {
