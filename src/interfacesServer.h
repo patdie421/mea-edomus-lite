@@ -134,10 +134,12 @@ int          restart_interfaces(int my_id, void *data, char *errmsg, int l_errms
 int          device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, cJSON *jsonInterface, cJSON *jsonType);
 
 // wrapper
+cJSON       *getInterfaceByName_alloc(char *name);
 cJSON       *getInterfaceByDevName_alloc(char *devName);
 cJSON       *getInterfaceById_alloc(int id);
 char        *getInterfacesAsString_alloc(void);
 char        *getInterfaceAsStringByName_alloc(char *name);
+
 char        *getDevicesAsString_alloc(char *interface);
 char        *getDeviceAsStringByName_alloc(char *interface, char *device);
 

@@ -92,9 +92,9 @@ def mea_getSMS(s):
 # Info télésurveillance 13/11/2015 08:40:27 : mise à l'arret via code NATHALIE du clavier ENTREE (zone 1) au 16 RUE JULES GUESDE - ROSNY SOUS
 def _analyseData(s):
    alarm=-1
-   if s.find(u"l'arret") <> -1:
+   if s.find(u"l'arret") != -1:
       alarm=1
-   elif s.find(u"en marche") <> -1:
+   elif s.find(u"en marche") != -1:
       alarm=2
    else:
       return(False, 3)

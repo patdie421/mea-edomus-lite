@@ -54,8 +54,8 @@ typedef void (*thread_f)(void *);
 
 // parametres valide pour les capteurs ou actionneurs pris en compte par le type 3.
 char *valid_enocean_plugin_params[]={"S:PLUGIN","S:PLUGIN_PARAMETERS", NULL};
-#define ENOCEAN_PLUGIN_PARAMS_PLUGIN      0
-#define ENOCEAN_PLUGIN_PARAMS_PARAMETERS  1
+// #define ENOCEAN_PLUGIN_PARAMS_PLUGIN      0
+// #define ENOCEAN_PLUGIN_PARAMS_PARAMETERS  1
 
 struct enocean_callback_data_s // donnee "userdata" pour les callbacks
 {
@@ -321,37 +321,46 @@ void *_thread_interface_type_003_enocean_data(void *args)
 
       if(!ret) {
          cJSON *jsonInterface=NULL;
-         char interfaceName[256]="";
+         char interfaceDevName[256]="";
          uint32_t addr=0;
-         uint8_t a=0,b=0,c=0,d=0;
+         uint8_t _addr[4];
+         // uint8_t a=0,b=0,c=0,d=0;
          int pairing_done=0;
          
          udata->i003->indicators.enoceandatain++;
          addr = e->enocean_addr;
-         d=addr & 0xFF;
+//         d=addr & 0xFF;
+//         addr = addr >> 8;
+//         c=addr & 0xFF;
+//         addr = addr >> 8;
+//         b=addr & 0xFF;
+//         addr = addr >> 8;
+//         a=addr & 0xFF;
+
+         _addr[3]=addr & 0xFF;
          addr = addr >> 8;
-         c=addr & 0xFF;
+         _addr[2]=addr & 0xFF;
          addr = addr >> 8;
-         b=addr & 0xFF;
+         _addr[1]=addr & 0xFF;
          addr = addr >> 8;
-         a=addr & 0xFF;
-         snprintf(interfaceName, sizeof(interfaceName)-1, "%s://%02x-%02x-%02x-%02x", udata->i003->name, a, b, c, d);
-         mea_strtolower(interfaceName);
-         jsonInterface = getInterfaceByDevName_alloc(interfaceName);
+         _addr[0]=addr & 0xFF;
+         snprintf(interfaceDevName, sizeof(interfaceDevName)-1, "%s://%02x-%02x-%02x-%02x", udata->i003->name, _addr[0], _addr[1], _addr[2], _addr[3]);
+         mea_strtolower(interfaceDevName);
+         jsonInterface = getInterfaceByDevName_alloc(interfaceDevName);
          
-         mea_log_printf("%s (%s) : enocean data from %02x-%02x-%02x-%02x\n", INFO_STR, __func__, a, b, c, d);
+         mea_log_printf("%s (%s) : enocean data from %02x-%02x-%02x-%02x\n", INFO_STR, __func__, _addr[0], _addr[1], _addr[2], _addr[3]);
 
          if(udata->i003->pairing_state==ENOCEAN_PAIRING_ON && jsonInterface==NULL) {
-            mea_log_printf("%s (%s) : pairing in progress for %02x-%02x-%02x-%02x\n", INFO_STR, __func__, a, b, c, d);
+            mea_log_printf("%s (%s) : pairing in progress for %02x-%02x-%02x-%02x\n", INFO_STR, __func__, _addr[0], _addr[1], _addr[2], _addr[3]);
             
             uint8_t eep[3]="";
             
             int _ret=enocean_pairing(udata->i003, e, addr, eep);
             if(_ret<0) {
-               mea_log_printf("%s (%s) : can't pair %02x-%02x-%02x-%02x\n", INFO_STR, __func__, a, b, c, d);
+               mea_log_printf("%s (%s) : can't pair %02x-%02x-%02x-%02x\n", INFO_STR, __func__, _addr[0], _addr[1], _addr[2], _addr[3]);
             }
             else {
-               enocean_update_interfaces(interfaceName, eep);
+               enocean_update_interfaces((void *)udata->i003, interfaceDevName, _addr, eep);
                pairing_done=1;
             }
          }
@@ -975,7 +984,7 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
    start_stop_params->i003->ed=ed;
 
    /*
-    * exécution du plugin de paramétrage
+    * exécution du plugin d'interface
     */
    interface_parameters=alloc_parsed_parameters(start_stop_params->i003->parameters, valid_enocean_plugin_params, &interface_nb_parameters, &err, 0);
    if(!interface_parameters || !interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
@@ -1037,9 +1046,9 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
          else {
             VERBOSE(5) mea_log_printf("%s (%s) : mea_init not fount in %s module\n", ERROR_STR, __func__, interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s);
          }
-         Py_XDECREF(pFunc);
+         Py_DECREF(pFunc);
       }
-      Py_XDECREF(pModule);
+      Py_DECREF(pModule);
       Py_DECREF(pName);
       PyErr_Clear();
 

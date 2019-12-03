@@ -226,6 +226,23 @@ cJSON *findInterfaceByIdThroughLoop_alloc(cJSON *jsonInterfaces, int id)
 }
 
 
+cJSON *findInterfaceByNameThroughLoop_alloc(cJSON *jsonInterfaces, char *name)
+{
+   if(!jsonInterfaces)
+      return NULL;
+
+   cJSON *jsonInterface = jsonInterfaces->child;
+   while( jsonInterface ) {
+      if(mea_strcmplower(name, jsonInterface->string)==0) {
+	      return cJSON_Duplicate(jsonInterface, 1);
+      }
+      jsonInterface=jsonInterface->next;
+   }
+
+   return NULL;
+}
+
+
 cJSON *getInterfaceById_alloc(int id)
 {
    cJSON *jsonInterface=NULL;
@@ -234,6 +251,22 @@ cJSON *getInterfaceById_alloc(int id)
    pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
 
    jsonInterface=findInterfaceByIdThroughLoop_alloc(jsonInterfaces, id);
+
+   pthread_rwlock_unlock(&jsonInterfaces_rwlock);
+   pthread_cleanup_pop(0);
+
+   return jsonInterface;
+}
+
+
+cJSON *getInterfaceByName_alloc(char *name)
+{
+   cJSON *jsonInterface=NULL;
+
+   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
+   pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
+
+   jsonInterface=findInterfaceByIdThroughLoop_alloc(jsonInterfaces, name);
 
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
@@ -1263,7 +1296,7 @@ int16_t init_statics_interfaces_fns(struct interfacesServer_interfaceFns_s *ifns
    return 0;
 }
  
- 
+
 #ifdef ASPLUGIN
 struct plugin_info_s {
    char   *name;
@@ -1440,7 +1473,39 @@ int load_interface(int type, char *driversPath)
 }
 #endif
  
+
+struct interfacesServer_interfaceFns_s *interfacesServer_get_apis(int id_interface)
+{
+   int ret=-1;
+   interfaces_queue_elem_t *iq=NULL;
+   struct interfacesServer_interfaceFns_s *apis=NULL;
+   
+   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
+   pthread_rwlock_rdlock(&interfaces_queue_rwlock);
  
+   if(_interfaces && _interfaces->nb_elem) {
+      mea_queue_first(_interfaces);
+      while(1) {
+         mea_queue_current(_interfaces, (void **)&iq);
+ 
+         if(iq && iq->context && iq->id == id_interface) {
+            apis=iq->fns;
+            break;
+         }
+ 
+         ret=mea_queue_next(_interfaces);
+         if(ret<0)
+            break;
+      }
+   }
+
+   pthread_rwlock_unlock(&interfaces_queue_rwlock);
+   pthread_cleanup_pop(0);
+ 
+   return apis;
+}
+
+
 int16_t interfacesServer_call_interface_api(int id_interface, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
 {
    int ret=-1;

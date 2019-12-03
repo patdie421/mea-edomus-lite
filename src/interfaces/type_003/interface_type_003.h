@@ -48,8 +48,8 @@ extern char *interface_type_003_enoceandatain_str;
 typedef struct interface_type_003_s {
    int              id_interface;
    int              id_driver;
-   char             name[41];
-   char             dev[81];
+   char             name[256];
+   char             dev[256];
    int              monitoring_id;
    enocean_ed_t    *ed;
    pthread_t       *thread;
@@ -73,8 +73,11 @@ struct interface_type_003_data_s {
    interface_type_003_t *i003;
 };
 
+extern char *valid_enocean_plugin_params[];
+#define ENOCEAN_PLUGIN_PARAMS_PLUGIN      0
+#define ENOCEAN_PLUGIN_PARAMS_PARAMETERS  1
 
-#define PLUGIN_DATA_MAX_SIZE 80
+#define PLUGIN_DATA_MAX_SIZE 81
 
 xpl2_f get_xPLCallback_interface_type_003(void *ixxx);
 int get_monitoring_id_interface_type_003(void *ixxx);

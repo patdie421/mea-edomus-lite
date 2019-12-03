@@ -39,7 +39,7 @@ def mea_xplCmndMsg(data):
 
 
    # le dernier message n'a pas encore été envoyé après 5 secondes
-   if mem_actuator['chrono']<>False:
+   if mem_actuator['chrono']!=False:
       now=int(round(time() * 1000))
       if now - mem_actuator['chrono'] > 5000:
          mem_actuator['chrono']=False
@@ -99,7 +99,7 @@ def mea_dataFromSensor(data):
       return True
 
    now=int(round(time() * 1000))
-   if 'chrono' in mem_actuator and mem_actuator['chrono'] <> False:
+   if 'chrono' in mem_actuator and mem_actuator['chrono']!=False:
       if now -  mem_actuator['chrono'] < 5000:  
          if s.find(u"\r\n> ") >=0:
             mea.sendSerialData(data['fd'], bytearray(mem_actuator['msg']+"\r\n"+chr(26)))
