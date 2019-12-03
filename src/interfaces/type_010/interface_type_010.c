@@ -116,6 +116,7 @@ int16_t _interface_type_010_xPL_callback2(cJSON *xplMsgJson, struct device_info_
       {
          pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
          PyEval_AcquireLock();
+         
          if(!callback_data->mainThreadState)
             callback_data->mainThreadState=PyThreadState_Get();
          if(!callback_data->myThreadState)

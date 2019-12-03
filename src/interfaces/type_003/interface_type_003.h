@@ -8,6 +8,11 @@
 #ifndef __interface_type_003_h
 #define __interface_type_003_h
 
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
+#include <Python.h>
+#endif
 #include <signal.h>
 
 #include "interface_type_003.h"
@@ -50,6 +55,9 @@ typedef struct interface_type_003_s {
    pthread_t       *thread;
    volatile sig_atomic_t
                     thread_is_running;
+   volatile sig_atomic_t
+                    pairing_state;
+   double           pairing_startms;
    xpl2_f           xPL_callback2;
    void            *xPL_callback_data;
    char            *parameters;

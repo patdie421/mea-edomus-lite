@@ -54,9 +54,11 @@ endif
 ifeq ($(ASPLUGIN), 1)
 SOURCES=enocean.c \
 interface_type_003.c \
+interface_type_003_pairing2.c \
 plugin.c
 else
 SOURCES=enocean.c \
+interface_type_003_pairing2.c \
 interface_type_003.c
 endif
 

@@ -220,4 +220,3 @@ def parseKeyValueDatasToList(aString, sep_assoc=";", sep_keyvalue="="):
             return None
       return keysValuesList
    return None
-

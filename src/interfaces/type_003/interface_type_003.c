@@ -12,6 +12,7 @@
 #endif
 
 #include "interface_type_003.h"
+#include "interface_type_003_pairing2.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -306,17 +307,27 @@ void *_thread_interface_type_003_enocean_data(void *args)
          }
       }
 
+      if(udata->i003->pairing_state == ENOCEAN_PAIRING_ON) {
+         if(mea_now() - udata->i003->pairing_startms > 60.0*1000.0) { // 60 secondes pour l'appairage
+            udata->i003->pairing_startms=-1.0;
+            udata->i003->pairing_state = ENOCEAN_PAIRING_OFF;
+         }
+      }
+
       ret=mea_queue_out_elem(udata->queue, (void **)&e);
 
       pthread_mutex_unlock(&udata->callback_lock);
       pthread_cleanup_pop(0);
 
       if(!ret) {
-         uint32_t addr;
-
+         cJSON *jsonInterface=NULL;
+         char interfaceName[256]="";
+         uint32_t addr=0;
+         uint8_t a=0,b=0,c=0,d=0;
+         int pairing_done=0;
+         
          udata->i003->indicators.enoceandatain++;
          addr = e->enocean_addr;
-         uint8_t a,b,c,d;
          d=addr & 0xFF;
          addr = addr >> 8;
          c=addr & 0xFF;
@@ -324,49 +335,53 @@ void *_thread_interface_type_003_enocean_data(void *args)
          b=addr & 0xFF;
          addr = addr >> 8;
          a=addr & 0xFF;
-
-         mea_log_printf("%s (%s) : enocean data from - %02x-%02x-%02x-%02x\n", INFO_STR, __func__, a, b, c, d);
-
-         char interfaceName[81];
-         snprintf(interfaceName,sizeof(interfaceName)-1,"%s://%02x-%02x-%02x-%02x", udata->i003->name, a, b, c, d);
+         snprintf(interfaceName, sizeof(interfaceName)-1, "%s://%02x-%02x-%02x-%02x", udata->i003->name, a, b, c, d);
          mea_strtolower(interfaceName);
+         jsonInterface = getInterfaceByDevName_alloc(interfaceName);
+         
+         mea_log_printf("%s (%s) : enocean data from %02x-%02x-%02x-%02x\n", INFO_STR, __func__, a, b, c, d);
 
-         cJSON *jsonInterface = getInterfaceByDevName_alloc(interfaceName);
-         if(jsonInterface) {
+         if(udata->i003->pairing_state==ENOCEAN_PAIRING_ON && jsonInterface==NULL) {
+            mea_log_printf("%s (%s) : pairing in progress for %02x-%02x-%02x-%02x\n", INFO_STR, __func__, a, b, c, d);
+            
+            uint8_t eep[3]="";
+            
+            int _ret=enocean_pairing(udata->i003, e, addr, eep);
+            if(_ret<0) {
+               mea_log_printf("%s (%s) : can't pair %02x-%02x-%02x-%02x\n", INFO_STR, __func__, a, b, c, d);
+            }
+            else {
+               enocean_update_interfaces(interfaceName, eep);
+               pairing_done=1;
+            }
+         }
+         
+         if(jsonInterface && pairing_done==0) {
             cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, "devices");
             if(jsonDevices) {
                cJSON *jsonDevice = jsonDevices->child;
                while(jsonDevice) {
                   int err;
                   char *parameters = cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
-
-                  udata->plugin_params=alloc_parsed_parameters(parameters, valid_enocean_plugin_params, &(udata->nb_plugin_params), &err, 0);
+                     udata->plugin_params=alloc_parsed_parameters(parameters, valid_enocean_plugin_params, &(udata->nb_plugin_params), &err, 0);
                   if(!udata->plugin_params || !udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
-                        goto _thread_interface_type_003_enocean_next_device_loop;
+                     goto _thread_interface_type_003_enocean_next_device_loop;
                   }
-
-                  plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-
-                  if(plugin_elem) {
+                     plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
+                     if(plugin_elem) {
                      pthread_cleanup_push( (void *)free, (void *)plugin_elem );
-
-                     plugin_elem->type_elem=DATAFROMSENSOR;
+                        plugin_elem->type_elem=DATAFROMSENSOR;
                      memcpy(plugin_elem->buff, e->data, e->l_data);
                      plugin_elem->l_buff=e->l_data;
-
                      { // appel des fonctions Python
                         PyEval_AcquireLock();
                         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); // trop compliquer de traiter avec pthread_cleanup => on interdit les arrêts lors des commandes python
                         PyThreadState *tempState = PyThreadState_Swap(udata->i003->myThreadState);
-
-                        struct device_info_s device_info;
+                           struct device_info_s device_info;
                         PyObject *value;
-
                         device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
                         plugin_elem->aDict = mea_device_info_to_pydict_device(&device_info);
-
                         mea_addLong_to_pydict(plugin_elem->aDict, XPL_ENOCEAN_ADDR_STR_C, (long)e->enocean_addr);
-
                         value = PyByteArray_FromStringAndSize(plugin_elem->buff, (long)plugin_elem->l_buff);
                         // PyDict_SetItemString(plugin_elem->aDict, DATA_STR_C, value);
                         PyDict_SetItemString(plugin_elem->aDict, "data", value);
@@ -385,7 +400,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
                         pthread_testcancel(); // on test tout de suite pour être sûr qu'on a pas ratté une demande d'arrêt
                      } // fin appel des fonctions Python
 
-                  pythonPluginServer_add_cmd(udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
+                     pythonPluginServer_add_cmd(udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
                      udata->i003->indicators.senttoplugin++;
                      free(plugin_elem);
                      plugin_elem=NULL;
@@ -412,6 +427,7 @@ _thread_interface_type_003_enocean_next_device_loop:
             }
             cJSON_Delete(jsonInterface);
          }
+
 
          free(e->data);
          e->data=NULL;

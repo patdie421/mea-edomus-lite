@@ -223,21 +223,7 @@ int mea_call_python_function(char *plugin_name, char *plugin_func, PyObject *plu
    }
 
    pModule = PyImport_Import(pName);
-/*
-   if(!pModule) {
-      VERBOSE(5) mea_log_printf("%s (%s) : %s not found\n", ERROR_STR, __func__, plugin_name);
-   }
-   else {
-      pFunc = PyObject_GetAttrString(pModule, plugin_func);
-      if(pFunc) {
-         retour=mea_call_python_function2(pFunc, plugin_params_dict);
-      }
-      else {
-         VERBOSE(5) mea_log_printf("%s (%s) : %s not fount in %s module\n", ERROR_STR, __func__, plugin_func, plugin_name);
-      }
-      Py_XDECREF(pFunc);
-   }
-*/
+
    if(pModule) {
       retour=mea_call_python_function_from_module(pModule, plugin_func, plugin_params_dict);
 
@@ -250,7 +236,130 @@ int mea_call_python_function(char *plugin_name, char *plugin_func, PyObject *plu
 }
 
 
-PyObject *mea_jsonObjectToPyObject(cJSON *e)
+cJSON *mea_call_python_function_json_alloc(char *module_name, char *function_name, cJSON *j) /* to test */
+{
+   cJSON *r=NULL;
+   PyObject *p=NULL;
+
+   if(j==NULL) {
+      p=Py_None;
+      Py_INCREF(p);
+   }
+   else {
+      p=mea_jsonToPyObject(j);
+      if(!p) {
+         return NULL;
+      }
+   }
+   
+   PyObject *pModuleName = PyString_FromString(module_name);
+   if(!pModuleName) {
+      if(p) {
+         Py_DECREF(p);
+         p=NULL;
+      }
+      return NULL;
+   }
+   PyObject *pModule = PyImport_Import(pModuleName);
+   Py_DECREF(pModuleName);
+   pModuleName=NULL;
+   
+   if(pModule) {
+      PyObject *pFunction = PyObject_GetAttrString(pModule, function_name);
+
+      if (pFunction && PyCallable_Check(pFunction)) {
+         PyObject *pFunctionArg = PyTuple_New(1); 
+         PyTuple_SetItem(pFunctionArg, 0, p); // PyTuple_SetItem va voler la référence sur p pas besoin de DEREF
+         p=NULL;
+         PyObject *pResult = PyObject_CallObject(pFunction, pFunctionArg);
+         if (pResult != NULL) {
+            r=mea_PyObjectToJson(pResult);
+            Py_DECREF(pResult);
+            pResult=NULL;
+         }
+         else {
+            if (PyErr_Occurred()) {
+               VERBOSE(5) {
+                  mea_log_printf("%s (%s) : python error - ", ERROR_STR, __func__ );
+                  PyErr_Print();
+                  fprintf(MEA_STDERR, "\n");
+               }
+               PyErr_Clear();
+            }
+         }
+
+         if(pFunctionArg) {
+            Py_DECREF(pFunctionArg);
+            pFunctionArg=NULL;
+         }
+      }
+      else {
+         VERBOSE(5) {
+            mea_log_printf("%s (%s) : function \"\" not exist or not callable in \"\"", ERROR_STR, __func__, function_name, module_name);
+         }
+      }
+
+      if(pFunction) {
+         Py_DECREF(pFunction);
+         pFunction=NULL;
+      }
+   }
+   else {
+      VERBOSE(5) {
+         mea_log_printf("%s (%s) : can't load \"\"", ERROR_STR, __func__, module_name);
+      }
+   }
+   
+   if(pModule) {
+      Py_DECREF(pModule);
+      pModule=NULL;
+   }
+
+   if(p) {
+      Py_DECREF(p);
+      p=NULL;
+   }
+   
+   return r;
+}
+
+
+PyObject *mea_jsonObjectToPyDict(cJSON *j)
+{
+   PyObject *p = PyDict_New();
+
+   cJSON *e=j;
+   while(e) {
+      PyObject *s = NULL;
+      s=mea_jsonToPyObject(e);
+      if(s) {
+         PyDict_SetItemString(p, e->string, s);
+         Py_DECREF(s);
+      }
+      e=e->next;
+   }
+   return p;
+}
+
+
+PyObject *mea_jsonArrayToPyList(cJSON *j)
+{
+   PyObject *p = PyList_New(0);
+   
+   cJSON *e=j;
+   while(e) {
+      PyObject *s=mea_jsonToPyObject(e);
+      if(s) {
+         PyList_Append(p,s);
+         Py_DECREF(s);
+      }
+      e=e->next;
+   }
+   return p;
+}
+
+
+PyObject *mea_jsonToPyObject(cJSON *e)
 {
    PyObject *p = NULL;
    
@@ -279,10 +388,11 @@ PyObject *mea_jsonObjectToPyObject(cJSON *e)
          break;
                
       case cJSON_Array:
+         p = mea_jsonArrayToPyList(e->child);
          break;
-               
+
       case cJSON_Object:
-         p=mea_jsonToPyDict(e->child);
+         p=mea_jsonObjectToPyDict(e->child);
          break;
       
       default:
@@ -293,56 +403,94 @@ PyObject *mea_jsonObjectToPyObject(cJSON *e)
 }
 
 
-PyObject *mea_jsonArrayToPyList(cJSON *j)
+cJSON *mea_PyTupleToJsonArray(PyObject *p)
 {
-   if(j->type!=cJSON_Array)
-      return NULL;
-      
-   if(!j->child)
-      return NULL;
-      
-   PyObject *p = PyList_New(0);
+   cJSON *j = NULL;
    
-   cJSON *e=j->child;
-   while(e) {
-      PyObject *s=mea_jsonObjectToPyObject(e);
-      PyList_Append(p,s);
-      Py_DECREF(s);
-      e=e->next;
+   j=cJSON_CreateArray();
+   
+   int l=(int)PyTuple_Size(p);
+   for(int i=0;i<l;i++) {
+      cJSON *v=mea_PyObjectToJson(PyTuple_GetItem(p,i));
+      if(v)
+         cJSON_AddItemToArray(j, v);
    }
-
-   return p;
+      
+   return j;
 }
 
 
-PyObject *mea_jsonToPyDict(cJSON *j)
+cJSON *mea_PyListToJsonArray(PyObject *p)
 {
-   if(!j) {
-      PyErr_SetString(PyExc_RuntimeError, "ERROR (mea_jsonToPyDict) : PyDict_New error");
-      return NULL;
+   cJSON *j = NULL;
+   
+   j=cJSON_CreateArray();
+   
+   int l=(int)PyList_Size(p);
+   for(int i=0;i<l;i++) {
+      cJSON *v=mea_PyObjectToJson(PyList_GetItem(p,i));
+      if(v)
+         cJSON_AddItemToArray(j, v);
+   }
+      
+   return j;
+}
+
+
+cJSON *mea_PyObjectToJsonObject(PyObject *p)
+{
+   cJSON *j = NULL;
+   
+   j=cJSON_CreateObject();
+   
+   PyObject *key, *value;
+   Py_ssize_t pos = 0;
+
+   while (PyDict_Next(p, &pos, &key, &value)) {
+      cJSON *v=mea_PyObjectToJson(value);
+      if(v)
+         cJSON_AddItemToObject(j, PyString_AsString(key), v);
    }
    
-//   cJSON *e=j->child;
-   if(!j->child) {
-      return mea_jsonObjectToPyObject(j);
+   return j;
+}
+
+
+cJSON *mea_PyObjectToJson(PyObject *p)
+{
+   cJSON *j=NULL;
+
+   if(p==Py_None) {
+      j=cJSON_CreateNull();
    }
-   else {
-      PyObject *p = PyDict_New();
-      cJSON *e=j->child;
-      while(e) {
-         PyObject *s = NULL;
-         if(e->type!=cJSON_Array) {
-            s=mea_jsonObjectToPyObject(e);
-         }
-         else {
-            s=mea_jsonArrayToPyList(e);
-         }
-         PyDict_SetItemString(p, e->string, s);
-         Py_DECREF(s);
-         e=e->next;
+   else if(PyBool_Check(p)) {
+      if(p == Py_True) {
+         j=cJSON_CreateTrue();
       }
-      return p;
+      else {
+         j=cJSON_CreateFalse();
+      }
    }
+   else if(PyFloat_Check(p)) {
+      j=cJSON_CreateNumber(PyFloat_AsDouble(p));
+   }
+   else if(PyLong_Check(p)) {
+      j=cJSON_CreateNumber(PyLong_AsDouble(p));
+   }
+   else if(PyString_Check(p)) {
+      j=cJSON_CreateString(PyString_AsString(p));
+   }
+   else if(PyDict_Check(p)) {
+      j=mea_PyObjectToJsonObject(p);
+   }
+   else if(PyTuple_Check(p)) {
+      j=mea_PyTupleToJsonArray(p);
+   }
+   else if(PyList_Check(p)) {
+      j=mea_PyListToJsonArray(p);
+   }
+
+   return j;
 }
 
 
@@ -398,4 +546,24 @@ PyObject *mea_xplMsgToPyDict2(cJSON *xplMsgJson)
    Py_DECREF(pyBody);
    
    return pyXplMsg;
+}
+
+
+void json_test()
+{
+   mea_log_printf("JSON_TEST_START\n");
+   
+   char *json="{ \"string\": \"string\", \"int\":10, \"float\":20.1234, \"boolean\": true, \"array\": [ 1, 2, 3, { \"object1\": \"object1\", \"object2\": \"object2\" } ] }";
+   
+   cJSON *j=cJSON_Parse(json);
+   cJSON *r=mea_call_python_function_json_alloc("json_test", "json_test", j);
+   char *s=cJSON_Print(r);
+   
+   mea_log_printf("json_test result: %s\n", s);
+   
+   cJSON_Delete(r);
+   cJSON_Delete(j);
+   free(s);
+   
+   mea_log_printf("JSON_TEST_END\n");
 }
