@@ -31,7 +31,7 @@
 
 // #define free(x) free(x);
 
-#include "mea_api.h"
+#include "mea_internal_api.h"
 
 char *pythonPlugin_server_name_str="PYTHONPLUGINSERVER";
 
