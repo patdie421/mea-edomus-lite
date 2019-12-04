@@ -6,6 +6,8 @@
 
 #include "cJSON.h"
 #include "mea_rest_api.h"
+#include "mea_rest_api_pairing.h"
+
 #include "mea_verbose.h"
 #include "mea_string_utils.h"
 #include "tokens.h"
@@ -857,6 +859,8 @@ int mea_rest_api(struct mg_connection *conn, int method, char *tokens[], int l_t
          return mea_rest_api_configuration(conn, method, _tokens, _l_tokens);
       case API_USER_ID:
          return mea_rest_api_user(conn, method, _tokens, _l_tokens);
+      case API_PAIRING_ID:
+         return mea_rest_api_pairing(conn, method, _tokens, _l_tokens);
       default:
          return returnResponse(conn, 404, 1, NULL);
    } 

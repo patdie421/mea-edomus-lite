@@ -78,6 +78,7 @@ typedef int    (*clean_f)(void *);
 typedef int    (*get_type_f)(void);
 typedef int    (*get_interface_id_f)(void *);
 typedef int    (*update_devices_f)(void *);
+typedef void * (*pairing_f)(int cmd, void *);
 typedef int    (*api_f)(void *ixxx, char *, void *, int, void **, int16_t *, char *, int); // *cmnd, void *args, int nb_args, void **res, char *err, int l_err
 
 struct interfacesServer_interfaceFns_s {
@@ -90,12 +91,10 @@ struct interfacesServer_interfaceFns_s {
    set_monitoring_id_f set_monitoring_id;
    get_xPLCallback_f get_xPLCallback;
    set_xPLCallback_f set_xPLCallback;
-
    update_devices_f update_devices;
    get_type_f get_type;
-
    clean_f clean;
-
+   pairing_f pairing;
    api_f api;
 };
 
@@ -111,7 +110,7 @@ typedef struct interfaces_queue_elem_s
 {
    int id;
    int type;
-   char name[17];
+   char name[256];
    char dev[256];
 
    uint16_t delegate_flag;
@@ -154,4 +153,5 @@ int         deleteInterface(char *interface);
 int         addInterface(cJSON *jsonData);
 int         updateInterface(char *interface, cJSON *jsonData);
 
+cJSON       *getAvailablePairing_alloc(void);
 #endif

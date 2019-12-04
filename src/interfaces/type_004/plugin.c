@@ -46,6 +46,9 @@ int get_fns_interface(void *lib, struct interfacesServer_interfaceFns_s *interfa
       if(!interfacesFns->get_type)
          fprintf(stderr,"get_type: %s\n", dlerror());
 
+      interfacesFns->pairing=NULL;
+      interfacesFns->api=NULL;
+      
       interfacesFns->plugin_flag = 1;
       interfacesFns->lib = lib; 
 

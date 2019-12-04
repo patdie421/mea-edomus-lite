@@ -867,6 +867,14 @@ static int api_write_data(interface_type_010_t *ixxx, PyObject *args, PyObject *
 }
 
 
+void *pairing_interface_type_010(int cmd, void *context)
+{
+   mea_log_printf("%s (%s) : pairing", ERROR_STR, __func__);
+   
+   return NULL;
+}
+
+
 int16_t api_interface_type_010(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
 {
 //   interface_type_010_t *i010 = (interface_type_010_t *)ixxx;
@@ -1335,6 +1343,7 @@ int get_fns_interface_type_010(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_010;
    interfacesFns->get_type = (get_type_f)&get_type_interface_type_010;
    interfacesFns->api = (api_f)&api_interface_type_010;
+   interfacesFns->pairing = (pairing_f)&pairing_interface_type_010;
    interfacesFns->lib = NULL;
    interfacesFns->type = interfacesFns->get_type();
    interfacesFns->plugin_flag = 0;

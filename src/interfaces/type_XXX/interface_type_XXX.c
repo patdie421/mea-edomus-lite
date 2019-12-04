@@ -471,6 +471,7 @@ int get_fns_interface_type_XXX(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->clean = (clean_f)&clean_interface_type_XXX;
 
    interfacesFns->api = (api_f)&api_interface_type_XXX;
+   interfacesFns->pairing = (api_f)&pairing_interface_type_XXX;
    interfacesFns->lib = NULL;
 
    interfacesFns->plugin_flag = 0;

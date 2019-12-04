@@ -117,6 +117,7 @@ static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le de
    {"SERVICE",                    API_SERVICE_ID},
    {"CONFIGURATION",              API_CONFIGURATION_ID},
    {"USER",                       API_USER_ID},
+   {"PAIRING",                    API_PAIRING_ID},
    {"api_key",                    API_KEY_ID},
    {"data",                       DATA_ID},
    {"l_data",                     L_DATA_ID},

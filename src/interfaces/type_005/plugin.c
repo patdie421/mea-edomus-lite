@@ -45,13 +45,17 @@ int get_fns_interface(void *lib, struct interfacesServer_interfaceFns_s *interfa
       interfacesFns->get_type = (get_type_f)dlsym(lib, "get_type_interface_type_005");
       if(!interfacesFns->get_type)
          fprintf(stderr,"get_type: %s\n", dlerror());
-         
-      return 0;
-   }
-   else
-   {
-      interfacesFns->lib = lib;
+      
+      interfacesFns->api=NULL;
+      interfacesFns->pairing=NULL;
       interfacesFns->plugin_flag = 1;
+      interfacesFns->lib = lib;
+
+         return 0;
+   }
+   else {
+      interfacesFns->plugin_flag = -1;
+      interfacesFns->lib = NULL;
 
       return -1;
    }

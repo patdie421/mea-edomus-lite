@@ -1031,6 +1031,7 @@ int get_fns_interface_type_006(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_006;
    interfacesFns->get_type = (get_type_f)&get_type_interface_type_006;
    interfacesFns->api = (api_f)&api_interface_type_006;
+   interfacesFns->pairing = NULL;
    interfacesFns->lib = NULL;
    interfacesFns->type = interfacesFns->get_type();
    interfacesFns->plugin_flag = 0;

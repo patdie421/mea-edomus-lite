@@ -83,6 +83,7 @@ struct tokens_strings_da_s
    char *api_type_str_c;
    char *api_configuration_str_c;
    char *api_user_str_c;
+   char *api_pairing_str_c;
 };
 
 extern struct tokens_strings_da_s *tokens_string_da;
@@ -153,6 +154,7 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define API_SERVICE_STR_C                tokens_string_da->api_service_str_c
 #define API_CONFIGURATION_STR_C          tokens_string_da->api_configuration_str_c
 #define API_USER_STR_C                   tokens_string_da->api_user_str_c
+#define API_PAIRING_STR_C                tokens_string_da->api_pairing_str_c
 
 #else
 
@@ -222,6 +224,7 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define API_TYPE_STR_C                   get_token_string_by_id(API_TYPE_ID)
 #define API_CONFIGURATION_STR_C          get_token_string_by_id(API_CONFIGURATION_ID)
 #define API_USER_STR_C                   get_token_string_by_id(API_USER_ID)
+#define API_PAIRING_STR_C                get_token_string_by_id(API_PAIRING_ID)
 
 #endif
 

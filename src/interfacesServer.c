@@ -1123,6 +1123,43 @@ int jsonTypesSave()
 }
 
 
+cJSON *getAvailablePairing_alloc()
+{
+   int ret=0;
+   interfaces_queue_elem_t *iq;
+   cJSON *result=cJSON_CreateObject();
+   
+   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
+   pthread_rwlock_rdlock(&interfaces_queue_rwlock);
+
+   if(_interfaces && _interfaces->nb_elem) {
+      mea_queue_first(_interfaces);
+      while(1) {
+         mea_queue_current(_interfaces, (void **)&iq);
+         if(iq->context) {
+            int monitoring_id = iq->fns->get_monitoring_id(iq->context);
+            if(monitoring_id>-1 && process_is_running(monitoring_id)) {
+               if(iq->fns->pairing) {
+                    cJSON_AddNumberToObject(result, iq->name, 1);
+//                  void *ret = iq->fns->pairing(0, iq->context);
+               }
+            }
+            break;
+         }
+         ret=mea_queue_next(_interfaces);
+         if(ret<0) {
+            break;
+         }
+      }
+   }
+   
+   pthread_rwlock_unlock(&interfaces_queue_rwlock);
+   pthread_cleanup_pop(0);
+   
+   return result;
+}
+
+
 int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, cJSON *jsonInterface, cJSON *jsonType)
 {
    if(!device_info)
