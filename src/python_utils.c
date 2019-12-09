@@ -295,7 +295,7 @@ cJSON *mea_call_python_function_json_alloc(char *module_name, char *function_nam
       }
       else {
          VERBOSE(5) {
-            mea_log_printf("%s (%s) : function \"%s\" not exist or not callable in \"%s\"\n", ERROR_STR, __func__, function_name, module_name);
+            mea_log_printf("%s (%s) : function \"\" not exist or not callable in \"\"", ERROR_STR, __func__, function_name, module_name);
          }
       }
 
@@ -306,7 +306,7 @@ cJSON *mea_call_python_function_json_alloc(char *module_name, char *function_nam
    }
    else {
       VERBOSE(5) {
-         mea_log_printf("%s (%s) : can't load \"%s\"\n", ERROR_STR, __func__, module_name);
+         mea_log_printf("%s (%s) : can't load \"\"", ERROR_STR, __func__, module_name);
       }
    }
    
