@@ -11,6 +11,14 @@
 
 #include "mongoose.h"
 
+/*
+enum pairing_cmd_e {
+   PAIRING_GET,
+   PAIRING_START,
+   PAIRING_STOP
+};
+*/
+
 int mea_rest_api_pairing(struct mg_connection *conn, int method, char *tokens[], int l_tokens);
 
 #endif /* mea_rest_api_pairing_h */

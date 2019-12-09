@@ -9,12 +9,6 @@
 #include "cJSON.h"
 
 
-enum pairing_cmd_e {
-   PAIRING_GET,
-   PAIRING_START,
-   PAIRING_STOP
-};
-
 #define ENOCEAN_PAIRING_ON  1
 #define ENOCEAN_PAIRING_OFF 0
 

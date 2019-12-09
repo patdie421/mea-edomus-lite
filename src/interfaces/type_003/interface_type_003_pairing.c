@@ -1,4 +1,5 @@
 #include "interface_type_003_pairing.h"
+#include "interfacesServer.h"
 #include "interface_type_003.h"
 
 #include <signal.h>
@@ -427,13 +428,13 @@ cJSON *enocean_pairing_end(void *context, void *parameters) /* TO TEST */
 void *enocean_pairingCtrl(int cmd, void *context, void *parameters)
 {
    switch(cmd) {
-      case PAIRING_GET:
+      case PAIRING_CMD_GETSTATE:
          return (void *)enocean_pairing_get(context, parameters);
 
-      case PAIRING_START:
+      case PAIRING_CMD_ON:
          return (void *)enocean_pairing_start(context, parameters);
          
-      case PAIRING_STOP:
+      case PAIRING_CMD_OFF:
          return (void *)enocean_pairing_end(context, parameters);
    }
    return NULL;
@@ -491,7 +492,7 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
       }
    }
    else {
-      _j=mea_call_python_function_json_alloc(pluginParams->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, "pairing_get_devices", j);
+   _j=mea_call_python_function_json_alloc(pluginParams->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, "pairing_get_devices", j);
    }
 
    if(_j && _j->type==cJSON_Object) {
