@@ -39,14 +39,19 @@ typedef struct interface_type_010_s
 {
    int              id_interface;
    int              id_driver;
-   char             name[41];
-   char             dev[81];
+   char             name[256];
+   char             dev[256];
    int              monitoring_id;
    pthread_t       *thread;
    volatile sig_atomic_t thread_is_running;
    xpl2_f           xPL_callback2;
    void            *xPL_callback_data;
    char            *parameters;
+   
+      
+   volatile sig_atomic_t
+                    pairing_state;
+   double           pairing_startms;
 
    int              fduration;
    char            *fendstr;
@@ -68,7 +73,6 @@ typedef struct interface_type_010_s
 
    PyThreadState   *mainThreadState;
    PyThreadState   *myThreadState;
-
    PyObject        *pModule;
    PyObject        *pFunc;
    PyObject        *pParams;

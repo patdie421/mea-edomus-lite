@@ -62,6 +62,7 @@ int16_t parsed_parameters_init(void);
 parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *parameters_to_find[], int *nb_params, int *err, int value_to_upper_flag);
 void release_parsed_parameters(parsed_parameters_t **params);
 void display_parsed_parameters(parsed_parameters_t *params);
+int parsed_parameters_get_param_string(char *params, char *valid_params[], int param_id, char *param, int param_l);
 
 int16_t is_in_assocs_list(struct assoc_s *assocs_list, int val1, int val2);
 

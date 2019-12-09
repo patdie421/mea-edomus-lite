@@ -17,6 +17,7 @@
 #include "httpServer.h"
 #include "tokens.h"
 #include "tokens_da.h"
+#include "mea_verbose.h"
 
 
 int mea_rest_api_pairing_GET(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
@@ -26,10 +27,21 @@ int mea_rest_api_pairing_GET(struct mg_connection *conn, int method, char *token
       char *s=cJSON_Print(interfaces);
       httpResponse(conn, 200, NULL, s);
       free(s);
+      cJSON_Delete(interfaces);
       return 0;
    }
    else if(l_tokens==1) {
-      returnResponse(conn, 200, 0, "pairing get");
+      cJSON *interfaces=getAvailablePairing_alloc();
+      cJSON *interface=cJSON_GetObjectItem(interfaces, tokens[0]);
+      if(interface) {
+         char *s=cJSON_Print(interface);
+         httpResponse(conn, 200, NULL, s);
+         free(s);
+         cJSON_Delete(interfaces);
+      }
+      else {
+         return returnResponse(conn, 404, 1, NULL);
+      }
       return 0;
    }
    return returnResponse(conn, 404, 1, NULL);
@@ -38,12 +50,51 @@ int mea_rest_api_pairing_GET(struct mg_connection *conn, int method, char *token
 
 int mea_rest_api_pairing_POST(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
-   if(l_tokens==0) {
-      cJSON *jsonData=getData_alloc(conn);
-      if(jsonData) {
+   cJSON *jsonData=NULL;
+   if(l_tokens==1) {
+      jsonData=getData_alloc(conn);
+      if(jsonData && jsonData->type==cJSON_Object) {
+         cJSON *state=cJSON_GetObjectItem(jsonData,"state");
+         if(state) {
+            if(state->type==cJSON_Number) {
+               int v=0;
+               char *msg="";
+               int ret=0;
 
-         cJSON_Delete(jsonData);
-         return returnResponse(conn, 200, 0, "pairing post");
+               if(state->valuedouble!=0.0) {
+                  v=1;
+               }
+               cJSON *r=setPairingState_alloc(tokens[0], v);
+
+               if(r && r->type==cJSON_True) {
+                  msg="done";
+                  ret=0;
+               }
+               else {
+                  msg="error";
+                  ret=1;
+               }
+               
+               if(r) {
+                  cJSON_Delete(r);
+                  r=NULL;
+               }
+
+               cJSON_Delete(jsonData);
+               return returnResponse(conn, 200, ret, msg);
+            }
+            else {
+               cJSON_Delete(jsonData);
+               return returnResponse(conn, 400, 1, "\"state\" is not a number");
+            }
+         }
+         else {
+            cJSON_Delete(jsonData);
+            return returnResponse(conn, 400, 1, "no \"state\" in body");
+         }
+      }
+      else {
+         return returnResponse(conn, 400, 1, "no valid body data");
       }
    }
    return returnResponse(conn, 404, 1, NULL);

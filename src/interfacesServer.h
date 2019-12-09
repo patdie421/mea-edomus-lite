@@ -24,6 +24,11 @@
 #define INTERFACE_TYPE_005 455
 #define INTERFACE_TYPE_006 465
 
+enum pairing_cmd_e {
+   PAIRING_CMD_ON,
+   PAIRING_CMD_OFF,
+   PAIRING_CMD_GETSTATE
+};
 
 struct device_info_s
 {
@@ -44,6 +49,7 @@ struct device_info_s
 
    uint16_t location_id;
    uint16_t todbflag;
+
 };
 
 struct devices_index_s
@@ -78,7 +84,7 @@ typedef int    (*clean_f)(void *);
 typedef int    (*get_type_f)(void);
 typedef int    (*get_interface_id_f)(void *);
 typedef int    (*update_devices_f)(void *);
-typedef void * (*pairing_f)(int cmd, void *);
+typedef void * (*pairing_f)(enum pairing_cmd_e cmd, void *);
 typedef int    (*api_f)(void *ixxx, char *, void *, int, void **, int16_t *, char *, int); // *cmnd, void *args, int nb_args, void **res, char *err, int l_err
 
 struct interfacesServer_interfaceFns_s {
@@ -154,4 +160,5 @@ int         addInterface(cJSON *jsonData);
 int         updateInterface(char *interface, cJSON *jsonData);
 
 cJSON       *getAvailablePairing_alloc(void);
+cJSON       *setPairingState_alloc(char *interfaceName, int state);
 #endif

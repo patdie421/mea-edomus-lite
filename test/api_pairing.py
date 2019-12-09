@@ -28,11 +28,13 @@ def get(url, headers={}):
     except urllib2.HTTPError,e:
        connection = e
 
-    if connection.code == 200:
+    data=None
+    try:
        data = connection.read()
-       return connection.code,data
-    else:
-       return connection.code,None
+#       print "data:", data
+    except:
+       pass
+    return connection.code,data
 
 
 def post(url, body, headers={}):
@@ -50,15 +52,18 @@ def post(url, body, headers={}):
     except urllib2.HTTPError,e:
        connection = e
 
-    if connection.code == 200:
+    data=None
+    try:
        data = connection.read()
-       return connection.code,data
-    else:
-       return connection.code,None
+#       print "data:", data
+    except:
+       pass
+    return connection.code,data
 
 
-def post_pairing(host, port, body, sessionid):
-    url="http://"+str(host)+":"+str(port)+"/rest/pairing"
+def post_pairing(host, port, name, state, sessionid):
+    url="http://"+str(host)+":"+str(port)+"/rest/pairing/"+str(name)
+    body={ "state": state }
     headers={"Mea-session": sessionid}
     code,res=post(url, body, headers)
     return code, res
@@ -66,6 +71,13 @@ def post_pairing(host, port, body, sessionid):
 
 def get_pairing(host, port, sessionid):
     url="http://"+str(host)+":"+str(port)+"/rest/pairing"
+    headers={"Mea-session": sessionid}
+    code,res=get(url, headers)
+    return code, res
+
+
+def get_pairing_interface(host, port, name, sessionid):
+    url="http://"+str(host)+":"+str(port)+"/rest/pairing/"+str(name)
     headers={"Mea-session": sessionid}
     code,res=get(url, headers)
     return code, res
@@ -94,17 +106,44 @@ code,session=open_session(host, port, user, password)
 session=json.loads(session)
 sessionid=session["Mea-SessionId"]
 
-code,interfaces=get_interfaces(host, port, sessionid)
-if interfaces!=None:
-   interfaces=json.loads(interfaces)
-   print json.dumps(interfaces, indent=4)
+#code,interfaces=get_interfaces(host, port, sessionid)
+#if interfaces!=None:
+#   interfaces=json.loads(interfaces)
+#   print json.dumps(interfaces, indent=4)
 
 code,pairing=get_pairing(host, port, sessionid)
 if pairing!=None:
-   print pairing
+   print code, pairing
 
-body={}
-code,pairing=post_pairing(host, port, body, sessionid)
+print "I010 ?"
+code,pairing=get_pairing_interface(host, port, "I010", sessionid)
+print code, pairing
+
+print "TOTO ?"
+code,pairing=get_pairing_interface(host, port, "TOTO", sessionid)
+print code, pairing
+
+print "I010 ON"
+code,pairing=post_pairing(host, port, "I010", 1, sessionid)
 if pairing!=None:
-   print pairing
+   print code, pairing
 
+print "I010 ?"
+code,pairing=get_pairing(host, port, sessionid)
+if pairing!=None:
+   print code, pairing
+
+# print "I010 OFF"
+# code,pairing=post_pairing(host, port, "I010", 0, sessionid)
+# if pairing!=None:
+#   print code, pairing
+
+# print "I010 ?"
+# code,pairing=get_pairing(host, port, sessionid)
+# if pairing!=None:
+#    print code, pairing
+
+print "TOTO ON"
+code,pairing=post_pairing(host, port, "TOTO", 1, sessionid)
+if pairing!=None:
+   print code, pairing

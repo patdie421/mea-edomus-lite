@@ -782,6 +782,18 @@ int mea_rest_api_session(struct mg_connection *conn, int method, char *tokens[],
 {
    switch(method) {
 
+      case HTTP_GET_ID:
+         if(l_tokens==0) {
+            const char *meaSessionId=mg_get_header(conn, "Mea-Session");
+            if(checkSession((char *)meaSessionId)!=0) {
+               return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
+            }
+            return returnResponse(conn, 200, 0, NULL);
+         }
+         else {
+            return returnResponse(conn, 404, 1, NULL);
+         }
+
       case HTTP_POST_ID:
          if(l_tokens==0) {
             return openSession(conn);

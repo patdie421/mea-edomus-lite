@@ -12,6 +12,18 @@
 #include "cJSON.h"
 #include "interfacesServer.h"
 
+
+#define PYTHON_CALL_JSON(THREADSTATE, IN, OUT) \
+{ \
+   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); \
+   PyEval_AcquireLock(); \
+   PyThreadState *tempState = PyThreadState_Swap(THREADSTATE); \
+   OUT=mea_call_python_function_json_alloc(name, "pairing_get_devices", IN); \
+   PyThreadState_Swap(tempState); \
+   PyEval_ReleaseLock(); \
+   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL); \
+}
+
 #define mea_python_lock() \
    { \
    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); \

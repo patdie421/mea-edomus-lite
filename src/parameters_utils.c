@@ -219,6 +219,37 @@ int16_t parsed_parameters_clean_older_than(time_t t)
 }
 
 
+int parsed_parameters_get_param_string(char *params, char *valid_params[], int param_id, char *param, int param_l)
+{
+   parsed_parameters_t *_params=NULL;
+   int nbParams=0;
+   int err=0;
+   
+   _params=alloc_parsed_parameters(params, valid_params, &nbParams, &err, 0);
+   display_parsed_parameters(_params);
+   
+   if(!_params || _params->parameters[param_id].type!=STRING || !_params->parameters[param_id].value.s) {
+      if(_params) {
+         release_parsed_parameters(&_params);
+         _params=NULL;
+         VERBOSE(9) mea_log_printf("%s (%s) : parameter not found\n", ERROR_STR, __func__);
+         return -1;
+      }
+      else {
+         VERBOSE(5) mea_log_printf("%s (%s) : invalid parameters string (%s)\n", ERROR_STR, __func__, params);
+         return -1;
+      }
+   }
+   else {
+      strncpy(param, _params->parameters[param_id].value.s, param_l);
+      VERBOSE(5) mea_log_printf("%s (%s) : string: %s)\n", ERROR_STR, __func__, params);
+      release_parsed_parameters(&_params);
+      _params=NULL;
+      return 0;
+   }
+}
+
+
 int16_t parsed_parameters_init()
 {
 #ifdef PARSED_PARAMETERS_CACHING_ENABLED
@@ -513,7 +544,9 @@ void display_parsed_parameters(parsed_parameters_t *mpp)
    DEBUG_SECTION {
       if(mpp) {
          for(int i=0;i<mpp->nb;i++) {
-            printf("%s = ", mpp->parameters[i].label);
+            if(mpp->parameters[i].label==NULL)
+               continue;
+            printf("%d:%s = ", i, mpp->parameters[i].label);
             switch((int)(mpp->parameters[i].type)) {
                case 1:
                   printf("%d (I)\n",mpp->parameters[i].value.i);

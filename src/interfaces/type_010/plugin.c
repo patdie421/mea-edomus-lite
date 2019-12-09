@@ -50,7 +50,7 @@ int get_fns_interface(void *lib, struct interfacesServer_interfaceFns_s *interfa
       if(!interfacesFns->api)
          fprintf(stderr,"api: %s\n", dlerror());
 
-      interfacesFns->api = (api_f)dlsym(lib, "pairing_interface_type_010");
+      interfacesFns->pairing = (pairing_f)dlsym(lib, "pairing_interface_type_010");
       if(!interfacesFns->pairing)
          fprintf(stderr,"pairing: %s\n", dlerror());
 

@@ -38,6 +38,7 @@
 #include "mea_string_utils.h"
 #include "parameters_utils.h"
 #include "cJSON.h"
+#include "mea_timer.h"
 
 #include "processManager.h"
 #include "pythonPluginServer.h"
@@ -310,7 +311,7 @@ int init_interface_type_010_data_preprocessor(interface_type_010_t *i010, char *
 
       i010->pFunc = PyObject_GetAttrString(i010->pModule, "mea_dataPreprocessor");
       if(!i010->pFunc) {
-         ret=-1;
+         ret=0;
          goto init_interface_type_010_data_preprocessor_clean_exit;
       }
       
@@ -322,23 +323,24 @@ int init_interface_type_010_data_preprocessor(interface_type_010_t *i010, char *
          ret = 0;
       }
       else {
-         VERBOSE(5) mea_log_printf("%s (%s) : no mea_dataPreprocessor entry point\n", ERROR_STR, __func__);
+         VERBOSE(5) mea_log_printf("%s (%s) : no mea_dataPreprocessor entry point\n", WARNING_STR, __func__);
 
          Py_XDECREF(i010->pFunc);
          i010->pFunc=NULL;
 
          Py_XDECREF(i010->pModule);
          i010->pModule=NULL;
-
-         ret = -1;
+      
+         ret = 0;
       }
    }
 
 init_interface_type_010_data_preprocessor_clean_exit:
    if(pName) {
-      Py_XDECREF(pName);
+      Py_DECREF(pName);
       pName=NULL;      
    }
+   
    mea_python_unlock();
 
    return ret;
@@ -378,7 +380,7 @@ int interface_type_010_data_preprocessor(interface_type_010_t *i010)
                int ret=PyObject_GetBuffer(res, &py_packet, PyBUF_SIMPLE);
                if(ret<0) {
                   VERBOSE(5) mea_log_printf("%s (%s) : python buffer error\n", ERROR_STR, __func__);
-                  retour = -1;
+//                  retour = -1;
                }
                else
                {
@@ -421,6 +423,68 @@ int interface_type_010_data_preprocessor(interface_type_010_t *i010)
    }
 
    return retour;
+}
+
+
+int interface_type_010_pairing(interface_type_010_t *i010)
+{
+   int ret=-1;
+   char *data=NULL;
+   
+   // retrieve data to send to plugin   
+   data=alloca(i010->line_buffer_ptr+1);
+   data[i010->line_buffer_ptr]=0;
+   strncpy(data, i010->line_buffer, i010->line_buffer_ptr);
+
+   VERBOSE(5) {
+      mea_log_printf("%s (%s) : ***** pairing data (%s) ? *****\n", INFO_STR, __func__, data);
+   }
+   
+   int err=0;
+
+   char name[256];
+   if(parsed_parameters_get_param_string(i010->parameters, valid_interface_010_params, INTERFACE_PARAMS_PLUGIN, name, sizeof(name)-1)==0) {
+
+      cJSON *j=NULL, *_j=NULL;
+
+      name[sizeof(name)-1]=0;
+
+      j=cJSON_CreateObject();
+      cJSON_AddStringToObject(j, "data", data);
+      
+      PYTHON_CALL_JSON(i010->myThreadState, j, _j);
+
+      VERBOSE(5) {
+         char *s=cJSON_Print(_j);
+         mea_log_printf("%s (%s) : pairing result=%s\n", ERROR_STR, __func__, s);
+         free(s);
+      }
+      
+      if(_j->type!=cJSON_NULL) {
+         int _ret=addDevice(i010->name, _j);
+         if(_ret==0) {
+            VERBOSE(5) mea_log_printf("%s (%s) : pairing done\n", ERROR_STR, __func__);
+         }
+         else {
+            VERBOSE(5) mea_log_printf("%s (%s) : pairing error (%d)\n", ERROR_STR, __func__, _ret);
+         }
+         i010->pairing_state=0;
+         i010->pairing_startms=-1.0;
+      }
+      else {
+         VERBOSE(5) mea_log_printf("%s (%s) : no pairing data\n", ERROR_STR, __func__);
+      }
+
+      cJSON_Delete(_j);
+      cJSON_Delete(j);
+
+      return 0;
+   }
+
+   i010->pairing_state=0;
+   i010->pairing_startms=-1.0;
+
+   return ret;
 }
 
 
@@ -480,12 +544,23 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
 
 static int interface_type_010_data_to_plugin(interface_type_010_t *i010)
 {
-   int ret=interface_type_010_data_preprocessor(i010);
+   int ret=0;
+   
+   if(i010->pairing_state==1) {
+      int ret=interface_type_010_pairing(i010);
+      if(ret>0) {
+         return 0;
+      }
+   }
+
+   ret=interface_type_010_data_preprocessor(i010);
    if(ret==-1)
       return -1;
 
+   
    if(ret==1) {
    }
+
    cJSON *jsonInterface = getInterfaceById_alloc(i010->id_interface);
    if(jsonInterface) {
       cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, "devices");
@@ -556,6 +631,13 @@ static int process_interface_type_010_data(interface_type_010_t *i010)
          break;
       }
 
+      if(i010->pairing_state==1) {
+         if(mea_now()-i010->pairing_startms>60.0*1000.0) {
+            i010->pairing_state=0;
+            i010->pairing_startms=-1.0;
+         }
+      }
+
       /* Initialize the timeout data structure. */
       if(i010->fduration <= 0) {
          timeout.tv_sec = 5;
@@ -567,6 +649,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010)
       }
 
       ret = select(FD_SETSIZE, &set, NULL, NULL, &timeout);
+      
       if(ret == 0) {
          if((i010->fduration > 0) && (i010->line_buffer_ptr)) {
             i010->line_buffer[i010->line_buffer_ptr]=0;
@@ -867,9 +950,27 @@ static int api_write_data(interface_type_010_t *ixxx, PyObject *args, PyObject *
 }
 
 
-void *pairing_interface_type_010(int cmd, void *context)
+void *pairing_interface_type_010(enum pairing_cmd_e cmd, void *context)
 {
-   mea_log_printf("%s (%s) : pairing", ERROR_STR, __func__);
+   interface_type_010_t *i010=(interface_type_010_t *)context;
+   
+   switch(cmd) {
+      case PAIRING_CMD_ON:
+         i010->pairing_state=1;
+         i010->pairing_startms=mea_now();
+         return cJSON_CreateTrue();
+
+      case PAIRING_CMD_OFF:
+         i010->pairing_state=0;
+         i010->pairing_startms=-1.0;
+         return cJSON_CreateTrue();
+
+      case PAIRING_CMD_GETSTATE:
+         return cJSON_CreateNumber((double)i010->pairing_state);
+
+      default:
+         return cJSON_CreateNull();
+   }
    
    return NULL;
 }
@@ -976,7 +1077,8 @@ interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *
    i010->pParams = NULL;
    i010->mainThreadState=NULL;
    i010->myThreadState=NULL;
-
+   i010->pairing_state=0;
+   i010->pairing_startms=-1;
 
    parsed_parameters_t *interface_params=NULL;
    int nb_interface_params;
