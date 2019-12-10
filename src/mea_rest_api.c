@@ -7,6 +7,7 @@
 #include "cJSON.h"
 #include "mea_rest_api.h"
 #include "mea_rest_api_pairing.h"
+#include "mea_rest_api_user.h"
 
 #include "mea_verbose.h"
 #include "mea_string_utils.h"
@@ -18,21 +19,44 @@
 #include "processManager.h"
 #include "configuration.h"
 
-char *_users2 = "{ \
-\"admin\": { \"password\":\"admin\", \"fullname\":\"admin\" }, \
-\"user\": { \"password\":\"user\", \"fullname\":\"user\" } \
-}";
 
-cJSON *users2 = NULL;
 cJSON *sessions = NULL;
 
 char *no_valid_json_data_str="no valid json data";
 char *bad_method_str="bad method";
 char *not_authorized_str="not authorized";
+char *success_str="success";
 
-#define NO_VALID_JSON_DATA no_valid_json_data_str
-#define BAD_METHOD bad_method_str
-#define NOT_AUTHORIZED not_authorized_str
+
+cJSON *getData_alloc(struct mg_connection *conn)
+{
+   cJSON *json=NULL;
+
+   const char *cl=mg_get_header(conn, "Content-Length");
+   if(cl) {
+      int l_data=atoi(cl);
+      if(l_data>0) {
+         char *data=(char *)malloc(l_data+1);
+         if(data) {
+            mg_read(conn, data, l_data);
+            data[l_data]=0;
+            json = cJSON_Parse(data);
+            free(data);
+         }
+      }
+   }
+   return json;
+}
+
+
+int returnResponseAndDeleteJsonData(struct mg_connection *conn, int httperr, int errnum, char *msg, cJSON *jsonData)
+{
+   int ret=returnResponse(conn, httperr, errnum, msg);
+   if(jsonData)
+      cJSON_Delete(jsonData);
+   return ret;
+   
+}
 
 
 int returnResponse(struct mg_connection *conn, int httperr, int errnum, char *msg)
@@ -68,6 +92,22 @@ int purgeSessions() {
 }
 
 
+int purgeSessionsByUsername(char *username) {
+   if(sessions) {
+      cJSON *session = sessions->child;
+      while(session) {
+         cJSON *next = session->next;
+         if(mea_strcmplower(cJSON_GetObjectItem(session, "user")->valuestring, username)==0) {
+            cJSON_DeleteItemFromObject(sessions, session->string);
+         }
+         session = next;
+      }
+   }
+
+   return 1;
+}
+
+
 int closeSession(struct mg_connection *conn, char *id)
 {
    cJSON *json_id = NULL;
@@ -85,27 +125,6 @@ int closeSession(struct mg_connection *conn, char *id)
       mea_log_printf("%s (%s) : unknown session\n",ERROR_STR,__func__);
 
    return 1;
-}
-
-
-cJSON *getData_alloc(struct mg_connection *conn)
-{
-   cJSON *json=NULL;
-
-   const char *cl=mg_get_header(conn, "Content-Length");
-   if(cl) {
-      int l_data=atoi(cl);
-      if(l_data>0) {
-         char *data=(char *)malloc(l_data+1);
-         if(data) {
-            mg_read(conn, data, l_data);
-            data[l_data]=0;
-            json = cJSON_Parse(data);
-            free(data);
-         }
-      }
-   }
-   return json;
 }
 
 
@@ -129,9 +148,9 @@ int openSession(struct mg_connection *conn)
                if(user && password) {
                
                   cJSON *u = cJSON_GetObjectItem(users2, user->valuestring);
-
                   if(u) {
                      cJSON *p=cJSON_GetObjectItem(u, "password");
+
                      if(p && p->type==cJSON_String && strcmp(password->valuestring, p->valuestring)==0) {
 
                         char id[21];
@@ -140,10 +159,18 @@ int openSession(struct mg_connection *conn)
                            id[i]='A'+ rand() % ('Z'-'A');
                         id[20]=0;
 
+                        double _profile=0.0;
+                        cJSON *profile=cJSON_GetObjectItem(u, "profile");
+                        if(profile && profile->type==cJSON_Number) {
+                           _profile=profile->valuedouble;
+                        }
+
                         cJSON *idData = cJSON_CreateObject();
                         cJSON_AddItemToObject(idData, "time", cJSON_CreateNumber((double)time(NULL))); 
+                        cJSON_AddItemToObject(idData, "profile", cJSON_CreateNumber(_profile));
+                        cJSON_AddItemToObject(idData, "user", cJSON_CreateString(user->valuestring));
                         cJSON_AddItemToObject(sessions, id, idData);
-                        char jsonSessionId[80];
+                        char jsonSessionId[256];
                         snprintf(jsonSessionId, sizeof(jsonSessionId), "{\"Mea-SessionId\":\"%s\"}", id);
                         httpResponse(conn, 200, NULL, jsonSessionId);
                      }
@@ -180,6 +207,56 @@ int openSession(struct mg_connection *conn)
 }
 
 
+int getSessionProfile(char *sessionId)
+{
+   if(sessionId) {
+      cJSON *json_sessionId = cJSON_GetObjectItem(sessions, sessionId);
+      if(json_sessionId == NULL) {
+         return -1;
+      }
+      else {
+         cJSON *json_profile=cJSON_GetObjectItem(json_sessionId, "profile");
+         if(json_profile==NULL || json_profile->type!=cJSON_Number) {
+            return 0;
+         }
+         else {
+            return (int)(json_profile->valuedouble);
+         }
+      }
+   }
+   else {
+      return -1;
+   }
+}
+
+
+char *getSessionUser_alloc(char *sessionId)
+{
+   char *user=NULL;
+   
+   if(sessionId) {
+      cJSON *json_sessionId = cJSON_GetObjectItem(sessions, sessionId);
+      if(json_sessionId == NULL) {
+         return NULL;
+      }
+      else {
+         cJSON *json_user=cJSON_GetObjectItem(json_sessionId, "user");
+         if(json_user==NULL || json_user->type!=cJSON_String) {
+            return 0;
+         }
+         else {
+            user=malloc(strlen(json_user->valuestring)+1);
+            if(user) {
+               strcpy(user, json_user->valuestring);
+               return user;
+            }
+         }
+      }
+   }
+   return NULL;
+}
+
+
 int checkSession(char *sessionId)
 {
    if(sessionId) {
@@ -200,68 +277,6 @@ int checkSession(char *sessionId)
    else {
       return -1;
    }
-}
-
-
-char *get_users_list_alloc()
-{
-   char *s=cJSON_Print(users2);
-
-   return s;
-}
-
-
-int mea_rest_api_user_GET(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
-{
-   if(l_tokens==0) {
-      char *s=get_users_list_alloc();
-      httpResponse(conn, 200, NULL, s);
-      free(s);
-      return 0;
-   }
-   else if(l_tokens==1) {
-      cJSON *jsonUser=cJSON_GetObjectItem(users2, tokens[0]);
-      if(jsonUser) {
-         char *s=cJSON_Print(jsonUser);
-         httpResponse(conn, 200, NULL, s);
-         free(s);
-         return 0;
-      }
-   }
-   return returnResponse(conn, 404, 1, NULL);
-}
-
-
-int mea_rest_api_user_POST(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
-{
-   if(l_tokens==0) {
-      cJSON *jsonData=getData_alloc(conn);
-      if(jsonData) {
-         return returnResponse(conn, 200, 0, "user post");
-      }
-   }
-   return returnResponse(conn, 404, 1, NULL);
-}
-
-
-int mea_rest_api_user_PUT(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
-{
-   if(l_tokens==1) {
-      cJSON *jsonData=getData_alloc(conn);
-      if(jsonData) {
-         return returnResponse(conn, 200, 0, "user put");
-      }
-   }
-   return returnResponse(conn, 404, 1, NULL);
-}
-
-
-int mea_rest_api_user_DELETE(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
-{
-   if(l_tokens==1) {
-      return returnResponse(conn, 200, 0, "user delete");
-   }
-   return returnResponse(conn, 404, 1, NULL);
 }
 
 
@@ -362,33 +377,27 @@ int mea_rest_api_service_PUT(struct mg_connection *conn, int method, char *token
                char msg[256];
                if(mea_strcmplower(jsonAction->valuestring, "start")==0) {
                   ret=process_start(id, msg, sizeof(msg)-1);
-                  cJSON_Delete(jsonData);
-                  return returnResponse(conn, 200, 0, msg);
+                  return returnResponseAndDeleteJsonData(conn, 200, 0, msg, jsonData);
                }
                if(mea_strcmplower(jsonAction->valuestring, "stop")==0) {
                   ret=process_stop(id, msg, sizeof(msg)-1);
-                  cJSON_Delete(jsonData);
-                  return returnResponse(conn, 200, 0, msg);
+                  return returnResponseAndDeleteJsonData(conn, 200, 0, msg, jsonData);
                }
                if(mea_strcmplower(jsonAction->valuestring, "restart")==0) {
                   ret=process_restart(id, msg, sizeof(msg)-1);
-                  cJSON_Delete(jsonData);
-                  return returnResponse(conn, 200, 0, msg);
+                  return returnResponseAndDeleteJsonData(conn, 200, 0, msg, jsonData);
                }
                else {
                   process_start(id, msg, sizeof(msg)-1);
-                  cJSON_Delete(jsonData);
-                  return returnResponse(conn, 400, 1,"unknown action");
+                  return returnResponseAndDeleteJsonData(conn, 400, 1,"unknown action", jsonData);
                }
             }
             else {
-               cJSON_Delete(jsonData);
-               return returnResponse(conn, 400, 1,"action not a string");
+               return returnResponseAndDeleteJsonData(conn, 400, 1,"action not a string", jsonData);
             }
          }
          else {
-            cJSON_Delete(jsonData);
-            return returnResponse(conn, 400, 1,"no action");
+            return returnResponseAndDeleteJsonData(conn, 400, 1,"no action", jsonData);
          }
       }
       else {
@@ -640,10 +649,10 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
             cJSON *jsonData=getData_alloc(conn);
             if(jsonData) {
                if(addInterface(jsonData)>=0) {
-                  return returnResponse(conn, 200, 0, NULL);
+                  return returnResponseAndDeleteJsonData(conn, 200, 0, NULL, jsonData);
                }
                else {
-                  return returnResponse(conn, 404, 1, NULL);
+                  return returnResponseAndDeleteJsonData(conn, 404, 1, NULL, jsonData);
                }
             }
             else {
@@ -664,10 +673,10 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
             cJSON *jsonData=getData_alloc(conn);
             if(jsonData) {
                if(updateInterface(tokens[0], jsonData)>=0) {
-                  return returnResponse(conn, 200, 0, NULL);
+                  return returnResponseAndDeleteJsonData(conn, 200, 0, NULL, jsonData);
                }
                else {
-                  return returnResponse(conn, 404, 1, NULL);
+                  return returnResponseAndDeleteJsonData(conn, 404, 1, NULL, jsonData);
                }
             }
             else {
@@ -687,10 +696,16 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
 int mea_rest_api_configuration(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
    const char *meaSessionId=mg_get_header(conn, "Mea-Session");
-
+   int profile=-1;
    if(checkSession((char *)meaSessionId)!=0) {
       return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
    }
+
+   profile=getSessionProfile((char *)meaSessionId);
+   if(profile<0) {
+      return returnResponse(conn, 500, 1, "profile error");
+   }
+
    switch(method) {
       case HTTP_GET_ID:
          if(l_tokens==0) {
@@ -720,58 +735,33 @@ int mea_rest_api_configuration(struct mg_connection *conn, int method, char *tok
          }
 
       case HTTP_PUT_ID: {
+         if(profile<1) {
+            return returnResponse(conn, 401, 98, NOT_AUTHORIZED);
+         }
          cJSON *jsonData=getData_alloc(conn);
          if(!jsonData) {
             return returnResponse(conn, 400, 1, NO_VALID_JSON_DATA);
          }
          if(l_tokens==0) {
             if(updateAppParameters(jsonData)==0) {
-               return returnResponse(conn, 200, 0, NULL);
+               return returnResponseAndDeleteJsonData(conn, 200, 0, NULL, jsonData);
             }
             else {
-               return returnResponse(conn, 404, 1, NULL);
+               return returnResponseAndDeleteJsonData(conn, 404, 1, NULL, jsonData);
             }
          }
          else if(l_tokens==1) {
             if(updateAppParameter(tokens[0], jsonData)==0) {
-               return returnResponse(conn, 200, 0, NULL);
+               return returnResponseAndDeleteJsonData(conn, 200, 0, NULL, jsonData);
             }
             else {
-               return returnResponse(conn, 404, 1, NULL);
+               return returnResponseAndDeleteJsonData(conn, 404, 1, NULL, jsonData);
             }
          }
          else {
-            return returnResponse(conn, 404, 1, NULL);
+            return returnResponseAndDeleteJsonData(conn, 404, 1, NULL, jsonData);
          }
       }
-      default:
-         return returnResponse(conn, 405, 1, BAD_METHOD);
-   }
-}
-
-
-int mea_rest_api_user(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
-{
-   const char *meaSessionId=mg_get_header(conn, "Mea-Session");
-
-   if(checkSession((char *)meaSessionId)!=0) {
-      return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
-   }
-
-   switch(method) {
-
-      case HTTP_GET_ID:
-         return mea_rest_api_user_GET(conn, method, tokens, l_tokens);
-
-      case HTTP_POST_ID:
-         return mea_rest_api_user_POST(conn, method, tokens, l_tokens);
-
-      case HTTP_PUT_ID:
-         return mea_rest_api_user_PUT(conn, method, tokens, l_tokens);
-
-      case HTTP_DELETE_ID:
-         return mea_rest_api_user_DELETE(conn, method, tokens, l_tokens);
-
       default:
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
@@ -821,7 +811,6 @@ int mea_rest_api_init()
 {
    srand((unsigned int)time(NULL));
    sessions=cJSON_CreateObject();
-   users2=cJSON_Parse(_users2);
 
    return 1;
 }
@@ -877,4 +866,3 @@ int mea_rest_api(struct mg_connection *conn, int method, char *tokens[], int l_t
          return returnResponse(conn, 404, 1, NULL);
    } 
 }
-

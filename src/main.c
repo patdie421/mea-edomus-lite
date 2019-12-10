@@ -47,6 +47,7 @@
 
 #include "processManager.h"
 
+#include "users.h"
 #include "datetimeServer.h"
 #include "xPLServer.h"
 #include "pythonPluginServer.h"
@@ -146,7 +147,7 @@ void init_param_names(char *names[])
 
 int16_t read_all_application_parameters(char *cfgfile)
 {
-   cJSON *p=loadJson(cfgfile);
+   cJSON *p=loadJson_alloc(cfgfile);
 
    if(p) {
       cJSON *c = p->child;
@@ -401,6 +402,10 @@ int main(int argc, const char * argv[])
       clean_all_and_exit(1);
    }
 
+
+   // chargement des utilisateurs
+   initUsers();
+   
 
    //
    // stdout et stderr vers fichier log

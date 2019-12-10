@@ -80,21 +80,18 @@ int mea_rest_api_pairing_POST(struct mg_connection *conn, int method, char *toke
                   r=NULL;
                }
 
-               cJSON_Delete(jsonData);
-               return returnResponse(conn, 200, ret, msg);
+               return returnResponseAndDeleteJsonData(conn, 200, ret, msg, jsonData);
             }
             else {
-               cJSON_Delete(jsonData);
-               return returnResponse(conn, 400, 1, "\"state\" is not a number");
+               return returnResponseAndDeleteJsonData(conn, 400, 1, "\"state\" is not a number", jsonData);
             }
          }
          else {
-            cJSON_Delete(jsonData);
-            return returnResponse(conn, 400, 1, "no \"state\" in body");
+            return returnResponseAndDeleteJsonData(conn, 400, 1, "no \"state\" in body", jsonData);
          }
       }
       else {
-         return returnResponse(conn, 400, 1, "no valid body data");
+         return returnResponseAndDeleteJsonData(conn, 400, 1, "no valid body data", jsonData);
       }
    }
    return returnResponse(conn, 404, 1, NULL);
@@ -152,4 +149,3 @@ int mea_rest_api_pairing(struct mg_connection *conn, int method, char *tokens[],
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
 }
-

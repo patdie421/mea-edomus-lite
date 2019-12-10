@@ -254,7 +254,7 @@ static int _begin_request_handler(struct mg_connection *conn)
       if(strcmp(tokens[0],"REST")==0) {
          int ret=mea_rest_api(conn,method,&tokens[1],l_tokens-1);
          if(ret==1) {
-            _httpErrno(conn, 0, NULL);
+            _httpErrno(conn, 1, "not found");
             return 1;
          }
       }

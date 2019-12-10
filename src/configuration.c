@@ -23,6 +23,7 @@ char *appParameters_defaults =
 \"HTTP_PORT\":\"8083\",\
 \"INTERFACE\":\"eth0\",\
 \"RULESFILE\":\"mea-edomus.rules\",\
+\"USERSFILE\":\"users.json\",\
 \"RULESFILESPATH\":\"./lib/mea-rules\"}";
 
 
@@ -55,6 +56,8 @@ cJSON *filterByJson_alloc(cJSON *j, cJSON *f)
    cJSON *_j=cJSON_CreateObject();
    cJSON *e = j->child;
 
+   char *s=NULL;
+
    while(e) {
       if(e->type==cJSON_String && cJSON_GetObjectItem(f,e->string)) {
          cJSON *_e = cJSON_Duplicate(e, 1);
@@ -73,12 +76,13 @@ int updateAppParameters(cJSON *jsonData)
    if(!filter) {
       return -1;
    }
+
    cJSON *j=filterByJson_alloc(jsonData, filter);
    if(!j) {
       return -1;
    }
    cJSON_Delete(filter);
-
+   
    cJSON *e=j->child;
    while(e) {
       appParameters_set(e->string, e->valuestring, appParameters);
@@ -102,6 +106,9 @@ int updateAppParameter(char *name, cJSON *jsonData)
 
    int ret=-1;
    if(cJSON_GetObjectItem(filter, name)) {
+      if(jsonData->type!=cJSON_String) {
+         return -1;
+      }
       appParameters_set(name, jsonData->valuestring, appParameters);
       ret=0;
    }
@@ -113,7 +120,6 @@ int updateAppParameter(char *name, cJSON *jsonData)
 
 char *getAppParameterAsString_alloc(char *name)
 {
-//   char *_s=NULL;
    char *s=NULL;
 
    if(appParameters) {
