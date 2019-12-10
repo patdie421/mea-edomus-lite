@@ -1,0 +1,8 @@
+// Create a custom Cloud9 build system - similar to the Sublime build system
+// For more information see http://docs.aws.amazon.com/console/cloud9/create-builder-runner
+{
+    "cmd" : ["$project_path/mea-edomus-lite/docker/build.sh", "/tmp/mea-tmp" ],
+    "env" : {},
+    "info" : "Building Docker",
+    "selector": "source.ext"
+}
