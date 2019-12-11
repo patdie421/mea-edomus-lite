@@ -2,6 +2,7 @@
 #include "mea_rest_api.h"
 #include "interfacesServer.h"
 #include "httpServer.h"
+#include "mea_http_utils.h"
 #include "mongoose.h"
 #include "cJSON.h"
 #include "tokens.h"

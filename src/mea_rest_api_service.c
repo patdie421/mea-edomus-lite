@@ -9,6 +9,7 @@
 #include "mongoose.h"
 #include "cJSON.h"
 #include "httpServer.h"
+#include "mea_http_utils.h"
 #include "tokens.h"
 #include "tokens_da.h"
 #include "mea_verbose.h"
@@ -64,7 +65,7 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
          return 0;
       }
       else {
-         return returnResponse(conn, 500, 1, "that's a very bad error");
+         return returnResponse(conn, 500, 1, "that's really a very bad error");
       }
    }
    else if(l_tokens==1) {
@@ -82,7 +83,7 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
          return 0;
       }
       else {
-         return returnResponse(conn, 500, 1, "oups, wath happend");
+         return returnResponse(conn, 500, 1, "oops, what happend");
       }
    }
    else {
@@ -176,7 +177,7 @@ int mea_rest_api_service_PUT(struct mg_connection *conn, int method, char *token
       return returnResponse(conn, 404, 1, NULL);
    }
 
-   return returnResponse(conn, 500, 1, NULL);
+   return returnResponse(conn, 500, 1, "that's should not happened, but it does !");
 }
 
 
@@ -205,5 +206,5 @@ int mea_rest_api_service(struct mg_connection *conn, int method, char *tokens[],
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
 
-   return returnResponse(conn, 500, 1, "I don't known wath happends ... and you ?");
+   return returnResponse(conn, 500, 1, "I don't known what happends ... and you ?");
 }

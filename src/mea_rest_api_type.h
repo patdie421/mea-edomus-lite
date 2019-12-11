@@ -1,5 +1,5 @@
-#ifndef mea_rest_api_user_h
-#define mea_rest_api_user_h
+#ifndef mea_rest_api_type_h
+#define mea_rest_api_type_h
 
 #include "mongoose.h"
 

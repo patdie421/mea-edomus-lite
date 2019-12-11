@@ -12,6 +12,7 @@
 #include "tokens.h"
 #include "mongoose.h"
 #include "httpServer.h"
+#include "mea_http_utils.h"
 
 #include "configuration.h"
 

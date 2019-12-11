@@ -15,6 +15,7 @@
 #include "mongoose.h"
 #include "cJSON.h"
 #include "httpServer.h"
+#include "mea_http_utils.h"
 #include "tokens.h"
 #include "tokens_da.h"
 #include "mea_verbose.h"
