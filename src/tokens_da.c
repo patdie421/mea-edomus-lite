@@ -114,6 +114,7 @@ int16_t init_strings_da()
    tokens_string_da->restart_str_c                    = get_token_string_by_id(RESTART_ID);
    tokens_string_da->detail_str_c                     = get_token_string_by_id(DETAIL_ID);
    tokens_string_da->all_str_c                        = get_token_string_by_id(ALL_ID);
+   tokens_string_da->action_str_c                     = get_token_string_by_id(ACTION_ID);
 
 #endif
    return 0;

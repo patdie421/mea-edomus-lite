@@ -35,7 +35,6 @@ def do_action(host, port, sessionid, serviceid, action):
 
 
 def _actions(action, host, port, sessionid, options, args):
-   print sessionid
    if len(args)<>1:
       display.error("bad parameters")
       return False
