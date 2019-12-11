@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 
 unsigned long mea_queue_nb_elem(mea_queue_t *queue)

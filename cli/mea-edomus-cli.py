@@ -45,6 +45,9 @@ if __name__ == "__main__":
       except:
          pass
 
+   if len(args)<1:
+      sys.exit(0)
+ 
    o=args.pop(0).lower()
    if not o in objects_functions:
       parser.print_help()

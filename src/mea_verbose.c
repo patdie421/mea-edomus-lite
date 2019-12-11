@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
+#include <inttypes.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
 #include <time.h>
+#ifndef __APPLE__
 #include <stdarg.h>
+#endif
 #include <inttypes.h>
 #include <sys/file.h>
 

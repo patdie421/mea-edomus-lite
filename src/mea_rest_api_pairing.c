@@ -7,6 +7,7 @@
 //
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 #include "mea_rest_api_pairing.h"
 #include "mea_rest_api.h"
