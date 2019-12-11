@@ -33,15 +33,15 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
       int type=0; 
       if(request_info->query_string)
       {
-         ret=mg_get_var(request_info->query_string, strlen(request_info->query_string), "detail", buff, sizeof(buff));
+         ret=mg_get_var(request_info->query_string, strlen(request_info->query_string), DETAIL_STR_C, buff, sizeof(buff));
          if(ret) {
-            if(mea_strcmplower(buff, "true")==0)
+            if(mea_strcmplower(buff, TRUE_STR_C)==0)
                detail_flag=1;
          }
-         ret=mg_get_var(request_info->query_string, strlen(request_info->query_string), "type", buff, sizeof(buff));
+         ret=mg_get_var(request_info->query_string, strlen(request_info->query_string), XPL_TYPE_STR_C, buff, sizeof(buff));
          l_buff=(int)strlen(buff);
          if(ret && l_buff>0) {
-            if(mea_strcmplower(buff, "all")==0 || mea_strcmplower(buff, "-1")==0) {
+            if(mea_strcmplower(buff, ALL_STR_C)==0 || mea_strcmplower(buff, "-1")==0) {
                type=-1;
             }
             else {
@@ -64,7 +64,7 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
          return 0;
       }
       else {
-         return returnResponse(conn, 500, 1, "very bad error");
+         return returnResponse(conn, 500, 1, "that's a very bad error");
       }
    }
    else if(l_tokens==1) {
@@ -82,7 +82,7 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
          return 0;
       }
       else {
-         return returnResponse(conn, 500, 1, "oups, wath append");
+         return returnResponse(conn, 500, 1, "oups, wath happend");
       }
    }
    else {
@@ -94,8 +94,6 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
 int mea_rest_api_service_PUT(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
    int ret=0;
-//   char json[2048]="";
-//   char *s=NULL;
    int id=0;
 
    if(l_tokens==1) {
@@ -109,10 +107,41 @@ int mea_rest_api_service_PUT(struct mg_connection *conn, int method, char *token
       }
       cJSON *jsonData=getData_alloc(conn);
       if(jsonData) {
-         cJSON *jsonAction=cJSON_GetObjectItem(jsonData, "action");
+         cJSON *jsonAction=cJSON_GetObjectItem(jsonData, ACTION_STR_C);
          if(jsonAction) {
             if(jsonAction->type==cJSON_String) {
-               char msg[256];
+               char msg[256]="";
+
+               enum token_id_e sid=get_token_id_by_string(jsonAction->valuestring);
+               switch(sid) {
+                  case START_ID:
+                     ret=process_start(id, msg, sizeof(msg)-1);
+                     break;
+                  case STOP_ID:
+                     ret=process_stop(id, msg, sizeof(msg)-1);
+                     break;
+                  case RESTART_ID:
+                     ret=process_restart(id, msg, sizeof(msg)-1);
+                     break;
+                  default:
+                     strcpy(msg, "unknown action");
+                     ret=-1;
+                     break;
+               }
+
+               char *_msg;
+               if(strlen(msg)==0)
+                  _msg=NULL;
+               else
+                  _msg=msg;
+               if(ret<0) {
+                  return returnResponseAndDeleteJsonData(conn, 400, 1, _msg, jsonData);
+               }
+               else {
+                  return returnResponseAndDeleteJsonData(conn, 200, 0, _msg, jsonData);
+               }
+
+/*
                if(mea_strcmplower(jsonAction->valuestring, "start")==0) {
                   ret=process_start(id, msg, sizeof(msg)-1);
                   return returnResponseAndDeleteJsonData(conn, 200, 0, msg, jsonData);
@@ -129,6 +158,7 @@ int mea_rest_api_service_PUT(struct mg_connection *conn, int method, char *token
                   process_start(id, msg, sizeof(msg)-1);
                   return returnResponseAndDeleteJsonData(conn, 400, 1,"unknown action", jsonData);
                }
+*/
             }
             else {
                return returnResponseAndDeleteJsonData(conn, 400, 1,"action not a string", jsonData);
@@ -152,16 +182,11 @@ int mea_rest_api_service_PUT(struct mg_connection *conn, int method, char *token
 
 int mea_rest_api_service(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
-   const char *meaSessionId=mg_get_header(conn, "Mea-Session");
+   const char *meaSessionId=mg_get_header(conn, MEA_SESSION_STR_C);
 
    if(checkSession((char *)meaSessionId)!=0) {
       return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
    }
-
-//   int ret=0;
-//   char json[2048]="";
-//   char *s=NULL;
-//   int id=0;
 
    switch(method) {
       case HTTP_GET_ID:
@@ -180,5 +205,5 @@ int mea_rest_api_service(struct mg_connection *conn, int method, char *tokens[],
          return returnResponse(conn, 405, 1, BAD_METHOD);
    }
 
-   return returnResponse(conn, 500, 1, NULL);
+   return returnResponse(conn, 500, 1, "I don't known wath happends ... and you ?");
 }
