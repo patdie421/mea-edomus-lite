@@ -32,6 +32,7 @@
 #include "mea_queue.h"
 #include "xPLServer.h"
 #include "tokens.h"
+#include "tokens_da.h"
 #include "mea_sockets_utils.h"
 #include "cJSON.h"
 #include "mea_rest_api.h"
@@ -195,9 +196,9 @@ void _httpErrno(struct mg_connection *conn, int n, char *msg)
    char *iserror;
 
    if(n!=0)
-      iserror="true";
+      iserror=TRUE_STR_C;
    else
-      iserror="false";
+      iserror=FALSE_STR_C;
       
    if(msg)
       snprintf(errno_str, sizeof(errno_str)-1, "{ \"iserror\" : %s, \"errno\" : %d, \"errMsg\" : \"%s\" }",iserror, n, msg);
@@ -220,7 +221,6 @@ int gui_ping(struct mg_connection *conn)
 static int _begin_request_handler(struct mg_connection *conn)
 {
    const struct mg_request_info *request_info = mg_get_request_info(conn);
-//   char phpsessid[80];
    
    httpin_indicator++;
    process_update_indicator(_httpServer_monitoring_id, "HTTPIN", httpin_indicator);
@@ -254,7 +254,7 @@ static int _begin_request_handler(struct mg_connection *conn)
       if(strcmp(tokens[0],"REST")==0) {
          int ret=mea_rest_api(conn,method,&tokens[1],l_tokens-1);
          if(ret==1) {
-            _httpErrno(conn, 0, NULL);
+            _httpErrno(conn, 1, "not found");
             return 1;
          }
       }

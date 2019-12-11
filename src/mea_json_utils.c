@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <fcntl.h>
 #include <ctype.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 #include "mea_json_utils.h"
+#include "mea_file_utils.h"
+#include "mea_verbose.h"
 
 
 int writeJson(char *file, cJSON *j)
@@ -33,7 +37,7 @@ int writeJson(char *file, cJSON *j)
 }
 
 
-cJSON *loadJson(char *file)
+cJSON *loadJson_alloc(char *file)
 {
    FILE *fp;
    char *data;
@@ -67,4 +71,20 @@ cJSON *loadJson(char *file)
    else {
       return NULL;
    }
+}
+
+
+int backupJson(char *filename)
+{
+   char _time[40];
+   char filenamebak[1024];
+   
+   time_t timestamp = time(NULL); 
+   
+   strftime(_time, sizeof(_time)-1, "%Y-%m-%d_%X", localtime(&timestamp));
+   strcpy(filenamebak, filename);
+   strcat(filenamebak, ".");
+   strcat(filenamebak, _time);
+
+   return mea_filecopy(filename, filenamebak);
 }

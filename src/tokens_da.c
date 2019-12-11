@@ -103,6 +103,18 @@ int16_t init_strings_da()
    tokens_string_da->api_configuration_str_c          = get_token_string_by_id(API_CONFIGURATION_ID);
    tokens_string_da->api_user_str_c                   = get_token_string_by_id(API_USER_ID);
    tokens_string_da->api_pairing_str_c                = get_token_string_by_id(API_PAIRING_ID);
+   tokens_string_da->time_str_c                       = get_token_string_by_id(TIME_ID);
+   tokens_string_da->user_str_c                       = get_token_string_by_id(USER_ID);
+   tokens_string_da->password_str_c                   = get_token_string_by_id(PASSWORD_ID);
+   tokens_string_da->profile_str_c                    = get_token_string_by_id(PROFILE_ID);
+   tokens_string_da->mea_sessionid_str_c              = get_token_string_by_id(MEA_SESSIONID_ID);
+   tokens_string_da->mea_session_str_c                = get_token_string_by_id(MEA_SESSION_ID);
+   tokens_string_da->start_str_c                      = get_token_string_by_id(START_ID);
+   tokens_string_da->stop_str_c                       = get_token_string_by_id(STOP_ID);
+   tokens_string_da->restart_str_c                    = get_token_string_by_id(RESTART_ID);
+   tokens_string_da->detail_str_c                     = get_token_string_by_id(DETAIL_ID);
+   tokens_string_da->all_str_c                        = get_token_string_by_id(ALL_ID);
+   tokens_string_da->action_str_c                     = get_token_string_by_id(ACTION_ID);
 
 #endif
    return 0;

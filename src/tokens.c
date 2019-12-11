@@ -121,6 +121,18 @@ static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le de
    {"api_key",                    API_KEY_ID},
    {"data",                       DATA_ID},
    {"l_data",                     L_DATA_ID},
+   {"time",                       TIME_ID},
+   {"user",                       USER_ID},
+   {"password",                   PASSWORD_ID},
+   {"profile",                    PROFILE_ID},
+   {"Mea-SessionId",              MEA_SESSIONID_ID},
+   {"Mea-Session",                MEA_SESSION_ID},
+   {"start",                      START_ID},
+   {"stop",                       STOP_ID},
+   {"restart",                    RESTART_ID},
+   {"detail",                     DETAIL_ID},
+   {"all",                        ALL_ID},
+   
    {NULL,0}
 };
 
@@ -374,7 +386,7 @@ void init_tokens()
          return;
       }
       s->token=&tokens_list[i];
-      s->str = mea_string_malloc_and_copy((char *)(s->token->str),1);
+      s->str = mea_string_alloc_and_copy((char *)(s->token->str));
       if(!s->str) {
          DEBUG_SECTION PRINT_MALLOC_ERROR;
          free(s);

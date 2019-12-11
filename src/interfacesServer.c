@@ -1069,7 +1069,7 @@ cJSON *findInterfaceById(cJSON *jsonInterfaces, int id)
 
 cJSON *jsonInterfacesLoad(char *file)
 {
-   cJSON *_jsonInterfaces=loadJson(file);
+   cJSON *_jsonInterfaces=loadJson_alloc(file);
    if(_jsonInterfaces==NULL)
       return NULL;
 
@@ -1086,7 +1086,7 @@ cJSON *jsonInterfacesLoad(char *file)
 
 cJSON *jsonTypesLoad(char *file)
 {
-   cJSON *_jsonTypes=loadJson(file);
+   cJSON *_jsonTypes=loadJson_alloc(file);
    if(_jsonTypes==NULL)
       return NULL;
 

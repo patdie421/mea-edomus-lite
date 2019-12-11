@@ -11,17 +11,18 @@ from lib import session
 from lib import PassThroughOptionParser
 from modules import interface
 from modules import pairing
+from modules import configuration
+from modules import user
+from modules import service
+from modules import type
 
 objects_functions={}
-
-
-def init_objects_functions():
-   objects_functions={}
-   objects_functions["interface"]=interface.do
-   objects_functions["pairing"]=pairing.do
-   return objects_functions
-
-objects_functions=init_objects_functions()
+objects_functions["interface"]=interface.do
+objects_functions["pairing"]=pairing.do
+objects_functions["configuration"]=configuration.do
+objects_functions["user"]=user.do
+objects_functions["service"]=service.do
+objects_functions["type"]=type.do
 
 if __name__ == "__main__":
 

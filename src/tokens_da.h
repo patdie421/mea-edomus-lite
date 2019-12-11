@@ -84,6 +84,18 @@ struct tokens_strings_da_s
    char *api_configuration_str_c;
    char *api_user_str_c;
    char *api_pairing_str_c;
+   char *time_str_c;
+   char *user_str_c;
+   char *password_str_c;
+   char *profile_str_c;
+   char *mea_sessionid_str_c;
+   char *mea_session_str_c;
+   char *start_str_c;
+   char *stop_str_c;
+   char *restart_str_c;
+   char *detail_str_c;
+   char *all_str_c;
+   char *action_str_c;
 };
 
 extern struct tokens_strings_da_s *tokens_string_da;
@@ -155,6 +167,18 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define API_CONFIGURATION_STR_C          tokens_string_da->api_configuration_str_c
 #define API_USER_STR_C                   tokens_string_da->api_user_str_c
 #define API_PAIRING_STR_C                tokens_string_da->api_pairing_str_c
+#define TIME_STR_C                       tokens_string_da->time_str_c
+#define USER_STR_C                       tokens_string_da->user_str_c
+#define PASSWORD_STR_C                   tokens_string_da->password_str_c
+#define PROFILE_STR_C                    tokens_string_da->profile_str_c
+#define MEA_SESSIONID_STR_C              tokens_string_da->mea_sessionid_str_c
+#define MEA_SESSION_STR_C                tokens_string_da->mea_session_str_c
+#define START_STR_C                      tokens_string_da->start_str_c
+#define STOP_STR_C                       tokens_string_da->stop_str_c
+#define RESTART_STR_C                    tokens_string_da->restart_str_c
+#define DETAIL_STR_C                     tokens_string_da->detail_str_c
+#define ALL_STR_C                        tokens_string_da->all_str_c
+#define ACTION_STR_C                     tokens_string_da->action_str_c
 
 #else
 
@@ -225,6 +249,18 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define API_CONFIGURATION_STR_C          get_token_string_by_id(API_CONFIGURATION_ID)
 #define API_USER_STR_C                   get_token_string_by_id(API_USER_ID)
 #define API_PAIRING_STR_C                get_token_string_by_id(API_PAIRING_ID)
+#define TIME_STR_C                       get_token_string_by_id(TIME_ID)
+#define USER_STR_C                       get_token_string_by_id(USER_ID)
+#define PASSWORD_STR_C                   get_token_string_by_id(PASSWORD_ID)
+#define PROFILE_STR_C                    get_token_string_by_id(PROFILE_ID)
+#define MEA_SESSIONID_STR_C              get_token_string_by_id(MEA_SESSIONID_ID)
+#define MEA_SESSION_STR_C                get_token_string_by_id(MEA_SESSION_ID)
+#define START_STR_C                      get_token_string_by_id(START_ID)
+#define STOP_STR_C                       get_token_string_by_id(STOP_ID)
+#define RESTART_STR_C                    get_token_string_by_id(RESTART_ID)
+#define DETAIL_STR_C                     get_token_string_by_id(DETAIL_ID)
+#define ALL_STR_C                        get_token_string_by_id(ALL_ID)
+#define ACTION_STR_C                     get_token_string_by_id(ACTION_ID)
 
 #endif
 
@@ -232,4 +268,3 @@ int16_t init_strings_da(void);
 void release_strings_da(void);
 
 #endif
-
