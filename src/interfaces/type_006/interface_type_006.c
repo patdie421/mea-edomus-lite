@@ -519,7 +519,7 @@ void *_thread_interface_type_006_genericserial_data(void *args)
             params->i006->indicators.serialin+=buffer_ptr;
             buffer[buffer_ptr]=0;
 
-            int ret=interface_type_006_call_serialDataPre(params, (void *)buffer, buffer_ptr+1);
+            /* int ret= */interface_type_006_call_serialDataPre(params, (void *)buffer, buffer_ptr+1);
 
             cJSON *jsonInterface = getInterfaceById_alloc(params->i006->id_interface);
             if(jsonInterface) {
@@ -528,7 +528,7 @@ void *_thread_interface_type_006_genericserial_data(void *args)
                   cJSON *jsonDevice = jsonDevices->child;
                   while(jsonDevice) {
 
-                     int ret=interface_type_006_data_to_plugin(params->i006->myThreadState, jsonInterface, jsonDevice, DATAFROMSENSOR, (void *)buffer, buffer_ptr+1);
+                     /* int ret= */interface_type_006_data_to_plugin(params->i006->myThreadState, jsonInterface, jsonDevice, DATAFROMSENSOR, (void *)buffer, buffer_ptr+1);
 
                      jsonDevice=jsonDevice->next;
                   }

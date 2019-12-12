@@ -257,6 +257,36 @@ int mea_rest_api_user_POST(struct mg_connection *conn, int method, char *tokens[
             return 1;
          }
 
+         int ret=-1;
+         switch(get_token_id_by_string(action->valuestring)) {
+            case CREATE_ID:
+               parameters=getJsonDataParameters(conn, jsonData);
+               if(!parameters) {
+                  return 1;
+               }
+               ret=_userCreate(parameters);
+               if(ret==0)
+                  return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
+               else
+                  return returnResponseAndDeleteJsonData(conn, 400, ret, "user not created", jsonData);
+
+            case COMMIT_ID:
+               ret=_usersCommit();
+               if(ret==0)
+                  return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
+               else
+                  return returnResponseAndDeleteJsonData(conn, 400, ret, "commit not done", jsonData);
+
+            case ROLLBACK_ID:
+               ret=_usersRollback();
+               if(ret==0)
+                  return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
+               else
+                  return returnResponseAndDeleteJsonData(conn, 400, ret, "rollback not done", jsonData);
+
+               default: return returnResponse(conn, 400, 1, "unknown action");
+         }
+/*
          if(mea_strcmplower(action->valuestring,"create")==0) {
             parameters=getJsonDataParameters(conn, jsonData);
             if(!parameters) {
@@ -282,6 +312,7 @@ int mea_rest_api_user_POST(struct mg_connection *conn, int method, char *tokens[
             else
                return returnResponseAndDeleteJsonData(conn, 200, ret, "rollback not done", jsonData);
          }
+         */
       }
       else {
          return returnResponse(conn, 200, 1, NO_VALID_JSON_DATA);

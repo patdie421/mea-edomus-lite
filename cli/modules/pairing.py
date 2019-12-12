@@ -5,24 +5,17 @@ from optparse import OptionParser
 from lib import http
 from lib import session
 from lib import display
+from lib.mea_utils import *
+
 from modules import interface
 
 
 def get_pairing_interfaces_status(host, port, sessionid):
-    url="http://"+str(host)+":"+str(port)+"/rest/pairing"
-    headers={"Mea-session": sessionid}
-    code, res=http.get(url, headers)
-    res=json.loads(res)
-    return code, res
+    return GetUrl("http://"+str(host)+":"+str(port)+"/rest/pairing",sessionid)
 
 
 def set_pairing_interface(host, port, sessionid, name, state):
-    url="http://"+str(host)+":"+str(port)+"/rest/pairing/"+str(name)
-    body={ "state": state }
-    headers={"Mea-session": sessionid}
-    code,res=http.post(url, body, headers)
-    res=json.loads(res)
-    return code, res
+    return PutUrl("http://"+str(host)+":"+str(port)+"/rest/pairing/"+str(name),{ "state": state },sessionid)
 
 
 def get_pairable_interfaces(host, port, sessionid):
@@ -86,6 +79,7 @@ def _status(host, port, sessionid, options, args):
       return True
    else:
       return False
+
  
 def _pairable(host, port, sessionid, options, args):
    _result=None
@@ -100,6 +94,13 @@ def _pairable(host, port, sessionid, options, args):
    return True
 
 
+actions={}
+actions["pairable"]=_pairable
+actions["start"]=_start
+actions["stop"]=_stop
+actions["status"]=_status
+
+
 def do(host, port, sessionid, args):
    try:
       action=args.pop(0).lower()
@@ -111,15 +112,13 @@ def do(host, port, sessionid, args):
    parser.add_option("-f", "--format", dest="format", help="ouput format : [json|text]", default="json")
    (options, args) = parser.parse_args(args=args)
 
-   if not action in ["get", "start", "stop", "status"]:
+   if action==False:
       parser.print_help()
       return False
 
-   if action=="get":
-      return _pairable(host, port, sessionid, options, args)
-   elif action=="status":
-      return _status(host, port, sessionid, options, args)
-   elif action=="start":
-     return _start(host, port, sessionid, options, args)
-   elif action=="stop":
-     return _stop(host, port, sessionid, options, args)
+   if action in actions:
+      if actions[action](host, port, sessionid, options, args)==False:
+         parser.print_help()
+         return False
+      else:
+         return True

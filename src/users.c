@@ -26,7 +26,7 @@ int initUsers()
    char *meapath=appParameters_get("MEAPATH", NULL);
    char *usersfile=appParameters_get("USERSFILE", NULL);
    char *etc="/etc/";
-   int usersfullpath_l=strlen(meapath)+strlen(etc)+strlen(usersfile)+1;
+   int usersfullpath_l=(int)(strlen(meapath)+strlen(etc)+strlen(usersfile)+1);
 
    if(usersfullpath) {
       free(usersfullpath);

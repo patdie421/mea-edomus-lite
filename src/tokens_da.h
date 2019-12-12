@@ -96,6 +96,9 @@ struct tokens_strings_da_s
    char *detail_str_c;
    char *all_str_c;
    char *action_str_c;
+   char *create_str_c;
+   char *commit_str_c;
+   char *rollback_str_c;
 };
 
 extern struct tokens_strings_da_s *tokens_string_da;
@@ -179,6 +182,9 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define DETAIL_STR_C                     tokens_string_da->detail_str_c
 #define ALL_STR_C                        tokens_string_da->all_str_c
 #define ACTION_STR_C                     tokens_string_da->action_str_c
+#define CREATE_STR_C                     tokens_string_da->create_str_c
+#define COMMIT_STR_C                     tokens_string_da->commit_str_c
+#define ROLLBACK_STR_C                   tokens_string_da->rollback_str_c
 
 #else
 
@@ -261,6 +267,9 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define DETAIL_STR_C                     get_token_string_by_id(DETAIL_ID)
 #define ALL_STR_C                        get_token_string_by_id(ALL_ID)
 #define ACTION_STR_C                     get_token_string_by_id(ACTION_ID)
+#define CREATE_STR_C                     get_token_string_by_id(CREATE_ID)
+#define COMMIT_STR_C                     get_token_string_by_id(COMMIT_ID)
+#define ROLLBACK_STR_C                   get_token_string_by_id(ROLLBACK_ID)
 
 #endif
 

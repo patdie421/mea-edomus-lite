@@ -440,7 +440,7 @@ int interface_type_010_pairing(interface_type_010_t *i010)
       mea_log_printf("%s (%s) : ***** pairing data (%s) ? *****\n", INFO_STR, __func__, data);
    }
    
-   int err=0;
+//   int err=0;
 
    char name[256];
    if(parsed_parameters_get_param_string(i010->parameters, valid_interface_010_params, INTERFACE_PARAMS_PLUGIN, name, sizeof(name)-1)==0) {
@@ -1217,9 +1217,10 @@ void *_thread_interface_type_010_cleanup(void *args)
 {
    struct thread_params_s *params=(struct thread_params_s *)args;
 
-   if(!params)
-      return NULL;
-
+   if(params) {
+      free(params);
+      params=NULL;
+   }
    return NULL;
 }
 
@@ -1227,7 +1228,6 @@ void *_thread_interface_type_010_cleanup(void *args)
 void *_thread_interface_type_010(void *args)
 {
    struct thread_params_s *params=(struct thread_params_s *)args;
-//   int ret;
 
    pthread_cleanup_push( (void *)_thread_interface_type_010_cleanup, (void *)params );
    pthread_cleanup_push( (void *)set_interface_type_010_isnt_running, (void *)params->i010 );

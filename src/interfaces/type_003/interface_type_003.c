@@ -12,7 +12,7 @@
 #endif
 
 #include "interface_type_003.h"
-#include "interface_type_003_pairing2.h"
+#include "interface_type_003_pairing.h"
 
 #include <stdio.h>
 #include <stdlib.h>

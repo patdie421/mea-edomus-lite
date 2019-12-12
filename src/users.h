@@ -8,11 +8,7 @@
 
 extern cJSON *users2;
 
-char *user_getFileFullPath();
-
-int initUsers();
-//int loadUsers();
-//int writeUsers();
-//int backupUsers();
+char *user_getFileFullPath(void);
+int initUsers(void);
 
 #endif

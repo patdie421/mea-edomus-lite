@@ -9,6 +9,7 @@ from datetime import datetime
 from lib import http
 from lib import session
 from lib import PassThroughOptionParser
+
 from modules import interface
 from modules import pairing
 from modules import configuration
@@ -23,6 +24,7 @@ objects_functions["configuration"]=configuration.do
 objects_functions["user"]=user.do
 objects_functions["service"]=service.do
 objects_functions["type"]=type.do
+
 
 if __name__ == "__main__":
 
@@ -99,9 +101,7 @@ if __name__ == "__main__":
       code,_session=session.open(options.host, options.port, user, password)
       if code==200:
          _session=json.loads(_session)
-         sessionid=_session["Mea-SessionId"]
-         mysession["sessionid"]=sessionid
-#         mysession["sessiondate"]=datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+         mysession["sessionid"]=_session["Mea-SessionId"]
          with open(dotfile, 'w') as outfile:
             json.dump(mysession, outfile)
       else:

@@ -7,22 +7,15 @@ from optparse import OptionParser
 from lib import http
 from lib import session
 from lib import display
+from lib.mea_utils import *
 
 
 def get_types(host, port, sessionid):
-   url="http://"+str(host)+":"+str(port)+"/rest/type"
-   headers={"Mea-session": sessionid}
-   code, res=http.get(url, headers)
-   res=json.loads(res)
-   return code, res
+   return GetUrl("http://"+str(host)+":"+str(port)+"/rest/type",sessionid)
 
 
 def get_type(host, port, sessionid, username):
-   url="http://"+str(host)+":"+str(port)+"/rest/type/"+str(username)
-   headers={"Mea-session": sessionid}
-   code, res=http.get(url, headers)
-   res=json.loads(res)
-   return code, res
+   return GetUrl("http://"+str(host)+":"+str(port)+"/rest/type/"+str(username),sessionid)
 
 
 def _get(host, port, sessionid, options, args):

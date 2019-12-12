@@ -6,7 +6,7 @@ from optparse import OptionParser
 from lib import http
 from lib import session
 from lib import display
-
+from lib.mea_utils import *
 from modules import type
 
 
@@ -14,7 +14,7 @@ interface_states={ "0":0, "1":1, "2":2, "enabled":1, "disabled":0, "delegated":2
 device_states={ "0":0, "1":1, "enabled":1, "disabled":0, "inactive":0, "active":1 }
 
 
-def available_devices_types(host, port, sessionid):
+def get_available_devices_types(host, port, sessionid):
    code, res=type.get_types(host, port, sessionid)
    _available_types={}
    if code==200:
@@ -25,7 +25,7 @@ def available_devices_types(host, port, sessionid):
    return _available_types
 
 
-def available_interfaces_types(host, port, sessionid):
+def get_available_interfaces_types(host, port, sessionid):
    code, res=type.get_types(host, port, sessionid)
    _available_types={}
    if code==200:
@@ -46,36 +46,19 @@ def printValids(message, validList):
    display.error(message+": "+valids)
 
 
-def PostUrl(url,sessionid,body):
-   headers={"Mea-session": sessionid}
-   code, res=http.post(url, body, headers)
-   res=json.loads(res)
-   return code, res
+def update_interface_device(host, port, sessionid, interface, device, properties):
+   return PutUrl("http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface)+"/device/"+str(device),sessionid,properties)
+   return code, result
 
 
-def PutUrl(url,sessionid,body):
-   headers={"Mea-session": sessionid}
-   code, res=http.put(url, body, headers)
-   res=json.loads(res)
-   return code, res
-
-
-def GetUrl(url,sessionid):
-   headers={"Mea-session": sessionid}
-   code, res=http.get(url, headers)
-   res=json.loads(res)
-   return code, res
-   
-
-def DeleteUrl(url,sessionid):
-   headers={"Mea-session": sessionid}
-   code, res=http.delete(url, headers)
-   res=json.loads(res)
-   return code, res
-
-   
 def add_interface_device(host, port, sessionid, interface, device, properties):
+   properties["name"]=device
    return PostUrl("http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface)+"/device",sessionid,properties)
+   return code, result
+
+
+def delete_interface_device(host, port, sessionid, interface, device):
+   return DeleteUrl("http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface)+"/device/"+str(device),sessionid)
 
 
 def get_interfaces(host, port, sessionid):
@@ -107,6 +90,55 @@ def get_device(host, port, sessionid, interface, device):
    return GetUrl("http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface)+"/device/"+str(device),sessionid)
 
 
+def _update_interface_device(host, port, sessionid, options, interface, args):
+   v=args.pop(0).strip().lower()
+   if v!="device":
+      return -1, None
+   else:
+      if len(args)==0:
+         return -1, None
+      else:
+         j={}
+         device=args.pop(0).strip().lower()
+         possibles=["id_type", "state", "description", "parameters"]
+         for i in args:
+            s=str(i).split(':',1)
+            if len(s) != 2:
+               display.error("property syntax error: "+str(i))
+               return -1, None
+            v=s[0].strip().lower()
+            if not v in possibles:
+               display.error("unknown property: "+str(v))
+               return -1, None
+            j[s[0].strip().lower()]=s[1].strip()
+
+         if len(j)>0:
+            if "id_type" in j:
+               _available_types=get_available_devices_types(host, port, sessionid)
+               if j["id_type"] in _available_types:
+                  j["id_type"]=_available_types[j["id_type"]]
+               else:
+                  display.error("Not valid id_type values")
+                  printValids("Valid id_type values", _available_types)
+                  return -1, None
+            
+            if "state" in j:
+               if j["state"] in device_states:
+                  j["state"]=device_states[j["state"]]
+               else:
+                  display.error("Not valid id_type values")
+                  printValids("Valid id_type values", device_states)
+                  return -1, None
+
+            code, result = update_interface_device(host, port, sessionid, interface, device, j)
+            return code, result
+
+         display.error("no properties")
+         return -1, None
+      display.error("unknown error")
+      return -1, None
+
+
 def _add_interface_device(host, port, sessionid, options, interface, args):
    v=args.pop(0).strip().lower()
    if v!="device":
@@ -133,7 +165,7 @@ def _add_interface_device(host, port, sessionid, options, interface, args):
             if not "id_type" in j:
                display.error("id_type is mandatory")
                return -1, None
-            _available_types=available_devices_types(host, port, sessionid)
+            _available_types=get_available_devices_types(host, port, sessionid)
             if j["id_type"] in _available_types:
                j["id_type"]=_available_types[j["id_type"]]
             else:
@@ -193,61 +225,8 @@ def _update(host, port, sessionid, options, args):
    interface=args.pop(0)
    j={}
 
-   possibles=["id_type", "state", "dev", "description", "parameters"]
-   for i in args:
-      s=str(i).split(':',1)
-      if len(s) != 2:
-         display.error("property syntax error: "+str(i))
-         return False
-      v=s[0].strip().lower()
-      if not v in possibles:
-         display.error("unknown property: "+str(v))
-         return False
-      j[s[0].strip().lower()]=s[1].strip()
-
-   if len(j)>0:
-      _available_types=available_interfaces_types(host, port, sessionid)
-      if j["id_type"] in _available_types:
-         j["id_type"]=_available_types[j["id_type"]]
-      else:
-         display.error("Not valid id_type values")
-         printValids("Valid id_type values", _available_types)
-         return False
-         
-      if j["state"] in interface_states:
-         j["state"]=interface_states[j["state"]]
-      else:
-         display.error("Not valid id_type values")
-         printValids("Valid id_type values", interface_states)
-         return False
-
-      code, result = update_interface(host, port, sessionid, interface, j)
-      display.formated(result, options.format)
-      return True
-   else:
-      display.error("no property")
-      return False
-
-
-def _delete(host, port, sessionid, options, args):
-   interface=args.pop(0)
-   if len(args)==0:
-      code, result = delete_interface(host, port, sessionid, interface)
-      display.formated(result, options.format)
-      return True
-   else:
-      display.error("bad parameters")
-      return False
-
-
-def _add(host, port, sessionid, options, args):
-   interface=args.pop(0)
-   j={}
-
-   if len(args)>0:
-      code, result = _add_interface_device(host, port, sessionid, options, interface, args)
-      if code==-1:
-         return False
+   if len(args)>2 and args[0].strip().lower()=="device":
+      code, result = _update_interface_device(host, port, sessionid, options, interface, args)
    else:
       possibles=["id_type", "state", "dev", "description", "parameters"]
       for i in args:
@@ -262,10 +241,74 @@ def _add(host, port, sessionid, options, args):
          j[s[0].strip().lower()]=s[1].strip()
 
       if len(j)>0:
+         if "id_type" in j:
+            _available_types=get_available_interfaces_types(host, port, sessionid)
+            if j["id_type"] in _available_types:
+               j["id_type"]=_available_types[j["id_type"]]
+            else:
+               display.error("Not valid id_type values")
+               printValids("Valid id_type values", _available_types)
+               return False
+         if "state" in j:   
+            if j["state"] in interface_states:
+               j["state"]=interface_states[j["state"]]
+            else:
+               display.error("Not valid id_type values")
+               printValids("Valid id_type values", interface_states)
+               return False
+         code, result = update_interface(host, port, sessionid, interface, j)
+#         display.formated(result, options.format)
+#         return True
+      else:
+         display.error("no property")
+         return False
+   display.formated(result, options.format)
+   return True
+
+
+def _delete(host, port, sessionid, options, args):
+   interface=args.pop(0)
+   if len(args)==0:
+      code, result = delete_interface(host, port, sessionid, interface)
+      display.formated(result, options.format)
+      return True
+   if len(args)==2 and args[0].strip().lower() == "device":
+      device=args[1].strip().lower()
+      code, result = delete_interface_device(host, port, sessionid, interface, device)
+      display.formated(result, options.format)
+      return True
+   else:
+      display.error("bad parameters")
+      return False
+
+
+def _add(host, port, sessionid, options, args):
+   interface=args.pop(0)
+   j={}
+
+   if len(args)>2 and args[0].strip().lower()=="device":
+      code, result = _add_interface_device(host, port, sessionid, options, interface, args)
+      if code==-1:
+         return False
+   else:
+      possibles=["id_type", "state", "dev", "description", "parameters"]
+      for i in args:
+         s=str(i).split(':',1)
+         if len(s) != 2:
+            display.error("property syntax error: "+str(i))
+            return False
+         v=s[0].strip().lower()
+         print v
+         if not v in possibles:
+            display.error("unknown property: "+str(v))
+            return False
+         j[s[0].strip().lower()]=s[1].strip()
+
+      if len(j)>0:
          if not "id_type" in j:
             display.error("id_type is mandatory")
             return False
-         _available_types=available_interfaces_types(host, port, sessionid)
+         _available_types=get_available_interfaces_types(host, port, sessionid)
          if j["id_type"] in _available_types:
             j["id_type"]=_available_types[j["id_type"]]
          else:

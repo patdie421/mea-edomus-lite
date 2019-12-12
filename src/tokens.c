@@ -132,6 +132,9 @@ static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le de
    {"restart",                    RESTART_ID},
    {"detail",                     DETAIL_ID},
    {"all",                        ALL_ID},
+   {"create",                     CREATE_ID},
+   {"commit",                     COMMIT_ID},
+   {"rollback",                   ROLLBACK_ID},
    
    {NULL,0}
 };

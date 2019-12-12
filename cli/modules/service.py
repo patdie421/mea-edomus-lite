@@ -7,31 +7,19 @@ from optparse import OptionParser
 from lib import http
 from lib import session
 from lib import display
+from lib.mea_utils import *
 
 
 def get_services(host, port, sessionid):
-   url="http://"+str(host)+":"+str(port)+"/rest/service"
-   headers={"Mea-session": sessionid}
-   code, res=http.get(url, headers)
-   res=json.loads(res)
-   return code, res
+   return GetUrl("http://"+str(host)+":"+str(port)+"/rest/service",sessionid)
 
 
 def get_service(host, port, sessionid, service):
-   url="http://"+str(host)+":"+str(port)+"/rest/service/"+str(service)
-   headers={"Mea-session": sessionid}
-   code, res=http.get(url, headers)
-   res=json.loads(res)
-   return code, res
+   return GetUrl("http://"+str(host)+":"+str(port)+"/rest/service/"+str(service),sessionid)
 
 
 def do_action(host, port, sessionid, serviceid, action):
-   url="http://"+str(host)+":"+str(port)+"/rest/service/"+str(serviceid)
-   headers={"Mea-session": sessionid}
-   _action={"action":action}
-   code, res=http.put(url, _action, headers)
-   res=json.loads(res)
-   return code, res
+   return PutUrl("http://"+str(host)+":"+str(port)+"/rest/service/"+str(serviceid),sessionid,{"action":action})
 
 
 def _actions(action, host, port, sessionid, options, args):

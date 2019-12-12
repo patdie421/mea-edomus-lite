@@ -56,7 +56,7 @@ cJSON *filterByJson_alloc(cJSON *j, cJSON *f)
    cJSON *_j=cJSON_CreateObject();
    cJSON *e = j->child;
 
-   char *s=NULL;
+//   char *s=NULL;
 
    while(e) {
       if(e->type==cJSON_String && cJSON_GetObjectItem(f,e->string)) {

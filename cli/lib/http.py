@@ -2,12 +2,8 @@ import base64
 import json
 import urllib2
 
+
 def auth_str(user, pw):
-    """
-    Arguments:
-        user - (Required)
-        pw - (Required)
-    """
     auth = base64.b64encode('%s:%s' % (user, pw))
     return auth
 
@@ -25,7 +21,6 @@ def delete(url, headers={}):
        connection = opener.open(r)
     except urllib2.HTTPError,e:
        connection = e
-
     data=None
     try:
        data = connection.read()
@@ -47,7 +42,6 @@ def get(url, headers={}):
        connection = opener.open(r)
     except urllib2.HTTPError,e:
        connection = e
-
     data=None
     try:
        data = connection.read()
@@ -70,7 +64,6 @@ def post(url, body, headers={}):
        connection = opener.open(r)
     except urllib2.HTTPError,e:
        connection = e
-
     data=None
     try:
        data = connection.read()
@@ -93,7 +86,6 @@ def put(url, body, headers={}):
        connection = opener.open(r)
     except urllib2.HTTPError,e:
        connection = e
-
     data=None
     try:
        data = connection.read()

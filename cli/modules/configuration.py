@@ -6,39 +6,23 @@ from optparse import OptionParser
 from lib import http
 from lib import session
 from lib import display
+from lib.mea_utils import *
 
 
 def get_configurations(host, port, sessionid):
-   url="http://"+str(host)+":"+str(port)+"/rest/configuration"
-   headers={"Mea-session": sessionid}
-   code, res=http.get(url, headers)
-   res=json.loads(res)
-   return code, res
+   return GetUrl("http://"+str(host)+":"+str(port)+"/rest/configuration",sessionid)   
 
 
 def get_configuration(host, port, sessionid, parameter):
-   url="http://"+str(host)+":"+str(port)+"/rest/configuration/"+str(parameter)
-   headers={"Mea-session": sessionid}
-   code, res=http.get(url, headers)
-   res=json.loads(res)
-   return code, res
+   return GetUrl("http://"+str(host)+":"+str(port)+"/rest/configuration/"+str(parameter),sessionid)
 
 
 def set_configuration_parameter(host, port, sessionid, parameter, value):
-    url="http://"+str(host)+":"+str(port)+"/rest/configuration/"+str(name)
-    body=str(value)
-    headers={"Mea-session": sessionid}
-    code,res=http.post(url, body, headers)
-    res=json.loads(res)
-    return code, res
+    return PostUrl("http://"+str(host)+":"+str(port)+"/rest/configuration/"+str(name),sessionid)
 
 
 def set_configuration_parameters(host, port, sessionid, parameters):
-    url="http://"+str(host)+":"+str(port)+"/rest/configuration"
-    headers={"Mea-session": sessionid}
-    code,res=http.put(url, parameters, headers)
-    res=json.loads(res)
-    return code, res
+    return PutUrl("http://"+str(host)+":"+str(port)+"/rest/configuration",sessionid)
 
 
 def _set(host, port, sessionid, options, args):

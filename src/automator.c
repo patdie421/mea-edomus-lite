@@ -438,6 +438,7 @@ static int value_print(struct value_s *v)
 }
 #endif
 
+
 int function_qsort_compare_names(const void * a, const void * b)
 {
    return strcmp(functionsList2[functions_index[*(int16_t *)a]].name, functionsList2[functions_index[*(int16_t *)b]].name);

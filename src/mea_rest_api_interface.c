@@ -51,12 +51,16 @@ int mea_rest_api_device_POST_PUT(struct mg_connection *conn, int method, char *i
             msg="updated";
             ret=updateDevice(interface, tokens[1], device);
          }
+         else {
+            cJSON_Delete(device);
+            return returnResponse(conn, 404, 4, NULL);
+         }
          cJSON_Delete(device);
          if(ret==0) {
             return returnResponse(conn, 200, 0, msg);
          }
          else {
-            return returnResponse(conn, 404, 2, NULL);
+            return returnResponse(conn, 400, 2, NULL);
          }
       }
       else {

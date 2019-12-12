@@ -115,6 +115,9 @@ int16_t init_strings_da()
    tokens_string_da->detail_str_c                     = get_token_string_by_id(DETAIL_ID);
    tokens_string_da->all_str_c                        = get_token_string_by_id(ALL_ID);
    tokens_string_da->action_str_c                     = get_token_string_by_id(ACTION_ID);
+   tokens_string_da->create_str_c                     = get_token_string_by_id(CREATE_ID);
+   tokens_string_da->commit_str_c                     = get_token_string_by_id(COMMIT_ID);
+   tokens_string_da->rollback_str_c                   = get_token_string_by_id(ROLLBACK_ID);
 
 #endif
    return 0;
