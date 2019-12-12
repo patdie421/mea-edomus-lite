@@ -73,6 +73,6 @@ echo "=== result ==="
 python2.7 mea-edomus-cli.py interface get IXXX
 
 echo "--- DELETE INTERFACE"
-#python mea-edomus-cli.py interface delete IXXX
+python mea-edomus-cli.py interface delete IXXX
 echo "=== result ==="
 python2.7 mea-edomus-cli.py interface get IXXX

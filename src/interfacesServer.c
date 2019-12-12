@@ -129,44 +129,46 @@ void removeTypeFromIndexByTypeId(struct types_index_s **types_index, int type_id
 }
 
 
-void removeInterfaceFromIndexByInterfaceId(struct devs_index_s **devs_index, int interface_id)
+struct devs_index_s *removeInterfaceFromIndexByInterfaceId(struct devs_index_s *devs_index, int interface_id)
 {
    struct devs_index_s *e = NULL, *tmp = NULL;
    
-   HASH_ITER(hh, *devs_index, e, tmp) {
+   HASH_ITER(hh, devs_index, e, tmp) {
       if(e) {
          if(e->interface) {
             cJSON *id_interface=cJSON_GetObjectItem(e->interface,"id_interface");
             if(id_interface && (int)(id_interface->valuedouble)==interface_id) {
                e->interface=NULL;
-               HASH_DEL(*devs_index, e);
+               HASH_DEL(devs_index, e);
                free(e);
                e=NULL;
-               return;
+               break;
             }
          }
       }
    }
+   return devs_index;
 }
 
 
-void removeDeviceFromIndexByInterfaceId(struct devices_index_s **devices_index, int interface_id)
+struct devices_index_s * removeDeviceFromIndexByInterfaceId(struct devices_index_s *devices_index, int interface_id)
 {
    struct devices_index_s *e = NULL, *tmp = NULL;
    
-   HASH_ITER(hh, *devices_index, e, tmp) {
+   HASH_ITER(hh, devices_index, e, tmp) {
       if(e) {
          if(e->device) {
             cJSON *id_interface=cJSON_GetObjectItem(e->device, "id_interface");
             if(id_interface && (int)(id_interface->valuedouble)==interface_id) {
                e->device=NULL;
-               HASH_DEL(*devices_index, e);
+               HASH_DEL(devices_index, e);
                free(e);
                e=NULL;
             }
          }
       }
    }
+   return devices_index;
 }
 
 
@@ -425,8 +427,8 @@ int deleteInterface(char *interface)
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
    pthread_rwlock_rdlock(&interfaces_queue_rwlock);
 
-   removeDeviceFromIndexByInterfaceId(&devices_index, id_interface);
-   removeInterfaceFromIndexByInterfaceId(&devs_index, id_interface);
+   devices_index=removeDeviceFromIndexByInterfaceId(devices_index, id_interface);
+   devs_index=removeInterfaceFromIndexByInterfaceId(devs_index, id_interface);
 
    remove_interface(_interfaces, id_interface);
    remove_delegate_links(_interfaces, interface);

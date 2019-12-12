@@ -5,6 +5,8 @@ import pprint
 import urllib2
 import os
 import getpass
+import argparse
+
 from datetime import datetime
 from lib import http
 from lib import session
@@ -17,6 +19,20 @@ from modules import user
 from modules import service
 from modules import type
 
+cli_epilog='''
+Available artefacts:
+  configuration: display/change mea-edomus configuration properties
+  user:          manage mea-edomus user, profile and password
+  service:       manage services
+  type:          manage types of interfaces and devices
+  interface:     manage interfaces and associated devices
+  pairing:       manage pairing processes
+'''
+
+cli_description='''
+CLI for managing mea-edomus-lite
+'''
+
 objects_functions={}
 objects_functions["interface"]=interface.do
 objects_functions["pairing"]=pairing.do
@@ -26,22 +42,41 @@ objects_functions["service"]=service.do
 objects_functions["type"]=type.do
 
 
+args_parser = argparse.ArgumentParser(description=cli_description, epilog=cli_epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
+args_subparsers = args_parser.add_subparsers(dest='artefact')
+
+args_parser_interface = args_subparsers.add_parser('interface')
+args_parser_configuration = args_subparsers.add_parser('configuration')
+args_parser_service = args_subparsers.add_parser('service')
+args_parser_user = args_subparsers.add_parser('user')
+args_parser_type = args_subparsers.add_parser('type')
+args_parser_pairing = args_subparsers.add_parser('pairing')
+
+interface.parser(args_parser_interface)
+
+def getArgs():
+   args_parser.add_argument("-c", "--clean-session", action="store_true", dest="clean", help="remove local connection data", default=False)
+   args_parser.add_argument("-H", "--host", dest="host", help="", default="localhost")
+   args_parser.add_argument("-P", "--port", dest="port", help="", default=8083)
+   args_parser.add_argument("-U", "--user", dest="user", help="connection user id", default=None)
+   args_parser.add_argument("-W", "--password", dest="password", help="connection password", default=None)
+#   args_parser.add_argument("artefact", help="<object> to manipulate")
+#   args_parser.add_argument("action", help="<action> to be applied on the object")
+#   args_parser.add_argument("option", nargs="*", help="options and properties for artefact/action")
+   args, _args = args_parser.parse_known_args()
+   print args
+   
+   _args = [args.artefact]+[args.action]+args.option+_args
+   return args, _args
+
+
 if __name__ == "__main__":
 
    homedir = os.path.expanduser("~")
    dotfile = os.path.join(homedir, ".mea-edomus")
 
-   usage = "usage: %prog <object> <action> [object] [options]"
-
-   parser = PassThroughOptionParser.PassThroughOptionParser(usage)
-
-   parser.add_option("-c", "--clean-session", action="store_true", dest="clean", help="", default=False)
-   parser.add_option("-H", "--host", dest="host", help="", default="localhost")
-   parser.add_option("-P", "--port", dest="port", help="", default=8083)
-   parser.add_option("-U", "--user", dest="user", help="connection user", default=None)
-   parser.add_option("-W", "--password", dest="password", help="user password", default=None)
-   (options, args) = parser.parse_args()
-
+   (options, args) = getArgs()
+   parser=args_parser
    if options.clean==True:
       try:
          os.remove(dotfile)
@@ -60,7 +95,7 @@ if __name__ == "__main__":
       "sessionid":False,
       "host":options.host,
       "port":options.port,
-      "user":options.user }
+      "user":options.user}
 
    if(not os.path.isfile(dotfile)):
       mysession=defaultsession

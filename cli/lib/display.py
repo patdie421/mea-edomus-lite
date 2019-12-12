@@ -3,11 +3,12 @@ import json
 def format():
    return ["text", "json"]
 
+
 def error(msg):
    print msg
 
-def formated(result, f):
 
+def formated(result, f):
    if f=="json":
       print json.dumps(result, indent=3)
 

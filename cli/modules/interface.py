@@ -346,6 +346,13 @@ actions["update"]=_update
 actions["delete"]=_delete
 
 
+def parser(_parser):
+   _parser.add_argument("-f", "--format", dest="format", help="ouput format : [json|txt]", default="json")
+   _parser.add_argument("action", help="<action> to be applied on the object")
+   _parser.add_argument("name", help="interface <name>", nargs="?")
+   _parser.add_argument("option", nargs="*", help="options and properties for interface/action")
+
+
 def do(host, port, sessionid, args):
    try:
       action=args.pop(0).lower()
