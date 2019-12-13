@@ -1,5 +1,6 @@
 import sys
 import json
+import argparse
 
 from optparse import OptionParser
 from lib import http
@@ -15,7 +16,7 @@ def get_pairing_interfaces_status(host, port, sessionid):
 
 
 def set_pairing_interface(host, port, sessionid, name, state):
-    return PutUrl("http://"+str(host)+":"+str(port)+"/rest/pairing/"+str(name),{ "state": state },sessionid)
+    return PostUrl("http://"+str(host)+":"+str(port)+"/rest/pairing/"+str(name),sessionid,{ "state": state })
 
 
 def get_pairable_interfaces(host, port, sessionid):
@@ -41,9 +42,9 @@ def get_pairable_interface(host, port, sessionid, name):
 
 
 def _stop(host, port, sessionid, options, args):
-   if len(args)==1:
-      code, result=set_pairing_interface(host, port, sessionid, args[0], 0)
-      display.formated(result, options.format)
+   if args.name!=None:
+      code, result=set_pairing_interface(host, port, sessionid, args.name, 0)
+      display.formated(result, args.format)
       if(code==200):
          return True
       else:
@@ -53,10 +54,10 @@ def _stop(host, port, sessionid, options, args):
       return False
 
  
-def _start(host, port, sessionid, options, args):
-   if len(args)==1:
-      code, result=set_pairing_interface(host, port, sessionid, args[0], 1)
-      display.formated(result, options.format)
+def _start(host, port, sessionid, args, _args):
+   if args.name!=None:
+      code, result=set_pairing_interface(host, port, sessionid, args.name, 1)
+      display.formated(result, args.format)
       if(code==200):
          return True
       else:
@@ -66,59 +67,67 @@ def _start(host, port, sessionid, options, args):
       return False
 
 
-def _status(host, port, sessionid, options, args):
+def _status(host, port, sessionid, args, _args):
    code,result=get_pairing_interfaces_status(host, port, sessionid)
-   if len(args)==0:
-      display.formated(result,options.format)
-      return True
-   elif len(args)==1:
-      if args[0].upper() in result:
-         display.formated(result[args[0].upper()], options.format)
-         return True
-      display.formated(None, options.format)
+   if args.name==None:
+      display.formated(result,args.format)
       return True
    else:
+      if args.name.upper() in result:
+         display.formated(result[args.name.upper()], args.format)
+         return True
+      display.formated(None,args.format)
       return False
 
  
-def _pairable(host, port, sessionid, options, args):
+def _pairable(host, port, sessionid, args, _args):
    _result=None
-   if len(args)==0:
+   if args.name==None:
       code, result=get_pairable_interfaces(host, port, sessionid)
-   elif len(args)==1:
-      code, result=get_pairable_interface(host, port, sessionid, args[0])
    else:
-      display.error("parameter error")
-      return False
-   display.formated(result, options.format)
+      code, result=get_pairable_interface(host, port, sessionid, args.name)
+   display.formated(result, args.format)
    return True
 
 
 actions={}
-actions["pairable"]=_pairable
+actions["get"]=_pairable
 actions["start"]=_start
 actions["stop"]=_stop
 actions["status"]=_status
 
+cli_epilog='''
+Actions:
+   get:
+'''
 
-def do(host, port, sessionid, args):
+cli_description='''
+CLI pairing operation for compatible interface
+'''
+
+def parser(args_subparser, parent_parser):
+   pairing_parser=args_subparser.add_parser('pairing', parents=[parent_parser], add_help=False, description=cli_description, epilog=cli_epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
+   pairing_parser
+   pairing_parser.add_argument("action", choices=['get', 'start', 'stop', 'restart' ])
+   pairing_parser.add_argument("name", help="interface name", nargs="?")
+   return pairing_parser
+
+
+def do(host, port, sessionid, args, _args=[], _parser=None):
    try:
-      action=args.pop(0).lower()
+      action=args.action
    except:
-      action=False
-
-   usage = "usage: %prog pairing action [object] [options]"
-   parser = OptionParser(usage)
-   parser.add_option("-f", "--format", dest="format", help="ouput format : [json|text]", default="json")
-   (options, args) = parser.parse_args(args=args)
-
-   if action==False:
-      parser.print_help()
+      display.error("No action", errtype="ERROR", errno=1)
+      user_parser.print_help()
       return False
 
    if action in actions:
-      if actions[action](host, port, sessionid, options, args)==False:
-         parser.print_help()
+      if actions[action](host, port, sessionid, args, _args)==False:
          return False
       else:
          return True
+   else:
+      if _parser:
+         display.error("Bad action", errtype="ERROR", errno=1)
+         _parser.print_help()
+   return False

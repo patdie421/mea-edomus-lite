@@ -1,7 +1,6 @@
 import sys
 import json
-
-from optparse import OptionParser
+import argparse
 
 from lib import http
 from lib import session
@@ -83,25 +82,27 @@ def update_interface(host, port, sessionid, interface, properties):
 
 
 def get_devices(host, port, sessionid, interface):
+   print "http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface)+"/device"
    return GetUrl("http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface)+"/device", sessionid)
 
 
 def get_device(host, port, sessionid, interface, device):
+   print "http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface)+"/device/"+str(device)
    return GetUrl("http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface)+"/device/"+str(device),sessionid)
 
 
-def _update_interface_device(host, port, sessionid, options, interface, args):
-   v=args.pop(0).strip().lower()
+def _update_interface_device(host, port, sessionid, interface, args, _args):
+   v=args.option.pop(0).strip().lower()
    if v!="device":
       return -1, None
    else:
-      if len(args)==0:
+      if len(args.option)==0:
          return -1, None
       else:
          j={}
-         device=args.pop(0).strip().lower()
+         device=args.option.pop(0).strip().lower()
          possibles=["id_type", "state", "description", "parameters"]
-         for i in args:
+         for i in args.option:
             s=str(i).split(':',1)
             if len(s) != 2:
                display.error("property syntax error: "+str(i))
@@ -139,18 +140,18 @@ def _update_interface_device(host, port, sessionid, options, interface, args):
       return -1, None
 
 
-def _add_interface_device(host, port, sessionid, options, interface, args):
-   v=args.pop(0).strip().lower()
+def _add_interface_device(host, port, sessionid, interface, args, _args):
+   v=args.option.pop(0).strip().lower()
    if v!="device":
       return -1, None
    else:
-      if len(args)==0:
+      if len(args.option)==0:
          return -1, None
       else:
          j={}
-         device=args.pop(0).strip().lower()
+         device=args.option.pop(0).strip().lower()
          possibles=["id_type", "state", "description", "parameters"]
-         for i in args:
+         for i in args.option:
             s=str(i).split(':',1)
             if len(s) != 2:
                display.error("property syntax error: "+str(i))
@@ -192,44 +193,49 @@ def _add_interface_device(host, port, sessionid, options, interface, args):
       return -1, None
 
 
-def _get_interface_device(host, port, sessionid, options, interface, args):
-   v=args.pop(0).strip().lower()
+def _get_interface_device(host, port, sessionid, interface, args, _args):
+   v=args.option.pop(0).strip().lower()
    if v!="device":
       return -1, None
    else:
-      if len(args)==0:
+      if len(args.option)==0:
          code, result = get_devices(host, port, sessionid, interface)
          return code, result
-      elif len(args)==1:
-         code, result = get_device(host, port, sessionid, interface,args[0])
+      elif len(args.option)==1:
+         code, result = get_device(host, port, sessionid, interface, args.option[0])
          return code, result
-      return -1, None
+      else:
+         display.error("too many parameters")
+         return -1, None
 
 
-def _get(host, port, sessionid, options, args):
+def _get(host, port, sessionid, args, _args):
    result=None
-   if len(args)==0:
+   if args.name==None:
       code,result=get_interfaces(host, port, sessionid)
-   elif len(args)==1:
-      code,result=get_interface(host, port, sessionid, args[0])
+   elif len(args.option)==0:
+      code,result=get_interface(host, port, sessionid, args.name)
    else:
-      interface=args.pop(0)
-      code,result=_get_interface_device(host, port, sessionid, options, interface, args)
+      interface=args.name
+      code,result=_get_interface_device(host, port, sessionid, interface, args, _args)
       if code==-1:
          return False
-   display.formated(result, options.format)
+   display.formated(result, args.format)
    return True
 
 
-def _update(host, port, sessionid, options, args):
-   interface=args.pop(0)
+def _update(host, port, sessionid, args, _args):
+   interface=args.name
+   if interface==None:
+      display.error("no interface")
+      return False
    j={}
 
-   if len(args)>2 and args[0].strip().lower()=="device":
-      code, result = _update_interface_device(host, port, sessionid, options, interface, args)
+   if len(args.option)>1 and args.option[0].strip().lower()=="device":
+      code, result = _update_interface_device(host, port, sessionid, interface, args, _args)
    else:
       possibles=["id_type", "state", "dev", "description", "parameters"]
-      for i in args:
+      for i in args.option:
          s=str(i).split(':',1)
          if len(s) != 2:
             display.error("property syntax error: "+str(i))
@@ -257,48 +263,48 @@ def _update(host, port, sessionid, options, args):
                printValids("Valid id_type values", interface_states)
                return False
          code, result = update_interface(host, port, sessionid, interface, j)
-#         display.formated(result, options.format)
-#         return True
       else:
          display.error("no property")
          return False
-   display.formated(result, options.format)
+   display.formated(result, args.format)
    return True
 
 
-def _delete(host, port, sessionid, options, args):
-   interface=args.pop(0)
-   if len(args)==0:
+def _delete(host, port, sessionid, args, _args):
+   interface=args.name
+   if len(args.option)==0:
       code, result = delete_interface(host, port, sessionid, interface)
-      display.formated(result, options.format)
+      display.formated(result, args.format)
       return True
-   if len(args)==2 and args[0].strip().lower() == "device":
-      device=args[1].strip().lower()
+   if len(args.option)==2 and args.option[0].strip().lower() == "device":
+      device=args.option[1].strip().lower()
       code, result = delete_interface_device(host, port, sessionid, interface, device)
-      display.formated(result, options.format)
+      display.formated(result, args.format)
       return True
    else:
       display.error("bad parameters")
       return False
 
 
-def _add(host, port, sessionid, options, args):
-   interface=args.pop(0)
+def _add(host, port, sessionid, args, _args):
+   interface=args.name
+   if interface==None:
+      display.error("no interface")
+      return False
    j={}
 
-   if len(args)>2 and args[0].strip().lower()=="device":
-      code, result = _add_interface_device(host, port, sessionid, options, interface, args)
+   if len(args.option)>1 and args.option[0].strip().lower()=="device":
+      code, result = _add_interface_device(host, port, sessionid, interface, args, _args)
       if code==-1:
          return False
    else:
       possibles=["id_type", "state", "dev", "description", "parameters"]
-      for i in args:
+      for i in args.option:
          s=str(i).split(':',1)
          if len(s) != 2:
             display.error("property syntax error: "+str(i))
             return False
          v=s[0].strip().lower()
-         print v
          if not v in possibles:
             display.error("unknown property: "+str(v))
             return False
@@ -334,8 +340,7 @@ def _add(host, port, sessionid, options, args):
       else:
          display.error("no property")
          return False
-
-   display.formated(result, options.format)
+   display.formated(result, args.format)
    return True
 
 
@@ -346,34 +351,46 @@ actions["update"]=_update
 actions["delete"]=_delete
 
 
-def parser(_parser):
-   _parser.add_argument("-f", "--format", dest="format", help="ouput format : [json|txt]", default="json")
-   _parser.add_argument("action", help="<action> to be applied on the object")
-   _parser.add_argument("name", help="interface <name>", nargs="?")
-   _parser.add_argument("option", nargs="*", help="options and properties for interface/action")
+cli_epilog='''
+Actions and options:
+   get      [<interface name>] [device [<device name>]]
+   delete    <interface name>  [device <device name>]
+   add       <interface name>  type_id:<type_id> state:<state> dev:<dev> [parameters:<parameters>] [description:<description>]
+   add       <interface name>  device <device name> [type_id:<type_id>] [state:<state>] [parameters:<parameters>] [description:<description>]
+   update    <interface name>  [type_id:<type_id>] [state:<state>] [dev:<dev>] [parameters:<parameters>] [description:<description>]
+   update    <interface name>  device <device name> [type_id:<type_id>] [state:<state>] [parameters:<parameters>] [description:<description>]
+   commit
+   rollback
+'''
+
+cli_description='''
+CLI interfaces and devices managment
+'''
+
+def parser(args_subparser, parent_parser):
+   interface_parser=args_subparser.add_parser('interface', parents=[parent_parser], add_help=False, description=cli_description, epilog=cli_epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
+   interface_parser.add_argument('action', choices=['get', 'add', 'update', 'delete'], help="available actions")
+   interface_parser.add_argument('name', help="interface name", nargs="?")
+#   interface_parser.add_argument("keyvalue", metavar='key:value', help="<key>/<value> pairs for set", nargs="*")
+   interface_parser.add_argument('option', nargs="*", help="options or properties for interface/device action (see below)")
+   return interface_parser
 
 
-def do(host, port, sessionid, args):
+def do(host, port, sessionid, args, _args=[], _parser=None):
    try:
-      action=args.pop(0).lower()
+      action=args.action
    except:
-      action=False
-
-   usage = "usage: %prog interface <action> [object] [options]"
-   parser = OptionParser(usage)
-   parser.add_option("-f", "--format", dest="format", help="ouput format : [json|txt]", default="json")
-   (options, args) = parser.parse_args(args=args)
-
-   if action==False:
-      parser.print_help()
+      display.error("No action", errtype="ERROR", errno=1)
+      user_parser.print_help()
       return False
 
    if action in actions:
-      if actions[action](host, port, sessionid, options, args)==False:
-         parser.print_help()
+      if actions[action](host, port, sessionid, args, _args)==False:
          return False
       else:
          return True
    else:
-      parser.print_help()
-      return False
+      if _parser:
+         display.error("Bad action", errtype="ERROR", errno=1)
+         _parser.print_help()
+   return False

@@ -1,8 +1,6 @@
 import sys
 import json
-import getpass
-
-from optparse import OptionParser
+import argparse
 
 from lib import http
 from lib import session
@@ -22,41 +20,68 @@ def do_action(host, port, sessionid, serviceid, action):
    return PutUrl("http://"+str(host)+":"+str(port)+"/rest/service/"+str(serviceid),sessionid,{"action":action})
 
 
-def _actions(action, host, port, sessionid, options, args):
-   if len(args)<>1:
-      display.error("bad parameters")
+def _actions(action, host, port, sessionid, args, _args):
+   if args.pid==None:
+      display.error("pid is mandatory")
       return False
-   code, result=do_action(host, port, sessionid, args[0], action)
-   display.formated(result, options.format)
-   return True
-
-
-def _get(host, port, sessionid, options, args):
-   result=None
-   if len(args)==0:
-      code,result=get_services(host, port, sessionid)
-   elif len(args)==1:
-      code,result=get_service(host, port, sessionid, args[0])
-   else:
+   if len(_args)>0:
       display.error("too many parameters")
       return False
-   display.formated(result, options.format)
+
+   code, result=do_action(host, port, sessionid, args.pid, action)
+   display.formated(result, args.format)
    return True
 
 
-def _start(host, port, sessionid, options, args):
-   _actions("start", host, port, sessionid, options, args)
+def _get(host, port, sessionid, args, _args):
+   result=None
+   
+   if len(_args)!=0:
+      display.error("too many parameters")
+      return False
+
+   if args.pid==None:
+      code,result=get_services(host, port, sessionid)
+   else:
+      code,result=get_service(host, port, sessionid, args.pid)
+
+   display.formated(result, args.format)
    return True
 
 
-def _stop(host, port, sessionid, options, args):
-   _actions("stop", host, port, sessionid, options, args)
+def _start(host, port, sessionid, args, _args):
+   _actions("start", host, port, sessionid, args, _args)
    return True
 
 
-def _restart(host, port, sessionid, options, args):
-   _actions("restart", host, port, sessionid, options, args)
+def _stop(host, port, sessionid, args, _args):
+   _actions("stop", host, port, sessionid, args, _args)
    return True
+
+
+def _restart(host, port, sessionid, args, _args):
+   _actions("restart", host, port, sessionid, args, _args)
+   return True
+
+
+cli_epilog='''
+Actions and options:
+   get    [pid]
+   start   pid
+   stop    pid
+   restart pid
+'''
+
+cli_description='''
+CLI service control
+'''
+
+def parser(args_subparser, parent_parser):
+   service_parser=args_subparser.add_parser('service', parents=[parent_parser], add_help=False, description=cli_description, epilog=cli_epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
+   service_parser
+   service_parser.add_argument("action", help="get information, start, stop or restart sevices", choices=['get','start','stop','restart'])
+   service_parser.add_argument("pid", help="service process id. pid is mandatory for \"start\", \"stop\" or \"restart\" action.", nargs="?")
+   return service_parser
 
 
 actions={}
@@ -65,29 +90,22 @@ actions["start"]=_start
 actions["stop"]=_stop
 actions["restart"]=_restart
 
-def do(host, port, sessionid, args):
+
+def do(host, port, sessionid, args, _args=[], _parser=None):
    try:
-      action=args.pop(0).lower()
+      action=args.action
    except:
-      action=False
-
-   usage = "\
-usage: %prog user service [<pid>] [options]"
-
-   parser = OptionParser(usage)
-   parser.add_option("-f", "--format", dest="format", help="ouput format : [json|txt]", default="json")
-   (options, args) = parser.parse_args(args=args)
-
-   if action==False:
-      parser.print_help()
+      display.error("No action", errtype="ERROR", errno=1)
+      user_parser.print_help()
       return False
 
    if action in actions:
-      if actions[action](host, port, sessionid, options, args)==False:
-         parser.print_help()
+      if actions[action](host, port, sessionid, args, _args)==False:
          return False
       else:
          return True
-
-   parser.print_help()
+   else:
+      if _parser:
+         display.error("Bad action", errtype="ERROR", errno=1)
+         _parser.print_help()
    return False

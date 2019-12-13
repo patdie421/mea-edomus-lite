@@ -1,8 +1,6 @@
 import sys
 import json
-import getpass
-
-from optparse import OptionParser
+import argparse
 
 from lib import http
 from lib import session
@@ -18,46 +16,51 @@ def get_type(host, port, sessionid, username):
    return GetUrl("http://"+str(host)+":"+str(port)+"/rest/type/"+str(username),sessionid)
 
 
-def _get(host, port, sessionid, options, args):
-   result=None
-   if len(args)==0:
+def _get(host, port, sessionid, args, _args):
+   _type=args.name
+   if _type==None:
       code,result=get_types(host, port, sessionid)
-   elif len(args)==1:
-      code,result=get_type(host, port, sessionid, args[0])
    else:
-      display.error("too many parameters")
-      return False
-   display.formated(result, options.format)
+      code,result=get_type(host, port, sessionid, _type)
+   display.formated(result, args.format)
    return True
 
 
 actions={}
 actions["get"]=_get
 
+cli_epilog='''
+Actions:
+   get:
+'''
 
-def do(host, port, sessionid, args):
+cli_description='''
+CLI interface and device types managment
+'''
+
+def parser(args_subparser, parent_parser):
+   type_parser=args_subparser.add_parser('type', parents=[parent_parser], add_help=False, description=cli_description, epilog=cli_epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
+   type_parser
+   type_parser.add_argument("action", choices=['get'])
+   type_parser.add_argument("name", help="type name", nargs="?")
+   return type_parser
+
+
+def do(host, port, sessionid, args, _args=[], _parser=None):
    try:
-      action=args.pop(0).lower()
+      action=args.action
    except:
-      action=False
-
-   usage = "\
-usage: %prog user get [<type>] [options]\n"
-
-   parser = OptionParser(usage)
-   parser.add_option("-f", "--format", dest="format", help="ouput format : [json|txt]", default="json")
-   (options, args) = parser.parse_args(args=args)
-
-   if action==False:
-      parser.print_help()
+      display.error("No action", errtype="ERROR", errno=1)
+      user_parser.print_help()
       return False
 
    if action in actions:
-      if actions[action](host, port, sessionid, options, args)==False:
-         parser.print_help()
+      if actions[action](host, port, sessionid, args, _args)==False:
          return False
       else:
          return True
-
-   parser.print_help()
+   else:
+      if _parser:
+         display.error("Bad action", errtype="ERROR", errno=1)
+         _parser.print_help()
    return False

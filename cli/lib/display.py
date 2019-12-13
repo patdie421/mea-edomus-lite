@@ -1,11 +1,19 @@
 import json
+import sys
 
 def format():
    return ["text", "json"]
 
 
-def error(msg):
-   print msg
+def error(msg, errtype=None, errno=None):
+   _msg=""
+   if errtype:
+      _msg=str(errtype).upper()+": "+str(msg)
+   else:
+      _msg=str(msg)
+   if errno:
+      _msg=_msg+"\n(errno: "+str(errno)+")"
+   sys.stderr.write("\n"+_msg+"\n\n")
 
 
 def formated(result, f):

@@ -20,7 +20,7 @@ from modules import service
 from modules import type
 
 cli_epilog='''
-Available artefacts:
+Available resources:
   configuration: display/change mea-edomus configuration properties
   user:          manage mea-edomus user, profile and password
   service:       manage services
@@ -41,32 +41,31 @@ objects_functions["user"]=user.do
 objects_functions["service"]=service.do
 objects_functions["type"]=type.do
 
+_parsers={}
 
-args_parser = argparse.ArgumentParser(description=cli_description, epilog=cli_epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
-args_subparsers = args_parser.add_subparsers(dest='artefact')
-
-args_parser_interface = args_subparsers.add_parser('interface')
-args_parser_configuration = args_subparsers.add_parser('configuration')
-args_parser_service = args_subparsers.add_parser('service')
-args_parser_user = args_subparsers.add_parser('user')
-args_parser_type = args_subparsers.add_parser('type')
-args_parser_pairing = args_subparsers.add_parser('pairing')
-
-interface.parser(args_parser_interface)
+#interface.parser(args_parser_interface)
 
 def getArgs():
-   args_parser.add_argument("-c", "--clean-session", action="store_true", dest="clean", help="remove local connection data", default=False)
-   args_parser.add_argument("-H", "--host", dest="host", help="", default="localhost")
-   args_parser.add_argument("-P", "--port", dest="port", help="", default=8083)
-   args_parser.add_argument("-U", "--user", dest="user", help="connection user id", default=None)
-   args_parser.add_argument("-W", "--password", dest="password", help="connection password", default=None)
-#   args_parser.add_argument("artefact", help="<object> to manipulate")
-#   args_parser.add_argument("action", help="<action> to be applied on the object")
-#   args_parser.add_argument("option", nargs="*", help="options and properties for artefact/action")
+   args_common = argparse.ArgumentParser()
+   args_common.add_argument("-H", "--host", dest="host", help="mea-edomus host (default: localhost)", default="localhost")
+   args_common.add_argument("-P", "--port", dest="port", help="mea-edomus communication port (default: 8083)", default=8083)
+   args_common.add_argument("-U", "--user", dest="_user", metavar="USER", help="user connection id", default=None)
+   args_common.add_argument("-W", "--password", dest="password", help="user connection password", default=None)
+   args_common.add_argument("-f", "--format", dest="format", choices=['json','text'], help="ouput format (default: json)", default="json")
+   args_common.add_argument("-r", "--reset-session", action="store_true", dest="clean", help="remove local connection data before command execution", default=False)
+
+   args_parser = argparse.ArgumentParser(description=cli_description, epilog=cli_epilog, formatter_class=argparse.RawDescriptionHelpFormatter, parents=[args_common], add_help=False)
+   args_subparser = args_parser.add_subparsers(dest='resource')
+
+   _parsers['configuration'] = configuration.parser(args_subparser, args_common)
+   _parsers['interface']     = interface.parser(args_subparser, args_common)
+   _parsers['service']       = service.parser(args_subparser, args_common)
+   _parsers['user']          = user.parser(args_subparser, args_common)
+   _parsers['type']          = type.parser(args_subparser, args_common)
+   _parsers['pairing']       = pairing.parser(args_subparser, args_common)
+
    args, _args = args_parser.parse_known_args()
-   print args
    
-   _args = [args.artefact]+[args.action]+args.option+_args
    return args, _args
 
 
@@ -75,44 +74,46 @@ if __name__ == "__main__":
    homedir = os.path.expanduser("~")
    dotfile = os.path.join(homedir, ".mea-edomus")
 
-   (options, args) = getArgs()
-   parser=args_parser
-   if options.clean==True:
+   args, _args = getArgs()
+   if args.clean==True:
       try:
          os.remove(dotfile)
       except:
          pass
 
-   if len(args)<1:
-      sys.exit(0)
- 
-   o=args.pop(0).lower()
+   o=args.resource.lower()
    if not o in objects_functions:
       parser.print_help()
       sys.exit(1)
 
+   if args.clean==True:
+      try:
+         os.remove(dotfile)
+      except:
+         pass
+
    defaultsession={
       "sessionid":False,
-      "host":options.host,
-      "port":options.port,
-      "user":options.user}
+      "host":args.host,
+      "port":args.port,
+      "user":args._user}
 
    if(not os.path.isfile(dotfile)):
       mysession=defaultsession
    else:
       with open(dotfile) as json_file:
          mysession = json.load(json_file) 
-         if mysession["host"] != options.host:
-            mysession["host"]=options.host
+         if mysession["host"] != args.host:
+            mysession["host"]=args.host
             mysession["sessionid"]=False
-         if mysession["port"] != options.port:
-            mysession["port"]=options.port
+         if mysession["port"] != args.port:
+            mysession["port"]=args.port
             mysession["sessionid"]=False
-         if mysession["user"] != options.user:
-            mysession["user"]=options.user
+         if mysession["user"] != args._user:
+            mysession["user"]=args._user
             mysession["sessionid"]=False
-   
-   if options.password!=None:
+
+   if args.password!=None:
       mysession["sessionid"]=False
    else:
       try:
@@ -121,19 +122,18 @@ if __name__ == "__main__":
          sessionid=None
          pass
 
-
-   if(mysession["sessionid"]==False or session.check(options.host, options.port, mysession["sessionid"])==False):
-      if options.user==None:
+   if(mysession["sessionid"]==False or session.check(args.host, args.port, mysession["sessionid"])==False):
+      if args._user==None:
          user=raw_input('user: ')
       else:
-         user=options.user
+         user=args._user
 
-      if options.password==None:
+      if args.password==None:
          password=getpass.getpass("password:")
       else:
-         password=options.password
+         password=args.password
 
-      code,_session=session.open(options.host, options.port, user, password)
+      code,_session=session.open(args.host, args.port, user, password)
       if code==200:
          _session=json.loads(_session)
          mysession["sessionid"]=_session["Mea-SessionId"]
@@ -145,15 +145,14 @@ if __name__ == "__main__":
             json.dump(mysession, outfile)
          sys.stderr.write(_session)
          sys.exit(1)
-   else:
-      sessionid=mysession["sessionid"]
+
+   sessionid=mysession["sessionid"]
 
    if o in objects_functions:
-      r=objects_functions[o](options.host, options.port, sessionid, args)
+      r=objects_functions[o](args.host, args.port, sessionid, args, _args=_args, _parser=_parsers[o])
       if r==True:
          sys.exit(0)
       else:
          sys.exit(1)
    else:
-      parser.print_help()
       sys.exit(1)

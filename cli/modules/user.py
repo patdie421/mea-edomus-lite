@@ -1,8 +1,7 @@
 import sys
 import json
 import getpass
-
-from optparse import OptionParser
+import argparse
 
 from lib import http
 from lib import session
@@ -79,52 +78,46 @@ def update_password(host, port, sessionid, oldpassword, newpassword):
 
 
 def _commit(host, port, sessionid, options, args):
-   if len(args)==0:
-      code,result=commit_users(host, port, sessionid)
-   else:
+   if len(args.keyvalue)>0:
       display.error("too many parameters")
       return False
+   code,result=commit_users(host, port, sessionid)
    display.formated(result, options.format)
    return True
 
 
 def _rollback(host, port, sessionid, options, args):
-   if len(args)==0:
-      code,result=rollback_users(host, port, sessionid)
-   else:
+   if len(args.keyvalue)>0:
       display.error("too many parameters")
       return False
+   code,result=rollback_users(host, port, sessionid)
    display.formated(result, options.format)
    return True
 
 
-def _delete(host, port, sessionid, options, args):
-   if len(args)==1:
-      code,result=delete_user(host, port, sessionid, args[0])
-   else:
-      display.error("user not provided")
+def _delete(host, port, sessionid, args, _args):
+   if len(args.keyvalue)>0:
+      display.error("too many parameters")
       return False
-   display.formated(result, options.format)
+   code,result=delete_user(host, port, sessionid, args.user)
+   display.formated(result, args.format)
    return True
 
 
-def _get(host, port, sessionid, options, args):
+def _get(host, port, sessionid, args, _args):
    result=None
-   if len(args)==0:
+   if args.user==None:
       code,result=get_users(host, port, sessionid)
-   elif len(args)==1:
-      code,result=get_user(host, port, sessionid, args[0])
    else:
-      display.error("too many parameters")
-      return False
-   display.formated(result, options.format)
+      code,result=get_user(host, port, sessionid, args.user)
+   display.formated(result, args.format)
    return True
 
 
-def _password(host, port, sessionid, options, args):
+def _password(host, port, sessionid, args, _args):
    j={}
    possible=["oldpassword", "newpassword"]
-   for i in args:
+   for i in args.keyvalue:
       s=i.split(':')
       if len(s) != 2:
          display.error("property syntax error: "+str(i))
@@ -147,27 +140,24 @@ def _password(host, port, sessionid, options, args):
       newpassword=getpass.getpass("new password:")
 
    code,result= update_password(host, port, sessionid, oldpassword, newpassword)
-   display.formated(result, options.format)
+   display.formated(result, args.format)
    return True
 
-   display.error("parameter error")
-   return False
-
  
-def _update(host, port, sessionid, options, args):
-   username=args.pop(0)
+def _update(host, port, sessionid, args, _args):
+   username=args.user
    j={}
    possible=["password", "fullname", "profile"]
 
-   for i in args:
+   for i in args.keyvalue:
       s=str(i).split(':')
       if len(s) != 2:
-         display.error("property syntax error: "+str(i))
+         display.error("property syntax error - "+str(i))
          return False
 
       v=s[0].strip().lower()
       if not v in possible:
-         display.error("unknown property: "+str(v))
+         display.error("unknown property - "+str(v))
          return False
 
       j[s[0].strip().lower()]=s[1].strip()
@@ -182,27 +172,25 @@ def _update(host, port, sessionid, options, args):
          user["profile"]=int(j["profile"])
 
       code,result= update_user(host, port, sessionid, username, user)
-      display.formated(result, options.format)
+      display.formated(result, args.format)
       return True
    else:
       display.error("no parameters")
       return False
 
-   display.error("unknown error")
+   display.error("sorry, unknown error")
    return False
 
 
-def _create(host, port, sessionid, options, args):
-   username=args.pop(0)
+def _create(host, port, sessionid, args, _args):
+   username=args.user
    j={}
    possible=["password", "fullname", "profile"]
-   for i in args:
+   for i in args.keyvalue:
       s=str(i).split(':')
-
       if len(s) != 2:
          display.error("property syntax error: "+str(i))
          return False
-
       v=s[0].strip().lower()
       if not v in possible:
          display.error("unknown property: "+str(v))
@@ -227,7 +215,7 @@ def _create(host, port, sessionid, options, args):
 
       user={"username":username, "password":j["password"], "fullname":fullname, "profile":profile}
       code,result= create_user(host, port, sessionid, user)
-      display.formated(result, options.format)
+      display.formated(result, args.format)
       return True
    else:
       display.error("no parameters")
@@ -245,35 +233,45 @@ actions["password"]=_password
 actions["commit"]=_commit
 actions["rollback"]=_rollback
 
-def do(host, port, sessionid, args):
+
+cli_epilog='''
+Actions and options:
+   get      [<username>]
+   delete   <username>  [options]
+   add      <username>   password:<password>  [profile:<profileid>] [fullname:\"full user name\"]
+   update   <username>  [password:<password>] [profile:<profileid>] [fullname:\"full user name\"]
+   password <username>  [password:<password>]
+   commit
+   rollback
+'''
+
+cli_description='''
+CLI users managment
+'''
+
+def parser(args_subparser, parent_parser):
+   user_parser=args_subparser.add_parser('user', parents=[parent_parser], add_help=False, description=cli_description, epilog=cli_epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
+   user_parser.add_argument("action", help="For more details see below.", choices=['get','add','update','delete','password','commit','rollback'])
+   user_parser.add_argument("user", help="user name", nargs="?")
+   user_parser.add_argument("keyvalue", metavar='key:value', help="<key>/<value> pairs for action. For more details see below. ", nargs="*")
+   return user_parser
+
+
+def do(host, port, sessionid, args, _args=[], _parser=None):
    try:
-      action=args.pop(0).lower()
+      action=args.action
    except:
-      action=False
-
-   usage = "\
-usage: %prog user get     [<username>] [options]\n\
-       %prog user delete   <username>  [options]\n\
-       %prog user add      <username>  password:<password>   [profile:<profileid>] [fullname:\"full user name\"] [options]\n\
-       %prog user update   <username>  [password:<password>] [profile:<profileid>] [fullname:\"full user name\"] [options]\n\
-       %prog user password <username>  [password:<password>] [options]\n\
-       %prog user commit   [options]\n\
-       %prog user rollback [options]\n"
-
-   parser = OptionParser(usage)
-   parser.add_option("-f", "--format", dest="format", help="ouput format : [json|txt]", default="json")
-   (options, args) = parser.parse_args(args=args)
-
-   if action==False:
-      parser.print_help()
+      display.error("No action", errtype="ERROR", errno=1)
+      user_parser.print_help()
       return False
 
    if action in actions:
-      if actions[action](host, port, sessionid, options, args)==False:
-         parser.print_help()
+      if actions[action](host, port, sessionid, args, _args)==False:
          return False
       else:
          return True
-
-   parser.print_help()
+   else:
+      if _parser:
+         display.error("Bad action", errtype="ERROR", errno=1)
+         _parser.print_help()
    return False
