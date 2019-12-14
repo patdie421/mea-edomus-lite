@@ -30,7 +30,7 @@ Available resources:
 '''
 
 cli_description='''
-CLI for managing mea-edomus-lite
+CLI for configuring mea-edomus.
 '''
 
 objects_functions={}
