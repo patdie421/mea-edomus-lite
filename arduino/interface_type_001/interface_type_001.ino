@@ -210,16 +210,16 @@ int myReadFn()
 //
 
 // COMPTEUR0
-#define COUNTER_PIN0 2 // le compteur 0 est sur l'entrÃ©e 2
+#define COUNTER_PIN0 2 // le compteur 0 est sur l'entr&e 2
 volatile unsigned long counter0; // compteur du nombre d'impulsion
-volatile unsigned long prev_chrono0; // derniÃ¨re prise de chrono
-volatile unsigned char prev_state_pin0; // Ã©tat prÃ©cÃ©dent de l'entrÃ©e 2
+volatile unsigned long prev_chrono0; // dernière prise de chrono
+volatile unsigned char prev_state_pin0; // état précédent de l'entrée 2
 volatile unsigned char counter_flag0;
 
 void counter0_inter()
 {
-  char pin_state = PIND & (1 << COUNTER_PIN0); // avant tout, lecture de l'Ã©tat de l'entrÃ©e sans digitalRead qui prend trop de temps
-  unsigned long chrono=millis(); // maintenant qu'on connait l'Ã©tat de l'entrÃ©e on peut prendre le "temps" de lire le temps actuel en millisecondes
+  char pin_state = PIND & (1 << COUNTER_PIN0); // avant tout, lecture de l'état de l'entrée sans digitalRead qui prend trop de temps
+  unsigned long chrono=millis(); // maintenant qu'on connait l'état de l'entrée on peut prendre le "temps" de lire le temps actuel en millisecondes
 
     if(pin_state > prev_state_pin0) // detection d'un front montant
   {
@@ -240,18 +240,18 @@ void counter0_inter()
 }
 
 // COMPTEUR1
-#define COUNTER_PIN1 3 // le compteur 1 est sur l'entrÃ©e 3
+#define COUNTER_PIN1 3 // le compteur 1 est sur l'entrée 3
 volatile unsigned long counter1; // compteur du nombre d'impulsion
-volatile unsigned long prev_chrono1; // derniÃ¨re prise de chrono
-volatile unsigned char prev_state_pin1; // etat prÃ©cÃ©dente de l'entrÃ©e 3
+volatile unsigned long prev_chrono1; // dernière prise de chrono
+volatile unsigned char prev_state_pin1; // etat précédente de l'entrée 3
 volatile unsigned char counter_flag1;
 
 void counter1_inter()
 {
-  char pin_state = PIND & (1 << COUNTER_PIN1); // avant tout, lecture de l'Ã©tat de l'entrÃ©e sans digitalRead qui prend trop de temps
-  unsigned long chrono=millis(); // maintenant qu'on connait l'Ã©tat de l'entrÃ©e on peut prendre le "temps" de lire le temps actuel en millisecondes
+  char pin_state = PIND & (1 << COUNTER_PIN1); // avant tout, lecture de l'état de l'entrée sans digitalRead qui prend trop de temps
+  unsigned long chrono=millis(); // maintenant qu'on connait l'état de l'entrée on peut prendre le "temps" de lire le temps actuel en millisecondes
 
-    if(pin_state > prev_state_pin1) // detection d'un front montant
+  if(pin_state > prev_state_pin1) // detection d'un front montant
   {
     prev_chrono1=chrono; // on prend le chrono
   }
@@ -262,7 +262,7 @@ void counter1_inter()
       counter1++;
       counter_flag1=1;
     }
-    // si le temps entre les deux fronts n'est pas suffisant, on considÃ¨re que c'est du bruit.
+    // si le temps entre les deux fronts n'est pas suffisant, on considère que c'est du bruit.
     // et on ne fait rien
   }
   // si pin_state == prev_state_pin0 on ne fait rien, mais cela ne devrait jamais arriver ...

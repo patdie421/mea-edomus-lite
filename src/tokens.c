@@ -27,114 +27,116 @@ struct token_s
 };
 
 static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le dernier élément doit être {NULL, 0}
-   {"control",                    XPL_CONTROL_ID},
-   {"basic",                      XPL_BASIC_ID},
-   {"device",                     XPL_DEVICE_ID},
-   {"type",                       XPL_TYPE_ID},
-   {"output",                     XPL_OUTPUT_ID},
-   {"current",                    XPL_CURRENT_ID},
-   {"sensor",                     XPL_SENSOR_ID},
-   {"pulse",                      XPL_PULSE_ID},
-   {"command",                    XPL_COMMAND_ID},
-   {"data1",                      XPL_DATA1_ID},
-   {"request",                    XPL_REQUEST_ID},
-   {"energy",                     XPL_ENERGY_ID},
-   {"power",                      XPL_POWER_ID},
-   {"temp",                       XPL_TEMP_ID},
-   {"input",                      XPL_INPUT_ID},
-   {"digital_in",                 DIGITAL_IN_ID},
-   {"digital_out",                DIGITAL_OUT_ID},
-   {"analog_in",                  ANALOG_IN_ID},
-   {"analog_out",                 ANALOG_OUT_ID},
-   {"voltage",                    XPL_VOLTAGE_ID},
-   {"tmp36",                      XPL_TMP36_ID},
-   {"aref5",                      XPL_AREF5_ID},
-   {"aref11",                     XPL_AREF11_ID},
-   {"algo",                       XPL_ALGO_ID},
+
    {"action",                     ACTION_ID},
-   {"pwm",                        PWM_ID},
-   {"onoff",                      ONOFF_ID},
-   {"variable",                   VARIABLE_ID},
-   {"inc",                        INC_ID},
-   {"dec",                        DEC_ID},
-   {"device_id",                  DEVICE_ID_ID},
-   {"device_name",                DEVICE_NAME_ID},
-   {"device_type_id",             DEVICE_TYPE_ID_ID},
-   {"device_location_id",         DEVICE_LOCATION_ID_ID},
-   {"device_interface_name",      DEVICE_INTERFACE_NAME_ID},
-   {"device_interface_type_name", DEVICE_INTERFACE_TYPE_NAME_ID},
-   {"device_state",               DEVICE_STATE_ID},
-   {"device_type_parameters",     DEVICE_TYPE_PARAMETERS_ID},
-   {"interface_id",               INTERFACE_ID_ID},
-   {"interface_name",             INTERFACE_NAME_ID},
-   {"interface_type_id",          INTERFACE_TYPE_ID_ID},
-   {"interface_location_id",      INTERFACE_LOCATION_ID_ID},
-   {"interface_state",            INTERFACE_STATE_ID},
-   {"interface_parameters",       INTERFACE_PARAMETERS_ID},
-   {"device_parameters",          DEVICE_PARAMETERS_ID},
-   {"ID_XBEE",                    ID_XBEE_ID},
    {"ADDR_H",                     ADDR_H_ID},
    {"ADDR_L",                     ADDR_L_ID},
-   {"digital",                    DIGITAL_ID},
+   {"algo",                       XPL_ALGO_ID},
+   {"all",                        ALL_ID},
    {"analog",                     ANALOG_ID},
-   {"last",                       XPL_LAST_ID},
-   {"raw",                        RAW_ID},
-   {"high",                       HIGH_ID},
-   {"low",                        LOW_ID},
-   {"generic",                    GENERIC_ID},
-   {"unit",                       UNIT_ID},
-   {"todbflag",                   TODBFLAG_ID},
-   {"ENOCEAN_ADDR",               ENOCEAN_ADDR_ID},
-   {"ID_ENOCEAN",                 ID_ENOCEAN_ID},
-   {"watchdog",                   XPL_WATCHDOG_ID},
-   {"reachable",                  REACHABLE_ID},
+   {"analog_in",                  ANALOG_IN_ID},
+   {"analog_out",                 ANALOG_OUT_ID},
+   {"api_key",                    API_KEY_ID},
+   {"aref11",                     XPL_AREF11_ID},
+   {"aref5",                      XPL_AREF5_ID},
+   {"basic",                      XPL_BASIC_ID},
    {"color",                      COLOR_ID},
-   {"true",                       TRUE_ID},
+   {"command",                    XPL_COMMAND_ID},
+   {"commit",                     COMMIT_ID},
+   {"CONFIGURATION",              API_CONFIGURATION_ID},
+   {"control",                    XPL_CONTROL_ID},
+   {"control.basic",              XPL_CONTROLBASIC_ID},
+   {"create",                     CREATE_ID},
+   {"current",                    XPL_CURRENT_ID},
+   {"data",                       DATA_ID},
+   {"data1",                      XPL_DATA1_ID},
+   {"dec",                        DEC_ID},
+   {"DELETE",                     HTTP_DELETE_ID},
+   {"detail",                     DETAIL_ID},
+   {"device",                     XPL_DEVICE_ID},
+   {"device_id",                  DEVICE_ID_ID},
+   {"device_interface_name",      DEVICE_INTERFACE_NAME_ID},
+   {"device_interface_type_name", DEVICE_INTERFACE_TYPE_NAME_ID},
+   {"device_location_id",         DEVICE_LOCATION_ID_ID},
+   {"device_name",                DEVICE_NAME_ID},
+   {"device_parameters",          DEVICE_PARAMETERS_ID},
+   {"device_state",               DEVICE_STATE_ID},
+   {"device_type_id",             DEVICE_TYPE_ID_ID},
+   {"device_type_parameters",     DEVICE_TYPE_PARAMETERS_ID},
+   {"digital",                    DIGITAL_ID},
+   {"digital_in",                 DIGITAL_IN_ID},
+   {"digital_out",                DIGITAL_OUT_ID},
+   {"energy",                     XPL_ENERGY_ID},
+   {"ENOCEAN_ADDR",               ENOCEAN_ADDR_ID},
    {"false",                      FALSE_ID},
-   {"on",                         ON_ID},
-   {"typeoftype",                 TYPEOFTYPE_ID},
+   {"generic",                    GENERIC_ID},
+   {"GET",                        HTTP_GET_ID},
+   {"high",                       HIGH_ID},
+   {"ID_ENOCEAN",                 ID_ENOCEAN_ID},
+   {"ID_XBEE",                    ID_XBEE_ID},
+   {"inc",                        INC_ID},
+   {"input",                      XPL_INPUT_ID},
+   {"INTERFACE",                  API_INTERFACE_ID},
+   {"interface_id",               INTERFACE_ID_ID},
+   {"interface_location_id",      INTERFACE_LOCATION_ID_ID},
+   {"interface_name",             INTERFACE_NAME_ID},
+   {"interface_parameters",       INTERFACE_PARAMETERS_ID},
+   {"interface_state",            INTERFACE_STATE_ID},
+   {"interface_type_id",          INTERFACE_TYPE_ID_ID},
+   {"internal",                   INTERNAL_ID},
+   {"l_data",                     L_DATA_ID},
+   {"last",                       XPL_LAST_ID},
    {"LOCAL_XBEE_ADDR_H",          LOCAL_XBEE_ADDR_H_ID},
    {"LOCAL_XBEE_ADDR_L",          LOCAL_XBEE_ADDR_L_ID},
-   {"name",                       NAME_ID},
-   {"internal",                   INTERNAL_ID},
-   {"state",                      STATE_ID},
-   {"xplmsg",                     XPLMSG_ID},
-   {"source",                     XPLSOURCE_ID},
-   {"schema",                     XPLSCHEMA_ID},
-   {"target",                     XPLTARGET_ID},
-   {"msgtype",                    XPLMSGTYPE_ID},
-   {"xpl-trig",                   XPL_TRIG_ID},
-   {"xpl-stat",                   XPL_STAT_ID},
-   {"xpl-cmnd",                   XPL_CMND_ID},
-   {"control.basic",              XPL_CONTROLBASIC_ID},
-   {"sensor.request",             XPL_SENSORREQUEST_ID},
-   {"GET",                        HTTP_GET_ID},
-   {"POST",                       HTTP_POST_ID},
-   {"DELETE",                     HTTP_DELETE_ID},
-   {"PUT",                        HTTP_PUT_ID},
-   {"SESSION",                    API_SESSION_ID},
-   {"INTERFACE",                  API_INTERFACE_ID},
-   {"SERVICE",                    API_SERVICE_ID},
-   {"CONFIGURATION",              API_CONFIGURATION_ID},
-   {"USER",                       API_USER_ID},
-   {"PAIRING",                    API_PAIRING_ID},
-   {"api_key",                    API_KEY_ID},
-   {"data",                       DATA_ID},
-   {"l_data",                     L_DATA_ID},
-   {"time",                       TIME_ID},
-   {"user",                       USER_ID},
-   {"password",                   PASSWORD_ID},
-   {"profile",                    PROFILE_ID},
-   {"Mea-SessionId",              MEA_SESSIONID_ID},
+   {"low",                        LOW_ID},
    {"Mea-Session",                MEA_SESSION_ID},
-   {"start",                      START_ID},
-   {"stop",                       STOP_ID},
+   {"Mea-SessionId",              MEA_SESSIONID_ID},
+   {"msgtype",                    XPLMSGTYPE_ID},
+   {"name",                       NAME_ID},
+   {"on",                         ON_ID},
+   {"onoff",                      ONOFF_ID},
+   {"output",                     XPL_OUTPUT_ID},
+   {"PAIRING",                    API_PAIRING_ID},
+   {"password",                   PASSWORD_ID},
+   {"POST",                       HTTP_POST_ID},
+   {"power",                      XPL_POWER_ID},
+   {"profile",                    PROFILE_ID},
+   {"pulse",                      XPL_PULSE_ID},
+   {"PUT",                        HTTP_PUT_ID},
+   {"pwm",                        PWM_ID},
+   {"raw",                        RAW_ID},
+   {"reachable",                  REACHABLE_ID},
+   {"request",                    XPL_REQUEST_ID},
    {"restart",                    RESTART_ID},
-   {"detail",                     DETAIL_ID},
-   {"all",                        ALL_ID},
-   {"create",                     CREATE_ID},
-   {"commit",                     COMMIT_ID},
    {"rollback",                   ROLLBACK_ID},
+   {"schema",                     XPLSCHEMA_ID},
+   {"sensor",                     XPL_SENSOR_ID},
+   {"sensor.request",             XPL_SENSORREQUEST_ID},
+   {"SERVICE",                    API_SERVICE_ID},
+   {"SESSION",                    API_SESSION_ID},
+   {"source",                     XPLSOURCE_ID},
+   {"start",                      START_ID},
+   {"state",                      STATE_ID},
+   {"stop",                       STOP_ID},
+   {"target",                     XPLTARGET_ID},
+   {"temp",                       XPL_TEMP_ID},
+   {"time",                       TIME_ID},
+   {"tmp36",                      XPL_TMP36_ID},
+   {"todbflag",                   TODBFLAG_ID},
+   {"true",                       TRUE_ID},
+   {"type",                       XPL_TYPE_ID},
+   {"typeoftype",                 TYPEOFTYPE_ID},
+   {"unit",                       UNIT_ID},
+   {"USER",                       API_USER_ID},
+//   {"user",                       USER_ID},
+   {"variable",                   VARIABLE_ID},
+   {"voltage",                    XPL_VOLTAGE_ID},
+   {"watchdog",                   XPL_WATCHDOG_ID},
+   {"xpl-cmnd",                   XPL_CMND_ID},
+   {"xplmsg",                     XPLMSG_ID},
+   {"xpl-stat",                   XPL_STAT_ID},
+   {"xpl-trig",                   XPL_TRIG_ID},
+
    
    {NULL,0}
 };
@@ -400,39 +402,39 @@ void init_tokens()
       l=strlen(s->str);
       if(l>_token_max_string_size)
          _token_max_string_size=l;
-
+      _token_max_string_size;
       HASH_ADD_KEYPTR( hh_token_by_string, tokens_hash_by_string, s->str, strlen(s->str), s );
       HASH_ADD_KEYPTR( hh_token_by_id, tokens_hash_by_id, &(s->token->id), sizeof(s->token->id), s );
    }
 
    if(_token_max_string_size>0)
-      _token_string_buf=(char *)malloc(_token_max_string_size+1);   
+      _token_string_buf=(char *)malloc(_token_max_string_size+1);
 }
 
 
 void release_tokens()
 {
-   if(tokens_hash_by_id) { 
+   if(tokens_hash_by_id) {
       struct tokens_hash_s *s = NULL, *ts = NULL; 
       HASH_ITER(hh_token_by_string, tokens_hash_by_string, s, ts) { 
-         if(s->str) {
-            free(s->str);
-            s->str=NULL;
-         }
+//         if(s->str) {
+//            free(s->str);
+//            s->str=NULL;
+//         }
          HASH_DELETE(hh_token_by_string, tokens_hash_by_string, s);
-         free(s);
+//         free(s);
       } 
       tokens_hash_by_string=NULL;
    }
-   
+  
    if(tokens_hash_by_id) { 
       struct tokens_hash_s *s = NULL, *ts = NULL;
       HASH_ITER(hh_token_by_id, tokens_hash_by_id, s, ts) {
+         HASH_DELETE(hh_token_by_id, tokens_hash_by_id, s);
          if(s->str) {
             free(s->str);
             s->str=NULL;
          }
-         HASH_DELETE(hh_token_by_id, tokens_hash_by_id, s);
          free(s);
       } 
       tokens_hash_by_id=NULL;
@@ -454,7 +456,7 @@ char *get_token_string_by_id(enum token_id_e id)
 {
    struct tokens_hash_s *s = NULL;
 
-   if(tokens_hash_by_string == NULL) {   
+   if(tokens_hash_by_string == NULL) {
 #if TOKENS_AUTOINIT == 1
       init_tokens();
 #else
@@ -495,8 +497,9 @@ enum token_id_e get_token_id_by_string(char *str)
    if(_token_string_buf == NULL)
       return _UNKNOWN;
 
-   strncpy(_token_string_buf, str, _token_max_string_size-1);
-   _token_string_buf[_token_max_string_size-1]=0;
+//   strncpy(_token_string_buf, str, _token_max_string_size-1);
+   strncpy(_token_string_buf, str, _token_max_string_size);
+   _token_string_buf[_token_max_string_size]=0;
    mea_strtolower(_token_string_buf); 
 
    HASH_FIND(hh_token_by_string, tokens_hash_by_string, _token_string_buf, strlen(_token_string_buf), s);

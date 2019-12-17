@@ -1,8 +1,6 @@
 import sys
 import base64
 import json
-import pprint
-import urllib2
 import os
 import getpass
 import argparse
@@ -10,7 +8,6 @@ import argparse
 from datetime import datetime
 from lib import http
 from lib import session
-from lib import PassThroughOptionParser
 
 from modules import interface
 from modules import pairing
@@ -124,7 +121,7 @@ if __name__ == "__main__":
 
    if(mysession["sessionid"]==False or session.check(args.host, args.port, mysession["sessionid"])==False):
       if args._user==None:
-         user=raw_input('user: ')
+         user=input('user: ')
       else:
          user=args._user
 
@@ -143,7 +140,7 @@ if __name__ == "__main__":
          mysession["sessionid"]=None
          with open(dotfile, 'w') as outfile:
             json.dump(mysession, outfile)
-         sys.stderr.write(_session)
+         sys.stderr.write(str(_session))
          sys.exit(1)
 
    sessionid=mysession["sessionid"]

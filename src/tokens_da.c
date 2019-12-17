@@ -34,7 +34,6 @@ int16_t init_strings_da()
    tokens_string_da->low_str_c                        = get_token_string_by_id(LOW_ID);
    tokens_string_da->true_str_c                       = get_token_string_by_id(TRUE_ID);
    tokens_string_da->false_str_c                      = get_token_string_by_id(FALSE_ID);
-   
    tokens_string_da->xpl_sensor_str_c                 = get_token_string_by_id(XPL_SENSOR_ID);
    tokens_string_da->xpl_basic_str_c                  = get_token_string_by_id(XPL_BASIC_ID);
    tokens_string_da->xpl_device_str_c                 = get_token_string_by_id(XPL_DEVICE_ID);
@@ -44,24 +43,19 @@ int16_t init_strings_da()
    tokens_string_da->xpl_control_str_c                = get_token_string_by_id(XPL_CONTROL_ID);
    tokens_string_da->xpl_last_str_c                   = get_token_string_by_id(XPL_LAST_ID);
    tokens_string_da->xpl_request_str_c                = get_token_string_by_id(XPL_REQUEST_ID);
-   
    tokens_string_da->reachable_str_c                  = get_token_string_by_id(REACHABLE_ID);
    tokens_string_da->on_str_c                         = get_token_string_by_id(ON_ID);
    tokens_string_da->name_str_c                       = get_token_string_by_id(NAME_ID);
    tokens_string_da->state_str_c                      = get_token_string_by_id(STATE_ID);
    tokens_string_da->device_parameters_str_c          = get_token_string_by_id(DEVICE_PARAMETERS_ID);
-   
    tokens_string_da->id_enocean_str_c                 = get_token_string_by_id(ID_ENOCEAN_ID);
    tokens_string_da->enocean_addr_str_c               = get_token_string_by_id(ENOCEAN_ADDR_ID);
    tokens_string_da->device_type_id_str_c             = get_token_string_by_id(DEVICE_TYPE_ID_ID);
-   
    tokens_string_da->interface_id_str_c               = get_token_string_by_id(INTERFACE_ID_ID);
    tokens_string_da->interface_parameters_str_c       = get_token_string_by_id(INTERFACE_PARAMETERS_ID);
-   
    tokens_string_da->device_id_str_c                  = get_token_string_by_id(DEVICE_ID_ID);
    tokens_string_da->device_name_str_c                = get_token_string_by_id(DEVICE_NAME_ID);
    tokens_string_da->device_type_id_str_c             = get_token_string_by_id(DEVICE_TYPE_ID_ID);
-   
    tokens_string_da->device_localtion_id_str_c        = get_token_string_by_id(DEVICE_LOCATION_ID_ID);
    tokens_string_da->device_interface_name_str_c      = get_token_string_by_id(DEVICE_INTERFACE_NAME_ID);
    tokens_string_da->device_interface_type_name_str_c = get_token_string_by_id(DEVICE_INTERFACE_TYPE_NAME_ID);
@@ -157,16 +151,26 @@ int main(int argc, char *argv[])
    init_strings_da();
 
    t0=millis();
-   for(int i=0;i<1000;i++) {
+   for(int i=0;i<10000;i++) {
       for(int j=1;j<=_END;j++) {
          char *str=get_token_string_by_id(j);
          int id=(int)get_token_id_by_string(str);
-         if(j!=id)
-            printf("Error\n");
+         if(j!=id) {
+            printf("Error %s %d %d\n", str, j, id);
+            goto exit;
+         }
       }
    }
+   
    printf("%5.2f ms\n",millis()-t0);
-
+   
+   printf("USER %d\n", get_token_id_by_string("USER"));
+   printf("user %d\n", get_token_id_by_string("user"));
+   
+   printf("USER_ID: %s\n", get_token_string_by_id(USER_ID));
+   printf("API_USER_ID: %s\n", get_token_string_by_id(API_USER_ID));
+   
+exit:
    release_strings_da();
    release_tokens();
 }
