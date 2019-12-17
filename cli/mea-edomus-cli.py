@@ -1,4 +1,8 @@
 import sys
+if sys.version_info[0] < 3:
+   sys.stderr.write("Only compatible with Python 3 interpreter\n")
+   sys.stderr.write(str(sys.version_info)+"\n")
+   sys.exit(1)
 import base64
 import json
 import os
@@ -63,7 +67,7 @@ def getArgs():
 
    args, _args = args_parser.parse_known_args()
    
-   return args, _args
+   return args_parser, args, _args
 
 
 if __name__ == "__main__":
@@ -71,17 +75,21 @@ if __name__ == "__main__":
    homedir = os.path.expanduser("~")
    dotfile = os.path.join(homedir, ".mea-edomus")
 
-   args, _args = getArgs()
+   args_parser, args, _args = getArgs()
    if args.clean==True:
       try:
          os.remove(dotfile)
       except:
          pass
 
-   o=args.resource.lower()
-   if not o in objects_functions:
-      parser.print_help()
+   if args.resource == None:
+      args_parser.print_help()
       sys.exit(1)
+      
+   o=args.resource.lower()
+#   if not o in objects_functions:
+#      parser.print_help()
+#      sys.exit(1)
 
    if args.clean==True:
       try:
