@@ -7,6 +7,8 @@ from lib import http
 from lib import session
 from lib import display
 
+from dateutil.parser import parse
+
 
 def get_users(host, port, sessionid):
    url="http://"+str(host)+":"+str(port)+"/rest/user"
@@ -50,11 +52,13 @@ def commit_users(host, port, sessionid):
    return code, res
 
 
-def rollback_users(host, port, sessionid):
+def rollback_users(host, port, sessionid, timestamp=None):
    url="http://"+str(host)+":"+str(port)+"/rest/user"
    headers={"Mea-session": sessionid}
-   _user={"action":"rollback"}
-   code, res=http.post(url, _user, headers)
+   body={"action":"rollback"}
+   if timestamp!=None:
+      body["parameters"]={"timestamp":timestamp}
+   code, res=http.post(url, body, headers)
    res=json.loads(res)
    return code, res
 
@@ -77,21 +81,33 @@ def update_password(host, port, sessionid, oldpassword, newpassword):
    return code, res
 
 
-def _commit(host, port, sessionid, options, args):
-   if len(args.keyvalue)>0:
+def _commit(host, port, sessionid, args, _args):
+   if args.user!=None:
       display.error("too many parameters")
       return False
    code,result=commit_users(host, port, sessionid)
-   display.formated(result, options.format)
+   display.formated(result, args.format)
    return True
 
 
-def _rollback(host, port, sessionid, options, args):
-   if len(args.keyvalue)>0:
+def _rollback(host, port, sessionid, args, _args):
+   print args
+   if args.user==None:
+      code,result=rollback_users(host, port, sessionid)
+   elif len(args.keyvalue)==0:
+      date_str=args.user
+      try:
+         _datetime = parse(date_str)
+      except:
+         display.error("bad date format: "+date_str)
+         return False
+      timestamp=_datetime.strftime('%s')
+
+      code,result=rollback_users(host, port, sessionid, timestamp)
+   else:
       display.error("too many parameters")
       return False
-   code,result=rollback_users(host, port, sessionid)
-   display.formated(result, options.format)
+   display.formated(result, args.format)
    return True
 
 
@@ -240,9 +256,9 @@ Actions and options:
    delete   <username>  [options]
    add      <username>   password:<password>  [profile:<profileid>] [fullname:\"full user name\"]
    update   <username>  [password:<password>] [profile:<profileid>] [fullname:\"full user name\"]
-   password <username>  [password:<password>]
+   password <username>  [oldpassword:<oldpassword>] [newpassword:<newpassword>]
    commit
-   rollback
+   rollback [date]
 '''
 
 cli_description='''
@@ -252,7 +268,7 @@ CLI users managment
 def parser(args_subparser, parent_parser):
    user_parser=args_subparser.add_parser('user', parents=[parent_parser], add_help=False, description=cli_description, epilog=cli_epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
    user_parser.add_argument("action", help="For more details see below.", choices=['get','add','update','delete','password','commit','rollback'])
-   user_parser.add_argument("user", help="user name", nargs="?")
+   user_parser.add_argument("user", metavar='name|date', help="user name or date (for commit)", nargs="?")
    user_parser.add_argument("keyvalue", metavar='key:value', help="<key>/<value> pairs for action. For more details see below. ", nargs="*")
    return user_parser
 

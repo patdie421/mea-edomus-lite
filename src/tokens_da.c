@@ -118,6 +118,10 @@ int16_t init_strings_da()
    tokens_string_da->create_str_c                     = get_token_string_by_id(CREATE_ID);
    tokens_string_da->commit_str_c                     = get_token_string_by_id(COMMIT_ID);
    tokens_string_da->rollback_str_c                   = get_token_string_by_id(ROLLBACK_ID);
+   tokens_string_da->fullname_str_c                   = get_token_string_by_id(FULLNAME_ID);
+   tokens_string_da->username_str_c                   = get_token_string_by_id(USERNAME_ID);
+   tokens_string_da->parameters_str_c                 = get_token_string_by_id(PARAMETERS_ID);
+   tokens_string_da->update_str_c                     = get_token_string_by_id(UPDATE_ID);
 
 #endif
    return 0;

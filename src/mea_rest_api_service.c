@@ -26,7 +26,7 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
    char json[2048];
 
    if(l_tokens==0) {
-      char buff[40]="";
+      char buff[256]="";
       int l_buff=0;
       const struct mg_request_info *request_info = mg_get_request_info(conn);
 

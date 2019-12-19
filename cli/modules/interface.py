@@ -8,6 +8,8 @@ from lib import display
 from lib.mea_utils import *
 from modules import type
 
+from dateutil.parser import parse
+
 
 interface_states={ "0":0, "1":1, "2":2, "enabled":1, "disabled":0, "delegated":2, "inactive":0, "active":1 }
 device_states={ "0":0, "1":1, "enabled":1, "disabled":0, "inactive":0, "active":1 }
@@ -66,6 +68,20 @@ def get_interfaces(host, port, sessionid):
 
 def get_interface(host, port, sessionid, interface):
    return GetUrl("http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface),sessionid)
+
+
+def rollback_interfaces(host, port, sessionid, timestamp=None):
+   body={}
+   body["action"]='rollback';
+   if timestamp!=None:
+      body["parameters"]={"timestamp":timestamp}
+   return PostUrl("http://"+str(host)+":"+str(port)+"/rest/interface",sessionid,body)
+
+
+def commit_interfaces(host, port, sessionid):
+   body={}
+   body["action"]='commit';
+   return PostUrl("http://"+str(host)+":"+str(port)+"/rest/interface",sessionid,body)
 
 
 def delete_interface(host, port, sessionid, interface):
@@ -224,6 +240,35 @@ def _get(host, port, sessionid, args, _args):
    return True
 
 
+def _commit(host, port, sessionid, args, _args):
+   if args.name==None:
+      code,result=commit_interfaces(host, port, sessionid)
+   else:
+      display.error("too many parameters")
+      return False
+   display.formated(result, args.format)
+   return True
+
+
+def _rollback(host, port, sessionid, args, _args):
+   if args.name==None:
+      code,result=rollback_interfaces(host, port, sessionid)
+   elif len(args.option)==0:
+      date_str=args.name
+      try:
+         _datetime = parse(date_str)
+      except:
+         display.error("bad date format: "+date_str)
+         return False
+      timestamp=_datetime.strftime('%s')
+      code,result=rollback_interfaces(host, port, sessionid, timestamp)
+   else:
+      display.error("too many parameters")
+      return False
+   display.formated(result, args.format)
+   return True
+
+
 def _update(host, port, sessionid, args, _args):
    interface=args.name
    if interface==None:
@@ -349,6 +394,8 @@ actions["get"]=_get
 actions["add"]=_add
 actions["update"]=_update
 actions["delete"]=_delete
+actions["commit"]=_commit
+actions["rollback"]=_rollback
 
 
 cli_epilog='''
@@ -360,7 +407,7 @@ Actions and options:
    update    <interface name>  [type_id:<type_id>] [state:<state>] [dev:<dev>] [parameters:<parameters>] [description:<description>]
    update    <interface name>  device <device name> [type_id:<type_id>] [state:<state>] [parameters:<parameters>] [description:<description>]
    commit
-   rollback
+   rollback [date]
 '''
 
 cli_description='''
@@ -369,9 +416,8 @@ CLI interfaces and devices managment
 
 def parser(args_subparser, parent_parser):
    interface_parser=args_subparser.add_parser('interface', parents=[parent_parser], add_help=False, description=cli_description, epilog=cli_epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
-   interface_parser.add_argument('action', choices=['get', 'add', 'update', 'delete'], help="available actions")
+   interface_parser.add_argument('action', choices=['get', 'add', 'update', 'delete', 'commit', 'rollback'], help="available actions")
    interface_parser.add_argument('name', help="interface name", nargs="?")
-#   interface_parser.add_argument("keyvalue", metavar='key:value', help="<key>/<value> pairs for set", nargs="*")
    interface_parser.add_argument('option', nargs="*", help="options or properties for interface/device action (see below)")
    return interface_parser
 

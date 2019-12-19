@@ -10,6 +10,7 @@
 #include "mea_verbose.h"
 #include "mea_string_utils.h"
 #include "tokens.h"
+#include "tokens_da.h"
 #include "mongoose.h"
 #include "httpServer.h"
 #include "mea_http_utils.h"
@@ -19,7 +20,7 @@
 
 int mea_rest_api_configuration(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
-   const char *meaSessionId=mg_get_header(conn, "Mea-Session");
+   const char *meaSessionId=mg_get_header(conn, MEA_SESSION_STR_C);
    int profile=-1;
    if(checkSession((char *)meaSessionId)!=0) {
       return returnResponse(conn, 401, 99, NOT_AUTHORIZED);

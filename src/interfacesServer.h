@@ -161,4 +161,7 @@ int         updateInterface(char *interface, cJSON *jsonData);
 
 cJSON       *getAvailablePairing_alloc(void);
 cJSON       *setPairingState_alloc(char *interfaceName, int state);
+
+int         interfaceCommit(void);
+
 #endif

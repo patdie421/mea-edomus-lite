@@ -130,7 +130,8 @@ int mea_rest_api_device(struct mg_connection *conn, int method, char *interface,
 int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
    const char *meaSessionId=mg_get_header(conn, MEA_SESSION_STR_C);
-
+   int ret=-1;
+   
    if(checkSession((char *)meaSessionId)!=0) {
       return returnResponse(conn, 401, 99, NOT_AUTHORIZED);
    }
@@ -182,11 +183,29 @@ int mea_rest_api_interface(struct mg_connection *conn, int method, char *tokens[
          if(l_tokens==0) {
             cJSON *jsonData=getData_alloc(conn);
             if(jsonData) {
-               if(addInterface(jsonData)>=0) {
-                  return returnResponseAndDeleteJsonData(conn, 200, 0, NULL, jsonData);
+               cJSON *jsonAction=cJSON_GetObjectItem(jsonData, ACTION_STR_C);
+               if(jsonAction) {
+                  enum token_id_e action=get_token_id_by_string(jsonAction->valuestring);
+                  switch(action) {
+                     case COMMIT_ID:
+                        ret=interfaceCommit();
+                        if(ret==0)
+                           return returnResponseAndDeleteJsonData(conn, 200, 0, NULL, jsonData);
+                        else
+                           return returnResponseAndDeleteJsonData(conn, 400, 1, NULL, jsonData);
+                        break;
+                     case ROLLBACK_ID:
+                        return returnResponseAndDeleteJsonData(conn, 200, 0, NULL, jsonData);
+                        break;
+                     default:
+                        return returnResponseAndDeleteJsonData(conn, 400, 1, "unknown action", jsonData);
+                  }
                }
                else {
-                  return returnResponseAndDeleteJsonData(conn, 404, 1, NULL, jsonData);
+                  if(addInterface(jsonData)>=0)
+                     return returnResponseAndDeleteJsonData(conn, 200, 0, NULL, jsonData);
+                  else
+                     return returnResponseAndDeleteJsonData(conn, 400, 1, NULL, jsonData);
                }
             }
             else {

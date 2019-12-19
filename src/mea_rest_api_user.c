@@ -23,7 +23,7 @@ char *get_users_list_alloc()
    
    cJSON *user=_users2->child;
    while(user) {
-      cJSON_DeleteItemFromObject(user, "password");
+      cJSON_DeleteItemFromObject(user, PASSWORD_STR_C);
       user=user->next;
    }
 
@@ -89,14 +89,14 @@ int _userUpdatePassword(char *user, cJSON *parameters)
       return 3;
    }
 
-   cJSON *password=cJSON_GetObjectItem(_user, "password");
+   cJSON *password=cJSON_GetObjectItem(_user, PASSWORD_STR_C);
    if(password==NULL || password->type!=cJSON_String) {
       return 4;
    }
 
    if(strcmp(password->valuestring, oldpassword->valuestring)==0) {
-      cJSON_DeleteItemFromObject(_user, "password");
-      cJSON_AddStringToObject(_user, "password", newpassword->valuestring);
+      cJSON_DeleteItemFromObject(_user, PASSWORD_STR_C);
+      cJSON_AddStringToObject(_user, PASSWORD_STR_C, newpassword->valuestring);
    }
    else {
       return 5;
@@ -115,9 +115,9 @@ int _userUpdate(char *username, cJSON *jsonData)
    if(!user || user->type!=cJSON_Object)
       return 2;
 
-   cJSON *profile=cJSON_GetObjectItem(jsonData, "profile");
-   cJSON *fullname=cJSON_GetObjectItem(jsonData, "fullname");
-   cJSON *password=cJSON_GetObjectItem(jsonData, "password");
+   cJSON *profile=cJSON_GetObjectItem(jsonData, PROFILE_STR_C);
+   cJSON *fullname=cJSON_GetObjectItem(jsonData, FULLNAME_STR_C);
+   cJSON *password=cJSON_GetObjectItem(jsonData, PASSWORD_STR_C);
 
    if( !profile && !fullname && !password ) {
       return 3;
@@ -125,8 +125,8 @@ int _userUpdate(char *username, cJSON *jsonData)
 
    if(profile) {
       if(profile->type==cJSON_Number) {
-         cJSON_DeleteItemFromObject(user,"profile");
-         cJSON_AddNumberToObject(user,"profile",profile->valuedouble);
+         cJSON_DeleteItemFromObject(user,PROFILE_STR_C);
+         cJSON_AddNumberToObject(user,PROFILE_STR_C,profile->valuedouble);
       }
       else
          return 4;
@@ -134,8 +134,8 @@ int _userUpdate(char *username, cJSON *jsonData)
 
    if(fullname) {
       if(fullname->type==cJSON_String) {
-         cJSON_DeleteItemFromObject(user,"fullname");
-         cJSON_AddStringToObject(user, "fullname", fullname->valuestring);
+         cJSON_DeleteItemFromObject(user,FULLNAME_STR_C);
+         cJSON_AddStringToObject(user, FULLNAME_STR_C, fullname->valuestring);
       }
       else
          return 5;
@@ -143,8 +143,8 @@ int _userUpdate(char *username, cJSON *jsonData)
    
    if(password) {
       if(password->type==cJSON_String) {
-         cJSON_DeleteItemFromObject(user,"password");
-         cJSON_AddStringToObject(user, "password", fullname->valuestring);
+         cJSON_DeleteItemFromObject(user,PASSWORD_STR_C);
+         cJSON_AddStringToObject(user, PASSWORD_STR_C, fullname->valuestring);
       }
       else
          return 6;
@@ -159,7 +159,7 @@ int _userCreate(cJSON *jsonData)
    if(!jsonData || jsonData->type!=cJSON_Object)
       return 1;
 
-   cJSON *username=cJSON_GetObjectItem(jsonData, "username");
+   cJSON *username=cJSON_GetObjectItem(jsonData, USERNAME_STR_C);
    if(!username || username->type!=cJSON_String)
       return 2;
       
@@ -168,29 +168,29 @@ int _userCreate(cJSON *jsonData)
       return 3;
    }
 
-   cJSON *profile=cJSON_GetObjectItem(jsonData, "profile");
+   cJSON *profile=cJSON_GetObjectItem(jsonData, PROFILE_STR_C);
    if(!profile || profile->type!=cJSON_Number)
       return 4;
-   cJSON *fullname=cJSON_GetObjectItem(jsonData, "fullname");
+   cJSON *fullname=cJSON_GetObjectItem(jsonData, FULLNAME_STR_C);
    if(fullname && fullname->type!=cJSON_String)
       return 5;
-   cJSON *password=cJSON_GetObjectItem(jsonData, "password");
+   cJSON *password=cJSON_GetObjectItem(jsonData, PASSWORD_STR_C);
    if(!password || password->type!=cJSON_String)
       return 6;
       
    user=cJSON_CreateObject();
-   cJSON_AddItemToObject(user, "profile", cJSON_CreateNumber(profile->valuedouble));
-   cJSON_AddItemToObject(user, "fullname", cJSON_CreateString(fullname->valuestring));
-   cJSON_AddItemToObject(user, "password", cJSON_CreateString(password->valuestring));
+   cJSON_AddItemToObject(user, PROFILE_STR_C,  cJSON_CreateNumber(profile->valuedouble));
+   cJSON_AddItemToObject(user, FULLNAME_STR_C, cJSON_CreateString(fullname->valuestring));
+   cJSON_AddItemToObject(user, PASSWORD_STR_C, cJSON_CreateString(password->valuestring));
    cJSON_AddItemToObject(users2, username->valuestring, user);
    
    return 0;
 }
 
-
+/*
 cJSON *getJsonDataAction(struct mg_connection *conn, cJSON *jsonData)
 {
-   cJSON *action=cJSON_GetObjectItem(jsonData,"action");
+   cJSON *action=cJSON_GetObjectItem(jsonData, ACTION_STR_C);
    if(!action) {
       returnResponseAndDeleteJsonData(conn, 400, 1, "no action", jsonData);
       return NULL;
@@ -206,10 +206,10 @@ cJSON *getJsonDataAction(struct mg_connection *conn, cJSON *jsonData)
 
 cJSON *getJsonDataParameters(struct mg_connection *conn, cJSON *jsonData)
 {
-   cJSON *parameters=cJSON_GetObjectItem(jsonData, "parameters");
+   cJSON *parameters=cJSON_GetObjectItem(jsonData, PARAMETERS_STR_C);
    
    if(!parameters) {
-      returnResponseAndDeleteJsonData(conn, 400, 1, "no parameters", jsonData);
+      returnResponseAndDeleteJsonData(conn, 400, 1, "no parameter", jsonData);
       return NULL;
    }
    if(parameters->type!=cJSON_Object) {
@@ -218,7 +218,7 @@ cJSON *getJsonDataParameters(struct mg_connection *conn, cJSON *jsonData)
    }
    return parameters;
 }
-
+*/
 
 int mea_rest_api_user_GET(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
@@ -232,7 +232,7 @@ int mea_rest_api_user_GET(struct mg_connection *conn, int method, char *tokens[]
       cJSON *jsonUser=cJSON_GetObjectItem(users2, tokens[0]);
       if(jsonUser) {
          cJSON *_jsonUser=cJSON_Duplicate(jsonUser, 1);
-         cJSON_DeleteItemFromObject(_jsonUser,"password");
+         cJSON_DeleteItemFromObject(_jsonUser,PASSWORD_STR_C);
          char *s=cJSON_Print(_jsonUser);
          httpResponse(conn, 200, NULL, s);
          free(s);
@@ -324,7 +324,7 @@ int mea_rest_api_user_POST(struct mg_connection *conn, int method, char *tokens[
 
 int mea_rest_api_user_PUT(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
-   const char *meaSessionId=mg_get_header(conn, "Mea-Session");
+   const char *meaSessionId=mg_get_header(conn, MEA_SESSION_STR_C);
    cJSON *action=NULL;
    cJSON *parameters=NULL;
    
@@ -358,7 +358,7 @@ int mea_rest_api_user_PUT(struct mg_connection *conn, int method, char *tokens[]
    }
 
    if(l_tokens==0) {
-      if(mea_strcmplower(action->valuestring, "password")==0) {
+      if(mea_strcmplower(action->valuestring, PASSWORD_STR_C)==0) {
          int ret=_userUpdatePassword(user, parameters);
          free(user);
          if(ret==0) {
@@ -374,7 +374,7 @@ int mea_rest_api_user_PUT(struct mg_connection *conn, int method, char *tokens[]
    }
    else if(l_tokens==1) {
       if(profile>0) {
-         if(mea_strcmplower(action->valuestring, "update")==0) {
+         if(mea_strcmplower(action->valuestring, UPDATE_STR_C)==0) {
             int ret=_userUpdate(tokens[0], parameters);
             if(ret==0) {
                return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
@@ -426,7 +426,7 @@ int mea_rest_api_user_DELETE(struct mg_connection *conn, int method, char *token
 
 int mea_rest_api_user(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
-   const char *meaSessionId=mg_get_header(conn, "Mea-Session");
+   const char *meaSessionId=mg_get_header(conn, MEA_SESSION_STR_C);
 
    if(checkSession((char *)meaSessionId)!=0) {
       return returnResponse(conn, 401, 99, NOT_AUTHORIZED);

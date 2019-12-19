@@ -1168,11 +1168,74 @@ int resyncDevices(cJSON *jsonInterfaces, char *file)
    return 0;
 }
 
- 
-int jsonInterfacesSave()
-{
-   // TODO:
+/*
+ char jsonInterfacesFile[1024];
+ snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", meapath);
+ jsonInterfaces=jsonInterfacesLoad(jsonInterfacesFile);
+ if(!jsonInterfaces) {
+    VERBOSE(1) {
+       mea_log_printf("%s (%s) : can't load interfaces descriptions from %s\n",ERROR_STR,__func__,jsonInterfacesFile);
+    }
+    return -1;
+ }
+ createDevicesIndex(&devices_index, jsonInterfaces);
+ createDevsIndex(&devs_index, jsonInterfaces);
+ */
 
+
+int interfaceCommit()
+{
+   char jsonInterfacesFile[1024]="";
+   snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", appParameters_get("MEAPATH", NULL));
+   cJSON *_jsonInterfaces = NULL;
+   
+   if(backupJson(jsonInterfacesFile)==0) {
+      pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
+      pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
+
+      _jsonInterfaces=cJSON_Duplicate(jsonInterfaces, 1);
+      
+      pthread_rwlock_unlock(&jsonInterfaces_rwlock);
+      pthread_cleanup_pop(0);
+
+      int ret=writeJson(jsonInterfacesFile, _jsonInterfaces);
+      cJSON_Delete(_jsonInterfaces);
+
+      if(ret==0)
+         return 0;
+      else
+         return 3;
+   }
+   else {
+      return 2;
+   }
+}
+
+
+int interfaceRollback()
+{
+   char *interfaceFileName="";
+   
+   if(interfaceFileName==NULL) {
+      return 1;
+   }
+
+//   cJSON_Delete(jsonInterfaces);
+//   jsonInterfaces=loadJson_alloc(interfaceFileName);
+/*
+    Charger fichier dans JSON temporaire
+    boucle sur JSON
+       pour chaque interface
+          chercher si l'interface existe actuellement
+             OUI: comparer les propriétés (sauf device)
+                si différence
+                   interface_delete
+                   interface_add avec toutes les données de l'interface
+                si égale:
+                   traiter les devices ...
+             NON: ajouter l'interface
+      suprimer les interfaces qui ne se trouve pas dans le JSON temporaire
+ */
    return 0;
 }
 

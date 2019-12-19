@@ -57,7 +57,7 @@ int mea_rest_api_pairing_POST(struct mg_connection *conn, int method, char *toke
    if(l_tokens==1) {
       jsonData=getData_alloc(conn);
       if(jsonData && jsonData->type==cJSON_Object) {
-         cJSON *state=cJSON_GetObjectItem(jsonData,"state");
+         cJSON *state=cJSON_GetObjectItem(jsonData,STATE_STR_C);
          if(state) {
             if(state->type==cJSON_Number) {
                int v=0;
@@ -128,7 +128,7 @@ int mea_rest_api_pairing_DELETE(struct mg_connection *conn, int method, char *to
 
 int mea_rest_api_pairing(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
-   const char *meaSessionId=mg_get_header(conn, "Mea-Session");
+   const char *meaSessionId=mg_get_header(conn, MEA_SESSION_STR_C);
 
    if(checkSession((char *)meaSessionId)!=0) {
       return returnResponse(conn, 401, 99, NOT_AUTHORIZED);

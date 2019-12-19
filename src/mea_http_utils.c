@@ -3,6 +3,8 @@
 #include "mea_http_utils.h"
 
 #include "cJSON.h"
+#include "tokens.h"
+#include "tokens_da.h"
 #include "mongoose.h"
 #include "httpServer.h"
 
@@ -27,6 +29,37 @@ cJSON *getData_alloc(struct mg_connection *conn)
    return json;
 }
 
+
+cJSON *getJsonDataAction(struct mg_connection *conn, cJSON *jsonData)
+{
+   cJSON *action=cJSON_GetObjectItem(jsonData, ACTION_STR_C);
+   if(!action) {
+      returnResponseAndDeleteJsonData(conn, 400, 1, "no action", jsonData);
+      return NULL;
+   }
+   if(!(action->type==cJSON_String)) {
+      returnResponseAndDeleteJsonData(conn, 400, 1, "action not a string", jsonData);
+      return NULL;
+   }
+   
+   return action;
+}
+
+
+cJSON *getJsonDataParameters(struct mg_connection *conn, cJSON *jsonData)
+{
+   cJSON *parameters=cJSON_GetObjectItem(jsonData, PARAMETERS_STR_C);
+   
+   if(!parameters) {
+      returnResponseAndDeleteJsonData(conn, 400, 1, "no parameter", jsonData);
+      return NULL;
+   }
+   if(parameters->type!=cJSON_Object) {
+      returnResponseAndDeleteJsonData(conn, 400, 1, "parameters not an object", jsonData);
+      return NULL;
+   }
+   return parameters;
+}
 
 int returnResponseAndDeleteJsonData(struct mg_connection *conn, int httperr, int errnum, char *msg, cJSON *jsonData)
 {

@@ -99,6 +99,10 @@ struct tokens_strings_da_s
    char *create_str_c;
    char *commit_str_c;
    char *rollback_str_c;
+   char *fullname_str_c;
+   char *username_str_c;
+   char *parameters_str_c;
+   char *update_str_c;
 };
 
 extern struct tokens_strings_da_s *tokens_string_da;
@@ -185,6 +189,10 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define CREATE_STR_C                     tokens_string_da->create_str_c
 #define COMMIT_STR_C                     tokens_string_da->commit_str_c
 #define ROLLBACK_STR_C                   tokens_string_da->rollback_str_c
+#define FULLNAME_STR_C                   tokens_string_da->fullname_str_c
+#define USERNAME_STR_C                   tokens_string_da->username_str_c
+#define PARAMETERS_STR_C                 tokens_string_da->parameters_str_c
+#define UPDATE_STR_C                     tokens_string_da->update_str_c
 
 #else
 
@@ -270,6 +278,10 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define CREATE_STR_C                     get_token_string_by_id(CREATE_ID)
 #define COMMIT_STR_C                     get_token_string_by_id(COMMIT_ID)
 #define ROLLBACK_STR_C                   get_token_string_by_id(ROLLBACK_ID)
+#define FULLNAME_STR_C                   get_token_string_by_id(FULLNAME_ID)
+#define USERNAME_STR_C                   get_token_string_by_id(USERNAME_ID)
+#define PARAMETERS_STR_C                 get_token_string_by_id(PARAMETERS_ID)
+#define UPDATE_STR_C                     get_token_string_by_id(UPDATE_ID)
 
 #endif
 
