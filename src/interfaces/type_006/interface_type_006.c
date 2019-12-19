@@ -348,10 +348,15 @@ void *_thread_interface_type_006_genericserial_data_cleanup(void *args)
 int init_interface_type_006_data_preprocessor(interface_type_006_t *i006, char *plugin_name, char *plugin_parameters)
 {
    int ret = -1;
-
+   PyObject *pName = NULL;
    mea_python_lock();
       
-   PyObject *pName = PYSTRING_FROMSTRING(plugin_name);
+//   PyObject *pName = PYSTRING_FROMSTRING(plugin_name);
+#if PY_MAJOR_VERSION >= 3
+   pName = PyUnicode_DecodeFSDefault(plugin_name);
+#else
+   pName = PYSTRING_FROMSTRING(plugin_name);
+#endif
    if(!pName) {
       ret=-1;
       goto init_interface_type_006_data_preprocessor_clean_exit;

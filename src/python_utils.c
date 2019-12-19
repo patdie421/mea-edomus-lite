@@ -218,7 +218,12 @@ int mea_call_python_function(char *plugin_name, char *plugin_func, PyObject *plu
    PyObject *pName = NULL, *pModule = NULL;
    int retour=-1;
 
+//   pName = PYSTRING_FROMSTRING(plugin_name);
+#if PY_MAJOR_VERSION >= 3
+   pName = PyUnicode_DecodeFSDefault(plugin_name);
+#else
    pName = PYSTRING_FROMSTRING(plugin_name);
+#endif
    if(!pName) {
       return -1;
    }
@@ -241,6 +246,7 @@ cJSON *mea_call_python_function_json_alloc(char *module_name, char *function_nam
 {
    cJSON *r=NULL;
    PyObject *p=NULL;
+   PyObject *pModuleName=NULL;
 
    if(j==NULL) {
       p=Py_None;
@@ -253,7 +259,13 @@ cJSON *mea_call_python_function_json_alloc(char *module_name, char *function_nam
       }
    }
    
-   PyObject *pModuleName = PYSTRING_FROMSTRING(module_name);
+//   PyObject *pModuleName = PYSTRING_FROMSTRING(module_name);
+#if PY_MAJOR_VERSION >= 3
+   pModuleName = PyUnicode_DecodeFSDefault(module_name);
+#else
+   pModuleName = PYSTRING_FROMSTRING(module_name);
+#endif
+
    if(!pModuleName) {
       if(p) {
          Py_DECREF(p);
@@ -521,8 +533,8 @@ PyObject *mea_xplMsgToPyDict2(cJSON *xplMsgJson)
    cJSON *e=xplMsgJson->child; 
    while(e) {
       if(e->string) {
-         if(strcmp(e->string, XPLSOURCE_STR_C)==0 ||
-            strcmp(e->string, XPLTARGET_STR_C)==0 ||
+         if(strcmp(e->string, XPLSOURCE_STR_C)==0  ||
+            strcmp(e->string, XPLTARGET_STR_C)==0  ||
             strcmp(e->string, XPLMSGTYPE_STR_C)==0 ||
             strcmp(e->string, XPLSCHEMA_STR_C)==0) {
             s=PYSTRING_FROMSTRING(e->valuestring);
