@@ -382,12 +382,12 @@ int main(int argc, const char * argv[])
    // stdout et stderr vers fichier log
    //
    char log_file[1024];
-   int16_t n;
 
    if(!appParameters_get("LOGPATH",NULL) || !strlen(appParameters_get("LOGPATH",NULL))) {
       appParameters_set("LOGPATH","/var/log",NULL);
    }
 /*
+   int16_t n;
    n=snprintf(log_file,sizeof(log_file),"%s/mea-edomus.log", appParameters_get("LOGPATH",NULL));
    if(n<0 || n==sizeof(log_file)) {
       VERBOSE(1) {

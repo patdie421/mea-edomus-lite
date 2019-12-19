@@ -3,7 +3,12 @@
 #include <unistd.h>
 #include <inttypes.h>
 #include <string.h>
-#include <netinet/tcp.h>
+#include <sys/time.h>
+#include <sys/select.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <termios.h>
 
 #include "mea_http_utils.h"
 #include "mea_sockets_utils.h"

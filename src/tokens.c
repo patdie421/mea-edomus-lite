@@ -404,10 +404,9 @@ void init_tokens()
          return;
       }
       mea_strtolower(s->str);
-      l=strlen(s->str);
+      l=(int)strlen(s->str);
       if(l>_token_max_string_size)
          _token_max_string_size=l;
-      _token_max_string_size;
       HASH_ADD_KEYPTR( hh_token_by_string, tokens_hash_by_string, s->str, strlen(s->str), s );
       HASH_ADD_KEYPTR( hh_token_by_id, tokens_hash_by_id, &(s->token->id), sizeof(s->token->id), s );
    }

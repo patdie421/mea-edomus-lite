@@ -32,7 +32,7 @@
 
 #include "cJSON.h"
 #include "mea_json_utils.h"
-
+#include "mea_file_utils.h"
 #include "uthash.h"
 
 #include "processManager.h"
@@ -1282,7 +1282,7 @@ int interfaceCommit()
    snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", appParameters_get("MEAPATH", NULL));
    cJSON *_jsonInterfaces = NULL;
    
-   if(backupJson(jsonInterfacesFile)==0) {
+   if(mea_filebackup(jsonInterfacesFile)==0) {
       pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
       pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
 

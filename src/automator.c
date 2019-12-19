@@ -322,12 +322,12 @@ static int value_setFromStr(struct value_s *v, char *str)
    return _value_setFromStr(v, str, 0);
 }
 
-
+/*
 static int value_setFromStrTrim(struct value_s *v, char *str)
 {
    return _value_setFromStr(v, str, 1);
 }
-
+*/
 
 enum conversion_e { INT=0x01, FLOAT=0x02, HIGHLOW=0x04, TRUEFALSE=0x08, DEFAULT=0x00 };
 

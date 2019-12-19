@@ -16,4 +16,5 @@ dependencies: \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_verbose.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_string_utils.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_json_utils.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_file_utils.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/users.h

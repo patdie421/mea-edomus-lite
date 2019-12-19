@@ -847,12 +847,7 @@ int start_xPLServer(int my_id, void *data, char *errmsg, int l_errmsg)
       _xPLServer_thread_id=xPLServer();
 
       if(_xPLServer_thread_id==NULL) {
-#if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
-         int ret;
-#else
-         char *ret;
-#endif
-         ret=strerror_r(errno, err_str, sizeof(err_str));
+         strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(1) {
             mea_log_printf("%s (%s) : can't start xpl server - %s\n",ERROR_STR,__func__,err_str);
          }
