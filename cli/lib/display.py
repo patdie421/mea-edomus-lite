@@ -18,10 +18,10 @@ def error(msg, errtype=None, errno=None):
 
 def formated(result, f):
    if f=="json":
-      print json.dumps(result, indent=3)
+      print(json.dumps(result, indent=3))
 
    elif format=="text":
-      print result
+      print(result)
 
    else:
-      print json.dumps(result)
+      print(json.dumps(result))

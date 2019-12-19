@@ -1,7 +1,5 @@
 import base64
 import json
-import pprint
-import urllib2
 from lib import http
 
 def check(host, port, sessionid):

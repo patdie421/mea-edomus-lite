@@ -5,6 +5,7 @@
 #include <Comio2.h>
 #include <Pulses.h>
 
+// #define COUNTERS_SIMULATOR 1
 
 // utilisation des ports (ARDUINO UNO) Dans ce sketch
 /* PORTD
@@ -199,7 +200,7 @@ int myReadFn()
 
 /*
  * Les gestionnaires d'interruptions :
- * Pour le traitement des interruptions, la ressource Ã  Ã©conomiser est le "temps". On fait donc en sorte de prendre le moins possible
+ * Pour le traitement des interruptions, la ressource à économiser est le "temps". On fait donc en sorte de prendre le moins possible
  * de cycle CPU. Pour cela, on limite le nombre d'instructions et surtout les appels de fonctions. Il y a donc 2 gestionnaires d'
  * interruptions presque identiques (seul les variables changes) et volontairement nous ne cherchons pas Ã  factoriser pour Ã©viter de
  * rajouter des cycles (sauvegarde contexte, mise en pile des variables, ... typique des appels de fonctions nÃ©cessaire Ã  cette factorisation).
@@ -210,18 +211,18 @@ int myReadFn()
 //
 
 // COMPTEUR0
-#define COUNTER_PIN0 2 // le compteur 0 est sur l'entrÃ©e 2
+#define COUNTER_PIN0 2 // le compteur 0 est sur l'entrée 2
 volatile unsigned long counter0; // compteur du nombre d'impulsion
-volatile unsigned long prev_chrono0; // derniÃ¨re prise de chrono
-volatile unsigned char prev_state_pin0; // Ã©tat prÃ©cÃ©dent de l'entrÃ©e 2
+volatile unsigned long prev_chrono0; // dernière prise de chrono
+volatile unsigned char prev_state_pin0; // état précédent de l'entrée 2
 volatile unsigned char counter_flag0;
 
 void counter0_inter()
 {
-  char pin_state = PIND & (1 << COUNTER_PIN0); // avant tout, lecture de l'Ã©tat de l'entrÃ©e sans digitalRead qui prend trop de temps
-  unsigned long chrono=millis(); // maintenant qu'on connait l'Ã©tat de l'entrÃ©e on peut prendre le "temps" de lire le temps actuel en millisecondes
+  char pin_state = PIND & (1 << COUNTER_PIN0); // avant tout, lecture de l'état de l'entrée sans digitalRead qui prend trop de temps
+  unsigned long chrono=millis(); // maintenant qu'on connait l'état de l'entrée on peut prendre le "temps" de lire le temps actuel en millisecondes
 
-    if(pin_state > prev_state_pin0) // detection d'un front montant
+  if(pin_state > prev_state_pin0) // detection d'un front montant
   {
     prev_chrono0=chrono; // on prend le chrono
   }
@@ -240,18 +241,18 @@ void counter0_inter()
 }
 
 // COMPTEUR1
-#define COUNTER_PIN1 3 // le compteur 1 est sur l'entrÃ©e 3
+#define COUNTER_PIN1 3 // le compteur 1 est sur l'entrée 3
 volatile unsigned long counter1; // compteur du nombre d'impulsion
-volatile unsigned long prev_chrono1; // derniÃ¨re prise de chrono
-volatile unsigned char prev_state_pin1; // etat prÃ©cÃ©dente de l'entrÃ©e 3
+volatile unsigned long prev_chrono1; // dernière prise de chrono
+volatile unsigned char prev_state_pin1; // etat précédente de l'entrée 3
 volatile unsigned char counter_flag1;
 
 void counter1_inter()
 {
-  char pin_state = PIND & (1 << COUNTER_PIN1); // avant tout, lecture de l'Ã©tat de l'entrÃ©e sans digitalRead qui prend trop de temps
-  unsigned long chrono=millis(); // maintenant qu'on connait l'Ã©tat de l'entrÃ©e on peut prendre le "temps" de lire le temps actuel en millisecondes
+  char pin_state = PIND & (1 << COUNTER_PIN1); // avant tout, lecture de l'état de l'entrée sans digitalRead qui prend trop de temps
+  unsigned long chrono=millis(); // maintenant qu'on connait l'état de l'entrée on peut prendre le "temps" de lire le temps actuel en millisecondes
 
-    if(pin_state > prev_state_pin1) // detection d'un front montant
+  if(pin_state > prev_state_pin1) // detection d'un front montant
   {
     prev_chrono1=chrono; // on prend le chrono
   }
@@ -262,7 +263,7 @@ void counter1_inter()
       counter1++;
       counter_flag1=1;
     }
-    // si le temps entre les deux fronts n'est pas suffisant, on considÃ¨re que c'est du bruit.
+    // si le temps entre les deux fronts n'est pas suffisant, on considère que c'est du bruit.
     // et on ne fait rien
   }
   // si pin_state == prev_state_pin0 on ne fait rien, mais cela ne devrait jamais arriver ...
@@ -274,6 +275,54 @@ void counter1_inter()
 /******************************************************************************************/
 /* Gestion des compteurs E(R)DF                                                           */
 /******************************************************************************************/
+#ifdef COUNTERS_SIMULATOR
+
+unsigned long simulation_counter0=1000
+unsigned long simulation_counter1=100
+
+void process_simulator()
+{
+  long c=random(100)
+  if(c<10 && !counter_flag0) {
+     counter_flag0=1;
+     simulation_counter0++;
+  }
+  long c=random(100)
+  if(c<5 && !counter_flag1) {
+     counter_flag1=1;
+     simulation_counter1++;
+  }
+}
+
+
+void read_counters()
+{
+  long_to_array(simulation_counter0 / 1000, (unsigned char *)&(comio_mem[vars[0].addr]));
+  long_to_array(simulation_counter1 / 1000, (unsigned char *)&(comio_mem[vars[1].addr]));
+}
+
+void process_counters()
+{
+  unsigned char flag;
+
+  process_simulator();
+
+  // récupération des valeurs du comptage d'impulsions "LED" des compteurs et émission de trap
+  flag=counter_flag0;
+  counter_flag0=0;
+  if(flag)
+     comio2.sendTrap(CNTR0_TRAP, NULL, 0);
+
+  flag=counter_flag1;
+  counter_flag1=0;
+  if(flag)
+     comio2.sendTrap(CNTR1_TRAP, NULL, 0);
+
+  read_counters();
+}
+
+#else
+
 void read_counters()
 {
   static unsigned long chrono = 0;
@@ -321,18 +370,20 @@ void process_counters()
   counter_flag0=0; // quelque soit la valeur on remet à 0. Ca coute moins cher en CPU que de faire un test et en fonction de mettre à 0.
   ENABLE_INT0_D2;
   if(flag) // une interruption pour le compteur 0
-  comio2.sendTrap(CNTR0_TRAP, NULL, 0); // Emission d'un TRAP pour un traitement "temps rÃ©el" Ã©ventuel par le PC
+     comio2.sendTrap(CNTR0_TRAP, NULL, 0); // Emission d'un TRAP pour un traitement "temps réel" éventuel par le PC
 
   DISABLE_INT1_D3;
   flag=counter_flag1; // on récupère le flag
   counter_flag1=0; // quelque soit la valeur on remet à 0. Ca coute moins cher en CPU que de faire un test et en fonction de mettre à 0.
   ENABLE_INT1_D3;
   if(flag) // une interruption pour le compteur 1
-  comio2.sendTrap(CNTR1_TRAP, NULL, 0);
+     comio2.sendTrap(CNTR1_TRAP, NULL, 0);
 
   // lecture des info du compteur ERDF
   read_counters();
 }
+
+#endif
 
 
 /******************************************************************************************/
@@ -616,4 +667,3 @@ void loop()
   process_tmp36();
   process_digital_in_change_dectection();
 }
-

@@ -1,0 +1,163 @@
+{
+   "inputs":[
+      {
+         "name": "STARTUP",
+         "value": "$startup[]",
+         "num": 1,
+         "file": 0,
+         "line": 1
+      },
+      {
+         "name": "NOW",
+         "value": "$now[]",
+         "num": 2,
+         "file": 0,
+         "line": 2
+      },
+      {
+         "name": "FILTRE1",
+         "value": "<NOVAL>",
+         "num": 4,
+         "file": 0,
+         "line": 4,
+         "conditions":[
+            {"value1": "$xplmsgdata[]", "value2":"&false", "op":"=="}
+         ],
+         "onmatch": "moveforward NEXT"
+      },
+      {
+         "name": "FILTRE2",
+         "value": "<NOVAL>",
+         "num": 6,
+         "file": 0,
+         "line": 5,
+         "conditions":[
+            {"value1": "schema", "value2":"'hbeat.app'", "op":"=="}
+         ],
+         "onmatch": "break"
+      },
+      {
+         "name": "FILTRE3",
+         "value": "<NOVAL>",
+         "num": 8,
+         "file": 0,
+         "line": 6,
+         "conditions":[
+            {"value1": "schema", "value2":"'watchdog.basic'", "op":"=="}
+         ],
+         "onmatch": "break"
+      },
+      {
+         "name": "FILTRE4",
+         "value": "<NOVAL>",
+         "num": 10,
+         "file": 0,
+         "line": 7,
+         "conditions":[
+            {"value1": "schema", "value2":"'sensor.request'", "op":"=="}
+         ],
+         "onmatch": "break"
+      },
+      {
+         "name": "I1",
+         "value": "current",
+         "num": 11,
+         "file": 0,
+         "line": 9,
+         "conditions":[
+            {"value1": "device", "value2":"'I010S001'", "op":"=="}
+         ],
+         "onmatch": "moveforward NEXT"
+      },
+      {
+         "name": "NEXT",
+         "value": "<LABEL>",
+         "num": 13,
+         "file": 0,
+         "line": 11
+      },
+      {
+         "name": "O1",
+         "value": "&true",
+         "num": 14,
+         "file": 0,
+         "line": 12,
+         "conditions":[
+            {"value1": "{I1}", "value2":"#12", "op":">"}
+         ]
+      },
+      {
+         "name": "O1",
+         "value": "&false",
+         "num": 15,
+         "file": 0,
+         "line": 13,
+         "conditions":[
+            {"value1": "{I1}", "value2":"#8", "op":"<"}
+         ]
+      },
+      {
+         "name": "TIMER1",
+         "value": "$timer['timer1']",
+         "num": 16,
+         "file": 0,
+         "line": 14
+      }
+   ],
+   "outputs":[
+      {
+         "name": "T1",
+         "file": 0,
+         "line": 17,
+         "action": "timerCtrl",
+         "parameters": {
+            "command": "'start'",
+            "name": "'timer1'",
+            "unit": "'msec'",
+            "value": "#5000"
+         },
+         "condition": { "STARTUP": 1 }
+      },
+      {
+         "name": "T1",
+         "file": 0,
+         "line": 18,
+         "action": "timerCtrl",
+         "parameters": {
+            "command": "'start'",
+            "name": "'timer1'",
+            "unit": "'msec'",
+            "value": "#5000"
+         },
+         "condition": { "TIMER1": 1 }
+      },
+      {
+         "name": "A0",
+         "file": 0,
+         "line": 20,
+         "action": "xPLSend",
+         "parameters": {
+            "device": "'I010S001'",
+            "schema": "'sensor.request'",
+            "request": "'current'"
+         },
+         "condition": { "TIMER1": 1 }
+      },
+      {
+         "name": "A1",
+         "file": 0,
+         "line": 21,
+         "action": "xPLSend",
+         "parameters": {
+            "device": "'I010A001'",
+            "schema": "'control.basic'",
+            "current": "{O1}",
+            "type": "'output'"
+         },
+         "condition": { "O1": 3 }
+      }
+   ],
+   "files":[
+      "demo.srules"
+   ]
+}

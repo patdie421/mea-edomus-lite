@@ -1,0 +1,22 @@
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "homebridge": "^0.4.50",
+    "homebridge-http-humidity-sensor": "^1.0.5",
+    "homebridge-http-lightbulb": "^1.1.6",
+    "homebridge-http-notification-server": "^1.0.7",
+    "homebridge-http-outlet": "^1.0.5",
+    "homebridge-http-switch": "^0.5.26",
+    "homebridge-http-temperature-sensor": "^1.0.6",
+    "homebridge-notification": "^1.0.0"
+  }
+}

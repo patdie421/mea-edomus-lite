@@ -17,6 +17,10 @@
 #include "cJSON.h"
 #include "uthash.h"
 
+#define TYPEOFTYPE_INPUT      0
+#define TYPEOFTYPE_OUTPUT     1
+#define TYPEOFTYPE_INTERFACE 10
+
 #define INTERFACE_TYPE_001 100
 #define INTERFACE_TYPE_002 200
 #define INTERFACE_TYPE_003 300

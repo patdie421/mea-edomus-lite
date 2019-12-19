@@ -1,0 +1,21 @@
+STARTUP     is: $startup[]
+NOW         is: $now[]
+
+FILTRE1     is: <NOVAL>   if: ($xplmsgdata[] == &false)    onmatch: moveforward NEXT
+FILTRE2     is: <NOVAL>   if: (schema == 'hbeat.app')      onmatch: break
+FILTRE3     is: <NOVAL>   if: (schema == 'watchdog.basic') onmatch: break
+FILTRE4     is: <NOVAL>   if: (schema == 'sensor.request') onmatch: break
+
+I1          is: current if: (device == 'I010S001') onmatch: moveforward NEXT
+
+NEXT is: <LABEL>
+O1 is: &true  if: ({I1} > #12)
+O1 is: &false if: ({I1} < #8)
+TIMER1 is: $timer['timer1']
+
+** Timer1 : declenché toutes les 5 secondes
+T1 do: timerCtrl with: (command = 'start', name = 'timer1', unit = 'msec', value=#5000) when: STARTUP   rise
+T1 do: timerCtrl with: (command = 'start', name = 'timer1', unit = 'msec', value=#5000) when: TIMER1    rise
+
+A0 do: xPLSend  with: ( device = 'I010S001',  schema = 'sensor.request', request='current' ) when: TIMER1 rise
+A1 do: xPLSend  with: ( device = 'I010A001',  schema = 'control.basic', current={O1}, type='output' ) when: O1 change

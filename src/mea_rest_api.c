@@ -5,6 +5,14 @@
 #include <ctype.h>
 
 #include "cJSON.h"
+#include "mea_verbose.h"
+#include "mea_string_utils.h"
+#include "tokens.h"
+#include "tokens_da.h"
+#include "mongoose.h"
+#include "httpServer.h"
+#include "mea_http_utils.h"
+
 #include "mea_rest_api.h"
 #include "mea_rest_api_session.h"
 #include "mea_rest_api_pairing.h"
@@ -14,13 +22,6 @@
 #include "mea_rest_api_interface.h"
 #include "mea_rest_api_type.h"
 
-#include "mea_verbose.h"
-#include "mea_string_utils.h"
-#include "tokens.h"
-#include "tokens_da.h"
-#include "mongoose.h"
-#include "httpServer.h"
-#include "mea_http_utils.h"
 
 
 // #include "configuration.h"

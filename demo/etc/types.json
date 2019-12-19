@@ -1,0 +1,37 @@
+{
+   "TYP010": {
+      "id_type":3010,
+      "description":"",
+      "parameters":"[interface_type_010.idrv]",
+      "flag":0,
+      "typeoftype":10
+   },
+   "TYP003": {
+      "id_type":300,
+      "description":"",
+      "parameters":"",
+      "flag":0,
+      "typeoftype":10
+   },
+   "TYP002": {
+      "id_type":200,
+      "description":"",
+      "parameters":"",
+      "flag":0,
+      "typeoftype":10
+   },
+   "INPUT": {
+      "id_type":0,
+      "description":"",
+      "parameters":"",
+      "flag":0,
+      "typeoftype":0
+   },
+   "OUTPUT": {
+      "id_type":1,
+      "description":"",
+      "parameters":"",
+      "flag":0,
+      "typeoftype":1
+   }
+}

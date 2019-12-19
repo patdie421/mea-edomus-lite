@@ -14,6 +14,7 @@
 #include "mea_verbose.h"
 #include "mea_string_utils.h"
 #include "mea_json_utils.h"
+#include "mea_file_utils.h"
 #include "users.h"
 
 
@@ -42,7 +43,7 @@ int _usersCommit()
       return 1;
    }
    
-   if(backupJson(usersFileName)==0) {
+   if(mea_filebackup(usersFileName)==0) {
       if(writeJson(usersFileName, users2)==0) {
          return 0;
       }

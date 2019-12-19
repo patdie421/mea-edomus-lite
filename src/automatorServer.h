@@ -35,21 +35,19 @@ extern long automator_xplout_indicator;
 extern int _automatorServer_monitoring_id;
 extern pthread_t *_automatorServer_thread_id;
 
-struct automatorServer_start_stop_params_s
-{
+
+struct automatorServer_start_stop_params_s {
    cJSON *params_list;
 };
 
 
-typedef struct automator_msg_s
-{
+typedef struct automator_msg_s {
    int type;
    cJSON *msg_json;
 } automator_msg_t;
 
 
-typedef struct automator_queue_elem_s
-{
+typedef struct automator_queue_elem_s {
 } automator_queue_elem_t;
 
 
@@ -63,6 +61,5 @@ char       *getAutomatorRulesFile(void);
 int         start_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg);
 int         stop_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg);
 int         restart_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg);
-
 
 #endif

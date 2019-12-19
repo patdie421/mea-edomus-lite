@@ -1,0 +1,167 @@
+** STARTUP  is: &false at startup
+
+STARTUP     is: $startup[]
+NOW         is: $now[]
+
+FILTRE1     is: <NOVAL>   if: ($xplmsgdata[] == &false)    onmatch: moveforward NEXT
+FILTRE2     is: <NOVAL>   if: (schema == 'hbeat.app')      onmatch: break
+FILTRE3     is: <NOVAL>   if: (schema == 'watchdog.basic') onmatch: break
+FILTRE4     is: <NOVAL>   if: (schema == 'sensor.request') onmatch: break
+
+** Compteurs électrique
+CONSO       is: current if: (device == 'conso', type == 'power' ) onmatch: moveforward NEXT
+ECONSO      is: current if: (device == 'conso', type == 'energy') onmatch: moveforward NEXT
+PROD        is: current if: (device == 'prod',  type == 'power' ) onmatch: moveforward NEXT
+EPROD       is: current if: (device == 'prod',  type == 'energy') onmatch: moveforward NEXT
+** température tableau
+TEMP01      is: current if: (device == 'temp01')      onmatch: moveforward NEXT
+
+** Capteurs xbee
+XPILE01     is: current if: (device == 'xpile01')     onmatch: moveforward NEXT
+XPILE02     is: current if: (device == 'xpile02')     onmatch: moveforward NEXT
+XTEMP01     is: current if: (device == 'xtemp01')     onmatch: moveforward NEXT
+XTEMP02     is: current if: (device == 'xtemp02')     onmatch: moveforward NEXT
+XHUMI01     is: current if: (device == 'xhumi01')     onmatch: moveforward NEXT
+XHUMI02     is: current if: (device == 'xhumi02')     onmatch: moveforward NEXT
+
+** Netatmo (capteurs)
+** Thermostat
+TEMP005     is: current if: (device == 'temp005')     onmatch: moveforward NEXT
+BRULEUR005  is: current if: (device == 'bruleur005')  onmatch: moveforward NEXT
+BATTERIE005 is: current if: (device == 'batterie005') onmatch: moveforward NEXT
+CONSIGNE005 is: current if: (device == 'consigne005') onmatch: moveforward NEXT
+MODE005     is: current if: (device == 'mode005')     onmatch: moveforward NEXT
+** Station
+TEMP006     is: current if: (device == 'temp006')     onmatch: moveforward NEXT
+PRESS006    is: current if: (device == 'press006')    onmatch: moveforward NEXT
+HUMI006     is: current if: (device == 'humi006')     onmatch: moveforward NEXT
+NOISE006    is: current if: (device == 'noise006')    onmatch: moveforward NEXT
+CO2006      is: current if: (device == 'co2006')      onmatch: moveforward NEXT
+** Exterieur
+TEMP007     is: current if: (device == 'temp007')     onmatch: moveforward NEXT
+HUMI007     is: current if: (device == 'humi007')     onmatch: moveforward NEXT
+** Bureau
+TEMP008     is: current if: (device == 'temp008')     onmatch: moveforward NEXT
+HUMI008     is: current if: (device == 'humi008')     onmatch: moveforward NEXT
+CO2008      is: current if: (device == 'co2008')      onmatch: moveforward NEXT
+** Chambre2
+TEMP009     is: current if: (device == 'temp009')     onmatch: moveforward NEXT
+HUMI009     is: current if: (device == 'humi009')     onmatch: moveforward NEXT
+CO2009      is: current if: (device == 'co2009')      onmatch: moveforward NEXT
+
+** PHILIPS HUE
+LAMPE001S    is: current if: (device == 'lampe001s')    onmatch: moveforward NEXT
+CHAMBRE001DS is: current if: (device == 'chambre001ds') onmatch: moveforward NEXT
+CHAMBRE001GS is: current if: (device == 'chambre001gs') onmatch: moveforward NEXT
+
+** test
+DIMER001    is: current if: (device == 'dimer001')    onmatch: moveforward NEXT
+DIMER002    is: current if: (device == 'dimer002')    onmatch: moveforward NEXT
+
+** acquisition des boutons
+LAMPE001    is: current if: (device == 'lampe001')    onmatch: moveforward NEXT
+BUTTON001   is: current if: (device == 'button001')   onmatch: moveforward NEXT
+BUTTON002   is: current if: (device == 'button002')   onmatch: moveforward NEXT
+BUTTON003   is: current if: (device == 'button003')   onmatch: moveforward NEXT
+
+SWITCH001   is: current if: (device == 'switch001')   onmatch: moveforward NEXT
+SWITCH002   is: current if: (device == 'switch002')   onmatch: moveforward NEXT
+SWITCH002   is: current if: (device == 'switch002')   onmatch: moveforward NEXT
+
+GSWITCH001  is: current if: (device == 'gswitch001')  onmatch: moveforward NEXT
+
+ACT001S     is: current if: (device == 'act001s')     onmatch: moveforward NEXT
+ACT002S     is: current if: (device == 'act002s')     onmatch: moveforward NEXT
+ACT003S     is: current if: (device == 'act003s')     onmatch: moveforward NEXT
+** ACT003S     is: current if: (device == 'act003s') elseis: &false onmatch: moveforward NEXT
+
+NEXT is: <LABEL>
+TIMER1 is: $timer['timer1']
+TIMER2 is: $timer['timer2']
+TIMER3 is: $timer['timer3']
+
+LAMPE2 is: $not[{TIMER2}]
+
+*****************************
+** poissons entre 2 heures **
+*****************************
+ACT003S is: &false  if: ({STARTUP} == &true) ** présumé arrêté au démarrage
+ACTION005 do: xplSend  with: ( device = 'act003s', schema = 'sensor.request', request = 'current', type = 'input') when: STARTUP rise ** demande le statut de act003 au démarrage
+ACT003S is: current if: (device == 'act003s')
+** ACT003S is: current if: (device == 'act003s', schema == 'sensor.basic') ** remplace précédente si pas de filtre global (voir FILTRE4)
+ACT003S is: current if: (device == 'act003')
+STIME     is: $time['13:25:00']
+ITISSTIME is: &true  if: ({NOW} >= {STIME}) elseis: &false
+** Sans timer
+ETIME     is: $time['13:25:15']
+ITISETIME is: &true  if: ({NOW} >= {ETIME}) elseis: &false
+ACTION005 do: xPLSend  with: ( device = 'act003',  schema = 'control.basic', current=&high, type='output' ) when: ITISSTIME rise
+ACTION005 do: xPLSend  with: ( device = 'act003',  schema = 'control.basic', current=&low,  type='output' ) when: ITISETIME rise
+** Avec timer
+** TIMER4 is: $timer['timer4']
+** T4         do: timerCtrl with: (command = 'start', name = 'timer4', unit = 'sec',  value=#10)                when: ITISSTIME rise
+** ACTION005  do: xPLSend   with: ( device = 'act003', schema = 'control.basic', current=&high, type='output' ) when: ITISSTIME rise
+** ACTION005  do: xPLSend   with: ( device = 'act003', schema = 'control.basic', current=&low,  type='output' ) when: TIMER4    rise
+
+
+***********************************************
+** tempo rearmable avec n bouttons poussoirs **
+***********************************************
+LAMPETS  is: &false  if: ({STARTUP} == &true) ** lampe présumée éteinte au démarrage
+LAMPETS  is: current if: (device == 'lampets') ** etat de la lampe
+** LAMPETS  is: current if: (device == 'lampets', schema == 'sensor.basic') ** etat de la lampe (schéma pour éviter de traiter notre demande 'sensor.request' si pas de filtre global)
+LAMPETS  is: current if: (device == 'lampet') ** pour les tests seulement, normalement ligne au dessus
+** button virtuel pour regrouper tous les boutons en un seul
+BUTTONT is: current if: (device == 'buttont1')
+BUTTONT is: current if: (device == 'buttont2')
+** BUTTONT is: current if: (device == 'buttontn')
+TIMERT  is: $timer['timert']
+AT      do: xplSend    with: (device = 'lampets', schema = 'sensor.request', request = 'current', type = 'input') when: STARTUP rise ** demande le statut de la lampe au démarrage
+AT      do: timerCtrl  with: (command = 'start', name = 'timert', unit = 'sec', value=#5) when: BUTTONT rise ** demarrage/réactivation du timer quand un bouton virtuel est appuyé 
+AT      do: xplSend    with: (device = 'lampet', schema = 'control.basic', current=&high, type='output') when: BUTTONT rise ** ordre d'allumage quand un bouton virtuel est appuyé
+AT      do: xplSend    with: (device = 'lampet', schema = 'control.basic', current=&low,  type='output') when: TIMERT rise ** extinction de la lampe a échéance du timer
+AT      do: clearState with: ( name   = 'BUTTONT' ) when: BUTTONT change ** parce qu'on l'utilise en bouton poussoir
+
+
+***************************************************
+** tempo non-rearmable avec n bouttons poussoirs **
+***************************************************
+LAMPEUS  is: &false  if: ({STARTUP} == &true)
+LAMPEUS  is: current if: (device == 'lampeus')
+LAMPEUS  is: current if: (device == 'lampeu') ** pour les tests seulement
+BUTTONU is: current if: (device == 'buttont3')
+BUTTONU is: current if: (device == 'buttont4')
+** BUTTONU is: current if: (device == 'buttontn')
+TIMERU  is: $timer['timeru']
+AT      do: xplSend    with: (device = 'lampeus', schema = 'sensor.request', request = 'current', type = 'input') when: STARTUP rise ** demande le statut de la lampe au démarrage
+AU      do: xplSend    with: (device = 'lampeu', schema = 'control.basic', current=&high,  type='output') when: BUTTONU rise ** extinction de la lampe a échéance du timer
+AU      do: xplSend    with: (device = 'lampeu', schema = 'control.basic', current=&low,   type='output') when: TIMERU rise
+AU      do: timerCtrl  with: (command = 'start', name = 'timeru', unit = 'sec', value=#5) when: LAMPEUS rise ** demarrage/réactivation du timer quand un bouton virtuel est appuyé 
+AU      do: clearState with: ( name   = 'BUTTONU' ) when: BUTTONU change ** parce qu'on l'utilise en bouton poussoir
+
+
+TEST1 is: $not[{ITISSTIME}]
+TEST2 is: &false if: ({STARTUP}==&true)
+TEST2 is: &true  if: ($fall['TEST1']==&true)
+
+** Timer1 : declenché toutes les 5 secondes
+T1 do: timerCtrl with: (command = 'start', name = 'timer1', unit = 'msec', value=#5000) when: STARTUP   rise
+T1 do: timerCtrl with: (command = 'start', name = 'timer1', unit = 'msec', value=#5000) when: TIMER1    rise
+
+** desactivation du timer avec un boutton (switch on/off)
+T1 do: timerCtrl with: (command = 'stop',  name = 'timer1')                             when: BUTTON003 fall
+T1 do: timerCtrl with: (command = 'start', name = 'timer1', unit = 'msec', value=#5000) when: BUTTON003 rise
+
+** Timer2
+T2 do: timerCtrl with: (command = 'start', name = 'timer2', unit = 'msec', value=#500)  when: TIMER1    fall
+
+** pour les tests "retour d'info" dans les maps
+ACTION001  do: xPLSend  with: ( device = 'lampe001',   schema = 'control.basic', current=$tohlstr[{BUTTON001}], type='output' ) when: BUTTON001 change
+ACTION002  do: xPLSend  with: ( device = 'lampe002',   schema = 'control.basic', current=$tohlstr[{BUTTON002}], type='output' ) when: BUTTON002 change
+
+SWITCH001R do: xPLSend  with: ( device = 'gswitch001', schema = 'control.basic', current=$totfstr[{SWITCH001}], type='output' ) when: SWITCH001 change
+SWITCH001R do: xPLSend  with: ( device = 'gswitch001', schema = 'control.basic', current=$totfstr[{SWITCH002}], type='output' ) when: SWITCH002 change
+SWITCH001R do: xPLSend  with: ( device = 'gswitch001', schema = 'control.basic', current=$totfstr[{SWITCH003}], type='output' ) when: SWITCH003 change
+
+ACTION001  do: clearState with: ( name   = 'BUTTON001' ) when: BUTTON001 change
+ACTION002  do: clearState with: ( name   = 'BUTTON002' ) when: BUTTON002 change

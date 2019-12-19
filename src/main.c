@@ -56,6 +56,9 @@
 #include "automatorServer.h"
 #include "interfacesServer.h"
 
+#define MEA_PATH               1
+#define VERBOSELEVEL          12
+
 // id des process
 int xplServer_monitoring_id=-1;
 int httpServer_monitoring_id=-1;
@@ -64,15 +67,12 @@ int automatorServer_monitoring_id=-1;
 int log_rotation_id=-1;
 int main_monitoring_id = -1;
 
-mea_queue_t *interfaces=NULL;              /*!< liste (file) des interfaces. Variable globale car doit être accessible par les gestionnaires de signaux. */
 pthread_t *monitoringServer_thread=NULL;   /*!< Adresse du thread de surveillance interne. Variable globale car doit être accessible par les gestionnaires de signaux.*/
 
 long sigsegv_indicator = 0;
 
-uint16_t params_db_version=0;
-char *params_names[MAX_LIST_SIZE];         /*!< liste des noms (chaines) de paramètres */
-
 pid_t automator_pid = 0;
+
 
 void usage(char *cmd)
 /**
@@ -122,29 +122,6 @@ int logfile_rotation_job(int my_id, void *data, char *errmsg, int l_errmsg)
 }
 
 
-void init_param_names(char *names[])
-/**
- * \brief     initialisation de la table de correspondance nom (chaine, dans sqlite) avec un ID de paramètre numérique (index du tableau)
- * \param     table à initialiser.
- */
-{
-   names[0]                    = NULL;
-   names[MEA_PATH]             = NULL;
-   names[CONFIG_FILE]          = NULL;
-   names[HTML_PATH]            = "HTML_PATH";
-   names[LOG_PATH]             = "LOGPATH";
-   names[PLUGINS_PATH]         = "PLUGINPATH";
-   names[DRIVERS_PATH]         = "DRIVERSPATH";
-   names[XPL_VENDORID]         = "XPL_VENDORID";
-   names[XPL_DEVICEID]         = "XPL_DEVICEID";
-   names[XPL_INSTANCEID]       = "XPL_INSTANCEID";
-   names[VERBOSELEVEL]         = "VERBOSELEVEL";
-   names[HTTP_PORT]            = "HTTP_PORT";
-   names[INTERFACE]            = "INTERFACE";
-   names[RULES_FILE]           = "RULESFILE";
-   names[RULES_FILES_PATH]     = "RULESFILESPATH";
-}
-
 
 int16_t read_all_application_parameters(char *cfgfile)
 {
@@ -180,9 +157,9 @@ void clean_all_and_exit(int code)
       httpServer_monitoring_id=-1;
    }
   
-   if(interfaces) {
-      stop_interfaces();
-   }
+
+   stop_interfaces();
+
 
    if(pythonPluginServer_monitoring_id!=-1) {
       process_stop(pythonPluginServer_monitoring_id, NULL, 0);
@@ -240,13 +217,12 @@ static void error_handler(int signal_number)
    fprintf(stderr, "Error: signal %d:\n", signal_number);
    if((_xPLServer_thread_id!=NULL) && pthread_equal(*_xPLServer_thread_id, pthread_self())!=0) {
       fprintf(stderr, "Error: in xPLServer, try to recover\n");
-//      longjmp(xPLServer_JumpBuffer, 1);
    }
-/*
+
    else if((_automatorServer_thread_id!=NULL) && pthread_equal(*_automatorServer_thread_id, pthread_self())!=0) {
       fprintf(stderr, "Error: in automator.c/automatorServer.c\n");
    }
-*/
+
    fprintf(stderr, "Error: aborting\n");
    fprintf(stderr, "Thread id : %x", (unsigned int)pthread_self());
    abort();
@@ -287,8 +263,8 @@ int main(int argc, const char * argv[])
  * \return    1 en cas d'erreur, 0 sinon
  */
 {
-   int ret; // sqlite function need int
-  
+   int ret=0;
+
    // activation du core dump
    struct rlimit core_limit = { RLIM_INFINITY, RLIM_INFINITY };
    assert( setrlimit( RLIMIT_CORE, &core_limit ) == 0 );
@@ -302,7 +278,7 @@ int main(int argc, const char * argv[])
    static struct option long_options[] = {
       {"basepath",          required_argument, 0,  MEA_PATH             }, // 'p'
       {"verboselevel",      required_argument, 0,  VERBOSELEVEL         }, // 'v'
-      {"apiport",           required_argument, 0,  HTTP_PORT              }, // 'g'
+//      {"apiport",           required_argument, 0,  HTTP_PORT            }, // 'g'
       {"help",              no_argument,       0,  'h'                  }, // 'h'
       {0,                   0,                 0,  0                    }
    };
@@ -334,9 +310,7 @@ int main(int argc, const char * argv[])
    // process handle SIGPIPE -n true -p true -s false
    // cocher ensuite "Automatically continue after evaluating"
    
-   // initialisation des noms des parametres
-   init_param_names(params_names);
-   
+
    // initialisation de la liste des parametres à NULL sauf MEAPATH
    //
    if(!appParameters_get("MEAPATH", NULL))
@@ -369,10 +343,10 @@ int main(int argc, const char * argv[])
             _v=atoi(optarg);
             break;
 
-         case 'g':
-	 case HTTP_PORT:
-	    appParameters_set("HTTP_PORT", optarg, NULL);
-            break;
+//         case 'g':
+//	 case HTTP_PORT:
+//	    appParameters_set("HTTP_PORT", optarg, NULL);
+//            break;
 
          default:
             VERBOSE(1) mea_log_printf("%s (%s) : Paramètre \"%s\" inconnu.\n",ERROR_STR,__func__,optarg);
@@ -403,10 +377,6 @@ int main(int argc, const char * argv[])
       clean_all_and_exit(1);
    }
 
-
-   // chargement des utilisateurs
-   initUsers();
-   
 
    //
    // stdout et stderr vers fichier log
@@ -445,6 +415,10 @@ int main(int argc, const char * argv[])
 #ifdef __MEA_DEBUG_ON__
    appParameters_display();
 #endif
+
+   // chargement des utilisateurs
+   initUsers();
+   
 
    //
    // initialisation gestions des signaux (arrêt de l'appli et réinitialisation)
@@ -553,7 +527,8 @@ int main(int argc, const char * argv[])
    //
    struct interfacesServerData_s interfacesServerData;
    interfacesServerData.params_list=getAppParameters();
-   interfaces=start_interfaces(getAppParameters()); // démarrage des interfaces
+//   interfaces=start_interfaces(getAppParameters()); // démarrage des interfaces
+   start_interfaces(getAppParameters()); // démarrage des interfaces
    int interfaces_reload_task_id=process_register("RELOAD"); // mise en place de la tâche de rechargement des paramètrages des interfaces
    process_set_group(interfaces_reload_task_id, 2);
    process_set_start_stop(interfaces_reload_task_id, restart_interfaces, NULL, (void *)(&interfacesServerData), 1);

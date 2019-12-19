@@ -1,0 +1,92 @@
+{
+	"I005":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"SERIAL://tty.usbserial-FTY1A5FM:9600",
+		"parameters":	"",
+		"state":	1,
+		"devices":	{
+	},
+		"id_interface":	100
+	},
+	"I002":	{
+		"id_type":	200,
+		"description":	"",
+		"dev":	"SERIAL://ttyUSB1:9600",
+		"parameters":	"",
+		"state":	1,
+		"devices":	{
+	},
+		"id_interface":	101
+	},
+	"I005-00-29-c6-89":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"I005://00-29-c6-89",
+		"parameters":	"",
+		"state":	2,
+		"devices":	{
+			"I005S001":	{
+				"id_type":	0,
+				"description":	"Demo enocean input 1",
+				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:A",
+				"state":	1,
+				"id_sensor_actuator":	1000,
+				"id_interface":	102
+			}
+		},
+		"id_interface":	102
+	},
+	"I010":	{
+		"id_type":	3010,
+		"description":	"",
+		"dev":	"PIPE:///tmp/meapipe",
+		"parameters":	"PLUGIN=mea_text_inout;FSTARTSTR={{{;FENDSTR=}}};DIRECTION=BOTH",
+		"state":	1,
+		"devices":	{
+			"I010S001":	{
+				"id_type":	0,
+				"description":	"Demo input 1",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S001",
+				"state":	1,
+				"id_sensor_actuator":	1001,
+				"id_interface":	103
+			},
+			"I010S002":	{
+				"id_type":	0,
+				"description":	"Demo input 2",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S002",
+				"state":	1,
+				"id_sensor_actuator":	1002,
+				"id_interface":	103
+			},
+			"o02a":	{
+				"id_type":	0,
+				"description":	"Demo input 3",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:o02a",
+				"state":	1,
+				"id_sensor_actuator":	1003,
+				"id_interface":	103
+			},
+			"I010A001":	{
+				"id_type":	1,
+				"description":	"Demo actuator 1",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010A001",
+				"state":	1,
+				"id_sensor_actuator":	1004,
+				"id_interface":	103
+			}
+		},
+		"id_interface":	103
+	},
+	"IXXX":	{
+		"parameters":	"",
+		"state":	0,
+		"description":	"test",
+		"dev":	"dev",
+		"id_type":	3010,
+		"devices":	{
+	},
+		"id_interface":	104
+	}
+}

@@ -265,7 +265,7 @@ char *mea_strtrim2(char *s)
 char *mea_strtrim(char *s)
  /**
   * \brief     trim (suppression de blanc) à gauche et à droite d'une chaine.
-  * \details   la chaine est modifiée, un '\0' un '\0' est positionné à la place
+  * \details   la chaine est modifiée, un '\0' est positionné à la place
   *            du premier "blanc"
   *            des blancs en fin de chaine (voir mea_strrtrim()) et un pointeur
   *            est retourné sur le premier caractère "non blanc" de la chaine

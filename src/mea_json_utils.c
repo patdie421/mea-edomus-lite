@@ -74,17 +74,3 @@ cJSON *loadJson_alloc(char *file)
 }
 
 
-int backupJson(char *filename)
-{
-   char _time[40];
-   char filenamebak[1024];
-   
-   time_t timestamp = time(NULL); 
-   
-   strftime(_time, sizeof(_time)-1, "%Y-%m-%d_%X", localtime(&timestamp));
-   strcpy(filenamebak, filename);
-   strcat(filenamebak, ".");
-   strcat(filenamebak, _time);
-
-   return mea_filecopy(filename, filenamebak);
-}

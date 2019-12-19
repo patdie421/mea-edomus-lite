@@ -1,8 +1,10 @@
 import sys
+#if sys.version_info[0] < 3:
+#   sys.stderr.write("Only compatible with Python 3 interpreter\n")
+#   sys.stderr.write(str(sys.version_info)+"\n")
+#   sys.exit(1)
 import base64
 import json
-import pprint
-import urllib2
 import os
 import getpass
 import argparse
@@ -10,7 +12,6 @@ import argparse
 from datetime import datetime
 from lib import http
 from lib import session
-from lib import PassThroughOptionParser
 
 from modules import interface
 from modules import pairing
@@ -30,7 +31,7 @@ Available resources:
 '''
 
 cli_description='''
-CLI for managing mea-edomus-lite
+CLI for configuring mea-edomus.
 '''
 
 objects_functions={}
@@ -66,7 +67,7 @@ def getArgs():
 
    args, _args = args_parser.parse_known_args()
    
-   return args, _args
+   return args_parser, args, _args
 
 
 if __name__ == "__main__":
@@ -74,17 +75,21 @@ if __name__ == "__main__":
    homedir = os.path.expanduser("~")
    dotfile = os.path.join(homedir, ".mea-edomus")
 
-   args, _args = getArgs()
+   args_parser, args, _args = getArgs()
    if args.clean==True:
       try:
          os.remove(dotfile)
       except:
          pass
 
-   o=args.resource.lower()
-   if not o in objects_functions:
-      parser.print_help()
+   if args.resource == None:
+      args_parser.print_help()
       sys.exit(1)
+      
+   o=args.resource.lower()
+#   if not o in objects_functions:
+#      parser.print_help()
+#      sys.exit(1)
 
    if args.clean==True:
       try:
@@ -124,7 +129,10 @@ if __name__ == "__main__":
 
    if(mysession["sessionid"]==False or session.check(args.host, args.port, mysession["sessionid"])==False):
       if args._user==None:
-         user=raw_input('user: ')
+         if sys.version_info[0]<3:
+            user=raw_input('user: ')
+         else:
+            user=input('user: ')
       else:
          user=args._user
 
@@ -143,7 +151,7 @@ if __name__ == "__main__":
          mysession["sessionid"]=None
          with open(dotfile, 'w') as outfile:
             json.dump(mysession, outfile)
-         sys.stderr.write(_session)
+         sys.stderr.write(str(_session))
          sys.exit(1)
 
    sessionid=mysession["sessionid"]
