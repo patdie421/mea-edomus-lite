@@ -93,6 +93,23 @@ struct devices_index_s *devices_index = NULL;
 struct types_index_s *types_index = NULL;
 struct devs_index_s *devs_index = NULL;
 
+/*
+int cmpInterfaces(cJSON *i1, cJSON i2*)
+{
+   cJSON *j1, *j2;
+   
+   j1=cJSON_GetObjectItem(i1, PARAMETERS_STR_C);
+   j2=cJSON_GetObjectItem(i2, PARAMETERS_STR_C);
+   if(strcmp(j1->string, j2->string)!=0)
+      return 1;
+   j1=cJSON_GetObjectItem(i1, DEV_STR_C);
+   j2=cJSON_GetObjectItem(i2, DEV_STR_C);
+   if(strcmp(j1->string, j2->string)!=0)
+      return 2;
+
+   return 0;
+}
+*/
 
 void deleteTypesIndex(struct types_index_s **types_index)
 {
@@ -105,6 +122,65 @@ void deleteTypesIndex(struct types_index_s **types_index)
       }
    }
    *types_index = NULL;
+}
+
+
+struct devs_index_s *addInterfaceToDevsIndex(struct devs_index_s *devs_index, cJSON *jsonInterface)
+{
+   if(!jsonInterface)
+      return NULL;
+ 
+
+   char *devName = cJSON_GetObjectItem(jsonInterface, "dev")->valuestring;
+ 
+   struct devs_index_s *e=NULL;
+   HASH_FIND_STR(devs_index, devName, e);
+   if(e) {
+      HASH_DEL(devs_index, e);
+      free(e);
+       e=NULL;
+   }
+
+   e=(struct devs_index_s *)malloc(sizeof(struct devs_index_s));
+   mea_strncpytrimlower(e->devName, devName, sizeof(e->devName));
+   e->interface=jsonInterface;
+   HASH_ADD_STR(devs_index, devName, e);
+
+   return devs_index;
+}
+
+
+struct devices_index_s *addInterfaceDevicesToDevicesIndex(struct devices_index_s *devices_index, cJSON *jsonInterface)
+{
+   if(!jsonInterface)
+      return NULL;
+ 
+
+  cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
+ 
+  if(jsonDevices) {
+     cJSON *jsonDevice = jsonDevices->child;
+      while( jsonDevice ) {
+         char *name=jsonDevice->string;
+         
+         struct devices_index_s *e=NULL;
+         HASH_FIND_STR(devices_index, name, e);
+         if(e) {
+            HASH_DEL(devices_index, e);
+            free(e);
+            e=NULL;
+         }
+
+         e=(struct devices_index_s *)malloc(sizeof(struct devices_index_s));
+         strncpy(e->name, name, sizeof(e->name));
+         e->device=jsonDevice;
+         HASH_ADD_STR(devices_index, name, e);
+
+         jsonDevice=jsonDevice->next;
+      }
+   }
+
+   return devices_index;
 }
 
 
@@ -424,14 +500,14 @@ int deleteInterface(char *interface)
    if(id_interface==-1)
       return -1;
 
-   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
-   pthread_rwlock_rdlock(&interfaces_queue_rwlock);
-
    devices_index=removeDeviceFromIndexByInterfaceId(devices_index, id_interface);
    devs_index=removeInterfaceFromIndexByInterfaceId(devs_index, id_interface);
 
-   remove_interface(_interfaces, id_interface);
+   pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
+   pthread_rwlock_rdlock(&interfaces_queue_rwlock);
+
    remove_delegate_links(_interfaces, interface);
+   remove_interface(_interfaces, id_interface);
 
    pthread_rwlock_unlock(&interfaces_queue_rwlock);
    pthread_cleanup_pop(0);
@@ -536,11 +612,11 @@ addInterface_clean_exit:
 }
 
 
-int updateInterface(char *interface, cJSON *jsonData) /* TO TEST */
+int updateInterface(char *interface, cJSON *jsonData)
 {
    int ret=-1;
    int id_interface=-1;
-   cJSON *_jsonInterface=NULL;
+   cJSON *_jsonInterface=NULL, *_jsonInterfaceOld=NULL;
 
    if(jsonData->type!=cJSON_Object)
       return -1;
@@ -568,20 +644,20 @@ int updateInterface(char *interface, cJSON *jsonData) /* TO TEST */
          e=next;
       }
 
-      char devName[81]="";
+      char devName[256]="";
       mea_strncpytrimlower(devName, (char *)cJSON_GetObjectItem(jsonInterface, "dev")->valuestring, sizeof(devName)-1);
 
-      cJSON_DeleteItemFromObject(jsonInterfaces, interface);
+      _jsonInterfaceOld=cJSON_DetachItemFromObject(jsonInterfaces, interface);
+      
       cJSON_AddItemToObject(jsonInterfaces, interface, _jsonInterface);
 
+      devices_index=removeDeviceFromIndexByInterfaceId(devices_index, id_interface);
+      devs_index=removeInterfaceFromIndexByInterfaceId(devs_index, id_interface);
+
       struct devs_index_s *_e = NULL;
-      HASH_FIND_STR(devs_index, devName, _e);
-      if(_e) {
-         HASH_DEL(devs_index, _e);
-      }
-      else {
-         _e=(struct devs_index_s *)malloc(sizeof(struct devs_index_s));
-      }
+
+      _e=(struct devs_index_s *)malloc(sizeof(struct devs_index_s));
+
       mea_strncpytrimlower(_e->devName, (char *)cJSON_GetObjectItem(_jsonInterface, "dev")->valuestring, sizeof(_e->devName)-1);
       _e->interface=_jsonInterface;
       HASH_ADD_STR(devs_index, devName, _e);
@@ -592,17 +668,34 @@ int updateInterface(char *interface, cJSON *jsonData) /* TO TEST */
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
 
+
    if(ret==0) {
       pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
       pthread_rwlock_rdlock(&interfaces_queue_rwlock);
 
+      remove_delegate_links(_interfaces, _jsonInterfaceOld->string);
       remove_interface(_interfaces, id_interface);
-      prepare_interface(_interfaces, _params_list, _jsonInterface, 1);
+      if(prepare_interface(_interfaces, _params_list, _jsonInterface, 1)==0) {
+         link_delegates(_interfaces);
+      }
 
       pthread_rwlock_unlock(&interfaces_queue_rwlock);
       pthread_cleanup_pop(0);
    }
 
+   struct devices_index_s *_devices_index=NULL;
+   _devices_index=addInterfaceDevicesToDevicesIndex(devices_index, _jsonInterface);
+   if(_devices_index)
+      devices_index=_devices_index;
+
+   struct devs_index_s *_devs_index=NULL;
+   _devs_index=addInterfaceToDevsIndex(devs_index, _jsonInterface);
+   if(_devs_index)
+      devs_index=_devs_index;
+
+   if(_jsonInterfaceOld) {
+      cJSON_Delete(_jsonInterfaceOld);
+   }
    cJSON_Delete(jsonInterfaceTemplate);
    return 0;
 }
@@ -1782,17 +1875,17 @@ int remove_interface(mea_queue_t *interfaces_list, int id_interface)
       }
    }
 
-#ifdef DEBUGFLAG
-   mea_queue_first(interfaces_list);
-   while(1) {
-      ret=mea_queue_current(interfaces_list, (void **)&iq);
-      mea_log_printf("###> %s\n", iq->name);
-      if(mea_queue_next(interfaces_list)==ERROR) {
-         ret=-1;
-         break;
-      }
-   }
-#endif
+//#ifdef DEBUGFLAG
+//   mea_queue_first(interfaces_list);
+//   while(1) {
+//      ret=mea_queue_current(interfaces_list, (void **)&iq);
+//      mea_log_printf("###> %s\n", iq->name);
+//      if(mea_queue_next(interfaces_list)==ERROR) {
+//         ret=-1;
+//         break;
+//      }
+//   }
+///#endif
    return ret;
 }
 

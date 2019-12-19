@@ -5,6 +5,5 @@
 
 cJSON *loadJson_alloc(char *file);
 int writeJson(char *file, cJSON *j);
-int backupJson(char *filename);
 
 #endif

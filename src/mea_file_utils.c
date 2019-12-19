@@ -3,12 +3,33 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
+#include <string.h>
+
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 #include <copyfile.h>
 #else
 #include <sys/sendfile.h>
 #endif
+
+#include "mea_file_utils.h"
+
+
+int mea_filebackup(char *filename)
+{
+   char _time[40];
+   char filenamebak[1024];
+   
+   time_t timestamp = time(NULL); 
+   
+   strftime(_time, sizeof(_time)-1, "%Y-%m-%d_%X", localtime(&timestamp));
+   strcpy(filenamebak, filename);
+   strcat(filenamebak, ".");
+   strcat(filenamebak, _time);
+
+   return mea_filecopy(filename, filenamebak);
+}
 
 
 int mea_filecopy(const char* source, const char* destination)

@@ -47,6 +47,7 @@ struct tokens_strings_da_s
    char *device_interface_type_name_str_c;
    char *device_state_str_c;
    char *device_type_parameters_str_c;
+   char *devices_str_c;
    char *todbflag_str_c;
    char *addr_l_str_c;
    char *addr_h_str_c;
@@ -137,6 +138,7 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define DEVICE_TODBFLAG_STR_C            tokens_string_da->todbflag_str_c
 #define DEVICE_ADDR_H_STR_C              tokens_string_da->addr_h_str_c
 #define DEVICE_ADDR_L_STR_C              tokens_string_da->addr_l_str_c
+#define DEVICES_STR_C                    tokens_string_da->devices_str_c
 #define INTERFACE_ID_STR_C               tokens_string_da->interface_id_str_c
 #define INTERFACE_TYPE_ID_STR_C          tokens_string_da->interface_type_id_str_c
 #define INTERFACE_NAME_STR_C             tokens_string_da->interface_name_str_c
@@ -221,6 +223,7 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define DEVICE_TODBFLAG_STR_C            get_token_string_by_id(DEVICE_TODBFLAG_ID)
 #define DEVICE_ADDR_H_STR_C              get_token_string_by_id(DEVICE_ADDR_H_ID)
 #define DEVICE_ADDR_L_STR_C              get_token_string_by_id(DEVICE_ADDR_L_ID)
+#define DEVICES_STR_C                    get_token_string_by_id(DEVICES_ID)
 #define INTERFACE_ID_STR_C               get_token_string_by_id(INTERFACE_ID_ID)
 #define INTERFACE_TYPE_ID_STR_C          get_token_string_by_id(INTERFACE_TYPE_ID_ID)
 #define INTERFACE_NAME_STR_C             get_token_string_by_id(INTERFACE_NAME_ID)

@@ -63,6 +63,7 @@ static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le de
    {"device_state",               DEVICE_STATE_ID},
    {"device_type_id",             DEVICE_TYPE_ID_ID},
    {"device_type_parameters",     DEVICE_TYPE_PARAMETERS_ID},
+   {"devices",                    DEVICES_ID},
    {"digital",                    DIGITAL_ID},
    {"digital_in",                 DIGITAL_IN_ID},
    {"digital_out",                DIGITAL_OUT_ID},

@@ -61,6 +61,7 @@ int16_t init_strings_da()
    tokens_string_da->device_interface_type_name_str_c = get_token_string_by_id(DEVICE_INTERFACE_TYPE_NAME_ID);
    tokens_string_da->device_state_str_c               = get_token_string_by_id(DEVICE_STATE_ID);
    tokens_string_da->device_type_parameters_str_c     = get_token_string_by_id(DEVICE_TYPE_PARAMETERS_ID);
+   tokens_string_da->devices_str_c                    = get_token_string_by_id(DEVICES_ID);
    tokens_string_da->todbflag_str_c                   = get_token_string_by_id(TODBFLAG_ID);
    tokens_string_da->addr_h_str_c                     = get_token_string_by_id(ADDR_H_ID);
    tokens_string_da->addr_l_str_c                     = get_token_string_by_id(ADDR_L_ID);

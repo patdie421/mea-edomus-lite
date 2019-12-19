@@ -1,8 +1,8 @@
 import sys
-if sys.version_info[0] < 3:
-   sys.stderr.write("Only compatible with Python 3 interpreter\n")
-   sys.stderr.write(str(sys.version_info)+"\n")
-   sys.exit(1)
+#if sys.version_info[0] < 3:
+#   sys.stderr.write("Only compatible with Python 3 interpreter\n")
+#   sys.stderr.write(str(sys.version_info)+"\n")
+#   sys.exit(1)
 import base64
 import json
 import os
@@ -129,7 +129,10 @@ if __name__ == "__main__":
 
    if(mysession["sessionid"]==False or session.check(args.host, args.port, mysession["sessionid"])==False):
       if args._user==None:
-         user=input('user: ')
+         if sys.version_info[0]<3:
+            user=raw_input('user: ')
+         else:
+            user=input('user: ')
       else:
          user=args._user
 

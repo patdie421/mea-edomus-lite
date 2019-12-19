@@ -47,13 +47,11 @@ def printValids(message, validList):
 
 def update_interface_device(host, port, sessionid, interface, device, properties):
    return PutUrl("http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface)+"/device/"+str(device),sessionid,properties)
-   return code, result
 
 
 def add_interface_device(host, port, sessionid, interface, device, properties):
    properties["name"]=device
    return PostUrl("http://"+str(host)+":"+str(port)+"/rest/interface/"+str(interface)+"/device",sessionid,properties)
-   return code, result
 
 
 def delete_interface_device(host, port, sessionid, interface, device):

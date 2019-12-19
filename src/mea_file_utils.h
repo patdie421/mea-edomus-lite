@@ -2,5 +2,6 @@
 #define mea_file_utils_h
 
 int mea_filecopy(const char* source, const char* destination);
+int mea_filebackup(char *filename);
 
 #endif

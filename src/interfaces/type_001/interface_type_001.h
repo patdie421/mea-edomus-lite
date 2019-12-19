@@ -38,6 +38,12 @@
 #define I001_CNBXPLOUT   "CNBXPLOUT"
 #define I001_CNBXPLIN    "CNBXPLIN"
 
+#define UNIT_WH 1 // Watt/Heure
+#define UNIT_W  2 // Watt
+#define UNIT_C  3 // degré C
+#define UNIT_V  4 // Volt
+#define UNIT_H  5 // pourcentage humidité
+
 struct interface_type_001_indicators_s
 {
    uint32_t nbxplin;
