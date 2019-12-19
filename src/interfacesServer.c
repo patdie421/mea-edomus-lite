@@ -647,21 +647,18 @@ int updateInterface(char *interface, cJSON *jsonData)
       char devName[256]="";
       mea_strncpytrimlower(devName, (char *)cJSON_GetObjectItem(jsonInterface, "dev")->valuestring, sizeof(devName)-1);
 
-      _jsonInterfaceOld=cJSON_DetachItemFromObject(jsonInterfaces, interface);
-      
-      cJSON_AddItemToObject(jsonInterfaces, interface, _jsonInterface);
-
       devices_index=removeDeviceFromIndexByInterfaceId(devices_index, id_interface);
       devs_index=removeInterfaceFromIndexByInterfaceId(devs_index, id_interface);
 
-      struct devs_index_s *_e = NULL;
-
-      _e=(struct devs_index_s *)malloc(sizeof(struct devs_index_s));
-
+      _jsonInterfaceOld=cJSON_DetachItemFromObject(jsonInterfaces, interface);
+      
+      cJSON_AddItemToObject(jsonInterfaces, interface, _jsonInterface);
+/*
+      struct devs_index_s *_e = (struct devs_index_s *)malloc(sizeof(struct devs_index_s));
       mea_strncpytrimlower(_e->devName, (char *)cJSON_GetObjectItem(_jsonInterface, "dev")->valuestring, sizeof(_e->devName)-1);
       _e->interface=_jsonInterface;
       HASH_ADD_STR(devs_index, devName, _e);
-
+*/
       ret=0;
    }
 
