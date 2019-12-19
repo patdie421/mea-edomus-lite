@@ -117,7 +117,13 @@ int16_t init_strings_da()
    tokens_string_da->username_str_c                   = get_token_string_by_id(USERNAME_ID);
    tokens_string_da->parameters_str_c                 = get_token_string_by_id(PARAMETERS_ID);
    tokens_string_da->update_str_c                     = get_token_string_by_id(UPDATE_ID);
-
+   tokens_string_da->dev_str_c                        = get_token_string_by_id(DEV_ID);
+   tokens_string_da->id_type_str_c                    = get_token_string_by_id(ID_TYPE_ID);
+   tokens_string_da->id_interface_str_c               = get_token_string_by_id(ID_INTERFACE_ID);
+   tokens_string_da->typeoftype_str_c                 = get_token_string_by_id(TYPEOFTYPE_ID);
+   tokens_string_da->description_str_c                = get_token_string_by_id(DESCRIPTION_ID);
+   tokens_string_da->id_sensor_actuator_str_c         = get_token_string_by_id(ID_SENSOR_ACTUATOR_ID);
+   
 #endif
    return 0;
 }

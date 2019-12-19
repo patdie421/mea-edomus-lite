@@ -104,6 +104,12 @@ struct tokens_strings_da_s
    char *username_str_c;
    char *parameters_str_c;
    char *update_str_c;
+   char *dev_str_c;
+   char *id_type_str_c;
+   char *id_interface_str_c;
+   char *typeoftype_str_c;
+   char *description_str_c;
+   char *id_sensor_actuator_str_c;
 };
 
 extern struct tokens_strings_da_s *tokens_string_da;
@@ -195,6 +201,12 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define USERNAME_STR_C                   tokens_string_da->username_str_c
 #define PARAMETERS_STR_C                 tokens_string_da->parameters_str_c
 #define UPDATE_STR_C                     tokens_string_da->update_str_c
+#define DEV_STR_C                        tokens_string_da->dev_str_c
+#define ID_TYPE_STR_C                    tokens_string_da->id_type_str_c
+#define ID_INTERFACE_STR_C               tokens_string_da->id_interface_str_c
+#define TYPEOFTYPE_STR_C                 tokens_string_da->typeoftype_str_c
+#define DESCRIPTION_STR_C                tokens_string_da->description_str_c
+#define ID_SENSOR_ACTUATOR_STR_C         tokens_string_da->id_sensor_actuator_str_c
 
 #else
 
@@ -285,6 +297,12 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define USERNAME_STR_C                   get_token_string_by_id(USERNAME_ID)
 #define PARAMETERS_STR_C                 get_token_string_by_id(PARAMETERS_ID)
 #define UPDATE_STR_C                     get_token_string_by_id(UPDATE_ID)
+#define DEV_STR_C                        get_token_string_by_id(DEV_ID)
+#define ID_TYPE_STR_C                    get_token_string_by_id(ID_TYPE_ID)
+#define ID_INTERFACE_STR_C               get_token_string_by_id(ID_INTERFACE_ID)
+#define TYPEOFTYPE_STR_C                 get_token_string_by_id(TYPEOFTYPE_ID)
+#define DESCRIPTION_STR_C                get_token_string_by_id(DESCRIPTION_ID)
+#define ID_SENSOR_ACTUATOR_STR_C         get_token_string_by_id(ID_SENSOR_ACTUATOR_ID)
 
 #endif
 

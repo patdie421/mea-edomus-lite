@@ -141,8 +141,12 @@ static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le de
    {"xplmsg",                     XPLMSG_ID},
    {"xpl-stat",                   XPL_STAT_ID},
    {"xpl-trig",                   XPL_TRIG_ID},
+   {"dev",                        DEV_ID},
+   {"id_type",                    ID_TYPE_ID},
+   {"id_interface",               ID_INTERFACE_ID},
+   {"description",                DESCRIPTION_ID},
+   {"id_sensor_actuator",         ID_SENSOR_ACTUATOR_ID},
 
-   
    {NULL,0}
 };
 
