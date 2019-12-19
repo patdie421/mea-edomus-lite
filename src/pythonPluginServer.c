@@ -27,6 +27,7 @@
 #include "configuration.h"
 
 #include "pythonPluginServer.h"
+#include "python_utils.h"
 #include "processManager.h"
 
 // #define free(x) free(x);
@@ -153,12 +154,16 @@ exit_pythonPluginServer_add_cmd:
 
 mea_error_t call_pythonPlugin(char *module, int type, PyObject *data_dict)
 {
-   PyObject *pName, *pModule, *pFunc;
+   PyObject *pName, *pModule=NULL, *pFunc;
    PyObject *pArgs, *pValue;
 
    PyErr_Clear();
 
-   pName = PyString_FromString(module);
+#if PY_MAJOR_VERSION >= 3
+   pName = PyUnicode_DecodeFSDefault(module);
+#else
+   pName = PYSTRING_FROMSTRING(module);
+#endif
    pModule = PyDict_GetItem(known_modules, pName);
    if(!pModule) {
       pModule = PyImport_Import(pName);
@@ -248,7 +253,7 @@ mea_error_t call_pythonPlugin(char *module, int type, PyObject *data_dict)
 
          if (pValue != NULL) {
             unsigned long exectime=_diffMillis(chrono, _millis());
-            DEBUG_SECTION mea_log_printf("%s (%s) : result of call of %s : %ld (%ld)\n", DEBUG_STR, __func__, fx, PyInt_AsLong(pValue), exectime);
+            DEBUG_SECTION mea_log_printf("%s (%s) : result of call of %s : %ld (%ld)\n", DEBUG_STR, __func__, fx, PYINT_ASLONG(pValue), exectime);
             Py_DECREF(pValue); // verifier si nécessaire
          }
          else {
@@ -336,7 +341,11 @@ void *_pythonPlugin_thread(void *data)
 
    // chemin vers les plugins rajoutés dans le path de l'interpréteur Python
    PyObject* sysPath = PySys_GetObject((char*)"path");
-   PyObject* pluginsDir = PyString_FromString(plugin_path);
+#if PY_MAJOR_VERSION >= 3
+   PyObject* pluginsDir = PyUnicode_DecodeFSDefault(plugin_path);
+#else
+   PyObject* pluginsDir = PYSTRING_FROMSTRING(plugin_path);
+#endif
    PyList_Append(sysPath, pluginsDir);
    Py_DECREF(pluginsDir);
    

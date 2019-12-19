@@ -387,7 +387,7 @@ int main(int argc, const char * argv[])
    if(!appParameters_get("LOGPATH",NULL) || !strlen(appParameters_get("LOGPATH",NULL))) {
       appParameters_set("LOGPATH","/var/log",NULL);
    }
-
+/*
    n=snprintf(log_file,sizeof(log_file),"%s/mea-edomus.log", appParameters_get("LOGPATH",NULL));
    if(n<0 || n==sizeof(log_file)) {
       VERBOSE(1) {
@@ -409,7 +409,7 @@ int main(int argc, const char * argv[])
    close(fd);
 
    logfile_rotation_job(-1, (void *)log_file, NULL, 0);
-
+*/
    DEBUG_SECTION mea_log_printf("INFO  (main) Starting MEA-EDOMUS %s\n",__MEA_EDOMUS_VERSION__);
    
 #ifdef __MEA_DEBUG_ON__

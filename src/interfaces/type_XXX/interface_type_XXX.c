@@ -200,7 +200,7 @@ int16_t api_interface_type_XXX(void *ixxx, char *cmnd, void *args, int nb_args, 
    
    if(strcmp(cmnd, "test") == 0)
    {
-      *res = PyString_FromString("New style Api call OK !!!");
+      *res = PYSTRING_FROMSTRING("New style Api call OK !!!");
       *nerr=0;
       strncpy(err, "no error", l_err);
 

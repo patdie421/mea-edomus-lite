@@ -727,7 +727,7 @@ int16_t api_interface_type_003(void *ixxx, char *cmnd, void *args, int nb_args, 
    }
 #ifdef DEBUG
    else if(strcmp(cmnd, "test") == 0) {
-      *res = PyString_FromString("New style Api call OK !!!");
+      *res = PYSTRING_FROMSTRING("New style Api call OK !!!");
       *nerr=0;
       strncpy(err, "no error", l_err);
 
@@ -1015,7 +1015,7 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
 
       // à remplacer par mea_callfunction() ...
       PyErr_Clear();
-      pName = PyString_FromString(interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s);
+      pName = PYSTRING_FROMSTRING(interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s);
       pModule = PyImport_Import(pName);
       if(!pModule) {
          VERBOSE(5) mea_log_printf("%s (%s) : %s not found\n", ERROR_STR, __func__, interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s);
@@ -1036,7 +1036,7 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
 
             pValue = PyObject_CallObject(pFunc, pArgs); // appel du plugin
             if (pValue != NULL) {
-               DEBUG_SECTION mea_log_printf("%s (%s) : Result of call of mea_init : %ld\n", DEBUG_STR, __func__, PyInt_AsLong(pValue));
+               DEBUG_SECTION mea_log_printf("%s (%s) : Result of call of mea_init : %ld\n", DEBUG_STR, __func__, PYINT_ASLONG(pValue));
                Py_DECREF(pValue);
             }
             PyErr_Clear();

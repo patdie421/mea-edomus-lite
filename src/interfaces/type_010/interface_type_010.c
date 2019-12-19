@@ -277,10 +277,16 @@ static int init_interface_type_010_data_source(interface_type_010_t *i010)
 int init_interface_type_010_data_preprocessor(interface_type_010_t *i010, char *plugin_name, char *plugin_parameters)
 {
    int ret = -1;
+   PyObject *pName = NULL;
 
    mea_python_lock();
       
-   PyObject *pName = PyString_FromString(plugin_name);
+//   PyObject *pName = PYSTRING_FROMSTRING(plugin_name);
+#if PY_MAJOR_VERSION >= 3
+   pName = PyUnicode_DecodeFSDefault(plugin_name);
+#else
+   pName = PYSTRING_FROMSTRING(plugin_name);
+#endif
    if(!pName) {
       ret=-1;
       goto init_interface_type_010_data_preprocessor_clean_exit;
@@ -289,6 +295,8 @@ int init_interface_type_010_data_preprocessor(interface_type_010_t *i010, char *
       if(!i010->pModule) {
          i010->pModule =  PyImport_Import(pName);
          if(!i010->pModule) {
+            if (PyErr_Occurred())
+               PyErr_Print();
             ret=-1;
             goto init_interface_type_010_data_preprocessor_clean_exit;
          }
@@ -299,6 +307,8 @@ int init_interface_type_010_data_preprocessor(interface_type_010_t *i010, char *
          i010->pModule=PyImport_ReloadModule(m); // on force le rechargement (c'est pour simplifier)
          Py_DECREF(m);
          if(!i010->pModule) {
+            if (PyErr_Occurred())
+               PyErr_Print();
             ret=-1;
             goto init_interface_type_010_data_preprocessor_clean_exit;
          }
@@ -317,7 +327,7 @@ int init_interface_type_010_data_preprocessor(interface_type_010_t *i010, char *
       
       if(PyCallable_Check(i010->pFunc)) {
          if(plugin_parameters)
-            i010->pParams=PyString_FromString(plugin_parameters);
+            i010->pParams=PYSTRING_FROMSTRING(plugin_parameters);
          else
             i010->pParams=NULL;
          ret = 0;
@@ -998,7 +1008,7 @@ int16_t api_interface_type_010(void *ixxx, char *cmnd, void *args, int nb_args, 
 /*
    else if(strcmp(cmnd, "test") == 0)
    {
-      *res = PyString_FromString("New style Api call OK !!!");
+      *res = PYSTRING_FROMSTRING("New style Api call OK !!!");
       *nerr=0;
       strncpy(err, "no error", l_err);
 

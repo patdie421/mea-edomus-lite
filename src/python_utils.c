@@ -22,6 +22,7 @@
 #include "python_utils.h"
 
 
+
 PyObject *mea_getMemory(PyObject *self, PyObject *args, PyObject *mea_memory)
 {
    PyObject *key;
@@ -73,7 +74,7 @@ void mea_addDouble_to_pydict(PyObject *data_dict, char *key, double value)
 
 void mea_addString_to_pydict(PyObject *data_dict, char *key, char *value)
 {
-   PyObject *val = PyString_FromString(value);
+   PyObject *val = PYSTRING_FROMSTRING(value);
    PyDict_SetItemString(data_dict, key, val);
    Py_DECREF(val);
 }
@@ -159,7 +160,7 @@ int mea_call_python_function2(PyObject *pFunc, PyObject *plugin_params_dict)
 
       pValue = PyObject_CallObject(pFunc, pArgs); // appel du plugin
       if (pValue != NULL) {
-         retour=(int)PyInt_AsLong(pValue);
+         retour=(int)PYINT_ASLONG(pValue);
          Py_DECREF(pValue);
          DEBUG_SECTION mea_log_printf("%s (%s) : Result of call : %d\n", DEBUG_STR, __func__, retour);
       }
@@ -217,7 +218,12 @@ int mea_call_python_function(char *plugin_name, char *plugin_func, PyObject *plu
    PyObject *pName = NULL, *pModule = NULL;
    int retour=-1;
 
-   pName = PyString_FromString(plugin_name);
+//   pName = PYSTRING_FROMSTRING(plugin_name);
+#if PY_MAJOR_VERSION >= 3
+   pName = PyUnicode_DecodeFSDefault(plugin_name);
+#else
+   pName = PYSTRING_FROMSTRING(plugin_name);
+#endif
    if(!pName) {
       return -1;
    }
@@ -240,6 +246,7 @@ cJSON *mea_call_python_function_json_alloc(char *module_name, char *function_nam
 {
    cJSON *r=NULL;
    PyObject *p=NULL;
+   PyObject *pModuleName=NULL;
 
    if(j==NULL) {
       p=Py_None;
@@ -252,7 +259,13 @@ cJSON *mea_call_python_function_json_alloc(char *module_name, char *function_nam
       }
    }
    
-   PyObject *pModuleName = PyString_FromString(module_name);
+//   PyObject *pModuleName = PYSTRING_FROMSTRING(module_name);
+#if PY_MAJOR_VERSION >= 3
+   pModuleName = PyUnicode_DecodeFSDefault(module_name);
+#else
+   pModuleName = PYSTRING_FROMSTRING(module_name);
+#endif
+
    if(!pModuleName) {
       if(p) {
          Py_DECREF(p);
@@ -384,7 +397,7 @@ PyObject *mea_jsonToPyObject(cJSON *e)
          break;
 
       case cJSON_String:
-         p = PyString_FromString(e->valuestring);
+         p = PYSTRING_FROMSTRING(e->valuestring);
          break;
                
       case cJSON_Array:
@@ -449,7 +462,7 @@ cJSON *mea_PyObjectToJsonObject(PyObject *p)
    while (PyDict_Next(p, &pos, &key, &value)) {
       cJSON *v=mea_PyObjectToJson(value);
       if(v)
-         cJSON_AddItemToObject(j, PyString_AsString(key), v);
+         cJSON_AddItemToObject(j, PYSTRING_ASSTRING(key), v);
    }
    
    return j;
@@ -477,8 +490,8 @@ cJSON *mea_PyObjectToJson(PyObject *p)
    else if(PyLong_Check(p)) {
       j=cJSON_CreateNumber(PyLong_AsDouble(p));
    }
-   else if(PyString_Check(p)) {
-      j=cJSON_CreateString(PyString_AsString(p));
+   else if(PYSTRING_CHECK(p)) {
+      j=cJSON_CreateString(PYSTRING_ASSTRING(p));
    }
    else if(PyDict_Check(p)) {
       j=mea_PyObjectToJsonObject(p);
@@ -520,17 +533,17 @@ PyObject *mea_xplMsgToPyDict2(cJSON *xplMsgJson)
    cJSON *e=xplMsgJson->child; 
    while(e) {
       if(e->string) {
-         if(strcmp(e->string, XPLSOURCE_STR_C)==0 ||
-            strcmp(e->string, XPLTARGET_STR_C)==0 ||
+         if(strcmp(e->string, XPLSOURCE_STR_C)==0  ||
+            strcmp(e->string, XPLTARGET_STR_C)==0  ||
             strcmp(e->string, XPLMSGTYPE_STR_C)==0 ||
             strcmp(e->string, XPLSCHEMA_STR_C)==0) {
-            s=PyString_FromString(e->valuestring);
+            s=PYSTRING_FROMSTRING(e->valuestring);
             PyDict_SetItemString(pyXplMsg, e->string, s);
             Py_DECREF(s);
          }
          else {
             if (e->valuestring != NULL)
-               s=PyString_FromString(e->valuestring);
+               s=PYSTRING_FROMSTRING(e->valuestring);
             else {
                s=Py_None;
                Py_INCREF(s);
