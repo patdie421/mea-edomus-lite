@@ -25,29 +25,30 @@ MACOSX_ASPLUGIN_LDFLAGS=
 endif
 
 DEBUGFLAGS  = -D__DEBUG_ON__
+PYTHON_VERSION=2.7
+PYTHON=python$(PYTHON_VERSION)
+
+SHELL = /bin/bash
+
+DEBUGFLAGS  = -D__DEBUG_ON__
 ifeq ($(TECHNO), linux)
-   SONAME      = $(LINUX_SONAME)
    CFLAGS      = -std=gnu99 \
-                 -D_BSD_SOURCE \
                  -D_DEFAULT_SOURCE \
                  -O2 \
                  -DTECHNO_$(TECHNO) \
-                 -I/usr/include/python2.7 \
+                 -I/usr/include/mysql \
+                 -I/usr/include/$(PYTHON) \
                  -I"$(BASEDIR)/src" \
-                 $(DEBUGFLAGS) \
-                 $(LINUX_ASPLUGIN_CFLAGS)
-   LDFLAGS     = $(LINUX_ASPLUGIN_LDFLAGS)
+                 $(DEBUGFLAGS)
 endif
 ifeq ($(TECHNO), macosx)
-   SONAME      = $(MACOSX_SONAME)
    CFLAGS      = -std=c99 \
                  -O2 \
                  -DTECHNO_$(TECHNO) \
-                 -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
+                 -I/usr/local/mysql/include \
+                 -I/System/Library/Frameworks/Python.framework/Versions/$(PYTHON_VERSION)/include/$(PYTHON) \
                  -I"$(BASEDIR)/src" \
-                 $(DEBUGFLAGS) \
-                 $(MACOSX_ASPLUGIN_CFLAGS)
-   LDFLAGS     = $(MACOSX_ASPLUGIN_LDFLAGS)
+                 $(DEBUGFLAGS)
 endif
 
 ifeq ($(ASPLUGIN), 1)

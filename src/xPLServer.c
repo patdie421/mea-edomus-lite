@@ -3,12 +3,13 @@
 //  Created by Patrice DIETSCH on 17/10/12.
 //
 //
+/*
 #ifdef __APPLE__
 #include <Python/Python.h>
 #else
 #include <Python.h>
 #endif
-
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -846,10 +847,10 @@ int start_xPLServer(int my_id, void *data, char *errmsg, int l_errmsg)
       _xPLServer_thread_id=xPLServer();
 
       if(_xPLServer_thread_id==NULL) {
-#ifdef _POSIX_SOURCE
-         char *ret;
-#else
+#if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
          int ret;
+#else
+         char *ret;
 #endif
          ret=strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(1) {

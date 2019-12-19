@@ -1329,7 +1329,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
       PyThreadState *tempState = PyThreadState_Swap(myThreadState);
 
       PyErr_Clear();
-      pName = PyString_FromString(interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s);
+      pName = PYSTRING_FROMSTRING(interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s);
       pModule = PyImport_Import(pName);
       if(!pModule) {
          VERBOSE(5) mea_log_printf("%s (%s) : %s not found\n", ERROR_STR, __func__, interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s);

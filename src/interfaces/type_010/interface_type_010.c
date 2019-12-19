@@ -280,7 +280,7 @@ int init_interface_type_010_data_preprocessor(interface_type_010_t *i010, char *
 
    mea_python_lock();
       
-   PyObject *pName = PyString_FromString(plugin_name);
+   PyObject *pName = PYSTRING_FROMSTRING(plugin_name);
    if(!pName) {
       ret=-1;
       goto init_interface_type_010_data_preprocessor_clean_exit;
@@ -317,7 +317,7 @@ int init_interface_type_010_data_preprocessor(interface_type_010_t *i010, char *
       
       if(PyCallable_Check(i010->pFunc)) {
          if(plugin_parameters)
-            i010->pParams=PyString_FromString(plugin_parameters);
+            i010->pParams=PYSTRING_FROMSTRING(plugin_parameters);
          else
             i010->pParams=NULL;
          ret = 0;
@@ -998,7 +998,7 @@ int16_t api_interface_type_010(void *ixxx, char *cmnd, void *args, int nb_args, 
 /*
    else if(strcmp(cmnd, "test") == 0)
    {
-      *res = PyString_FromString("New style Api call OK !!!");
+      *res = PYSTRING_FROMSTRING("New style Api call OK !!!");
       *nerr=0;
       strncpy(err, "no error", l_err);
 

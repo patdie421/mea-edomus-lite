@@ -351,7 +351,7 @@ int init_interface_type_006_data_preprocessor(interface_type_006_t *i006, char *
 
    mea_python_lock();
       
-   PyObject *pName = PyString_FromString(plugin_name);
+   PyObject *pName = PYSTRING_FROMSTRING(plugin_name);
    if(!pName) {
       ret=-1;
       goto init_interface_type_006_data_preprocessor_clean_exit;
@@ -388,7 +388,7 @@ int init_interface_type_006_data_preprocessor(interface_type_006_t *i006, char *
       
       if(PyCallable_Check(i006->pFunc)) {
          if(plugin_parameters)
-            i006->pParams=PyString_FromString(plugin_parameters);
+            i006->pParams=PYSTRING_FROMSTRING(plugin_parameters);
          else
             i006->pParams=NULL;
          ret = 0;
