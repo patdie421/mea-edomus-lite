@@ -146,6 +146,7 @@ static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le de
    {"id_interface",               ID_INTERFACE_ID},
    {"description",                DESCRIPTION_ID},
    {"id_sensor_actuator",         ID_SENSOR_ACTUATOR_ID},
+   {"METRIC",                     API_METRIC_ID},
 
    {NULL,0}
 };

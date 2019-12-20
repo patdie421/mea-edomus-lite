@@ -9,8 +9,8 @@ endif
 SHELL = /bin/bash
 
 ifeq ($(ASPLUGIN), 1)
-LINUX_SONAME           = interface_type_003.so
-MACOSX_SONAME          = interface_type_003.dylib
+LINUX_SONAME           = interface_type_006.so
+MACOSX_SONAME          = interface_type_006.dylib
 LINUX_ASPLUGIN_CFLAGS  = -DASPLUGIN -fPIC
 LINUX_ASPLUGIN_LDFLAGS = -shared -Wl,--export-dynamic
 MACOSX_ASPLUGIN_CFLAGS = -DASPLUGIN
@@ -19,47 +19,48 @@ else
 LINUX_SONAME           =
 MACOSX_SONAME          =
 LINUX_ASPLUGIN_CFLAGS  =
-LINUX_ASPLUGIN_LDFLAGS = -shared
+LINUX_ASPLUGIN_LDFLAGS =
 MACOSX_ASPLUGIN_CFLAGS =
 MACOSX_ASPLUGIN_LDFLAGS=
 endif
 
 DEBUGFLAGS  = -D__DEBUG_ON__
+
+ifndef PYTHONVERSION
+PYTHONVERSION=2.7
+endif
+PYTHON=python$(PYTHONVERSION)
+
+SHELL = /bin/bash
+
+DEBUGFLAGS  = -D__DEBUG_ON__
 ifeq ($(TECHNO), linux)
-   SONAME      = $(LINUX_SONAME)
    CFLAGS      = -std=gnu99 \
                  -D_DEFAULT_SOURCE \
                  -O2 \
                  -DTECHNO_$(TECHNO) \
-                 -I/usr/include/mysql \
-                 -I/usr/include/python2.7 \
+                 -I/usr/include/$(PYTHON) \
                  -I"$(BASEDIR)/src" \
-                 $(DEBUGFLAGS) \
-                 $(LINUX_ASPLUGIN_CFLAGS)
-   LDFLAGS     = $(LINUX_ASPLUGIN_LDFLAGS)
+                 $(DEBUGFLAGS)
 endif
 ifeq ($(TECHNO), macosx)
-   SONAME      = $(MACOSX_SONAME)
    CFLAGS      = -std=c99 \
                  -O2 \
                  -DTECHNO_$(TECHNO) \
-                 -I/usr/local/mysql/include \
-                 -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
+                 -I/System/Library/Frameworks/Python.framework/Versions/$(PYTHON_VERSION)/include/$(PYTHON) \
                  -I"$(BASEDIR)/src" \
-                 $(DEBUGFLAGS) \
-                 $(MACOSX_ASPLUGIN_CFLAGS)
-   LDFLAGS     = $(MACOSX_ASPLUGIN_LDFLAGS)
+                 $(DEBUGFLAGS)
 endif
 
 ifeq ($(ASPLUGIN), 1)
-SOURCES=enocean.c \
-interface_type_003.c \
+SOURCES=interface_type_003.c \
 interface_type_003_pairing.c \
+enocean.c \
 plugin.c
 else
-SOURCES=enocean.c \
+SOURCES=interface_type_003.c \
 interface_type_003_pairing.c \
-interface_type_003.c
+enocean.c
 endif
 
 OBJECTS=$(addprefix $(TECHNO).objects/, $(SOURCES:.c=.o))
@@ -67,7 +68,7 @@ OBJECTS=$(addprefix $(TECHNO).objects/, $(SOURCES:.c=.o))
 all: .deps $(TECHNO).objects $(OBJECTS) $(SONAME)
 
 $(SONAME): $(OBJECTS) 
-	@$(CC) $(OBJECTS) $(LDFLAGS) -o $(SONAME);
+	@$(CC) $(LDFLAGS) $(OBJECTS) -o $(SONAME);
 
 $(TECHNO).objects/%.o: $(SOURCES)
 	@$(CC) $(INCLUDES) -c $(CFLAGS) -MM -MT $(TECHNO).objects/$*.o $*.c > .deps/$*.dep
@@ -83,3 +84,4 @@ clean:
 	rm -f $(TECHNO).objects/*.o .deps/*.dep $(SONAME)
  
 -include .deps/*.dep
+

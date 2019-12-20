@@ -340,7 +340,6 @@ PyObject *json_to_pydict_interface(cJSON *jsonInterface)
 int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_s *device_info, void *userValue)
 {
    char *device;
-//   int ret;
    int err;
    
    interface_type_002_t *interface=(interface_type_002_t *)userValue;
@@ -471,7 +470,7 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
    if(jsonInterface == NULL)
       return ERROR;
 
-   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
+   char *parameters=cJSON_GetObjectItem(jsonInterface,PARAMETERS_STR_C)->valuestring;
 
    parsed_parameters_t *plugin_params=NULL;
    int nb_plugin_params;
@@ -562,7 +561,7 @@ void *_thread_interface_type_002_xbeedata_cleanup(void *args)
 
 mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, struct thread_params_s *params, data_queue_elem_t *e)
 {
-   cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, "devices");
+   cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
 
    if(jsonDevices == NULL)
       return -1;
@@ -573,10 +572,10 @@ mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, st
       int err=0;
 
       char *name=jsonDevice->string;
-      int id_sensor_actuator=(int)cJSON_GetObjectItem(jsonDevice, "id_sensor_actuator")->valuedouble;
-      int id_type=(int)cJSON_GetObjectItem(jsonDevice, "id_type")->valuedouble;
-      char *parameters=(char*)cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
-      char *dev=(char*)cJSON_GetObjectItem(jsonInterface, "dev")->valuestring;
+      int id_sensor_actuator=(int)cJSON_GetObjectItem(jsonDevice, ID_SENSOR_ACTUATOR_STR_C)->valuedouble;
+      int id_type=(int)cJSON_GetObjectItem(jsonDevice, ID_TYPE_STR_C)->valuedouble;
+      char *parameters=(char*)cJSON_GetObjectItem(jsonDevice, PARAMETERS_STR_C)->valuestring;
+      char *dev=(char*)cJSON_GetObjectItem(jsonInterface, DEV_STR_C)->valuestring;
 //      int todbflag=0;
 
       printf("@@@@@ %s %d %d %s %s\n", name, id_sensor_actuator, id_type, parameters, dev);
@@ -957,10 +956,10 @@ interface_type_002_t *malloc_and_init2_interface_type_002(int id_driver, cJSON *
    }
 
    char *name=jsonInterface->string;
-   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,"id_interface")->valuedouble;
-   char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
-   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
-   char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
+   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,ID_INTERFACE_STR_C)->valuedouble;
+   char *dev=cJSON_GetObjectItem(jsonInterface,DEV_STR_C)->valuestring;
+   char *parameters=cJSON_GetObjectItem(jsonInterface,PARAMETERS_STR_C)->valuestring;
+   char *description=cJSON_GetObjectItem(jsonInterface,DESCRIPTION_STR_C)->valuestring;
 
    strncpy(i002->dev, (char *)dev, sizeof(i002->dev)-1);
    strncpy(i002->name, (char *)name, sizeof(i002->name)-1);
@@ -1201,8 +1200,8 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
  * \return    ERROR ou NOERROR
  **/ 
 {
-   char dev[81];
-   char buff[80];
+   char dev[256];
+   char buff[256];
    speed_t speed;
 
    int fd=-1;
@@ -1223,7 +1222,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    int interface_nb_parameters=0;
    parsed_parameters_t *interface_parameters=NULL;
    
-   char err_str[128];
+   char err_str[256];
    
    ret=get_dev_and_speed((char *)start_stop_params->i002->dev, buff, sizeof(buff), &speed);
    if(!ret) {

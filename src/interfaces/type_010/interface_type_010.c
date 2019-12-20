@@ -126,7 +126,7 @@ int16_t _interface_type_010_xPL_callback2(cJSON *xplMsgJson, struct device_info_
          PyThreadState *tempState = PyThreadState_Swap(callback_data->myThreadState);
 
          plugin_qelem->aDict=mea_device_info_to_pydict_device(device_info);
-         mea_addLong_to_pydict(plugin_qelem->aDict, "api_key", (long)i010->id_interface);
+         mea_addLong_to_pydict(plugin_qelem->aDict, API_KEY_STR_C, (long)i010->id_interface);
          PyObject *xplmsg=mea_xplMsgToPyDict2(xplMsgJson);
          PyDict_SetItemString(plugin_qelem->aDict, XPLMSG_STR_C, xplmsg);
          Py_DECREF(xplmsg);
@@ -368,11 +368,11 @@ int interface_type_010_data_preprocessor(interface_type_010_t *i010)
       PyObject *aDict=PyDict_New();
       if(aDict) {
          PyObject *value = PyByteArray_FromStringAndSize((char *)i010->line_buffer, (long)i010->line_buffer_ptr);
-         PyDict_SetItemString(aDict, "data", value);
+         PyDict_SetItemString(aDict, DATA_STR_C, value);
          Py_DECREF(value);
-         mea_addLong_to_pydict(aDict, "l_data", (long)i010->line_buffer_ptr);
+         mea_addLong_to_pydict(aDict, L_DATA_STR_C, (long)i010->line_buffer_ptr);
          mea_addLong_to_pydict(aDict, INTERFACE_ID_STR_C, i010->id_interface);
-         mea_addLong_to_pydict(aDict, "api_key", (long)i010->id_interface);
+         mea_addLong_to_pydict(aDict, API_KEY_STR_C, (long)i010->id_interface);
 
          if(i010->pParams)
             PyDict_SetItemString(aDict, "plugin_paramters", i010->pParams);
@@ -460,7 +460,7 @@ int interface_type_010_pairing(interface_type_010_t *i010)
       name[sizeof(name)-1]=0;
 
       j=cJSON_CreateObject();
-      cJSON_AddStringToObject(j, "data", data);
+      cJSON_AddStringToObject(j, DATA_STR_C, data);
       
       PYTHON_CALL_JSON(i010->myThreadState, j, _j);
 
@@ -523,14 +523,14 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
 
          plugin_elem->aDict = mea_device_info_to_pydict_device(device_info);
 
-         mea_addLong_to_pydict(plugin_elem->aDict, "api_key", (long)i010->id_interface);
+         mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, (long)i010->id_interface);
          mea_addLong_to_pydict(plugin_elem->aDict, DEVICE_TYPE_ID_STR_C, device_info->id);
 
          // les datas
          PyObject *value = PyByteArray_FromStringAndSize((char *)i010->line_buffer, (long)i010->line_buffer_ptr);
-         PyDict_SetItemString(plugin_elem->aDict, "data", value);
+         PyDict_SetItemString(plugin_elem->aDict, DATA_STR_C, value);
          Py_DECREF(value);
-         mea_addLong_to_pydict(plugin_elem->aDict, "l_data", (long)i010->line_buffer_ptr);
+         mea_addLong_to_pydict(plugin_elem->aDict, L_DATA_STR_C, (long)i010->line_buffer_ptr);
 
          if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
             mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
@@ -573,7 +573,7 @@ static int interface_type_010_data_to_plugin(interface_type_010_t *i010)
 
    cJSON *jsonInterface = getInterfaceById_alloc(i010->id_interface);
    if(jsonInterface) {
-      cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, "devices");
+      cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
       if(jsonDevices) {
          cJSON *jsonDevice = jsonDevices->child;
          while(jsonDevice) {
@@ -1051,11 +1051,11 @@ interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *
       return NULL;
    }
 
-   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,"id_interface")->valuedouble;
+   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,ID_INTERFACE_STR_C)->valuedouble;
    char *name=jsonInterface->string;
-   char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
-   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
-   char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
+   char *dev=cJSON_GetObjectItem(jsonInterface,DEV_STR_C)->valuestring;
+   char *parameters=cJSON_GetObjectItem(jsonInterface,PARAMETERS_STR_C)->valuestring;
+   char *description=cJSON_GetObjectItem(jsonInterface,DESCRIPTION_STR_C)->valuestring;
 
    strncpy(i010->dev, (char *)dev, sizeof(i010->dev)-1);
    strncpy(i010->name, (char *)name, sizeof(i010->name)-1);

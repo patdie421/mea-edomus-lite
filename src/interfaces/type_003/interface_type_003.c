@@ -366,12 +366,12 @@ void *_thread_interface_type_003_enocean_data(void *args)
          }
          
          if(jsonInterface && pairing_done==0) {
-            cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, "devices");
+            cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
             if(jsonDevices) {
                cJSON *jsonDevice = jsonDevices->child;
                while(jsonDevice) {
                   int err;
-                  char *parameters = cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
+                  char *parameters = cJSON_GetObjectItem(jsonDevice, PARAMETERS_STR_C)->valuestring;
                      udata->plugin_params=alloc_parsed_parameters(parameters, valid_enocean_plugin_params, &(udata->nb_plugin_params), &err, 0);
                   if(!udata->plugin_params || !udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
                      goto _thread_interface_type_003_enocean_next_device_loop;
@@ -392,8 +392,8 @@ void *_thread_interface_type_003_enocean_data(void *args)
                         plugin_elem->aDict = mea_device_info_to_pydict_device(&device_info);
                         mea_addLong_to_pydict(plugin_elem->aDict, XPL_ENOCEAN_ADDR_STR_C, (long)e->enocean_addr);
                         value = PyByteArray_FromStringAndSize(plugin_elem->buff, (long)plugin_elem->l_buff);
-                        // PyDict_SetItemString(plugin_elem->aDict, DATA_STR_C, value);
-                        PyDict_SetItemString(plugin_elem->aDict, "data", value);
+                        PyDict_SetItemString(plugin_elem->aDict, DATA_STR_C, value);
+                        // PyDict_SetItemString(plugin_elem->aDict, "data", value);
                         Py_DECREF(value);
                         // mea_addLong_to_pydict(plugin_elem->aDict, "l_data", (long)plugin_elem->l_buff);
                         mea_addLong_to_pydict(plugin_elem->aDict, L_DATA_STR_C, (long)plugin_elem->l_buff);
@@ -768,11 +768,11 @@ interface_type_003_t *malloc_and_init_interface_type_003(int id_driver, cJSON *j
       return NULL;
    }
 
-   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,"id_interface")->valuedouble;
+   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,ID_INTERFACE_STR_C)->valuedouble;
    char *name=jsonInterface->string;
-   char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
-   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
-   char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
+   char *dev=cJSON_GetObjectItem(jsonInterface,DEV_STR_C)->valuestring;
+   char *parameters=cJSON_GetObjectItem(jsonInterface,PARAMETERS_STR_C)->valuestring;
+   char *description=cJSON_GetObjectItem(jsonInterface,DESCRIPTION_STR_C)->valuestring;
 
    strncpy(i003->dev, (char *)dev, sizeof(i003->dev)-1);
    strncpy(i003->name, (char *)name, sizeof(i003->name)-1);

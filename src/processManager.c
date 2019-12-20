@@ -354,6 +354,7 @@ int managed_processes_indicators_list(char *message, int l_message)
 }
 
 
+
 int _managed_processes_process_to_json(int id, char *s, int s_l, int flag)
 {
    struct process_indicator_s *e;
@@ -442,6 +443,9 @@ int _managed_processes_process_to_json(int id, char *s, int s_l, int flag)
       if(mea_strncat(s,s_l,"}")<0)
          return -1;
    }
+   else {
+      return -1;
+   }
    return 0;
 }
 
@@ -455,7 +459,7 @@ int managed_processes_process_to_json(int id, char *message, int l_message)
 int managed_processes_processes_to_json(char *message, int l_message, int type)
 {
    char buff[512];
-   char json[2048];
+   char json[4096];
    
    json[0]=0;
    

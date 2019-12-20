@@ -171,14 +171,14 @@ int load_interface_type_001(interface_type_001_t *i001, cJSON *jsonInterface)
    }
    mea_queue_init(i001->sensors_list);
 
-   cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface,"devices");
+   cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface,DEVICES_STR_C);
    if(jsonDevices) {
       cJSON *jsonDevice=jsonDevices->child;
       while(jsonDevice) {
-         int id_sensor_actuator=(int)cJSON_GetObjectItem(jsonDevice,"id_sensor_actuator")->valuedouble;
-         int id_type=(int)cJSON_GetObjectItem(jsonDevice,"id_type")->valuedouble;
+         int id_sensor_actuator=(int)cJSON_GetObjectItem(jsonDevice,ID_SENSOR_ACTUATOR_STR_C)->valuedouble;
+         int id_type=(int)cJSON_GetObjectItem(jsonDevice,ID_TYPE_STR_C)->valuedouble;
          char *name=jsonDevice->string;
-         char *parameters=cJSON_GetObjectItem(jsonDevice,"parameters")->valuestring;
+         char *parameters=cJSON_GetObjectItem(jsonDevice,PARAMETERS_STR_C)->valuestring;
          int todbflag = 0;
 
          switch (id_type) {
@@ -322,11 +322,11 @@ interface_type_001_t *malloc_and_init2_interface_type_001(int id_driver, cJSON *
       return NULL;
    }
 
-   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,"id_interface")->valuedouble;
+   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,ID_INTERFACE_STR_C)->valuedouble;
    char *name=jsonInterface->string;
-   char *dev=cJSON_GetObjectItem(jsonInterface,"dev")->valuestring;
-//   char *parameters=cJSON_GetObjectItem(jsonInterface,"parameters")->valuestring;
-   char *description=cJSON_GetObjectItem(jsonInterface,"description")->valuestring;
+   char *dev=cJSON_GetObjectItem(jsonInterface,DEV_STR_C)->valuestring;
+//   char *parameters=cJSON_GetObjectItem(jsonInterface,PARAMETERS_STR_C)->valuestring;
+   char *description=cJSON_GetObjectItem(jsonInterface,DESCRIPTION_STR_C)->valuestring;
  
    // initialisation contexte de l'interface
    i001->thread_is_running=0;

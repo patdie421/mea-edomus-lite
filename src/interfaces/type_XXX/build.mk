@@ -8,9 +8,11 @@ endif
 
 SHELL = /bin/bash
 
+INTERFACE_NUM=XXX
+
 ifeq ($(ASPLUGIN), 1)
-LINUX_SONAME           = interface_type_XXX.so
-MACOSX_SONAME          = interface_type_XXX.dylib
+LINUX_SONAME           = interface_type_$(INTERFACE_NUM).so
+MACOSX_SONAME          = interface_type_$(INTERFACE_NUM).dylib
 LINUX_ASPLUGIN_CFLAGS  = -DASPLUGIN -fPIC
 LINUX_ASPLUGIN_LDFLAGS = -shared -Wl,--export-dynamic
 MACOSX_ASPLUGIN_CFLAGS = -DASPLUGIN
@@ -25,13 +27,19 @@ MACOSX_ASPLUGIN_LDFLAGS=
 endif
 
 DEBUGFLAGS  = -D__DEBUG_ON__
+
+ifndef PYTHONVERSION
+PYTHONVERSION=2.7
+endif
+PYTHON=python$(PYTHONVERSION)
+
 ifeq ($(TECHNO), linux)
    SONAME      = $(LINUX_SONAME)
    CFLAGS      = -std=gnu99 \
                  -D_DEFAULT_SOURCE \
                  -O2 \
                  -DTECHNO_$(TECHNO) \
-                 -I/usr/include/python2.7 \
+                 -I/usr/include/python$(PYTHONVERSION) \
                  -I"$(BASEDIR)"/src \
                  $(DEBUGFLAGS) \
                  $(LINUX_ASPLUGIN_CFLAGS)
@@ -42,7 +50,7 @@ ifeq ($(TECHNO), macosx)
    CFLAGS      = -std=c99 \
                  -O2 \
                  -DTECHNO_$(TECHNO) \
-                 -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
+                 -I/System/Library/Frameworks/Python.framework/Versions/$(PYTHONVERSION)/include/python$(PYTHONVERSION) \
                  -I"$(BASEDIR)"/src \
                  $(DEBUGFLAGS) \
                  $(MACOSX_ASPLUGIN_CFLAGS)
@@ -50,10 +58,10 @@ ifeq ($(TECHNO), macosx)
 endif
 
 ifeq ($(ASPLUGIN), 1)
-SOURCES=interface_type_XXX.c \
+SOURCES=interface_type_$(INTERFACE_NUM).c \
 plugin.c
 else
-SOURCES=interface_type_XXX.c
+SOURCES=interface_type_$(INTERFACE_NUM).c
 endif
 
 OBJECTS=$(addprefix $(TECHNO).objects/, $(SOURCES:.c=.o))

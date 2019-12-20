@@ -14,12 +14,13 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/select.h>
+#include <sys/time.h>
 #include <signal.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <pthread.h>
 #include <time.h>
-#include <sys/time.h>
+
 
 #include "serial.h"
 #include "comio2.h"

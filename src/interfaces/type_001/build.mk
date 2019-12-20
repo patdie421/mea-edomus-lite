@@ -6,8 +6,10 @@ ifndef TECHNO
 $(error - TECHNO is unset)
 endif
 
-PYTHON_VERSION=2.7
-PYTHON=python$(PYTHON_VERSION)
+ifndef PYTHONVERSION
+PYTHONVERSION=2.7
+endif
+PYTHON=python$(PYTHONVERSION)
 
 SHELL = /bin/bash
 
@@ -17,7 +19,6 @@ ifeq ($(TECHNO), linux)
                  -D_DEFAULT_SOURCE \
                  -O2 \
                  -DTECHNO_$(TECHNO) \
-                 -I/usr/include/mysql \
                  -I/usr/include/$(PYTHON) \
                  -I"$(BASEDIR)/src" \
                  $(DEBUGFLAGS)
@@ -26,7 +27,6 @@ ifeq ($(TECHNO), macosx)
    CFLAGS      = -std=c99 \
                  -O2 \
                  -DTECHNO_$(TECHNO) \
-                 -I/usr/local/mysql/include \
                  -I/System/Library/Frameworks/Python.framework/Versions/$(PYTHON_VERSION)/include/$(PYTHON) \
                  -I"$(BASEDIR)/src" \
                  $(DEBUGFLAGS)

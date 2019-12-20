@@ -110,6 +110,7 @@ struct tokens_strings_da_s
    char *typeoftype_str_c;
    char *description_str_c;
    char *id_sensor_actuator_str_c;
+   char *api_metric_str_c;
 };
 
 extern struct tokens_strings_da_s *tokens_string_da;
@@ -207,6 +208,7 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define TYPEOFTYPE_STR_C                 tokens_string_da->typeoftype_str_c
 #define DESCRIPTION_STR_C                tokens_string_da->description_str_c
 #define ID_SENSOR_ACTUATOR_STR_C         tokens_string_da->id_sensor_actuator_str_c
+#define API_METRIC_STR_C                 tokens_string_da->api_metric_str_c
 
 #else
 
@@ -303,6 +305,7 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define TYPEOFTYPE_STR_C                 get_token_string_by_id(TYPEOFTYPE_ID)
 #define DESCRIPTION_STR_C                get_token_string_by_id(DESCRIPTION_ID)
 #define ID_SENSOR_ACTUATOR_STR_C         get_token_string_by_id(ID_SENSOR_ACTUATOR_ID)
+#define API_METRIC_STR_C                 get_token_string_by_id(API_METRIC_ID)
 
 #endif
 

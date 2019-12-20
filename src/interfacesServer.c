@@ -111,7 +111,7 @@ int cmpInterfaces(cJSON *i1, cJSON i2*)
 }
 */
 
-void deleteTypesIndex(struct types_index_s **types_index)
+struct types_index_s *deleteTypesIndex(struct types_index_s **types_index)
 {
    struct types_index_s *e = NULL, *tmp = NULL;
  
@@ -122,6 +122,8 @@ void deleteTypesIndex(struct types_index_s **types_index)
       }
    }
    *types_index = NULL;
+   
+   return *types_index;
 }
 
 
@@ -248,7 +250,7 @@ struct devices_index_s * removeDeviceFromIndexByInterfaceId(struct devices_index
 }
 
 
-void deleteDevicesIndex(struct devices_index_s **devices_index)
+struct devices_index_s *deleteDevicesIndex(struct devices_index_s **devices_index)
 {
    struct devices_index_s *e = NULL, *tmp = NULL;
  
@@ -259,10 +261,12 @@ void deleteDevicesIndex(struct devices_index_s **devices_index)
       }
    }
    *devices_index = NULL;
+   
+   return *devices_index;
 }
 
 
-void deleteDevsIndex(struct devs_index_s **devs_index)
+struct devs_index_s *deleteDevsIndex(struct devs_index_s **devs_index)
 {
    struct devs_index_s *e = NULL, *tmp = NULL;
  
@@ -273,6 +277,8 @@ void deleteDevsIndex(struct devs_index_s **devs_index)
       }
    }
    *devs_index = NULL;
+   
+   return *devs_index;
 }
 
 
@@ -1258,20 +1264,6 @@ int resyncDevices(cJSON *jsonInterfaces, char *file)
    return 0;
 }
 
-/*
- char jsonInterfacesFile[1024];
- snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", meapath);
- jsonInterfaces=jsonInterfacesLoad(jsonInterfacesFile);
- if(!jsonInterfaces) {
-    VERBOSE(1) {
-       mea_log_printf("%s (%s) : can't load interfaces descriptions from %s\n",ERROR_STR,__func__,jsonInterfacesFile);
-    }
-    return -1;
- }
- createDevicesIndex(&devices_index, jsonInterfaces);
- createDevsIndex(&devs_index, jsonInterfaces);
- */
-
 
 int interfaceCommit()
 {
@@ -1660,7 +1652,6 @@ int init_interfaces_list(cJSON *jsonInterfaces, cJSON *jsonType)
  
    cJSON *jsonInterface=jsonInterfaces->child;
    while( jsonInterface ) {
-//      int  state=cJSON_GetObjectItem(jsonInterface, "state")->valuedouble;
       int  id_type=cJSON_GetObjectItem(jsonInterface, ID_TYPE_STR_C)->valuedouble;
 
       cJSON *jsonType=findTypeByIdThroughIndex(types_index, id_type);
@@ -2045,41 +2036,6 @@ int clean_not_linked(mea_queue_t *interfaces_list)
    return 0;
 }
  
-/*
-int remove_delegate_links(mea_queue_t *interfaces_list, char *interface) // BUG:
-{
-   int ret = 0;
-   interfaces_queue_elem_t *iq;
-   interfaces_queue_elem_t *iq_clone;
- 
-   mea_queue_first(interfaces_list);
-   while(1) {
-      mea_queue_current(interfaces_list, (void **)&iq);
- 
-      if(iq && !iq->context) {
-         char name[256], more[256];
-         int n;
- 
-         ret=sscanf(iq->dev,"%[^:]://%[^\n]%n\n", name, more, &n);
-         if(ret>0 && strlen(iq->dev) == n) {
-            if(iq_clone->context && iq_clone->delegate_flag == 0) {
-               if(mea_strcmplower(name, interface) == 0) {
-                  iq->context = NULL;
-                  iq->fns = NULL;
-               }
-            }
-         }
-      }
- 
-      ret=mea_queue_next(interfaces_list);
-      if(ret<0)
-         break;
-   }
-
-   return 0;
-}
-*/
-
 
 int remove_delegate_links(mea_queue_t *interfaces_list, char *interface)
 {

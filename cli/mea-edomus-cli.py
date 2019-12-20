@@ -19,6 +19,7 @@ from modules import configuration
 from modules import user
 from modules import service
 from modules import type
+from modules import metric
 
 cli_epilog='''
 Available resources:
@@ -28,6 +29,7 @@ Available resources:
   type:          manage types of interfaces and devices
   interface:     manage interfaces and associated devices
   pairing:       manage pairing processes
+  metric:        get serices metrics
 '''
 
 cli_description='''
@@ -41,6 +43,7 @@ objects_functions["configuration"]=configuration.do
 objects_functions["user"]=user.do
 objects_functions["service"]=service.do
 objects_functions["type"]=type.do
+objects_functions["metric"]=metric.do
 
 _parsers={}
 
@@ -64,6 +67,7 @@ def getArgs():
    _parsers['user']          = user.parser(args_subparser, args_common)
    _parsers['type']          = type.parser(args_subparser, args_common)
    _parsers['pairing']       = pairing.parser(args_subparser, args_common)
+   _parsers['metric']        = metric.parser(args_subparser, args_common)
 
    args, _args = args_parser.parse_known_args()
    

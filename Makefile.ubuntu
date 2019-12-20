@@ -4,6 +4,8 @@ CC = gcc
 TECHNO=linux
 DEBUGFLAGS = -g -D__DEBUG_ON__
 ASPLUGIN = 1
+PYTHONVERSION = 2.7
+#PYTHONVERSION = 3.6m
 
 MYPATH := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 #MYPATH=/home/bananapi/mea-edomus
@@ -45,19 +47,19 @@ CFLAGS      = -std=c99 \
                $(DEBUGFLAGS) \
               -O3 \
               -D_DEFAULT_SOURCE \
-              -I/usr/include/python2.7 \
-              -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
+              -I/usr/include/python$(PYTHONVERSION) \
+              -I/System/Library/Frameworks/Python.framework/Versions/$(PYTHONVERSION)/include/python$(PYTHONVERSION) \
               -I"$(MYPATH)/src" \
                $(INTERFACES_CFLAGS) \
                $(ASPLUGIN_CFLAGS) \
               -pthread
 
-LDFLAGS     = -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
-              -L/usr/lib/python2.7/config-x86_64-linux-gnu \
+LDFLAGS     = -L/System/Library/Frameworks/Python.framework/Versions/$(PYTHONVERSION)/lib \
+              -L/usr/lib/python$(PYTHONVERSION)/config-x86_64-linux-gnu \
               -lpthread \
               -lm \
               -ldl \
-              -lpython2.7 \
+              -lpython$(PYTHONVERSION) \
               -lrt \
               -lcurl \
               $(ASPLUGIN_LDFLAGS) \
@@ -70,7 +72,7 @@ all: .deps $(TECHNO).objects interfaces $(SOURCES) $(EXECUTABLE)
 interfaces:
 	@for i in $(INTERFACES_PATH) ; \
 	do \
-	   $(MAKE) -C $$i -f build.mk TECHNO=$(TECHNO) BASEDIR="$(MYPATH)" CC=$(CC) ASPLUGIN=$(ASPLUGIN); \
+	   $(MAKE) -C $$i -f build.mk TECHNO=$(TECHNO) BASEDIR="$(MYPATH)" CC=$(CC) ASPLUGIN=$(ASPLUGIN) PYTHONVERSION=$(PYTHONVERSION); \
 	done
 
 $(TECHNO).objects/%.o: %.c
@@ -84,13 +86,13 @@ clean:
 	-rm -f $(OBJECTS) $(INTERFACES_OBJECTS) .deps/src/*
 	@for i in $(INTERFACES_PATH) ; \
 	do \
-	   $(MAKE) -C $$i -f build.mk TECHNO=$(TECHNO) BASEDIR="$(MYPATH)" CC=$(CC) ASPLUGIN=$(ASPLUGIN) clean; \
+	   $(MAKE) -C $$i -f build.mk TECHNO=$(TECHNO) BASEDIR="$(MYPATH)" CC=$(CC) ASPLUGIN=$(ASPLUGIN) PYTHONVERSION=$(PYTHONVERSION) clean; \
 	done
 
 clean-all: clean
-	make -C commands -f commands.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) clean
+	make -C commands -f commands.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) PYTHONVERSION=$(PYTHONVERSION) clean
 	make -C src -f utilslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) clean
-	make -C src/interfaces/drivers -f driverslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) clean
+	make -C src/interfaces/drivers -f driverslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) PYTHONVERSION=$(PYTHONVERSION) clean
 	-rm -f lib/mealib/$(TECHNO)/mealib.a
 	-rm -f package/mea-edomus.tar.pkg.bz2
 
@@ -109,7 +111,7 @@ build-package: build-all
 	package/build-package.sh "$(MYPATH)" $(TECHNO)
 
 build-commands: lib/mealib/$(TECHNO)/mealib.a
-	make -C commands -f commands.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO)
+	make -C commands -f commands.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) PYTHONVERSION=$(PYTHONVERSION)
   
 build-mealib: lib/mealib/$(TECHNO)/mealib.a
 
@@ -117,10 +119,10 @@ lib/mealib/$(TECHNO)/mealib.a: lib/mealib/$(TECHNO)/utilslib.a lib/mealib/$(TECH
 	ar -rcT lib/mealib/$(TECHNO)/mealib.a lib/mealib/$(TECHNO)/utilslib.a lib/mealib/$(TECHNO)/driverslib.a
 
 lib/mealib/$(TECHNO)/utilslib.a:
-	make -C src -f utilslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO)
+	make -C src -f utilslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) PYTHONVERSION=$(PYTHONVERSION)
 
 lib/mealib/$(TECHNO)/driverslib.a:
-	make -C src/interfaces/drivers -f driverslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO)
+	make -C src/interfaces/drivers -f driverslib.mk BASEDIR="$(MYPATH)" TECHNO=$(TECHNO) PYTHONVERSION=$(PYTHONVERSION)
 
 $(TECHNO).objects:
 	@mkdir -p $(TECHNO).objects
