@@ -12,8 +12,8 @@ def get_types(host, port, sessionid):
    return GetUrl("http://"+str(host)+":"+str(port)+"/rest/type",sessionid)
 
 
-def get_type(host, port, sessionid, username):
-   return GetUrl("http://"+str(host)+":"+str(port)+"/rest/type/"+str(username),sessionid)
+def get_type(host, port, sessionid, typename):
+   return GetUrl("http://"+str(host)+":"+str(port)+"/rest/type/"+str(typename),sessionid)
 
 
 def _get(host, port, sessionid, args, _args):

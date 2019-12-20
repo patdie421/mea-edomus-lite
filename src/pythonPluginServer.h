@@ -15,6 +15,7 @@
 
 #include <pthread.h>
 
+#include "cJSON.h"
 
 #define DEBUG_PyEval_AcquireLock(id, last_time) { \
    printf("CHRONO : Demande Lock par %s a %u ms\n",(id),start_chrono((last_time))); \
@@ -29,7 +30,7 @@
 
 
 //typedef enum {XBEEDATA=1, XPLMSG=2, COMMISSIONNING=3, ENOCEANDATA=4, GENERICSERIALDATA=5, DATAFROMSENSOR=6 } pythonPlugin_type;
-typedef enum {XBEEDATA=1, XPLMSG=2, COMMISSIONNING=3, DATAFROMSENSOR=6 } pythonPlugin_type;
+typedef enum {XBEEDATA=1, XPLMSG=2, COMMISSIONNING=3, DATAFROMSENSOR=6, XPLMSG_JSON=12, DATAFROMSENSOR_JSON=16, CUSTOM_JSON=30 } pythonPlugin_type;
 
 
 struct pythonPluginServer_start_stop_params_s
@@ -41,8 +42,11 @@ struct pythonPluginServer_start_stop_params_s
 typedef struct pythonPlugin_cmd_s
 {
    char *python_module;
+   char *python_function;
    char *data;
    int  l_data;
+   pthread_cond_t *exec_cond;
+   pthread_mutex_t *exec_lock;
 } pythonPlugin_cmd_t;
 
 
@@ -50,6 +54,7 @@ typedef struct plugin_queue_elem_s
 {
    pythonPlugin_type type_elem;
    PyObject *aDict;
+   cJSON *aJsonDict;
    char buff[128];
    uint16_t l_buff;
 } plugin_queue_elem_t;

@@ -141,6 +141,7 @@ void         stop_interfaces(void);
 int          dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson);
 int          restart_interfaces(int my_id, void *data, char *errmsg, int l_errmsg);
 int          device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, cJSON *jsonInterface, cJSON *jsonType);
+cJSON       *device_info_to_json_alloc(struct device_info_s *device_info);
 
 // wrapper
 cJSON       *getInterfaceByName_alloc(char *name);

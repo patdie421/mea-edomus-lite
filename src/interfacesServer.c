@@ -1422,6 +1422,30 @@ cJSON *getAvailablePairing_alloc()
 }
 
 
+cJSON *device_info_to_json_alloc(struct device_info_s *device_info)
+{
+   cJSON *jsonDeviceInfo=cJSON_CreateObject();
+
+   if(!jsonDeviceInfo)
+      return NULL;
+
+   cJSON_AddNumberToObject(jsonDeviceInfo, DEVICE_ID_STR_C, device_info->id);
+   cJSON_AddStringToObject(jsonDeviceInfo, DEVICE_NAME_STR_C, device_info->name);
+   cJSON_AddNumberToObject(jsonDeviceInfo, DEVICE_STATE_STR_C, device_info->state);
+   cJSON_AddNumberToObject(jsonDeviceInfo, DEVICE_TYPE_ID_STR_C, device_info->type_id);
+   cJSON_AddNumberToObject(jsonDeviceInfo, DEVICE_LOCATION_ID_STR_C, device_info->location_id);
+   cJSON_AddNumberToObject(jsonDeviceInfo, INTERFACE_ID_STR_C, device_info->interface_id);
+   cJSON_AddStringToObject(jsonDeviceInfo, DEVICE_INTERFACE_NAME_STR_C, device_info->interface_name);
+   cJSON_AddStringToObject(jsonDeviceInfo, DEVICE_INTERFACE_TYPE_NAME_STR_C, device_info->type_name);
+   cJSON_AddStringToObject(jsonDeviceInfo, DEVICE_TYPE_PARAMETERS_STR_C, device_info->type_parameters);
+   cJSON_AddNumberToObject(jsonDeviceInfo, TODBFLAG_STR_C, device_info->todbflag);
+   cJSON_AddNumberToObject(jsonDeviceInfo, TYPEOFTYPE_STR_C, device_info->typeoftype_id);
+   cJSON_AddStringToObject(jsonDeviceInfo, DEV_STR_C, device_info->interface_dev);
+
+   return jsonDeviceInfo;
+}
+
+
 int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, cJSON *jsonInterface, cJSON *jsonType)
 {
    if(!device_info)

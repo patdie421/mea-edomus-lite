@@ -36,7 +36,8 @@ extern "C"
 #define cJSON_String 4
 #define cJSON_Array 5
 #define cJSON_Object 6
-	
+#define cJSON_ByteArray 7
+
 #define cJSON_IsReference 256
 #define cJSON_StringIsConst 512
 
@@ -91,6 +92,7 @@ extern cJSON *cJSON_CreateFalse(void);
 extern cJSON *cJSON_CreateBool(int b);
 extern cJSON *cJSON_CreateNumber(double num);
 extern cJSON *cJSON_CreateString(const char *string);
+extern cJSON *cJSON_CreateByteArray(const char *bytes, int l_bytes);
 extern cJSON *cJSON_CreateArray(void);
 extern cJSON *cJSON_CreateObject(void);
 

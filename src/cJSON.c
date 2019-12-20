@@ -46,6 +46,16 @@ static int cJSON_strcasecmp(const char *s1,const char *s2)
 static void *(*cJSON_malloc)(size_t sz) = malloc;
 static void (*cJSON_free)(void *ptr) = free;
 
+static char* cJSON_bytearraydup(const char* bytes, int l_bytes)
+{
+      char* copy;
+
+      if (!(copy = (char*)cJSON_malloc(l_bytes+1))) return 0;
+      memcpy(copy,bytes,l_bytes);
+      copy[l_bytes]=0;
+      return copy;
+}
+
 static char* cJSON_strdup(const char* str)
 {
       size_t len;
@@ -695,6 +705,7 @@ cJSON *cJSON_CreateFalse(void)					{cJSON *item=cJSON_New_Item();if(item)item->t
 cJSON *cJSON_CreateBool(int b)					{cJSON *item=cJSON_New_Item();if(item)item->type=b?cJSON_True:cJSON_False;return item;}
 cJSON *cJSON_CreateNumber(double num)			{cJSON *item=cJSON_New_Item();if(item){item->type=cJSON_Number;item->valuedouble=num;item->valueint=(int)num;}return item;}
 cJSON *cJSON_CreateString(const char *string)	{cJSON *item=cJSON_New_Item();if(item){item->type=cJSON_String;item->valuestring=cJSON_strdup(string);}return item;}
+cJSON *cJSON_CreateByteArray(const char *bytes, int l_bytes) {cJSON *item=cJSON_New_Item();if(item){item->type=cJSON_ByteArray;item->valuestring=cJSON_bytearraydup(bytes, l_bytes);item->valueint=(int)l_bytes;}return item;}
 cJSON *cJSON_CreateArray(void)					{cJSON *item=cJSON_New_Item();if(item)item->type=cJSON_Array;return item;}
 cJSON *cJSON_CreateObject(void)					{cJSON *item=cJSON_New_Item();if(item)item->type=cJSON_Object;return item;}
 

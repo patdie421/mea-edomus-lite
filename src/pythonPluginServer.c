@@ -96,29 +96,24 @@ void setPythonPluginPath(char *path)
 }
 
 
-mea_error_t pythonPluginServer_add_cmd(char *module, void *data, int l_data)
+mea_error_t pythonPluginServer_exec_cmd_coditionUp(pthread_mutex_t *exec_lock, pthread_cond_t *exec_cond)
 {
-   pythonPlugin_cmd_t *e=NULL;
-   int ret=NOERROR;
-   e=(pythonPlugin_cmd_t *)malloc(sizeof(pythonPlugin_cmd_t));
-   if(!e)
-      return ERROR;
-   e->python_module=NULL;
-   e->data=NULL;
-   e->l_data=0;
+   pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)exec_lock);
    
-   e->python_module=(char *)malloc(strlen(module)+1);
-   if(!e->python_module)
-      goto exit_pythonPluginServer_add_cmd;
-   strcpy(e->python_module, module);
+   pthread_mutex_lock(exec_lock);
+   pthread_cond_broadcast(exec_cond);
+   pthread_mutex_unlock(exec_lock);
+   
+   pthread_cleanup_pop(0);
+   
+   return NOERROR;
+}
 
-   e->data=(char *)malloc(l_data);
-   if(!e->data)
-      goto exit_pythonPluginServer_add_cmd;
-   memcpy(e->data, data, l_data);
-   
-   e->l_data=l_data;
-   
+
+mea_error_t add_to_cmd_queue(pythonPlugin_cmd_t *e)
+{
+   mea_error_t ret=NOERROR;
+
    pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&pythonPluginCmd_queue_lock);
    pthread_mutex_lock(&pythonPluginCmd_queue_lock);
    if(pythonPluginCmd_queue) {
@@ -130,29 +125,194 @@ mea_error_t pythonPluginServer_add_cmd(char *module, void *data, int l_data)
       ret=ERROR;
    pthread_mutex_unlock(&pythonPluginCmd_queue_lock);
    pthread_cleanup_pop(0);
-
-   if(ret!=ERROR)
-      return NOERROR;
    
-exit_pythonPluginServer_add_cmd:
+   return ret;
+}
+
+
+void _clean_cmd(pythonPlugin_cmd_t *e)
+{
    if(e) {
       if(e->python_module) {
          free(e->python_module);
          e->python_module=NULL;
       }
+
+      if(e->python_function) {
+         free(e->python_function);
+         e->python_function=NULL;
+      }
+
       if(e->data) {
          free(e->data);
          e->data=NULL;
       }
       e->l_data=0;
-      free(e);
-      e=NULL;
    }
+}
+
+
+mea_error_t pythonPluginServer_exec_cmd(char *module, char *function, void *data, int l_data)
+{
+   int ret=NOERROR;
+   pthread_cond_t *exec_cond;
+   pthread_mutex_t *exec_lock;
+   
+   exec_cond=malloc(sizeof(pthread_cond_t));
+   exec_lock=malloc(sizeof(pthread_mutex_t));
+
+   pthread_mutex_init(exec_lock, NULL);
+   pthread_cond_init(exec_cond, NULL);
+
+   pythonPlugin_cmd_t *e=NULL;
+   e=(pythonPlugin_cmd_t *)malloc(sizeof(pythonPlugin_cmd_t));
+   if(!e) {
+      ret=ERROR;
+      goto pythonPluginServer_exec_cmd_clean_exit;
+   }
+   e->python_module=NULL;
+   e->python_function=NULL;
+   e->data=NULL;
+   e->l_data=0;
+   e->exec_cond=exec_cond;
+   e->exec_lock=exec_lock;
+
+   e->python_module=(char *)malloc(strlen(module)+1);
+   if(!e->python_module)
+      goto pythonPluginServer_exec_cmd_clean_exit;
+   strcpy(e->python_module, module);
+
+   if(function) {
+      e->python_function=(char *)malloc(strlen(function)+1);
+      if(!e->python_function)
+         goto pythonPluginServer_exec_cmd_clean_exit;
+      strcpy(e->python_function, module);
+   }
+   
+   e->data=(char *)malloc(l_data);
+   if(!e->data)
+      goto pythonPluginServer_exec_cmd_clean_exit;
+   memcpy(e->data, data, l_data);
+   e->l_data=l_data;
+ 
+   ret=add_to_cmd_queue(e);
+
+   struct timeval tv;
+   struct timespec ts;
+   gettimeofday(&tv, NULL);
+   ts.tv_sec = tv.tv_sec + 10; // timeout de 10 secondes
+   ts.tv_nsec = 0;
+   
+   pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)exec_lock);
+   pthread_mutex_lock(exec_lock);
+   
+   int _ret=pthread_cond_timedwait(exec_cond, exec_lock, &ts);
+   if(_ret!=0) {
+      if(_ret==ETIMEDOUT) {
+         DEBUG_SECTION mea_log_printf("%s (%s) : pthread_cond_timedwait timeout",WARNING_STR, __func__);
+      }
+      else {
+         DEBUG_SECTION mea_log_printf("%s (%s) : pthread_cond_timedwait error - ",ERROR_STR, __func__);
+         perror("");
+      }
+   }
+
+   pthread_mutex_unlock(exec_lock);
+   pthread_cleanup_pop(0);
+
+
+pythonPluginServer_exec_cmd_clean_exit:
+   if(exec_cond) {
+      pthread_cond_destroy(exec_cond);
+      free(exec_cond);
+      exec_cond=NULL;
+   }
+   if(exec_lock) {
+      pthread_mutex_destroy(exec_lock);
+      free(exec_lock);
+      exec_lock=NULL;
+   }
+
+   _clean_cmd(e);
+   free(e);
+   e=NULL;
+
+   return ret;
+}
+
+
+mea_error_t pythonPluginServer_add_cmd(char *module, void *data, int l_data)
+{
+   pythonPlugin_cmd_t *e=NULL;
+   int ret=NOERROR;
+   e=(pythonPlugin_cmd_t *)malloc(sizeof(pythonPlugin_cmd_t));
+   if(!e)
+      return ERROR;
+   e->python_module=NULL;
+   e->python_function=NULL;
+   e->data=NULL;
+   e->l_data=0;
+   e->exec_cond=NULL;
+   e->exec_lock=NULL;
+
+   e->python_module=(char *)malloc(strlen(module)+1);
+   if(!e->python_module)
+      goto pythonPluginServer_add_cmd_clean_exit;
+   strcpy(e->python_module, module);
+
+   e->data=(char *)malloc(l_data);
+   if(!e->data)
+      goto pythonPluginServer_add_cmd_clean_exit;
+   memcpy(e->data, data, l_data);
+   
+   e->l_data=l_data;
+   
+   ret=add_to_cmd_queue(e);
+/*   
+   pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&pythonPluginCmd_queue_lock);
+   pthread_mutex_lock(&pythonPluginCmd_queue_lock);
+   if(pythonPluginCmd_queue) {
+      mea_queue_in_elem(pythonPluginCmd_queue, e);
+      if(pythonPluginCmd_queue->nb_elem>=1)
+         pthread_cond_broadcast(&pythonPluginCmd_queue_cond);
+   }
+   else
+      ret=ERROR;
+   pthread_mutex_unlock(&pythonPluginCmd_queue_lock);
+   pthread_cleanup_pop(0);
+*/
+   if(ret!=ERROR)
+      return NOERROR;
+   
+pythonPluginServer_add_cmd_clean_exit:
+/*
+   if(e) {
+      if(e->python_module) {
+         free(e->python_module);
+         e->python_module=NULL;
+      }
+
+      if(e->python_function) {
+         free(e->python_function);
+         e->python_function=NULL;
+      }
+
+      if(e->data) {
+         free(e->data);
+         e->data=NULL;
+      }
+
+   }
+*/
+   _clean_cmd(e);
+   free(e);
+   e=NULL;
+
    return ERROR;
 }
 
 
-mea_error_t call_pythonPlugin(char *module, int type, PyObject *data_dict)
+mea_error_t call_pythonPlugin(char *module, char *function, int type, PyObject *data_dict)
 {
    PyObject *pName, *pModule=NULL, *pFunc;
    PyObject *pArgs, *pValue;
@@ -234,6 +394,9 @@ mea_error_t call_pythonPlugin(char *module, int type, PyObject *data_dict)
 //            break;
          case DATAFROMSENSOR:
             fx="mea_dataFromSensor";
+            break;
+         case CUSTOM_JSON:
+//            fx=e->function;
             break;
          default:
             return NOERROR;
@@ -403,27 +566,56 @@ void *_pythonPlugin_thread(void *data)
          pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
          PyEval_AcquireLock();
          tempState = PyThreadState_Swap(myThreadState);
-         
-         PyObject *pydict_data=data->aDict;
 
-         call_pythonPlugin(e->python_module, data->type_elem, pydict_data);
-         
+         PyObject *pydict_data=NULL;
+
+         if(data->type_elem==XPLMSG_JSON ||
+            data->type_elem==DATAFROMSENSOR_JSON ||
+            data->type_elem==CUSTOM_JSON) {
+            data->aDict=mea_jsonToPyObject(data->aJsonDict);
+            cJSON_Delete(data->aJsonDict);
+            data->aJsonDict=NULL;
+            switch(data->type_elem) {
+               case XPLMSG_JSON:
+                  data->type_elem=XPLMSG;
+                  break;
+               case DATAFROMSENSOR_JSON:
+                  data->type_elem=DATAFROMSENSOR;
+                  break;
+            }
+         }
+
+         pydict_data=data->aDict;
+
+         call_pythonPlugin(e->python_module, e->python_module, data->type_elem, pydict_data);
+
          Py_DECREF(pydict_data);
 
          PyThreadState_Swap(tempState);
          PyEval_ReleaseLock();
          pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 
+         if(e->exec_lock) {
+            pythonPluginServer_exec_cmd_coditionUp(e->exec_lock, e->exec_cond);
+         }
+
          if(e) {
+/*         
             if(e->python_module) {
                free(e->python_module);
                e->python_module=NULL;
+            }
+            if(e->python_function) {
+               free(e->python_function);
+               e->python_function=NULL;
             }
             if(e->data) {
                free(e->data);
                e->data=NULL;
             }
             e->l_data=0;
+*/
+            _clean_cmd(e);
             free(e);
             e=NULL;
          }

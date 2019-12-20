@@ -39,6 +39,7 @@
 #include "parameters_utils.h"
 #include "cJSON.h"
 #include "mea_timer.h"
+#include "mea_xpl.h"
 
 #include "processManager.h"
 #include "pythonPluginServer.h"
@@ -71,10 +72,13 @@ struct thread_params_s
    interface_type_010_t *i010;
 };
 
+
 struct callback_xpl_data_s 
 {
+/*
    PyThreadState  *mainThreadState; 
    PyThreadState  *myThreadState; 
+*/
 };
 
 typedef void (*thread_f)(void *);
@@ -111,35 +115,42 @@ int16_t _interface_type_010_xPL_callback2(cJSON *xplMsgJson, struct device_info_
          release_parsed_parameters(&plugin_params);
       return -1;
    }
+   
+   cJSON *data=NULL;
    plugin_queue_elem_t *plugin_qelem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
    if(plugin_qelem) {
-      plugin_qelem->type_elem=XPLMSG;
-      {
-         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-         PyEval_AcquireLock();
+//      {
+      data=device_info_to_json_alloc(device_info);
+      cJSON *msg=mea_xplMsgToJson_alloc(xplMsgJson);
+      cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
+      cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)i010->id_interface);
+      if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+         cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
+
+      plugin_qelem->type_elem=XPLMSG_JSON;
+      plugin_qelem->aJsonDict=data;
+      plugin_qelem->aDict=NULL;
          
-         if(!callback_data->mainThreadState)
-            callback_data->mainThreadState=PyThreadState_Get();
-         if(!callback_data->myThreadState)
-            callback_data->myThreadState = PyThreadState_New(callback_data->mainThreadState->interp);
+//         plugin_qelem->type_elem=XPLMSG;
+//         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+//         PyEval_AcquireLock();
+//         if(!callback_data->mainThreadState)
+//            callback_data->mainThreadState=PyThreadState_Get();
+//         if(!callback_data->myThreadState)
+//            callback_data->myThreadState = PyThreadState_New(callback_data->mainThreadState->interp);
+//         PyThreadState *tempState = PyThreadState_Swap(callback_data->myThreadState);
+//         plugin_qelem->aDict=mea_jsonToPyObject(data);
+//         plugin_qelem->aJsonDict=NULL;
+//         if(data) {
+//            cJSON_Delete(data);
+//            data=NULL;
+//         }
+//         PyThreadState_Swap(tempState);
+//         PyEval_ReleaseLock();
+//         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 
-         PyThreadState *tempState = PyThreadState_Swap(callback_data->myThreadState);
-
-         plugin_qelem->aDict=mea_device_info_to_pydict_device(device_info);
-         mea_addLong_to_pydict(plugin_qelem->aDict, API_KEY_STR_C, (long)i010->id_interface);
-         PyObject *xplmsg=mea_xplMsgToPyDict2(xplMsgJson);
-         PyDict_SetItemString(plugin_qelem->aDict, XPLMSG_STR_C, xplmsg);
-         Py_DECREF(xplmsg);
-
-         if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
-            mea_addString_to_pydict(plugin_qelem->aDict, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
-         
-         PyThreadState_Swap(tempState);
-         PyEval_ReleaseLock();
-         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-      }
-      
       pythonPluginServer_add_cmd(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_qelem, sizeof(plugin_queue_elem_t));
+//      }
 
       i010->indicators.senttoplugin++;
       free(plugin_qelem);
@@ -515,12 +526,23 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
    plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
 
    if(plugin_elem) {
-      plugin_elem->type_elem=DATAFROMSENSOR;
+      plugin_elem->type_elem=DATAFROMSENSOR_JSON;
+      
+      plugin_elem->aJsonDict = device_info_to_json_alloc(device_info);
+      cJSON_AddNumberToObject(plugin_elem->aJsonDict,API_KEY_STR_C,(double)i010->id_interface);
+      cJSON_AddNumberToObject(plugin_elem->aJsonDict,DEVICE_TYPE_ID_STR_C,(double)device_info->id);
+      if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
+         cJSON_AddStringToObject(plugin_elem->aJsonDict, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
+      }
+      cJSON_AddItemToObject(plugin_elem->aJsonDict,DATA_STR_C,cJSON_CreateByteArray(i010->line_buffer, i010->line_buffer_ptr));
+      cJSON_AddNumberToObject(plugin_elem->aJsonDict, L_DATA_STR_C, (double)i010->line_buffer_ptr);
+/*
       {
          pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
          PyEval_AcquireLock();
          PyThreadState *tempState = PyThreadState_Swap(i010->myThreadState);
 
+         plugin_elem->type_elem=DATAFROMSENSOR;
          plugin_elem->aDict = mea_device_info_to_pydict_device(device_info);
 
          mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, (long)i010->id_interface);
@@ -540,6 +562,7 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
          PyEval_ReleaseLock();
          pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
       }
+*/
    }
 
    pythonPluginServer_add_cmd(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
@@ -1351,15 +1374,15 @@ int stop_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
       
    if(start_stop_params->i010->xPL_callback_data) {
       struct callback_xpl_data_s *data = (struct callback_xpl_data_s *)start_stop_params->i010->xPL_callback_data;
+/*
       PyEval_AcquireLock(); 
-     
       if(data->myThreadState) { 
          PyThreadState_Clear(data->myThreadState); 
          PyThreadState_Delete(data->myThreadState); 
          data->myThreadState=NULL; 
       }
       PyEval_ReleaseLock(); 
-      
+*/      
       free(start_stop_params->i010->xPL_callback_data);
       start_stop_params->i010->xPL_callback_data=NULL;
    }
@@ -1419,9 +1442,10 @@ int start_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
        }
        goto clean_exit;
    }
+/*
    xpl_callback_params->mainThreadState=NULL;
    xpl_callback_params->myThreadState=NULL;
-
+*/
    start_stop_params->i010->thread=start_interface_type_010_thread(start_stop_params->i010, NULL, (thread_f)_thread_interface_type_010);
 
    start_stop_params->i010->xPL_callback_data=xpl_callback_params;

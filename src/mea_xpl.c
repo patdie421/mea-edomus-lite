@@ -23,8 +23,11 @@
 #include <netdb.h>
 #include <string.h>
 
+#include "cJSON.h"
 #include "mea_timer.h"
 #include "mea_verbose.h"
+#include "tokens.h"
+#include "tokens_da.h"
 
 #define XPLPORT 3865
 
@@ -315,4 +318,53 @@ void mea_xPLSendHbeat(int fd, struct sockaddr_in *xPLBroadcastAddr, char *remote
    sprintf(msg, hbeatMsg, source, type, interval, port, remoteip, version);
    
    mea_xPLSendMessage(fd, xPLBroadcastAddr, msg, (int)strlen(msg));
+}
+
+
+cJSON *mea_xplMsgToJson_alloc(cJSON *xplMsgJson)
+{
+   if(xplMsgJson == NULL)
+      return NULL;
+
+   cJSON *jsonXplMsg = NULL;
+   cJSON *jsonBody= NULL;
+   
+   jsonXplMsg = cJSON_CreateObject();
+   jsonBody=cJSON_CreateObject();
+
+   if(!jsonXplMsg || !jsonBody) {
+      if(jsonXplMsg)
+         cJSON_Delete(jsonXplMsg);
+      if(jsonBody)
+         cJSON_Delete(jsonBody);
+      return NULL;
+   }
+
+   cJSON_AddNumberToObject(jsonXplMsg, XPLMSG_STR_C, 1.0);
+   
+   cJSON *e=xplMsgJson->child;
+   while(e) {
+      if(e->string) {
+         if(strcmp(e->string, XPLSOURCE_STR_C)==0  ||
+            strcmp(e->string, XPLTARGET_STR_C)==0  ||
+            strcmp(e->string, XPLMSGTYPE_STR_C)==0 ||
+            strcmp(e->string, XPLSCHEMA_STR_C)==0) {
+               
+            cJSON_AddStringToObject(jsonXplMsg, e->string, e->valuestring);
+         }
+         else {
+            if (e->valuestring != NULL) {
+               cJSON_AddStringToObject(jsonBody, e->string, e->valuestring);
+            }
+            else {
+               cJSON_AddNullToObject(jsonBody, e->string);
+            }
+         }
+      }
+      e=e->next;
+   }
+   
+   cJSON_AddItemToObject(jsonXplMsg, "body", jsonBody);
+
+   return jsonXplMsg;
 }

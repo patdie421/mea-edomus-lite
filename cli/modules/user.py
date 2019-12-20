@@ -91,7 +91,6 @@ def _commit(host, port, sessionid, args, _args):
 
 
 def _rollback(host, port, sessionid, args, _args):
-   print args
    if args.user==None:
       code,result=rollback_users(host, port, sessionid)
    elif len(args.keyvalue)==0:

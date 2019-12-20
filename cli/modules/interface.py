@@ -10,7 +10,6 @@ from modules import type
 
 from dateutil.parser import parse
 
-
 interface_states={ "0":0, "1":1, "2":2, "enabled":1, "disabled":0, "delegated":2, "inactive":0, "active":1 }
 device_states={ "0":0, "1":1, "enabled":1, "disabled":0, "inactive":0, "active":1 }
 

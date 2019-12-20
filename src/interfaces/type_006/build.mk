@@ -31,25 +31,29 @@ PYTHONVERSION=2.7
 endif
 PYTHON=python$(PYTHONVERSION)
 
-SHELL = /bin/bash
-
-DEBUGFLAGS  = -D__DEBUG_ON__
 ifeq ($(TECHNO), linux)
+   SONAME      = $(LINUX_SONAME)
    CFLAGS      = -std=gnu99 \
+                 -D_BSD_SOURCE \
                  -D_DEFAULT_SOURCE \
                  -O2 \
                  -DTECHNO_$(TECHNO) \
-                 -I/usr/include/$(PYTHON) \
+                 -I/usr/include/python$(PYTHONVERSION) \
                  -I"$(BASEDIR)/src" \
-                 $(DEBUGFLAGS)
+                 $(DEBUGFLAGS) \
+                 $(LINUX_ASPLUGIN_CFLAGS)
+   LDFLAGS     = $(LINUX_ASPLUGIN_LDFLAGS)
 endif
 ifeq ($(TECHNO), macosx)
+   SONAME      = $(MACOSX_SONAME)
    CFLAGS      = -std=c99 \
                  -O2 \
                  -DTECHNO_$(TECHNO) \
-                 -I/System/Library/Frameworks/Python.framework/Versions/$(PYTHON_VERSION)/include/$(PYTHON) \
+                 -I/System/Library/Frameworks/Python.framework/Versions/$(PYTHONVERSION)/include/python$(PYTHONVERSION) \
                  -I"$(BASEDIR)/src" \
-                 $(DEBUGFLAGS)
+                 $(DEBUGFLAGS) \
+                 $(MACOSX_ASPLUGIN_CFLAGS)
+   LDFLAGS     = $(MACOSX_ASPLUGIN_LDFLAGS)
 endif
 
 ifeq ($(ASPLUGIN), 1)

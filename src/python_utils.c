@@ -399,6 +399,10 @@ PyObject *mea_jsonToPyObject(cJSON *e)
       case cJSON_String:
          p = PYSTRING_FROMSTRING(e->valuestring);
          break;
+         
+      case cJSON_ByteArray:
+         p = PyByteArray_FromStringAndSize(e->valuestring, (long)e->valueint);
+         break;
                
       case cJSON_Array:
          p = mea_jsonArrayToPyList(e->child);
