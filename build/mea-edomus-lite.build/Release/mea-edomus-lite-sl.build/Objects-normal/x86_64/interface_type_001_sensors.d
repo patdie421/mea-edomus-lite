@@ -1,9 +1,9 @@
 dependencies: \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/interfaces/type_001/interface_type_001_sensors.c \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/globals.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_verbose.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_queue.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_error.h \
-  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_verbose.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/xPLServer.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/cJSON.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/interfaces/type_001/arduino_pins.h \

@@ -46,7 +46,10 @@ int get_fns_interface(void *lib, struct interfacesServer_interfaceFns_s *interfa
       if(!interfacesFns->get_type)
          fprintf(stderr,"get_type: %s\n", dlerror());
 
-      interfacesFns->api=NULL;
+      interfacesFns->api = (api_f)dlsym(lib, "api_interface_type_006_json");
+      if(!interfacesFns->api)
+         fprintf(stderr,"api: %s\n", dlerror());
+
       interfacesFns->pairing=NULL;
       
       interfacesFns->plugin_flag = 1;

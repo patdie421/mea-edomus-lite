@@ -43,6 +43,7 @@
 #include "python_utils.h"
 
 #include "processManager.h"
+#include "mea_xpl.h"
 
 #include "interfacesServer.h"
 #include "interface_type_002.h"
@@ -94,8 +95,6 @@ struct callback_commissionning_data_s
 
 struct callback_xpl_data_s
 {
-   PyThreadState  *mainThreadState;
-   PyThreadState  *myThreadState;
 };
 
 
@@ -105,8 +104,6 @@ struct thread_params_s
    mea_queue_t          *queue;
    pthread_mutex_t       callback_lock;
    pthread_cond_t        callback_cond;
-   PyThreadState        *mainThreadState;
-   PyThreadState        *myThreadState;
    parsed_parameters_t  *plugin_params;
    int                   nb_plugin_params;
    data_queue_elem_t    *e;
@@ -312,28 +309,22 @@ int get_local_xbee_addr(xbee_xd_t *xd, xbee_host_t *local_xbee)
    return 0;
 }
 
-
-PyObject *json_to_pydict_interface(cJSON *jsonInterface)
+cJSON *data_from_json_interface(cJSON *jsonInterface)
 {
-   PyObject *data_dict;
-   
-   data_dict=PyDict_New();
-   if(!data_dict)
-      return NULL;
-  
-   mea_addLong_to_pydict(data_dict, get_token_string_by_id(INTERFACE_ID_ID), (long)cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble);
-   mea_addLong_to_pydict(data_dict, get_token_string_by_id(INTERFACE_TYPE_ID_ID), (long)cJSON_GetObjectItem(jsonInterface, "id_type")->valuedouble);
-   mea_addString_to_pydict(data_dict, get_token_string_by_id(INTERFACE_NAME_ID), (char *)jsonInterface->string);
-   mea_addLong_to_pydict(data_dict, get_token_string_by_id(INTERFACE_STATE_ID), (long)cJSON_GetObjectItem(jsonInterface, "state")->valuedouble);
-
+   cJSON *data=cJSON_CreateObject();
    uint32_t addr_h, addr_l;
-   
+
+   cJSON_AddNumberToObject(data, INTERFACE_ID_STR_C, cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble);
+   cJSON_AddNumberToObject(data, INTERFACE_TYPE_ID_STR_C, cJSON_GetObjectItem(jsonInterface, "id_type")->valuedouble);
+   cJSON_AddStringToObject(data, INTERFACE_NAME_STR_C, jsonInterface->string);
+   cJSON_AddNumberToObject(data, INTERFACE_STATE_STR_C, cJSON_GetObjectItem(jsonInterface, "state")->valuedouble);
    if(sscanf((char *)cJSON_GetObjectItem(jsonInterface, "dev")->valuestring, "MESH://%x-%x", &addr_h, &addr_l)==2) {
-      mea_addLong_to_pydict(data_dict, get_token_string_by_id(ADDR_H_ID), (long)addr_h);
-      mea_addLong_to_pydict(data_dict, get_token_string_by_id(ADDR_L_ID), (long)addr_l);
+      cJSON_AddNumberToObject(data, get_token_string_by_id(ADDR_H_ID), addr_h);
+      cJSON_AddNumberToObject(data, get_token_string_by_id(ADDR_L_ID), addr_l);
    }
-   
-   return data_dict;
+   cJSON_AddNumberToObject(data, API_KEY_STR_C, cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble);
+
+   return data;
 }
 
 
@@ -343,17 +334,8 @@ int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    int err;
    
    interface_type_002_t *interface=(interface_type_002_t *)userValue;
-   struct callback_xpl_data_s *params=(struct callback_xpl_data_s *)interface->xPL_callback_data;
    
    interface->indicators.xplin++;
-   
-   PyEval_AcquireLock();
-   if(!params->mainThreadState)
-      params->mainThreadState=PyThreadState_Get();
-   if(!params->myThreadState)
-      params->myThreadState = PyThreadState_New(params->mainThreadState->interp);
-   PyEval_ReleaseLock();
-   
    cJSON *j = NULL;
    j = cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_DEVICE_ID));
    if(!j)
@@ -371,34 +353,21 @@ int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_
           release_parsed_parameters(&plugin_params);
       return ERROR; // si pas de parametre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin pour ce capteur
    }
+   
+   cJSON *data=cJSON_CreateObject();
+   data=device_info_to_json_alloc(device_info);
+   cJSON *msg=mea_xplMsgToJson_alloc(xplMsgJson);
+   cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
+   if(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
+      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
+   cJSON_AddNumberToObject(data, DEVICE_TYPE_ID_STR_C, (double)device_info->type_id);
+   cJSON_AddNumberToObject(data, get_token_string_by_id(ID_XBEE_ID), (double)((long)interface->xd));
+   cJSON_AddNumberToObject(data, API_KEY_STR_C, interface->id_interface);
 
-   plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-   if(plugin_elem) {
-      plugin_elem->type_elem=XPLMSG;
-      { // appel des fonctions Python
-         PyEval_AcquireLock();
-         PyThreadState *tempState = PyThreadState_Swap(params->myThreadState);
-               
-         plugin_elem->aDict=mea_device_info_to_pydict_device(device_info);
+   python_cmd_json(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
-         mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ID_XBEE_ID), (long)interface->xd);
-         PyObject *d=mea_xplMsgToPyDict2(xplMsgJson);
-         PyDict_SetItemString(plugin_elem->aDict, XPLMSG_STR_C, d);
-         mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(DEVICE_TYPE_ID_ID), device_info->type_id);
-         Py_DECREF(d);
-               
-         if(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
-         mea_addString_to_pydict(plugin_elem->aDict, get_token_string_by_id(DEVICE_PARAMETERS_ID), plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
-               
-         PyThreadState_Swap(tempState);
-         PyEval_ReleaseLock();
-      } // fin appel des fonctions Python
-   }         
-   pythonPluginServer_add_cmd(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
    interface->indicators.senttoplugin++;
    release_parsed_parameters(&plugin_params);
-   plugin_elem=NULL;
-
          
    DBG_FREE(plugin_params);
    plugin_params=NULL;
@@ -440,9 +409,8 @@ mea_error_t _inteface_type_002_xbeedata_callback(int id, unsigned char *cmd, uin
 
 mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *cmd, uint16_t l_cmd, void *data, char *addr_h, char *addr_l)
 {
-   struct xbee_node_identification_response_s *nd_resp;
-//   int rval=0;
-   int err;
+   struct xbee_node_identification_response_s *nd_resp=NULL;
+   int err=-1;
    
    struct callback_commissionning_data_s *callback_commissionning=(struct callback_commissionning_data_s *)data;
    *(callback_commissionning->commissionning_request)=*(callback_commissionning->commissionning_request)+1;
@@ -473,7 +441,7 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
    char *parameters=cJSON_GetObjectItem(jsonInterface,PARAMETERS_STR_C)->valuestring;
 
    parsed_parameters_t *plugin_params=NULL;
-   int nb_plugin_params;
+   int nb_plugin_params=-1;
       
    plugin_params=alloc_parsed_parameters(parameters, valid_xbee_plugin_params, &nb_plugin_params, &err, 0);
    if(!plugin_params || !plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
@@ -481,31 +449,21 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
          release_parsed_parameters(&plugin_params);
       return ERROR;
    }
- 
-   plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-   if(plugin_elem) {
-      plugin_elem->type_elem=COMMISSIONNING;
-         
-      { // appel des fonctions Python
-         mea_python_lock();
 
-         plugin_elem->aDict = json_to_pydict_interface(jsonInterface);
-/////         plugin_elem->aDict=stmt_to_pydict_interface(stmt);
-
-         mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ID_XBEE_ID), (long)callback_commissionning->i002->xd);
-         mea_addLong_to_pydict(plugin_elem->aDict, "LOCAL_XBEE_ADDR_H", (long)callback_commissionning->i002->local_xbee->l_addr_64_h);
-         mea_addLong_to_pydict(plugin_elem->aDict, "LOCAL_XBEE_ADDR_L", (long)callback_commissionning->i002->local_xbee->l_addr_64_l);
-            
-         if(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
-            mea_addString_to_pydict(plugin_elem->aDict, get_token_string_by_id(INTERFACE_PARAMETERS_ID), plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
-         mea_python_unlock();
-      } // fin appel des fonctions Python
-         
-      pythonPluginServer_add_cmd(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-      *(callback_commissionning->senttoplugin)=*(callback_commissionning->senttoplugin)+1;
+   cJSON *_data=data_from_json_interface(jsonInterface);
+   cJSON_AddNumberToObject(_data, get_token_string_by_id(ID_XBEE_ID), (double)((long)callback_commissionning->i002->xd));
+   cJSON_AddNumberToObject(_data, "LOCAL_XBEE_ADDR_H", (double)callback_commissionning->i002->local_xbee->l_addr_64_h);
+   cJSON_AddNumberToObject(_data, "LOCAL_XBEE_ADDR_L", (double)callback_commissionning->i002->local_xbee->l_addr_64_l);
+   if(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s) {
+      cJSON_AddStringToObject(_data, get_token_string_by_id(INTERFACE_PARAMETERS_ID), plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
    }
+   cJSON_AddNumberToObject(_data, API_KEY_STR_C, callback_commissionning->i002->id_interface);
 
-   release_parsed_parameters(&plugin_params); 
+   python_cmd_json(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, COMMISSIONNING, data);
+   
+   *(callback_commissionning->senttoplugin)=*(callback_commissionning->senttoplugin)+1;
+
+   release_parsed_parameters(&plugin_params);
    plugin_params=NULL;
    
    VERBOSE(9) {
@@ -531,14 +489,6 @@ void *_thread_interface_type_002_xbeedata_cleanup(void *args)
       params->e=NULL;
    }
 
-   if(params->myThreadState) {
-      PyEval_AcquireLock();
-      PyThreadState_Clear(params->myThreadState);
-      PyThreadState_Delete(params->myThreadState);
-      PyEval_ReleaseLock();
-      params->myThreadState=NULL;
-   }
-   
    if(params->plugin_params)
       release_parsed_parameters(&(params->plugin_params));
    
@@ -571,14 +521,12 @@ mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, st
 
       int err=0;
 
-      char *name=jsonDevice->string;
-      int id_sensor_actuator=(int)cJSON_GetObjectItem(jsonDevice, ID_SENSOR_ACTUATOR_STR_C)->valuedouble;
-      int id_type=(int)cJSON_GetObjectItem(jsonDevice, ID_TYPE_STR_C)->valuedouble;
+//      char *name=jsonDevice->string;
+//      int id_sensor_actuator=(int)cJSON_GetObjectItem(jsonDevice, ID_SENSOR_ACTUATOR_STR_C)->valuedouble;
+//      int id_type=(int)cJSON_GetObjectItem(jsonDevice, ID_TYPE_STR_C)->valuedouble;
       char *parameters=(char*)cJSON_GetObjectItem(jsonDevice, PARAMETERS_STR_C)->valuestring;
       char *dev=(char*)cJSON_GetObjectItem(jsonInterface, DEV_STR_C)->valuestring;
 //      int todbflag=0;
-
-      printf("@@@@@ %s %d %d %s %s\n", name, id_sensor_actuator, id_type, parameters, dev);
 
       params->plugin_params=alloc_parsed_parameters(parameters, valid_xbee_plugin_params, &(params->nb_plugin_params), &err, 0);
       if(!params->plugin_params || !params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
@@ -587,72 +535,31 @@ mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, st
          continue; // si pas de paramètre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin
       }
                
-      plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-      if(plugin_elem) {
+      uint16_t data_type = e->cmd[0]; // 0x90 serie, 0x92 iodata
+      uint32_t addr_h, addr_l;
 
-         pthread_cleanup_push( (void *)free, (void *)plugin_elem );
-
-         plugin_elem->type_elem=XBEEDATA;
-              
-         memcpy(plugin_elem->buff, e->cmd, e->l_cmd);
-         plugin_elem->l_buff=e->l_cmd;
-               
-         uint16_t data_type = e->cmd[0]; // 0x90 serie, 0x92 iodata
-
-         { // appel des fonctions Python
-            PyEval_AcquireLock();
-            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); // trop compliquer de traiter avec pthread_cleanup => on interdit les arrets lors des commandes python
-            PyThreadState *tempState = PyThreadState_Swap(params->myThreadState);
-
-            uint32_t addr_h, addr_l;
-
-            struct device_info_s device_info;
-            device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
-            plugin_elem->aDict=mea_device_info_to_pydict_device(&device_info);
-
-            if(sscanf((char *)dev, "MESH://%x-%x", &addr_h, &addr_l)==2) {
-               mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ADDR_H_ID), (long)addr_h);
-               mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ADDR_L_ID), (long)addr_l);
-            }
-       
-            PyObject *value;
-
-            value = PyByteArray_FromStringAndSize(plugin_elem->buff, (long)plugin_elem->l_buff);
-            PyDict_SetItemString(plugin_elem->aDict, "cmd", value);
-            Py_DECREF(value);
-            mea_addLong_to_pydict(plugin_elem->aDict, "l_cmd", (long)plugin_elem->l_buff);
-
-            value = PyByteArray_FromStringAndSize(&(plugin_elem->buff[12]), (long)plugin_elem->l_buff-12);
-            PyDict_SetItemString(plugin_elem->aDict, "cmd_data", value);
-            Py_DECREF(value);
-            mea_addLong_to_pydict(plugin_elem->aDict, "l_cmd_data", (long)plugin_elem->l_buff-12);
-
-            mea_addLong_to_pydict(plugin_elem->aDict, "data_type", (long)data_type);
-            mea_addLong_to_pydict(plugin_elem->aDict, get_token_string_by_id(ID_XBEE_ID), (long)params->xd);
-                  
-            if(params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
-               mea_addString_to_pydict(plugin_elem->aDict, get_token_string_by_id(DEVICE_PARAMETERS_ID), params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
-                  
-            PyThreadState_Swap(tempState);
-            PyEval_ReleaseLock();
-            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL); // on réauthorise les arrêts 
-            pthread_testcancel(); // on test tout de suite pour être sûr qu'on a pas ratté une demande d'arrêt
-         } // fin appel des fonctions Python
-
-         pythonPluginServer_add_cmd(params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-         params->i002->indicators.senttoplugin++;
-         DBG_FREE(plugin_elem);
-         plugin_elem=NULL;
-               
-         pthread_cleanup_pop(0);
+      struct device_info_s device_info;
+      device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
+      cJSON *data = device_info_to_json_alloc(&device_info);
+      if(sscanf((char *)dev, "MESH://%x-%x", &addr_h, &addr_l)==2) {
+         cJSON_AddNumberToObject(data, get_token_string_by_id(ADDR_H_ID), (double)addr_h);
+         cJSON_AddNumberToObject(data, get_token_string_by_id(ADDR_L_ID), (double)addr_l);
       }
-      else {
-         VERBOSE(2) {
-            mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-            perror("");
-         }
-         pthread_exit(PTHREAD_CANCELED);
+      cJSON_AddItemToObject(data, "cmd", cJSON_CreateByteArray((char *)e->cmd, e->l_cmd));
+      cJSON_AddNumberToObject(data, "l_cmd", e->l_cmd);
+      cJSON_AddItemToObject(data, "cmd_data", cJSON_CreateByteArray((char *)&(e->cmd[12]), e->l_cmd-12));
+      cJSON_AddNumberToObject(data, "l_cmd_data", e->l_cmd-12);
+      cJSON_AddNumberToObject(data, "data_type", data_type);
+      cJSON_AddNumberToObject(data, get_token_string_by_id(ID_XBEE_ID), (double)((long)params->xd));
+      if(params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s) {
+         cJSON_AddStringToObject(data, get_token_string_by_id(DEVICE_PARAMETERS_ID), params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
       }
+      cJSON_AddNumberToObject(data, API_KEY_STR_C, device_info.interface_id);
+      
+      python_cmd_json(params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, XBEEDATA, data);
+      
+      params->i002->indicators.senttoplugin++;
+
       release_parsed_parameters(&(params->plugin_params));
       jsonDevice=jsonDevice->next;
    }
@@ -683,15 +590,7 @@ void *_thread_interface_type_002_xbeedata(void *args)
    
    params->plugin_params=NULL;
    params->nb_plugin_params=0;
-   
-   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-   PyEval_AcquireLock();
-   params->mainThreadState = PyThreadState_Get();
-   params->myThreadState = PyThreadState_New(params->mainThreadState->interp);
-   PyEval_ReleaseLock();
-   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-   pthread_testcancel();
-   
+
    while(1) {
       process_heartbeat(params->i002->monitoring_id);
       process_update_indicator(params->i002->monitoring_id, interface_type_002_senttoplugin_str, params->i002->indicators.senttoplugin);
@@ -819,9 +718,7 @@ pthread_t *start_interface_type_002_xbeedata_thread(interface_type_002_t *i002, 
    pthread_mutex_init(&params->callback_lock, NULL);
    pthread_cond_init(&params->callback_cond, NULL);
    params->i002=(void *)i002;
-   params->mainThreadState = NULL;
-   params->myThreadState = NULL;
-   
+
    // préparation des données pour les callback io_data et data_flow dont les données sont traitées par le même thread
    callback_xbeedata=(struct callback_data_s *)malloc(sizeof(struct callback_data_s));
    if(!callback_xbeedata) {
@@ -999,6 +896,175 @@ interface_type_002_t *malloc_and_init2_interface_type_002(int id_driver, cJSON *
 }               
 
 
+static uint32_t _indianConvertion(uint32_t val_x86)
+{
+   uint32_t val_xbee;
+   char *val_x86_ptr;
+   char *val_xbee_ptr;
+   
+   val_x86_ptr = (char *)&val_x86;
+   val_xbee_ptr = (char *)&val_xbee;
+   
+   // conversion little vers big indian
+   for(int16_t i=0,j=3;i<sizeof(uint32_t);i++)
+      val_xbee_ptr[i]=val_x86_ptr[j-i];
+
+   return val_xbee;
+}
+
+int mea_sendAtCmdAndWaitResp_json(interface_type_002_t *i002, cJSON *args, cJSON **res, int16_t *_nerr, char *_err, int l_err)
+//cJSON *mea_sendAtCmdAndWaitResp_json(PyObject *self, PyObject *args)
+{
+   unsigned char at_cmd[81];
+   uint16_t l_at_cmd;
+   unsigned char resp[81];
+   uint16_t l_resp;
+   int16_t ret;
+   cJSON *arg;
+   xbee_host_t *host=NULL;
+   xbee_xd_t *xd=i002->xd;
+
+   *_nerr=255;
+
+   // récupération des paramètres et contrôle des types
+   if(args->type!=cJSON_Array || cJSON_GetArraySize(args)!=6) {
+      return -255;
+   }
+ 
+   uint32_t addr_h;
+   arg=cJSON_GetArrayItem(args, 2);
+   if(arg->type==cJSON_Number) {
+      addr_h=(uint32_t)arg->valuedouble;
+   }
+   else {
+      return -255;
+   }
+
+   uint32_t addr_l;
+   arg=cJSON_GetArrayItem(args, 3);
+   if(arg->type==cJSON_Number) {
+      addr_l=(uint32_t)arg->valuedouble;
+   }
+   else {
+      return -255;
+   }
+
+   char *at;
+   arg=cJSON_GetArrayItem(args, 4);
+   if(arg->type==cJSON_String || arg->type==cJSON_ByteArray) {
+      at=arg->valuestring;
+      if(arg->type==cJSON_ByteArray) {
+         at[arg->valueint]=0;
+      }
+   }
+   else {
+      return -255;
+   }
+   at_cmd[0]=at[0];
+   at_cmd[1]=at[1];
+   
+   arg=cJSON_GetArrayItem(args, 5);
+   if(arg->type==cJSON_Number) {
+      uint32_t val=(uint32_t)arg->valuedouble;
+      uint32_t val_xbee=_indianConvertion(val);
+      char *val_xbee_ptr=(char *)&val_xbee;
+      
+      for(int16_t i=0;i<sizeof(uint32_t);i++)
+         at_cmd[2+i]=val_xbee_ptr[i];
+      l_at_cmd=6;
+   }
+   else if(arg->type==cJSON_String || arg->type==cJSON_ByteArray) {
+      int l=0;
+      char *at_arg=(char *)arg->valuestring;
+      if(arg->type==cJSON_String) {
+         l=(int)strlen(at_arg);
+      }
+      else {
+         l=arg->valueint;
+      }
+      uint16_t i;
+      for(i=0;i<l;i++)
+         at_cmd[2+i]=at_arg[i];
+      if(i>0)
+         l_at_cmd=2+i;
+      else
+         l_at_cmd=2;
+   }
+   else {
+      return -255;
+   }
+   
+   // recuperer le host dans la table (necessite d'avoir accès à xd
+   int16_t err;
+   
+   host=NULL;
+   host=(xbee_host_t *)malloc(sizeof(xbee_host_t)); // description de l'xbee directement connecté
+   xbee_get_host_by_addr_64(xd, host, addr_h, addr_l, &err);
+   if(err==XBEE_ERR_NOERR) {
+   }
+   else {
+      DEBUG_SECTION mea_log_printf("%s (%s) : host not found.\n", DEBUG_STR ,__func__);
+      if(host) {
+         free(host);
+         host=NULL;
+      }
+      return -255;
+   }
+
+   ret=xbee_atCmdSendAndWaitResp(xd, host, at_cmd, l_at_cmd, resp, &l_resp, &err);
+   if(ret==-1) {
+      DEBUG_SECTION mea_log_printf("%s (%s) : error %d.\n", DEBUG_STR, __func__, err);
+      if(host) {
+         free(host);
+         host=NULL;
+      }
+      return -255;
+   }
+   
+   struct xbee_remote_cmd_response_s *mapped_resp=(struct xbee_remote_cmd_response_s *)resp;
+   
+   cJSON *t=cJSON_CreateArray();
+   cJSON_AddItemToArray(t, cJSON_CreateNumber((double)mapped_resp->cmd_status));
+   cJSON_AddItemToArray(t, cJSON_CreateByteArray((char *)&resp, l_resp));
+   cJSON_AddItemToArray(t, cJSON_CreateNumber((double)l_resp));
+
+   free(host);
+   host=NULL;
+
+   *res=t;
+   
+   return 0; // return True
+}
+
+
+int16_t api_interface_type_002_json(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
+{
+   interface_type_002_t *i002 = (interface_type_002_t *)ixxx;
+
+   cJSON *jsonArgs = (cJSON *)args;
+   cJSON **jsonRes = (cJSON **)res;
+   
+   if(strcmp(cmnd, "sendXbeeCmdAndWaitResp") == 0) {
+      int ret=0;
+      ret=mea_sendAtCmdAndWaitResp_json((void *)i002, jsonArgs, jsonRes, nerr, err, l_err);
+      if(ret<0) {
+         strncpy(err, "error", l_err);
+         return -1;
+      }
+      else {
+         strncpy(err, "no error", l_err);
+         *nerr=0;
+         return 0;
+      }
+   }
+   else {
+      strncpy(err, "unknown function", l_err);
+
+      return -254;
+   }
+}
+
+
 int update_devices_type_002(void *ixxx)
 {
    printf("update devices 002\n");
@@ -1015,16 +1081,6 @@ int clean_interface_type_002(interface_type_002_t *i002)
    }
    
    if(i002->xPL_callback_data) {
-      struct callback_xpl_data_s *data = (struct callback_xpl_data_s *)i002->xPL_callback_data;
-      
-      PyEval_AcquireLock();
-      if(data->myThreadState) {
-         PyThreadState_Clear(data->myThreadState);
-         PyThreadState_Delete(data->myThreadState);
-         data->myThreadState=NULL;
-      }
-      PyEval_ReleaseLock();
-         
       DBG_FREE(i002->xPL_callback_data);
       i002->xPL_callback_data=NULL;
    }
@@ -1089,16 +1145,6 @@ int stop_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    VERBOSE(1) mea_log_printf("%s  (%s) : %s shutdown thread ... ", INFO_STR, __func__, start_stop_params->i002->name);
 
    if(start_stop_params->i002->xPL_callback_data) {
-      struct callback_xpl_data_s *data = (struct callback_xpl_data_s *)start_stop_params->i002->xPL_callback_data;
-      
-      PyEval_AcquireLock();
-      if(data->myThreadState) {
-         PyThreadState_Clear(data->myThreadState);
-         PyThreadState_Delete(data->myThreadState);
-         data->myThreadState=NULL;
-      }
-      PyEval_ReleaseLock();
-         
       DBG_FREE(start_stop_params->i002->xPL_callback_data);
       start_stop_params->i002->xPL_callback_data=NULL;
    }
@@ -1191,12 +1237,6 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
 /**
  * \brief     Demarrage d'une interface de type 2
  * \details   ouverture de la communication avec l'xbee point d'entrée MESH, démarrage du thread de gestion des données iodata et xbeedata, mise en place des callback xpl et commissionnement
- * \param     i002           descripteur de l'interface  
- * \param     db             descripteur ouvert de la base de paramétrage  
- * \param     id_interface   identifiant de l'interface
- * \param     dev_and_speed  chemin et vitesse (débit) de l'interface série (sous forme SERIAL://dev:speed
- * \param     parameters     paramètres associés à l'interface
- * \param     md             descripteur ouvert de la base d'historique
  * \return    ERROR ou NOERROR
  **/ 
 {
@@ -1316,67 +1356,16 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
       }
    }
    else {
-      PyObject *plugin_params_dict=NULL;
-      PyObject *pName, *pModule, *pFunc;
-      PyObject *pArgs, *pValue=NULL;
-      
-      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-      PyEval_AcquireLock();
-      PyThreadState *mainThreadState=PyThreadState_Get();
-      PyThreadState *myThreadState = PyThreadState_New(mainThreadState->interp);
-      
-      PyThreadState *tempState = PyThreadState_Swap(myThreadState);
-
-      PyErr_Clear();
-//      pName = PYSTRING_FROMSTRING(interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s);
-#if PY_MAJOR_VERSION >= 3
-      pName = PyUnicode_DecodeFSDefault(interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s);
-#else
-      pName = PYSTRING_FROMSTRING(interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s);
-#endif
-
-      pModule = PyImport_Import(pName);
-      if(!pModule) {
-         VERBOSE(5) mea_log_printf("%s (%s) : %s not found\n", ERROR_STR, __func__, interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s);
+      cJSON *data=cJSON_CreateObject();
+      cJSON_AddNumberToObject(data, get_token_string_by_id(ID_XBEE_ID), (double)((long)xd));
+      cJSON_AddNumberToObject(data, get_token_string_by_id(INTERFACE_ID_ID), start_stop_params->i002->id_interface);
+      cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)start_stop_params->i002->id_interface);
+      if(interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s) {
+         cJSON_AddStringToObject(data, get_token_string_by_id(INTERFACE_PARAMETERS_ID), interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
       }
-      else { // à mutualiser ... "fonction call_python_function" à écrire ... voir aussi automator ...
-         pFunc = PyObject_GetAttrString(pModule, "mea_init");
-         if (pFunc && PyCallable_Check(pFunc)) {
-            // préparation du parametre du module
-            plugin_params_dict=PyDict_New();
-            mea_addLong_to_pydict(plugin_params_dict, get_token_string_by_id(ID_XBEE_ID), (long)xd);
-            mea_addLong_to_pydict(plugin_params_dict, get_token_string_by_id(INTERFACE_ID_ID), start_stop_params->i002->id_interface);
-            if(interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
-               mea_addString_to_pydict(plugin_params_dict, get_token_string_by_id(INTERFACE_PARAMETERS_ID), interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
-
-            pArgs = PyTuple_New(1);
-            Py_INCREF(plugin_params_dict); // PyTuple_SetItem va voler la référence, on en rajoute une pour pouvoir ensuite faire un Py_DECREF
-            PyTuple_SetItem(pArgs, 0, plugin_params_dict);
-         
-            pValue = PyObject_CallObject(pFunc, pArgs); // appel du plugin
-            if (pValue != NULL) {
-               DEBUG_SECTION mea_log_printf("%s (%s) : Result of call of mea_init : %ld\n", DEBUG_STR, __func__, PyInt_AsLong(pValue));
-            }
-            PyErr_Clear(); // à remplacer
-            if(pValue != NULL)
-               Py_DECREF(pValue);
-            Py_DECREF(pArgs);
-            Py_DECREF(plugin_params_dict);
-         }
-         else {
-            VERBOSE(5) mea_log_printf("%s (%s) : mea_init not fount in %s module\n", ERROR_STR, __func__, interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s);
-         }
-         Py_XDECREF(pFunc);
-      }
-      Py_XDECREF(pModule);
-      Py_DECREF(pName);
-      PyErr_Clear();
+      cJSON_AddNumberToObject(data, API_KEY_STR_C, start_stop_params->i002->id_interface);
       
-      PyThreadState_Swap(tempState);
-      PyThreadState_Clear(myThreadState);
-      PyThreadState_Delete(myThreadState);
-      PyEval_ReleaseLock();
-      pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+      python_call_function_json_alloc(interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
 
       if(interface_parameters)
          release_parsed_parameters(&interface_parameters);
@@ -1431,9 +1420,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
       }
       goto clean_exit;
    }
-   xpl_callback_params->mainThreadState=NULL;
-   xpl_callback_params->myThreadState=NULL;
-   
+
    start_stop_params->i002->xPL_callback_data=xpl_callback_params;
    start_stop_params->i002->xPL_callback2=_interface_type_002_xPL_callback2;
    
@@ -1496,7 +1483,7 @@ int get_fns_interface_type_002(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->set_monitoring_id = (set_monitoring_id_f)&set_monitoring_id_interface_type_002;
    interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_002;
    interfacesFns->get_type = (get_type_f)&get_type_interface_type_002;
-   interfacesFns->api = NULL;
+   interfacesFns->api = (api_f)&api_interface_type_002_json;
    interfacesFns->pairing = NULL;
    interfacesFns->lib = NULL;
    interfacesFns->type = interfacesFns->get_type();

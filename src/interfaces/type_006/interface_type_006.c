@@ -5,12 +5,6 @@
 //  Created by Patrice Dietsch on 16/11/2015.
 //
 //
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
-
 #include "interface_type_006.h"
 
 #include <stdio.h>
@@ -32,11 +26,11 @@
 #include "mea_verbose.h"
 #include "macros.h"
 #include "parameters_utils.h"
-#include "pythonPluginServer.h"
+
 #include "python_utils.h"
 #include "processManager.h"
 #include "interfacesServer.h"
-
+#include "mea_xpl.h"
 
 char *interface_type_006_senttoplugin_str="SENT2PLUGIN";
 char *interface_type_006_xplin_str="XPLIN";
@@ -44,13 +38,6 @@ char *interface_type_006_xplout_str="XPLOUT";
 char *interface_type_006_serialin_str="SERIALIN";
 char *interface_type_006_serialout_str="SERIALOUT";
 
-// char *c_data_str = "data";
-// char *c_l_data_str = "l_data";
-// char *c_api_key_str = "api_key";
-
-// #define DATA_STR c_data_str
-// #define L_DATA_STR c_l_data_str
-// #define API_KEY_STR c_api_key_str
 
 typedef void (*thread_f)(void *);
 
@@ -77,111 +64,66 @@ int restart_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg
 int16_t check_status_interface_type_006(interface_type_006_t *i006);
 
 
-int interface_type_006_call_serialDataPre(struct genericserial_thread_params_s *params, void *data, int l_data)
+int interface_type_006_call_serialDataPre(struct genericserial_thread_params_s *params, void *_data, int l_data)
 {
-   int retour=-1;
-   if(params->i006->pFunc) {
-
-      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-      PyEval_AcquireLock();
-      PyThreadState *tempState = PyThreadState_Swap(params->i006->myThreadState);
-
-      PyObject *aDict=PyDict_New();
-      if(aDict) {
-         PyObject *value = PyByteArray_FromStringAndSize((char *)data, l_data);
-         PyDict_SetItemString(aDict, DATA_STR_C, value);
-         Py_DECREF(value);
-         mea_addLong_to_pydict(aDict, L_DATA_STR_C, (long)l_data);
-
-         mea_addLong_to_pydict(aDict, INTERFACE_ID_STR_C, params->i006->id_interface);
-         mea_addLong_to_pydict(aDict, API_KEY_STR_C, (long)params->i006->id_interface);
-
-         if(params->i006->pParams)
-            PyDict_SetItemString(aDict, "plugin_paramters", params->i006->pParams);
-
-         retour=mea_call_python_function2(params->i006->pFunc, aDict);
-         Py_DECREF(aDict);
-
+   if(params->i006->interface_plugin_name) {
+      cJSON *data=cJSON_CreateObject();
+      
+      cJSON_AddItemToObject(data, DATA_STR_C, cJSON_CreateByteArray(_data, l_data));
+      cJSON_AddNumberToObject(data, L_DATA_STR_C, (double)l_data);
+      cJSON_AddNumberToObject(data, INTERFACE_ID_STR_C, params->i006->id_interface);
+      cJSON_AddNumberToObject(data, API_KEY_STR_C, params->i006->id_interface);
+      if(params->i006->interface_plugin_parameters) {
+         cJSON_AddStringToObject(data, PLUGIN_PARAMETERS_STR_C, params->i006->interface_plugin_parameters);
       }
-
-      PyThreadState_Swap(tempState);
-      PyEval_ReleaseLock();
-      pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+      cJSON *result=python_call_function_json_alloc(params->i006->interface_plugin_name, "mea_dataPreprocessor", data);
+      
+      if(result) {
+         cJSON_Delete(result);
+         result=NULL;
+      }
    }
 
-   return retour;
+   return 0;
 }
 
 
-static int interface_type_006_data_to_plugin(PyThreadState *myThreadState, cJSON *jsonInterface, cJSON *jsonDevice, int data_type, void *data, int l_data)
+static int interface_type_006_data_to_plugin(cJSON *jsonInterface, cJSON *jsonDevice, void *_data, int l_data)
 {
    parsed_parameters_t *plugin_params=NULL;
    int nb_plugin_params;
    int err;
    int retour=-1;
-   plugin_queue_elem_t *plugin_elem = NULL;
 
    char *parameters = cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
 
    plugin_params=alloc_parsed_parameters(parameters, valid_genericserial_plugin_params, &nb_plugin_params, &err, 0);
-   if(!plugin_params || !plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s)
-      goto interface_type_006_data_to_plugin_clean_exit;
-
-   plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-   if(plugin_elem) {
-      plugin_elem->type_elem=data_type;
-
-      struct device_info_s device_info;
-      device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
-            
-      {
-         // appel des fonctions Python => on lock
-         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); // trop compliquer de traiter avec pthread_cleanup => on interdit les arrêts lors des commandes python
-         PyEval_AcquireLock();
-         PyThreadState *tempState = PyThreadState_Swap(myThreadState);
-
-         // les infos du "device"
-         plugin_elem->aDict = mea_device_info_to_pydict_device(&device_info);
-         if(!plugin_elem->aDict)
-            goto interface_type_006_data_to_plugin_clean_exit;
-
-         // les datas
-         PyObject *value = PyByteArray_FromStringAndSize((char *)data, (long)l_data);
-         PyDict_SetItemString(plugin_elem->aDict, DATA_STR_C, value);
-         Py_DECREF(value);
-         mea_addLong_to_pydict(plugin_elem->aDict, L_DATA_STR_C, (long)l_data);
-
-         // info api
-         mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, device_info.interface_id);
-         
-         // parametres spécifiques
-         if(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s)
-            mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s);
-
-         PyThreadState_Swap(tempState);
-         PyEval_ReleaseLock();
-         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL); // on réauthorise les arrêts
-
-      } // fin appel des fonctions Python
-     
-      // commande dans la file de traitement 
-      pythonPluginServer_add_cmd(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-
-      retour = 0;
+   if(!plugin_params || !plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s) {
+      if(plugin_params)
+         release_parsed_parameters(&plugin_params);
+      return -1;
    }
 
-interface_type_006_data_to_plugin_clean_exit:
-   if(plugin_elem) {
-      free(plugin_elem);
-      plugin_elem=NULL;
+   struct device_info_s device_info;
+   device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
+   
+   cJSON *data = device_info_to_json_alloc(&device_info);
+
+   cJSON_AddNumberToObject(data,API_KEY_STR_C,(double)device_info.interface_id);
+   cJSON_AddItemToObject(data,DATA_STR_C,cJSON_CreateByteArray(_data, l_data));
+   cJSON_AddNumberToObject(data,L_DATA_STR_C, (double)l_data);
+   if(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s) {
+      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s);
    }
+
+   python_cmd_json(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
 
    if(plugin_params) {
       release_parsed_parameters(&plugin_params);
       nb_plugin_params=0;
-      plugin_params=NULL; 
+      plugin_params=NULL;
    }
- 
+
    return retour;
 }
 
@@ -197,43 +139,25 @@ void set_interface_type_006_isnt_running(void *data)
 int16_t _interface_type_006_xPL_callback2(cJSON *xplMsgJson, struct device_info_s *device_info, void *userValue)
 {
    char *device = NULL;
-   int err;
+   int err = -1;
    cJSON *j = NULL;
- 
+   parsed_parameters_t *plugin_params=NULL;
+   int nb_plugin_params = -1;
    interface_type_006_t *i006=(interface_type_006_t *)userValue;
-   struct callback_xpl_data_s *callback_data=(struct callback_xpl_data_s *)i006->xPL_callback_data;
    
    i006->indicators.xplin++;
    
-   
-   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-   PyEval_AcquireLock();
-
-   if(!callback_data->mainThreadState)
-      callback_data->mainThreadState=PyThreadState_Get();
-   if(!callback_data->myThreadState)
-      callback_data->myThreadState = PyThreadState_New(callback_data->mainThreadState->interp);
-
-   PyEval_ReleaseLock();
-   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL); // on réauthorise les arrêts         
-
    j=cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_DEVICE_ID));
-   if(j)
+   if(j) {
       device=j->valuestring;
-   if(!device) {
-      VERBOSE(5) mea_log_printf("%s (%s) : xPL message no device\n", INFO_STR, __func__);
-      return -1;
+      if(!device) {
+         VERBOSE(5) mea_log_printf("%s (%s) : xPL message no device\n", INFO_STR, __func__);
+         return -1;
+      }
    }
    mea_strtolower(device);
  
-   if(!device)
-      return -1;
-
-   parsed_parameters_t *plugin_params=NULL;
-   int nb_plugin_params;
-
    plugin_params=alloc_parsed_parameters(device_info->parameters, valid_genericserial_plugin_params, &nb_plugin_params, &err, 0);
-
    if(!plugin_params || !plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s) {
       if(plugin_params) {
          release_parsed_parameters(&plugin_params);
@@ -242,37 +166,18 @@ int16_t _interface_type_006_xPL_callback2(cJSON *xplMsgJson, struct device_info_
       }
       return -1;
    }
+   
+   cJSON *data=cJSON_CreateObject();
+   data=device_info_to_json_alloc(device_info);
+   cJSON *msg=mea_xplMsgToJson_alloc(xplMsgJson);
+   cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
+   cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)i006->id_interface);
+   if(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s)
+      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s);
 
-   plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-   if(plugin_elem) {
-      plugin_elem->type_elem=XPLMSG;
+   python_cmd_json(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
-      { // appel des fonctions Python
-         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-         PyEval_AcquireLock();
-         PyThreadState *tempState = PyThreadState_Swap(callback_data->myThreadState);
-
-         plugin_elem->aDict=mea_device_info_to_pydict_device(device_info);
-
-         if(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s)
-            mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s);
-
-         mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, i006->id_interface);
-
-         PyObject *_xplmsg=mea_xplMsgToPyDict2(xplMsgJson);
-         PyDict_SetItemString(plugin_elem->aDict, XPLMSG_STR_C, _xplmsg);
-
-         PyThreadState_Swap(tempState);
-         PyEval_ReleaseLock();
-         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-      } // fin appel des fonctions Python
-
-      pythonPluginServer_add_cmd(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-
-      i006->indicators.senttoplugin++;
-      free(plugin_elem);
-      plugin_elem=NULL;
-   }
+   i006->indicators.senttoplugin++;
 
    release_parsed_parameters(&plugin_params);
    nb_plugin_params=0;
@@ -292,131 +197,11 @@ void *_thread_interface_type_006_genericserial_data_cleanup(void *args)
    if(params->i006->fd!=-1) {
       close(params->i006->fd);
    }
-   
-   if(params->i006->myThreadState) {
-      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-      PyEval_AcquireLock();
-      PyThreadState *tempState = PyThreadState_Swap(params->i006->myThreadState);
-      if(params->i006->pFunc) {
-         Py_XDECREF(params->i006->pFunc);
-         params->i006->pFunc=NULL;
-      } 
-      if(params->i006->pModule) {
-         Py_XDECREF(params->i006->pModule);
-         params->i006->pModule=NULL;
-      }
-      if(params->i006->pParams) {
-         Py_XDECREF(params->i006->pParams);
-         params->i006->pParams=NULL;
-      }
-      PyThreadState_Swap(tempState);
-      PyThreadState_Clear(params->i006->myThreadState);
-      PyThreadState_Delete(params->i006->myThreadState);
-      params->i006->myThreadState=NULL;
-      PyEval_ReleaseLock();
-      pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-
-      params->i006->myThreadState=NULL;
-   }
-   else
-   {
-      mea_python_lock();
-      if(params->i006->pFunc) {
-         Py_XDECREF(params->i006->pFunc);
-         params->i006->pFunc=NULL;
-      }
-      if(params->i006->pModule) {
-         Py_XDECREF(params->i006->pModule);
-         params->i006->pModule=NULL;
-      }
-      if(params->i006->pParams) {
-         Py_XDECREF(params->i006->pParams);
-         params->i006->pParams=NULL;
-      }
-      mea_python_unlock();
-   }
 
    free(params);
    params=NULL;
 
    return NULL;
-}
-
-
-int init_interface_type_006_data_preprocessor(interface_type_006_t *i006, char *plugin_name, char *plugin_parameters)
-{
-   int ret = -1;
-   PyObject *pName = NULL;
-   mea_python_lock();
-      
-//   PyObject *pName = PYSTRING_FROMSTRING(plugin_name);
-#if PY_MAJOR_VERSION >= 3
-   pName = PyUnicode_DecodeFSDefault(plugin_name);
-#else
-   pName = PYSTRING_FROMSTRING(plugin_name);
-#endif
-   if(!pName) {
-      ret=-1;
-      goto init_interface_type_006_data_preprocessor_clean_exit;
-   }
-   else {
-      if(!i006->pModule) {
-         i006->pModule =  PyImport_Import(pName);
-         if(!i006->pModule) {
-            ret=-1;
-            goto init_interface_type_006_data_preprocessor_clean_exit;
-         }
-      }
-      else {
-         PyObject *m = NULL;
-         m=i006->pModule;
-         i006->pModule=PyImport_ReloadModule(m); // on force le rechargement (c'est pour simplifier)
-         Py_DECREF(m);
-         if(!i006->pModule) {
-            ret=-1;
-            goto init_interface_type_006_data_preprocessor_clean_exit;
-         }
-      }
-
-      if(i006->pFunc) {
-         Py_DECREF(i006->pFunc);
-         i006->pFunc=NULL;
-      }
-
-      i006->pFunc = PyObject_GetAttrString(i006->pModule, "mea_dataPreprocessor");
-      if(!i006->pFunc) {
-         ret=-1;
-         goto init_interface_type_006_data_preprocessor_clean_exit;
-      }
-      
-      if(PyCallable_Check(i006->pFunc)) {
-         if(plugin_parameters)
-            i006->pParams=PYSTRING_FROMSTRING(plugin_parameters);
-         else
-            i006->pParams=NULL;
-         ret = 0;
-      }
-      else {
-         VERBOSE(5) mea_log_printf("%s (%s) : no mea_dataPreprocessor entry point\n", ERROR_STR, __func__);
-
-         Py_XDECREF(i006->pFunc);
-         i006->pFunc=NULL;
-
-         Py_XDECREF(i006->pModule);
-         i006->pModule=NULL;
-
-         ret = -1;
-      }
-   }
-
-init_interface_type_006_data_preprocessor_clean_exit:
-   if(pName) {
-      Py_XDECREF(pName);
-      pName=NULL;      
-   }
-   mea_python_unlock();
-
-   return ret;
 }
 
 
@@ -431,16 +216,6 @@ void *_thread_interface_type_006_genericserial_data(void *args)
    process_heartbeat(params->i006->monitoring_id);
    
    int err_counter=0;
-   
-   // on se met un context python sous le coude pour ce thread
-   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-   PyEval_AcquireLock();
-   params->i006->mainThreadState = PyThreadState_Get();
-   params->i006->myThreadState = PyThreadState_New(params->i006->mainThreadState->interp);
-   PyEval_ReleaseLock();
-   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-   pthread_testcancel();
-
    mea_timer_t process_timer;
 
    mea_init_timer(&process_timer, 5, 1);
@@ -522,7 +297,7 @@ void *_thread_interface_type_006_genericserial_data(void *args)
             params->i006->indicators.serialin+=buffer_ptr;
             buffer[buffer_ptr]=0;
 
-            /* int ret= */interface_type_006_call_serialDataPre(params, (void *)buffer, buffer_ptr+1);
+            interface_type_006_call_serialDataPre(params, (void *)buffer, buffer_ptr+1);
 
             cJSON *jsonInterface = getInterfaceById_alloc(params->i006->id_interface);
             if(jsonInterface) {
@@ -530,9 +305,7 @@ void *_thread_interface_type_006_genericserial_data(void *args)
                if(jsonDevices) {
                   cJSON *jsonDevice = jsonDevices->child;
                   while(jsonDevice) {
-
-                     /* int ret= */interface_type_006_data_to_plugin(params->i006->myThreadState, jsonInterface, jsonDevice, DATAFROMSENSOR, (void *)buffer, buffer_ptr+1);
-
+                     interface_type_006_data_to_plugin(jsonInterface, jsonDevice, (void *)buffer, buffer_ptr+1);
                      jsonDevice=jsonDevice->next;
                   }
                }
@@ -570,8 +343,7 @@ pthread_t *start_interface_type_006_genericserial_data_thread(interface_type_006
    struct genericserial_callback_data_s *genericserial_callback_data=NULL;
    
    params=malloc(sizeof(struct genericserial_thread_params_s));
-   if(!params)
-   {
+   if(!params) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
          perror("");
@@ -580,12 +352,6 @@ pthread_t *start_interface_type_006_genericserial_data_thread(interface_type_006
    }
 
    params->i006=(void *)i006;
-
-   if(interface_parameters && interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s) {
-      init_interface_type_006_data_preprocessor(params->i006,
-                                                interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s,
-                                                interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s);
-   }
 
    thread=(pthread_t *)malloc(sizeof(pthread_t));
    if(!thread) {
@@ -642,6 +408,16 @@ int clean_interface_type_006(void *ixxx)
    if(i006->thread) {
       free(i006->thread);
       i006->thread=NULL;
+   }
+
+   if(i006->interface_plugin_name) {
+      free(i006->interface_plugin_name);
+      i006->interface_plugin_name=NULL;
+   }
+   
+   if(i006->interface_plugin_parameters) {
+      free(i006->interface_plugin_parameters);
+      i006->interface_plugin_parameters=NULL;
    }
 
    return 0;
@@ -702,7 +478,7 @@ int get_type_interface_type_006()
 }
 
 
-static int api_write_data(interface_type_006_t *i006, PyObject *args, PyObject **res, int16_t *nerr, char *err, int l_err)
+static int api_write_data_json(interface_type_006_t *i006, cJSON *args, cJSON **res, int16_t *nerr, char *err, int l_err)
 {
    err="";
    l_err=0;
@@ -711,50 +487,53 @@ static int api_write_data(interface_type_006_t *i006, PyObject *args, PyObject *
       *nerr=253;
       return -253;
    }
-   PyObject *arg;
+   cJSON *arg;
    int16_t ret;
    *nerr=255;
    *res = NULL;
 
    // récupération des paramètres et contrôle des types
-   if(PyTuple_Size(args)!=3)
+   if(args->type!=cJSON_Array || cJSON_GetArraySize(args)!=3) {
       return -255;
-
-   Py_buffer py_packet;
-   arg=PyTuple_GetItem(args, 2);
-   if(PyObject_CheckBuffer(arg)) {
-      ret=PyObject_GetBuffer(arg, &py_packet, PyBUF_SIMPLE);
-      if(ret<0)
-         return -255;
    }
-   else
-      return -255;
 
-   ret=write(i006->fd, py_packet.buf, py_packet.len);
-   if(ret<0) {
-      VERBOSE(5) {
-         mea_log_printf("%s (%s) : write - ", ERROR_STR, __func__);
-         perror("");
+   arg=cJSON_GetArrayItem(args, 2);
+
+   if(arg->type==cJSON_String || arg->type==cJSON_ByteArray) {
+      int l=0;
+      if(arg->type==cJSON_String) {
+         l=(int)strlen(arg->valuestring);
+      }
+      else {
+         l=arg->valueint;
+      }
+      ret=write(i006->fd, arg->valuestring, l);
+      if(ret<0) {
+         VERBOSE(5) {
+            mea_log_printf("%s (%s) : write - ", ERROR_STR, __func__);
+            perror("");
+         }
       }
    }
- 
-   PyBuffer_Release(&py_packet);
- 
+   else {
+      return -255;
+   }
+
    nerr=0;
 
    return 0;
 }
 
 
-int16_t api_interface_type_006(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
+int16_t api_interface_type_006_json(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
 {
    interface_type_006_t *i006 = (interface_type_006_t *)ixxx;
 
-   PyObject *pyArgs = (PyObject *)args;
-   PyObject **pyRes = (PyObject **)res;
+   cJSON *jsonArgs = (cJSON *)args;
+   cJSON **jsonRes = (cJSON **)res;
    
    if(strcmp(cmnd, "mea_writeData") == 0) {
-      int ret=api_write_data((void *)i006, pyArgs, pyRes, nerr, err, l_err);
+      int ret=api_write_data_json((void *)i006, jsonArgs, jsonRes, nerr, err, l_err);
       if(ret<0) {
          strncpy(err, "error", l_err);
          return -1;
@@ -798,8 +577,8 @@ interface_type_006_t *malloc_and_init2_interface_type_006(int id_driver, cJSON *
       return NULL;
    }
 
-   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,ID_INTERFACE_STR_C)->valuedouble;
    char *name=jsonInterface->string;
+   int id_interface=(int)cJSON_GetObjectItem(jsonInterface,ID_INTERFACE_STR_C)->valuedouble;
    char *dev=cJSON_GetObjectItem(jsonInterface,DEV_STR_C)->valuestring;
    char *parameters=cJSON_GetObjectItem(jsonInterface,PARAMETERS_STR_C)->valuestring;
    char *description=cJSON_GetObjectItem(jsonInterface,DESCRIPTION_STR_C)->valuestring;
@@ -819,11 +598,8 @@ interface_type_006_t *malloc_and_init2_interface_type_006(int id_driver, cJSON *
    i006->xPL_callback2=NULL;
    i006->xPL_callback_data=NULL;
 
-   i006->myThreadState=NULL;
-   i006->myThreadState=NULL;
-   i006->pModule=NULL;
-   i006->pFunc=NULL;
-   i006->pParams=NULL;
+   i006->interface_plugin_name=NULL;
+   i006->interface_plugin_parameters=NULL;
    
    i006->monitoring_id=process_register((char *)name);
    i006_start_stop_params->i006=i006;
@@ -857,15 +633,6 @@ int stop_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
    }
 
    if(start_stop_params->i006->xPL_callback_data) {
-      struct callback_xpl_data_s *callback_data = (struct callback_xpl_data_s *)start_stop_params->i006->xPL_callback_data;
-      if(callback_data->myThreadState) {
-         PyEval_AcquireLock();
-         PyThreadState_Clear(callback_data->myThreadState);
-         PyThreadState_Delete(callback_data->myThreadState);
-         callback_data->myThreadState=NULL;
-         PyEval_ReleaseLock();
-      }
-
       free(start_stop_params->i006->xPL_callback_data);
       start_stop_params->i006->xPL_callback_data=NULL;
    }
@@ -954,17 +721,23 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
          VERBOSE(5) mea_log_printf("%s (%s) : invalid or no python plugin parameters (%s)\n", ERROR_STR, __func__, start_stop_params->i006->parameters);
    }
    else {
-      mea_python_lock(); // attention python_lock / python_unlock définissent un block ({ }) les variables déclérées restent locales au bloc
-
-      PyObject *plugin_params_dict=PyDict_New();
-
-      mea_addLong_to_pydict(plugin_params_dict, INTERFACE_ID_STR_C, start_stop_params->i006->id_interface);
-      if(interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s)
-         mea_addString_to_pydict(plugin_params_dict, INTERFACE_PARAMETERS_STR_C, interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s);
-      mea_call_python_function(interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", plugin_params_dict);
-      Py_DECREF(plugin_params_dict);
-
-      mea_python_unlock();
+      start_stop_params->i006->interface_plugin_name = malloc(strlen(interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s)+1);
+      strcpy(start_stop_params->i006->interface_plugin_name, interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s);
+      if(interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s) {
+         start_stop_params->i006->interface_plugin_parameters = malloc(strlen(interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s));
+         strcpy(start_stop_params->i006->interface_plugin_name, interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s);
+      }
+      cJSON *data=cJSON_CreateObject();
+      cJSON_AddNumberToObject(data, INTERFACE_ID_STR_C, start_stop_params->i006->id_interface);
+      if(start_stop_params->i006->interface_plugin_parameters) {
+         cJSON_AddStringToObject(data, INTERFACE_PARAMETERS_STR_C, start_stop_params->i006->interface_plugin_parameters);
+      }
+      
+      cJSON *result=python_call_function_json_alloc(start_stop_params->i006->interface_plugin_name, "mea_init", data);
+      
+      if(result) {
+         cJSON_Delete(result);
+      }
    }
    // données pour les callbacks xpl
    struct callback_xpl_data_s *xpl_callback_params=(struct callback_xpl_data_s *)malloc(sizeof(struct callback_xpl_data_s));
@@ -1013,6 +786,16 @@ clean_exit:
       start_stop_params->i006->xPL_callback_data=NULL;
    }
 
+   if(start_stop_params->i006->interface_plugin_name) {
+      free(start_stop_params->i006->interface_plugin_name);
+      start_stop_params->i006->interface_plugin_name=NULL;
+   }
+   
+   if(start_stop_params->i006->interface_plugin_parameters) {
+      free(start_stop_params->i006->interface_plugin_parameters);
+      start_stop_params->i006->interface_plugin_parameters=NULL;
+   }
+
    if(interface_parameters) {
       release_parsed_parameters(&interface_parameters);
       interface_parameters=NULL;
@@ -1033,7 +816,7 @@ int get_fns_interface_type_006(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->set_monitoring_id = (set_monitoring_id_f)&set_monitoring_id_interface_type_006;
    interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_006;
    interfacesFns->get_type = (get_type_f)&get_type_interface_type_006;
-   interfacesFns->api = (api_f)&api_interface_type_006;
+   interfacesFns->api = (api_f)&api_interface_type_006_json;
    interfacesFns->pairing = NULL;
    interfacesFns->lib = NULL;
    interfacesFns->type = interfacesFns->get_type();

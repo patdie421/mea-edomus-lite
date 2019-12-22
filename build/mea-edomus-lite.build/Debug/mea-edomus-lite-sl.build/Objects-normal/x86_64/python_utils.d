@@ -9,4 +9,5 @@ dependencies: \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_verbose.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/tokens.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/tokens_da.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/pythonPluginServer.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/python_utils.h

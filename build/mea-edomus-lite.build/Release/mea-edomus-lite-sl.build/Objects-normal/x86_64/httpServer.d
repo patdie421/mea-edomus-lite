@@ -1,8 +1,6 @@
 dependencies: \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/httpServer.c \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/globals.h \
-  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_queue.h \
-  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_error.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/consts.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_verbose.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/configuration.h \
@@ -10,6 +8,8 @@ dependencies: \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/httpServer.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mongoose.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_string_utils.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_queue.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_error.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/xPLServer.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/tokens.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/tokens_da.h \

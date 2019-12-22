@@ -5,12 +5,6 @@
 //  Created by Patrice Dietsch on 21/02/2015.
 //
 //
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
-
 #include "interface_type_003.h"
 #include "interface_type_003_pairing.h"
 
@@ -37,9 +31,8 @@
 #include "enocean.h"
 #include "serial.h"
 #include "parameters_utils.h"
-#include "pythonPluginServer.h"
 #include "python_utils.h"
-
+#include "mea_xpl.h"
 #include "processManager.h"
 
 #include "interfacesServer.h"
@@ -116,7 +109,6 @@ int16_t _interface_type_003_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    int err =0;
 
    interface_type_003_t *i003=(interface_type_003_t *)userValue;
-   struct xpl_callback_data_s *callback_data=(struct xpl_callback_data_s *)i003->xPL_callback_data;
 
    char *dev = (char *)device_info->interface_dev;
    int a,b,c,d;
@@ -141,41 +133,17 @@ int16_t _interface_type_003_xPL_callback2(cJSON *xplMsgJson, struct device_info_
          release_parsed_parameters(&plugin_params);
       return -1;
    }
+   
+   cJSON *data=NULL;
+   data=device_info_to_json_alloc(device_info);
+   cJSON *msg=mea_xplMsgToJson_alloc(xplMsgJson);
+   cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
+   cJSON_AddNumberToObject(data, XPL_ENOCEAN_ADDR_STR_C, (double)enocean_addr);
+   cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)i003->id_interface);
+   if(plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s)
+      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
 
-   plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-
-   if(plugin_elem) {
-      plugin_elem->type_elem=XPLMSG;
-
-      PyEval_AcquireLock(); {
-
-         if(!callback_data->mainThreadState)
-            callback_data->mainThreadState=PyThreadState_Get();
-         if(!callback_data->myThreadState)
-            callback_data->myThreadState = PyThreadState_New(callback_data->mainThreadState->interp);
-
-         PyThreadState *tempState = PyThreadState_Swap(callback_data->myThreadState);
-
-         plugin_elem->aDict=mea_device_info_to_pydict_device(device_info);
-
-         mea_addLong_to_pydict(plugin_elem->aDict, XPL_ENOCEAN_ADDR_STR_C, (long)enocean_addr);
-         mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, (long)i003->id_interface);
-
-         PyObject *dd=mea_xplMsgToPyDict2(xplMsgJson);
-         PyDict_SetItemString(plugin_elem->aDict, XPLMSG_STR_C, dd);
-         Py_DECREF(dd);
-
-         if(plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s)
-            mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
-         PyThreadState_Swap(tempState);
-
-      } PyEval_ReleaseLock();
-
-      pythonPluginServer_add_cmd(plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-      i003->indicators.senttoplugin++;
-      free(plugin_elem);
-      plugin_elem=NULL;
-   }
+   python_cmd_json(plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
    release_parsed_parameters(&plugin_params);
    plugin_params=NULL;
@@ -221,13 +189,6 @@ void *_thread_interface_type_003_enocean_data_cleanup(void *args)
 
    if(!udata)
       return NULL;
-   if(udata->i003->myThreadState) {
-      PyEval_AcquireLock();
-      PyThreadState_Clear(udata->i003->myThreadState);
-      PyThreadState_Delete(udata->i003->myThreadState);
-      PyEval_ReleaseLock();
-      udata->i003->myThreadState=NULL;
-   }
 
    if(udata->queue && udata->queue->nb_elem>0) // on vide s'il y a quelque chose avant de partir
       mea_queue_cleanup(udata->queue, _enocean_data_free_queue_elem);
@@ -268,14 +229,6 @@ void *_thread_interface_type_003_enocean_data(void *args)
    enocean_ed_t *ed=udata->ed;
    enocean_data_queue_elem_t *e;
    int ret;
-
-   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-   PyEval_AcquireLock();
-   udata->i003->mainThreadState = PyThreadState_Get();
-   udata->i003->myThreadState = PyThreadState_New(udata->i003->mainThreadState->interp);
-   PyEval_ReleaseLock();
-   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-   pthread_testcancel();
 
    while(1) {
       if(ed->signal_flag==1)
@@ -376,55 +329,19 @@ void *_thread_interface_type_003_enocean_data(void *args)
                   if(!udata->plugin_params || !udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
                      goto _thread_interface_type_003_enocean_next_device_loop;
                   }
-                     plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
-                     if(plugin_elem) {
-                     pthread_cleanup_push( (void *)free, (void *)plugin_elem );
-                        plugin_elem->type_elem=DATAFROMSENSOR;
-                     memcpy(plugin_elem->buff, e->data, e->l_data);
-                     plugin_elem->l_buff=e->l_data;
-                     { // appel des fonctions Python
-                        PyEval_AcquireLock();
-                        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); // trop compliquer de traiter avec pthread_cleanup => on interdit les arrêts lors des commandes python
-                        PyThreadState *tempState = PyThreadState_Swap(udata->i003->myThreadState);
-                           struct device_info_s device_info;
-                        PyObject *value;
-                        device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
-                        plugin_elem->aDict = mea_device_info_to_pydict_device(&device_info);
-                        mea_addLong_to_pydict(plugin_elem->aDict, XPL_ENOCEAN_ADDR_STR_C, (long)e->enocean_addr);
-                        value = PyByteArray_FromStringAndSize(plugin_elem->buff, (long)plugin_elem->l_buff);
-                        PyDict_SetItemString(plugin_elem->aDict, DATA_STR_C, value);
-                        // PyDict_SetItemString(plugin_elem->aDict, "data", value);
-                        Py_DECREF(value);
-                        // mea_addLong_to_pydict(plugin_elem->aDict, "l_data", (long)plugin_elem->l_buff);
-                        mea_addLong_to_pydict(plugin_elem->aDict, L_DATA_STR_C, (long)plugin_elem->l_buff);
-                        // mea_addLong_to_pydict(plugin_elem->aDict, "api_key", (long)params->i003->id_interface);
-                        mea_addLong_to_pydict(plugin_elem->aDict, API_KEY_STR_C, (long)udata->i003->id_interface);
-
-                        if(udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s)
-                           mea_addString_to_pydict(plugin_elem->aDict, DEVICE_PARAMETERS_STR_C, udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
-
-                        PyThreadState_Swap(tempState);
-                        PyEval_ReleaseLock();
-                        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL); // on réauthorise les arrêts
-                        pthread_testcancel(); // on test tout de suite pour être sûr qu'on a pas ratté une demande d'arrêt
-                     } // fin appel des fonctions Python
-
-                     pythonPluginServer_add_cmd(udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, (void *)plugin_elem, sizeof(plugin_queue_elem_t));
-                     udata->i003->indicators.senttoplugin++;
-                     free(plugin_elem);
-                     plugin_elem=NULL;
-
-                     pthread_cleanup_pop(0);
-                  }
-                  else {
-                     VERBOSE(2) {
-                        release_parsed_parameters(&(udata->plugin_params));
-                        cJSON_Delete(jsonInterface);
-                        mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-                        perror("");
-                     }
-                     pthread_exit(PTHREAD_CANCELED);
-                  }
+                  
+                  struct device_info_s device_info;
+                  device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
+                  cJSON *data=NULL;
+                  data=device_info_to_json_alloc(&device_info);
+                  cJSON_AddNumberToObject(data, XPL_ENOCEAN_ADDR_STR_C, (double)e->enocean_addr);
+                  cJSON_AddItemToObject(data, DATA_STR_C, cJSON_CreateByteArray((char *)e->data, e->l_data));
+                  cJSON_AddNumberToObject(data, L_DATA_STR_C, (double)e->l_data);
+                  cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)(long)udata->i003->id_interface);
+                  if(udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s)
+                     cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
+                  python_cmd_json(udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+                  udata->i003->indicators.senttoplugin++;
 
 _thread_interface_type_003_enocean_next_device_loop:
                   if(udata->plugin_params) {
@@ -498,8 +415,6 @@ pthread_t *start_interface_type_003_enocean_data_thread(interface_type_003_t *i0
    pthread_mutex_init(&udata->callback_lock, NULL);
    pthread_cond_init(&udata->callback_cond, NULL);
    udata->i003=(void *)i003;
-   udata->i003->mainThreadState = NULL;
-   udata->i003->myThreadState = NULL;
 
    // préparation des données pour les callback io_data et data_flow dont les données sont traitées par le même thread
    enocean_callback_data=(struct enocean_callback_data_s *)malloc(sizeof(struct enocean_callback_data_s));
@@ -656,58 +571,65 @@ int get_interface_id_interface_type_003(void *ixxx)
 }
 
 
-int api_sendEnoceanRadioErp1Packet(interface_type_003_t *i003, PyObject *args, PyObject **res, int16_t *nerr, char *err, int l_err)
+int api_sendEnoceanRadioErp1Packet_json(interface_type_003_t *i003, cJSON *args, cJSON **res, int16_t *nerr, char *err, int l_err)
 {
-   PyObject *arg;
+   cJSON *arg;
    int16_t ret;
 
    *nerr=255;
+   
    // récupération des paramètres et contrôle des types
-   if(PyTuple_Size(args)!=6)
+   if(args->type!=cJSON_Array || cJSON_GetArraySize(args)!=6) {
       return -255;
+   }
 
    // rorg
    uint32_t rorg;
-   arg=PyTuple_GetItem(args, 2);
-   if(PyNumber_Check(arg))
-      rorg=(uint32_t)PyLong_AsLong(arg);
+   arg=cJSON_GetArrayItem(args, 2);
+   
+   if(arg->type==cJSON_Number) {
+      rorg=(uint32_t)arg->valuedouble;
+   }
    else
       return -255;
 
    // sub_id
    uint32_t sub_id;
-   arg=PyTuple_GetItem(args, 3);
-   if(PyNumber_Check(arg))
-      sub_id=(uint32_t)PyLong_AsLong(arg);
+   arg=cJSON_GetArrayItem(args, 3);
+   if(arg->type==cJSON_Number) {
+      sub_id=(uint32_t)arg->valuedouble;
+   }
    else
       return -255;
 
    // dest addr
    uint32_t dest_addr;
-   arg=PyTuple_GetItem(args, 4);
-   if(PyNumber_Check(arg))
-      dest_addr=(uint32_t)PyLong_AsLong(arg);
+   arg=cJSON_GetArrayItem(args, 4);
+   if(arg->type==cJSON_Number) {
+      dest_addr=(uint32_t)arg->valuedouble;
+   }
    else
       return -255;
 
-   Py_buffer py_packet;
-   arg=PyTuple_GetItem(args, 5);
-   if(PyObject_CheckBuffer(arg)) {
-      ret=PyObject_GetBuffer(arg, &py_packet, PyBUF_SIMPLE);
-      if(ret<0)
-      return -255;
+   arg=cJSON_GetArrayItem(args, 5);
+   int l=0;
+   if(arg->type==cJSON_ByteArray || arg->type==cJSON_String) {
+      if(arg->type==cJSON_String) {
+         l=(int)strlen(arg->valuestring);
+      }
+      else {
+         l=arg->valueint;
+      }
    }
    else
       return -255;
 
    *nerr = 0;
-   ret = enocean_send_radio_erp1_packet(i003->ed, rorg, i003->ed->id, sub_id, dest_addr, py_packet.buf, py_packet.len, 0, nerr);
+   ret = enocean_send_radio_erp1_packet(i003->ed, rorg, i003->ed->id, sub_id, dest_addr, (uint8_t *)arg->valuestring, l, 0, nerr);
    if(ret<0)
       strncpy(err, "error", l_err);
    else
       strncpy(err, "no error", l_err);
-
-   PyBuffer_Release(&py_packet);
 
    *res = NULL;
 
@@ -715,19 +637,19 @@ int api_sendEnoceanRadioErp1Packet(interface_type_003_t *i003, PyObject *args, P
 }
 
 
-int16_t api_interface_type_003(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
+int16_t api_interface_type_003_json(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
 {
    interface_type_003_t *i003 = (interface_type_003_t *)ixxx;
 
-   PyObject *pyArgs = (PyObject *)args;
-   PyObject **pyRes = (PyObject **)res;
+   cJSON *jsonArgs = (cJSON *)args;
+   cJSON **jsonRes = (cJSON **)res;
 
    if(strcmp(cmnd, "sendEnoceanRadioErp1Packet") == 0) {
-      api_sendEnoceanRadioErp1Packet(i003, pyArgs, pyRes, nerr, err, l_err);
+      api_sendEnoceanRadioErp1Packet_json(i003, jsonArgs, jsonRes, nerr, err, l_err);
    }
 #ifdef DEBUG
    else if(strcmp(cmnd, "test") == 0) {
-      *res = PYSTRING_FROMSTRING("New style Api call OK !!!");
+      *jsonRes = cJSON_CreateString("New style Api call OK !!!");
       *nerr=0;
       strncpy(err, "no error", l_err);
 
@@ -792,9 +714,6 @@ interface_type_003_t *malloc_and_init_interface_type_003(int id_driver, cJSON *j
    i003->xPL_callback2=NULL;
    i003->xPL_callback_data=NULL;
 
-   i003->mainThreadState=NULL;
-   i003->myThreadState=NULL;
-
    i003->monitoring_id=process_register((char *)name);
    i003_start_stop_params->i003=i003;
 
@@ -831,16 +750,6 @@ int stop_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
    VERBOSE(1) mea_log_printf("%s (%s) : %s shutdown thread ... ", INFO_STR, __func__, start_stop_params->i003->name);
 
    if(start_stop_params->i003->xPL_callback_data) {
-      struct xpl_callback_data_s *data = (struct xpl_callback_data_s *)start_stop_params->i003->xPL_callback_data;
-
-      if(data->myThreadState) {
-         PyEval_AcquireLock();
-         PyThreadState_Clear(data->myThreadState);
-         PyThreadState_Delete(data->myThreadState);
-         PyEval_ReleaseLock();
-         data->myThreadState=NULL;
-      }
-
       free(start_stop_params->i003->xPL_callback_data);
       start_stop_params->i003->xPL_callback_data=NULL;
    }
@@ -999,64 +908,22 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
       }
    }
    else {
-      //
-      // a remplacer par appel a python_call ... (voir python_utils.c)
-      //
-      PyObject *plugin_params_dict=NULL;
-      PyObject *pName, *pModule, *pFunc;
-      PyObject *pArgs, *pValue=NULL;
-
-      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-      PyEval_AcquireLock();
-      PyThreadState *mainThreadState=PyThreadState_Get();
-      PyThreadState *myThreadState = PyThreadState_New(mainThreadState->interp);
-
-      PyThreadState *tempState = PyThreadState_Swap(myThreadState);
-
-      // à remplacer par mea_callfunction() ...
-      PyErr_Clear();
-      pName = PYSTRING_FROMSTRING(interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s);
-      pModule = PyImport_Import(pName);
-      if(!pModule) {
-         VERBOSE(5) mea_log_printf("%s (%s) : %s not found\n", ERROR_STR, __func__, interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s);
-      }
-      else {
-         pFunc = PyObject_GetAttrString(pModule, "mea_init");
-         if (pFunc && PyCallable_Check(pFunc)) {
-            // préparation du parametre du module
-            plugin_params_dict=PyDict_New();
-
-            mea_addLong_to_pydict(plugin_params_dict, INTERFACE_ID_STR_C, start_stop_params->i003->id_interface);
-            if(interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s)
-               mea_addString_to_pydict(plugin_params_dict, INTERFACE_PARAMETERS_STR_C, interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
-
-            pArgs = PyTuple_New(1);
-            Py_INCREF(plugin_params_dict); // PyTuple_SetItem va voler la référence, on en rajoute une pour pouvoir ensuite faire un Py_DECREF
-            PyTuple_SetItem(pArgs, 0, plugin_params_dict);
-
-            pValue = PyObject_CallObject(pFunc, pArgs); // appel du plugin
-            if (pValue != NULL) {
-               DEBUG_SECTION mea_log_printf("%s (%s) : Result of call of mea_init : %ld\n", DEBUG_STR, __func__, PYINT_ASLONG(pValue));
-               Py_DECREF(pValue);
-            }
-            PyErr_Clear();
-            Py_DECREF(pArgs);
-            Py_DECREF(plugin_params_dict);
+      cJSON *result=NULL;
+      cJSON *data=cJSON_CreateObject();
+      if(data) {
+         cJSON_AddNumberToObject(data, INTERFACE_ID_STR_C, start_stop_params->i003->id_interface);
+         if(interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s) {
+            cJSON_AddStringToObject(data, INTERFACE_PARAMETERS_STR_C, interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
          }
-         else {
-            VERBOSE(5) mea_log_printf("%s (%s) : mea_init not fount in %s module\n", ERROR_STR, __func__, interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s);
-         }
-         Py_DECREF(pFunc);
-      }
-      Py_DECREF(pModule);
-      Py_DECREF(pName);
-      PyErr_Clear();
+         result=python_call_function_json_alloc(interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
+         if(result) {
+            char *s=cJSON_Print(result);
+            DEBUG_SECTION mea_log_printf("%s (%s) : Result of call of mea_init : %s\n", DEBUG_STR, __func__, s);
+            free(s);
 
-      PyThreadState_Swap(tempState);
-      PyThreadState_Clear(myThreadState);
-      PyThreadState_Delete(myThreadState);
-      PyEval_ReleaseLock();
-      pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+            cJSON_Delete(result);
+         }
+      }
 
       if(interface_parameters)
          release_parsed_parameters(&interface_parameters);
@@ -1101,7 +968,6 @@ clean_exit:
    if(start_stop_params->i003->thread)
       stop_interface_type_003(start_stop_params->i003->monitoring_id, start_stop_params, NULL, 0);
 
-
    if(interface_parameters) {
       release_parsed_parameters(&interface_parameters);
       interface_nb_parameters=0;
@@ -1134,7 +1000,7 @@ int get_fns_interface_type_003(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->set_monitoring_id = (set_monitoring_id_f)&set_monitoring_id_interface_type_003;
    interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_003;
    interfacesFns->get_type = (get_type_f)&get_type_interface_type_003;
-   interfacesFns->api = (api_f)&api_interface_type_003;
+   interfacesFns->api = (api_f)&api_interface_type_003_json;
    interfacesFns->lib = NULL;
    interfacesFns->type = interfacesFns->get_type();
    interfacesFns->plugin_flag = 0;

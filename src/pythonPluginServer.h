@@ -45,8 +45,10 @@ typedef struct pythonPlugin_cmd_s
    char *python_function;
    char *data;
    int  l_data;
+   cJSON **result;
    pthread_cond_t *exec_cond;
    pthread_mutex_t *exec_lock;
+   int reload_flag;
 } pythonPlugin_cmd_t;
 
 
@@ -55,12 +57,14 @@ typedef struct plugin_queue_elem_s
    pythonPlugin_type type_elem;
    PyObject *aDict;
    cJSON *aJsonDict;
-   char buff[128];
+   char buff[256];
    uint16_t l_buff;
 } plugin_queue_elem_t;
 
 
 mea_error_t pythonPluginServer_add_cmd(char *module, void *data, int l_data);
+cJSON      *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int l_data, int reload_flag);
+
 void        setPythonPluginPath(char *path);
 int         start_pythonPluginServer(int my_id, void *data, char *errmsg, int l_errmsg);
 int         stop_pythonPluginServer(int my_id, void *data, char *errmsg, int l_errmsg);

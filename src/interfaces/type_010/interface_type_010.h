@@ -9,11 +9,6 @@
 #define __interface_type_010_h
 
 #include <signal.h>
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
 
 #include "interfacesServer.h"
 #include "xPLServer.h"
@@ -71,12 +66,8 @@ typedef struct interface_type_010_s
  
    struct interface_type_010_indicators_s indicators;
 
-   PyThreadState   *mainThreadState;
-   PyThreadState   *myThreadState;
-   PyObject        *pModule;
-   PyObject        *pFunc;
-   PyObject        *pParams;
- 
+   char            *interface_plugin_name;
+   char            *interface_plugin_parameters;
 } interface_type_010_t;
 
 

@@ -48,7 +48,7 @@ int get_fns_interface(void *lib, struct interfacesServer_interfaceFns_s *interfa
       if(!interfacesFns->get_type)
          fprintf(stderr,"get_type: %s\n", dlerror());
 
-      interfacesFns->api = (api_f)dlsym(lib, "api_interface_type_003");
+      interfacesFns->api = (api_f)dlsym(lib, "api_interface_type_003_json");
       if(!interfacesFns->api)
          fprintf(stderr,"api: %s\n", dlerror());
 

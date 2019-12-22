@@ -125,7 +125,8 @@ int16_t init_strings_da()
    tokens_string_da->id_sensor_actuator_str_c         = get_token_string_by_id(ID_SENSOR_ACTUATOR_ID);
    tokens_string_da->api_metric_str_c                 = get_token_string_by_id(API_METRIC_ID);
    tokens_string_da->todbflag_str_c                   = get_token_string_by_id(TODBFLAG_ID);
-   
+   tokens_string_da->plugin_parameters_str_c          = get_token_string_by_id(PLUGIN_PARAMETERS_ID);
+
 #endif
    return 0;
 }

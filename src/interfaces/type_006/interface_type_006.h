@@ -7,20 +7,7 @@
 //
 #ifndef __interface_type_006_h
 #define __interface_type_006_h
-
-/*
-#ifdef ASPLUGIN
-#define NAME(f) f ## _ ## PLGN
-#else
-#define NAME(f) f
-#endif
-*/
 #include <signal.h>
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
 
 #include "interfacesServer.h"
 #include "xPLServer.h"
@@ -44,10 +31,10 @@ extern char *interface_type_006_serialin_str;
 typedef struct interface_type_006_s
 {
    int              id_interface;
-   char             name[41];
-   char             dev[81];
+   char             name[256];
+   char             dev[256];
 
-   char             real_dev[81];
+   char             real_dev[256];
    int              real_speed;
    int              fd;
 
@@ -58,10 +45,13 @@ typedef struct interface_type_006_s
    xpl2_f           xPL_callback2;
    void            *xPL_callback_data;
 
-   PyThreadState   *mainThreadState; 
-   PyThreadState   *myThreadState; 
+   char            *interface_plugin_name;
+   char            *interface_plugin_parameters;
+   
+//   PyThreadState   *mainThreadState; 
+//   PyThreadState   *myThreadState; 
 
-   PyObject      *pModule, *pFunc, *pParams;
+//   PyObject      *pModule, *pFunc, *pParams;
 
    struct interface_type_006_indicators_s indicators;
 } interface_type_006_t;

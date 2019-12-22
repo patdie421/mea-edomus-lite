@@ -157,14 +157,14 @@ def mea_init(data):
 
    mem_interface=mea.getMemory("interface_"+str(interface_id))
 
-   return True
+   return { "status": True, "msg":"un texte" }
 
 
 def is_number(s):
     """ Returns True is string is a number. """
     try:
         float(s)
-        return True
+        return { "status": True, "msg": "un texte" }
     except ValueError:
         return False
 

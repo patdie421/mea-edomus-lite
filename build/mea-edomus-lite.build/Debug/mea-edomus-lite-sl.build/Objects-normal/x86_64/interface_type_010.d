@@ -18,5 +18,6 @@ dependencies: \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/parameters_utils.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/commands/mea-compilr/cJSON.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_timer.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_xpl.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/processManager.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/python_utils.h

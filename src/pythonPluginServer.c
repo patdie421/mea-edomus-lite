@@ -110,7 +110,7 @@ mea_error_t pythonPluginServer_exec_cmd_coditionUp(pthread_mutex_t *exec_lock, p
 }
 
 
-mea_error_t add_to_cmd_queue(pythonPlugin_cmd_t *e)
+mea_error_t _pythonPluginServer_add_to_cmd_queue(pythonPlugin_cmd_t *e)
 {
    mea_error_t ret=NOERROR;
 
@@ -130,7 +130,7 @@ mea_error_t add_to_cmd_queue(pythonPlugin_cmd_t *e)
 }
 
 
-void _clean_cmd(pythonPlugin_cmd_t *e)
+void _pythonPluginServer_clean_cmd(pythonPlugin_cmd_t *e)
 {
    if(e) {
       if(e->python_module) {
@@ -152,9 +152,11 @@ void _clean_cmd(pythonPlugin_cmd_t *e)
 }
 
 
-mea_error_t pythonPluginServer_exec_cmd(char *module, char *function, void *data, int l_data)
+cJSON *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int l_data, int reload_flag)
 {
-   int ret=NOERROR;
+   int ret=-1;
+   cJSON *result=NULL;
+
    pthread_cond_t *exec_cond;
    pthread_mutex_t *exec_lock;
    
@@ -167,7 +169,7 @@ mea_error_t pythonPluginServer_exec_cmd(char *module, char *function, void *data
    pythonPlugin_cmd_t *e=NULL;
    e=(pythonPlugin_cmd_t *)malloc(sizeof(pythonPlugin_cmd_t));
    if(!e) {
-      ret=ERROR;
+      ret=-1;
       goto pythonPluginServer_exec_cmd_clean_exit;
    }
    e->python_module=NULL;
@@ -176,7 +178,7 @@ mea_error_t pythonPluginServer_exec_cmd(char *module, char *function, void *data
    e->l_data=0;
    e->exec_cond=exec_cond;
    e->exec_lock=exec_lock;
-
+   e->reload_flag=reload_flag;
    e->python_module=(char *)malloc(strlen(module)+1);
    if(!e->python_module)
       goto pythonPluginServer_exec_cmd_clean_exit;
@@ -186,8 +188,10 @@ mea_error_t pythonPluginServer_exec_cmd(char *module, char *function, void *data
       e->python_function=(char *)malloc(strlen(function)+1);
       if(!e->python_function)
          goto pythonPluginServer_exec_cmd_clean_exit;
-      strcpy(e->python_function, module);
+      strcpy(e->python_function, function);
    }
+   
+   e->result=&result;
    
    e->data=(char *)malloc(l_data);
    if(!e->data)
@@ -195,7 +199,7 @@ mea_error_t pythonPluginServer_exec_cmd(char *module, char *function, void *data
    memcpy(e->data, data, l_data);
    e->l_data=l_data;
  
-   ret=add_to_cmd_queue(e);
+   ret=_pythonPluginServer_add_to_cmd_queue(e);
 
    struct timeval tv;
    struct timespec ts;
@@ -216,11 +220,10 @@ mea_error_t pythonPluginServer_exec_cmd(char *module, char *function, void *data
          perror("");
       }
    }
-
+   
    pthread_mutex_unlock(exec_lock);
    pthread_cleanup_pop(0);
-
-
+   
 pythonPluginServer_exec_cmd_clean_exit:
    if(exec_cond) {
       pthread_cond_destroy(exec_cond);
@@ -233,18 +236,17 @@ pythonPluginServer_exec_cmd_clean_exit:
       exec_lock=NULL;
    }
 
-   _clean_cmd(e);
-   free(e);
-   e=NULL;
-
-   return ret;
+   if(ret!=NOERROR)
+      result=NULL;
+   
+   return result;
 }
 
 
 mea_error_t pythonPluginServer_add_cmd(char *module, void *data, int l_data)
 {
    pythonPlugin_cmd_t *e=NULL;
-   int ret=NOERROR;
+   int ret=ERROR;
    e=(pythonPlugin_cmd_t *)malloc(sizeof(pythonPlugin_cmd_t));
    if(!e)
       return ERROR;
@@ -254,6 +256,7 @@ mea_error_t pythonPluginServer_add_cmd(char *module, void *data, int l_data)
    e->l_data=0;
    e->exec_cond=NULL;
    e->exec_lock=NULL;
+   e->result=NULL;
 
    e->python_module=(char *)malloc(strlen(module)+1);
    if(!e->python_module)
@@ -266,53 +269,17 @@ mea_error_t pythonPluginServer_add_cmd(char *module, void *data, int l_data)
    memcpy(e->data, data, l_data);
    
    e->l_data=l_data;
+   e->reload_flag=0;
    
-   ret=add_to_cmd_queue(e);
-/*   
-   pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&pythonPluginCmd_queue_lock);
-   pthread_mutex_lock(&pythonPluginCmd_queue_lock);
-   if(pythonPluginCmd_queue) {
-      mea_queue_in_elem(pythonPluginCmd_queue, e);
-      if(pythonPluginCmd_queue->nb_elem>=1)
-         pthread_cond_broadcast(&pythonPluginCmd_queue_cond);
-   }
-   else
-      ret=ERROR;
-   pthread_mutex_unlock(&pythonPluginCmd_queue_lock);
-   pthread_cleanup_pop(0);
-*/
-   if(ret!=ERROR)
-      return NOERROR;
-   
+   ret=_pythonPluginServer_add_to_cmd_queue(e);
+
 pythonPluginServer_add_cmd_clean_exit:
-/*
-   if(e) {
-      if(e->python_module) {
-         free(e->python_module);
-         e->python_module=NULL;
-      }
 
-      if(e->python_function) {
-         free(e->python_function);
-         e->python_function=NULL;
-      }
-
-      if(e->data) {
-         free(e->data);
-         e->data=NULL;
-      }
-
-   }
-*/
-   _clean_cmd(e);
-   free(e);
-   e=NULL;
-
-   return ERROR;
+   return ret;
 }
 
 
-mea_error_t call_pythonPlugin(char *module, char *function, int type, PyObject *data_dict)
+cJSON *call_pythonPlugin(char *module, char *function, int type, PyObject *data_dict, int reload_flag)
 {
    PyObject *pName, *pModule=NULL, *pFunc;
    PyObject *pArgs, *pValue;
@@ -335,7 +302,7 @@ mea_error_t call_pythonPlugin(char *module, char *function, int type, PyObject *
             mea_log_printf("%s (%s) : module %s not loaded - \n", ERROR_STR, __func__, module);
             PyErr_Print();
          }
-         return NOERROR;
+         return NULL;
       }
    }
    else {
@@ -350,7 +317,7 @@ mea_error_t call_pythonPlugin(char *module, char *function, int type, PyObject *
       strcat(str_module_py,"reload");
      
       int ret=unlink(str_module_py);
-      if(!ret) {
+      if(!ret || reload_flag==1) {
          PyObject *m = pModule;
          pModule = PyImport_ReloadModule(m); // possible fute ici voir l'utilisation de Reload
          if(pModule) {
@@ -373,12 +340,10 @@ mea_error_t call_pythonPlugin(char *module, char *function, int type, PyObject *
    
    Py_DECREF(pName);
 
-   int return_code = 0;
-   char *fx;
+   cJSON *return_code = NULL;
+   char *fx=NULL;
    if (pModule != NULL) {
       switch(type) {
-         case XBEEDATA:
-            fx="mea_dataFromSensor";
             break;
          case XPLMSG:
             fx="mea_xplCmndMsg";
@@ -386,20 +351,15 @@ mea_error_t call_pythonPlugin(char *module, char *function, int type, PyObject *
          case COMMISSIONNING:
             fx="mea_commissionningRequest";
             break;
-//         case ENOCEANDATA:
-//            fx="mea_enoceanData";
-//            break;
-//         case GENERICSERIALDATA:
-//            fx="mea_serialData";
-//            break;
          case DATAFROMSENSOR:
+         case XBEEDATA:
             fx="mea_dataFromSensor";
             break;
          case CUSTOM_JSON:
-//            fx=e->function;
+            fx=function;
             break;
          default:
-            return NOERROR;
+            return NULL;
       }
       pFunc = PyObject_GetAttrString(pModule, fx);
 
@@ -411,13 +371,17 @@ mea_error_t call_pythonPlugin(char *module, char *function, int type, PyObject *
          PyTuple_SetItem(pArgs, 0, data_dict);
          pValue = PyObject_CallObject(pFunc, pArgs);
          Py_DECREF(pArgs);
+         unsigned long exectime=_diffMillis(chrono, _millis());
 
          process_update_indicator(_pythonPluginServer_monitoring_id, "PYCALL", ++nbpycall_indicator);
 
          if (pValue != NULL) {
-            unsigned long exectime=_diffMillis(chrono, _millis());
-            DEBUG_SECTION mea_log_printf("%s (%s) : result of call of %s : %ld (%ld)\n", DEBUG_STR, __func__, fx, PYINT_ASLONG(pValue), exectime);
-            Py_DECREF(pValue); // verifier si nécessaire
+            cJSON *result=mea_PyObjectToJson(pValue);
+            Py_DECREF(pValue);
+            char *s=cJSON_Print(result);
+            DEBUG_SECTION mea_log_printf("%s (%s) : result of call of %s : %s (%ld)\n", DEBUG_STR, __func__, fx, s, exectime);
+            free(s);
+            return_code=result;
          }
          else {
             VERBOSE(5) {
@@ -426,7 +390,7 @@ mea_error_t call_pythonPlugin(char *module, char *function, int type, PyObject *
                fprintf(MEA_STDERR, "\n");
             }
             process_update_indicator(_pythonPluginServer_monitoring_id, "PYCALLERR", ++nbpycallerr_indicator);
-            return_code=ERROR;
+            return_code=NULL;
          }
       }
       else {
@@ -437,14 +401,14 @@ mea_error_t call_pythonPlugin(char *module, char *function, int type, PyObject *
                fprintf(MEA_STDERR, "\n");
             }
             PyErr_Clear();
-            return_code=ERROR;
+            return_code=NULL;
             goto call_pythonPlugin_clean_exit;
          }
          else {
             VERBOSE(5) {
                mea_log_printf("%s (%s) : python unknown error\n", ERROR_STR, __func__);
             }
-            return_code=ERROR;
+            return_code=NULL;
             goto call_pythonPlugin_clean_exit;
          }
       }
@@ -455,7 +419,7 @@ mea_error_t call_pythonPlugin(char *module, char *function, int type, PyObject *
          PyErr_Print();
          fprintf(MEA_STDERR, "\n");
       }
-      return ERROR;
+      return NULL;
    }
    
 call_pythonPlugin_clean_exit:
@@ -582,12 +546,21 @@ void *_pythonPlugin_thread(void *data)
                case DATAFROMSENSOR_JSON:
                   data->type_elem=DATAFROMSENSOR;
                   break;
+               default:
+                  break;
             }
          }
 
          pydict_data=data->aDict;
 
-         call_pythonPlugin(e->python_module, e->python_module, data->type_elem, pydict_data);
+         cJSON *result=call_pythonPlugin(e->python_module, e->python_function, data->type_elem, pydict_data, e->reload_flag);
+         
+         if(e->result) {
+            *(e->result)=result;
+         }
+         else {
+            cJSON_Delete(result);
+         }
 
          Py_DECREF(pydict_data);
 
@@ -600,22 +573,7 @@ void *_pythonPlugin_thread(void *data)
          }
 
          if(e) {
-/*         
-            if(e->python_module) {
-               free(e->python_module);
-               e->python_module=NULL;
-            }
-            if(e->python_function) {
-               free(e->python_function);
-               e->python_function=NULL;
-            }
-            if(e->data) {
-               free(e->data);
-               e->data=NULL;
-            }
-            e->l_data=0;
-*/
-            _clean_cmd(e);
+            _pythonPluginServer_clean_cmd(e);
             free(e);
             e=NULL;
          }
@@ -703,10 +661,7 @@ void pythonPluginCmd_queue_free_queue_elem(void *d)
 {
    pythonPlugin_cmd_t *e=(pythonPlugin_cmd_t *)d;
 
-   free(e->python_module);
-   e->python_module=NULL;
-   free(e->data);
-   e->data=NULL;
+   _pythonPluginServer_clean_cmd(e);
 } 
 
 

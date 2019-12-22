@@ -41,6 +41,7 @@ static PyObject *mea_xplGetInstanceID(PyObject *self, PyObject *args);
 static PyObject *mea_xplSendMsg2(PyObject *self, PyObject *args);
 static PyObject *mea_addDataToSensorsValuesTable(PyObject *self, PyObject *args);
 static PyObject *mea_interface_api(PyObject *self, PyObject *args);
+static PyObject *mea_interface_api_json(PyObject *self, PyObject *args);
 
 
 static PyMethodDef MeaMethods[] = {
@@ -55,7 +56,7 @@ static PyMethodDef MeaMethods[] = {
    {"addDataToSensorsValuesTable",  mea_addDataToSensorsValuesTable,  METH_VARARGS, "Envoi des donnees dans la table sensors_values"},
 //   {"sendSerialData",               mea_write,                        METH_VARARGS, "Envoi des donnees vers une ligne serie"},
 //   {"receiveSerialData",            mea_read,                         METH_VARARGS, "recupere des donnees depuis une ligne serie"},
-   {"interfaceAPI",                 mea_interface_api,                METH_VARARGS, "appel api d'interface"},
+   {"interfaceAPI",                 mea_interface_api_json,                METH_VARARGS, "appel api d'interface"},
    {NULL, NULL, 0, NULL}
 };
 
@@ -169,6 +170,80 @@ static PyObject *mea_interface_api(PyObject *self, PyObject *args)
    PyTuple_SetItem(t, 1, PyLong_FromLong((long)nerr));
    if(res == NULL)
       res = PyLong_FromLong(0L);
+   PyTuple_SetItem(t, 2, res);
+
+   return t;
+
+mea_interface_api_arg_err:
+   PyErr_BadArgument();
+   return NULL;
+}
+
+
+static PyObject *mea_interface_api_json(PyObject *self, PyObject *args)
+{
+   PyObject *arg;
+
+   int id_interface=-1;
+   int nb_args=0;
+   // récupération des paramètres et contrôle des types
+
+   nb_args=(int)PyTuple_Size(args);
+   if(nb_args<2)
+      goto mea_interface_api_arg_err;
+
+   arg=PyTuple_GetItem(args, 0);
+   if(PyNumber_Check(arg))
+      id_interface=(int)PyLong_AsLong(arg);
+   else
+      goto mea_interface_api_arg_err;
+
+   char *cmnd = NULL;
+   arg=PyTuple_GetItem(args, 1);
+   if(PYSTRING_CHECK(arg))
+      cmnd=(char *)PYSTRING_ASSTRING(arg);
+   else
+      goto mea_interface_api_arg_err;
+
+   char err[255];
+   int16_t nerr;
+   cJSON *_res = NULL;
+   cJSON *_args = mea_PyObjectToJson(args);
+
+   int ret=interfacesServer_call_interface_api(id_interface, cmnd, (void *)_args, nb_args - 2, (void **)&_res, &nerr, err, sizeof(err));
+
+   cJSON_Delete(_args);
+   
+   switch(ret) {
+      case -252:
+      case -253:
+      case -254:
+         if(_res) {
+            cJSON_Delete(_res);
+            _res=NULL;
+         }
+         PyErr_SetString(PyExc_RuntimeError, err);
+         return NULL;
+      case -255:
+         if(_res) {
+            cJSON_Delete(_res);
+            _res=NULL;
+         }
+         PyErr_BadArgument();
+         return NULL;
+   }
+
+   PyObject *res=NULL;
+   if(_res) {
+      res=mea_jsonToPyObject(_res);
+      cJSON_Delete(_res);
+   }
+   if(res == NULL)
+      res = PyLong_FromLong(0L);
+
+   PyObject *t=PyTuple_New(3);
+   PyTuple_SetItem(t, 0, PyLong_FromLong(ret));
+   PyTuple_SetItem(t, 1, PyLong_FromLong((long)nerr));
    PyTuple_SetItem(t, 2, res);
 
    return t;

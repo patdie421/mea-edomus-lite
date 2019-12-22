@@ -15,4 +15,5 @@ dependencies: \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_rest_api_service.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_rest_api_configuration.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_rest_api_interface.h \
-  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_rest_api_type.h
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_rest_api_type.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_rest_api_metric.h

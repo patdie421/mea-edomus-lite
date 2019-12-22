@@ -111,6 +111,7 @@ struct tokens_strings_da_s
    char *description_str_c;
    char *id_sensor_actuator_str_c;
    char *api_metric_str_c;
+   char *plugin_parameters_str_c;
 };
 
 extern struct tokens_strings_da_s *tokens_string_da;
@@ -210,6 +211,7 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define ID_SENSOR_ACTUATOR_STR_C         tokens_string_da->id_sensor_actuator_str_c
 #define API_METRIC_STR_C                 tokens_string_da->api_metric_str_c
 #define TODBFLAG_STR_C                   tokens_string_da->todbflag_str_c
+#define PLUGIN_PARAMETERS_STR_C          tokens_string_da->plugin_parameters_str_c
 
 #else
 
@@ -308,6 +310,7 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define ID_SENSOR_ACTUATOR_STR_C         get_token_string_by_id(ID_SENSOR_ACTUATOR_ID)
 #define API_METRIC_STR_C                 get_token_string_by_id(API_METRIC_ID)
 #define TODBFLAG_STR_C                   get_token_string_by_id(TODBFLAG_ID)
+#define PLUGIN_PARAMETERS_STR_C          get_token_string_by_id(PLUGIN_PARAMETERS_ID)
 
 #endif
 

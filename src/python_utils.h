@@ -32,18 +32,6 @@
 #define PYBUFFER_NEW        PyBuffer_New
 #endif
 
-
-#define PYTHON_CALL_JSON(THREADSTATE, IN, OUT) \
-{ \
-   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); \
-   PyEval_AcquireLock(); \
-   PyThreadState *tempState = PyThreadState_Swap(THREADSTATE); \
-   OUT=mea_call_python_function_json_alloc(name, "pairing_get_devices", IN); \
-   PyThreadState_Swap(tempState); \
-   PyEval_ReleaseLock(); \
-   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL); \
-}
-
 #define mea_python_lock() \
    { \
    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL); \
@@ -59,7 +47,6 @@
    PyEval_ReleaseLock(); \
    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL); \
    }
-
 
 PyObject *mea_getMemory(PyObject *self, PyObject *args, PyObject *mea_memory);
 
@@ -83,5 +70,8 @@ int mea_call_python_function3(PyObject *pFunc, PyObject *plugin_params_dict, PyO
 int mea_call_python_function_from_module(PyObject *module, char *plugin_func, PyObject *plugin_params_dict);
 
 cJSON *mea_call_python_function_json_alloc(char *module_name, char *function_name, cJSON *j);
+
+int python_cmd_json(char *module, int type, cJSON *data);
+cJSON *python_call_function_json_alloc(char *module, char *function, cJSON *data);
 
 #endif
