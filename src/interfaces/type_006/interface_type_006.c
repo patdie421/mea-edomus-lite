@@ -688,12 +688,7 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
    if(!ret) {
       int n=snprintf(dev,sizeof(buff)-1,"/dev/%s",buff);
       if(n<0 || n==(sizeof(buff)-1)) {
-#ifdef _POSIX_SOURCE
-         char *ret;
-#else
-         int ret;
-#endif
-         ret=strerror_r(errno, err_str, sizeof(err_str));
+         strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(2) {
             mea_log_printf("%s (%s) : snprintf - %s\n", ERROR_STR, __func__, err_str);
          }
