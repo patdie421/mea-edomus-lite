@@ -560,7 +560,7 @@ char *mea_string_alloc_and_copy(char *str)
    int l_new_str=(int)strlen(str)+1;
    char *new_str=(char *)malloc(l_new_str);
    if(new_str) {
-      strncpy(new_str, str, l_new_str-1);
+      strcpy(new_str, str);
       new_str[l_new_str-1]=0;
    }
    else {  

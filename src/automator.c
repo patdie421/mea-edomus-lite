@@ -2067,7 +2067,7 @@ char *automator_inputs_table_to_json_string_alloc()
 
    data=(char *)malloc(l_data+1);
    if(data) {
-      strncpy(data, jsonstr, l_data);
+      strcpy(data, jsonstr);
    }
  
    return data;

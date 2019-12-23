@@ -721,7 +721,7 @@ struct mea_eval_stack_s *mea_eval_addStackToCache(char *expr, struct mea_eval_st
          e=NULL;
          return NULL;
       } 
-      strncpy(e->expr, expr, l_expr);
+      strcpy(e->expr, expr);
       e->stack = stack;
       e->stack_ptr = stack_ptr;
       e->err = err;

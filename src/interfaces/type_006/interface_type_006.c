@@ -588,7 +588,7 @@ interface_type_006_t *malloc_and_init2_interface_type_006(int id_driver, cJSON *
    i006->id_interface=id_interface;
    i006->parameters=(char *)malloc(strlen((char *)parameters)+1);
    if(i006->parameters)
-      strncpy(i006->parameters,(char *)parameters, strlen((char *)parameters));
+      strcpy(i006->parameters,(char *)parameters);
    i006->indicators.senttoplugin=0;
    i006->indicators.xplin=0;
    i006->indicators.serialin=0;
