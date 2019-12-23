@@ -737,12 +737,7 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
    // données pour les callbacks xpl
    struct callback_xpl_data_s *xpl_callback_params=(struct callback_xpl_data_s *)malloc(sizeof(struct callback_xpl_data_s));
    if(!xpl_callback_params) {
-#ifdef _POSIX_SOURCE
-      char *ret;
-#else
-      int ret;
-#endif
-      ret=strerror_r(errno, err_str, sizeof(err_str));
+      strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
@@ -762,12 +757,7 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
    }
 
    {
-#ifdef _POSIX_SOURCE
-      char *ret;
-#else
-      int ret;
-#endif
-      ret=strerror_r(errno, err_str, sizeof(err_str));
+      strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) mea_log_printf("%s  (%s) : %s can't start - %s.\n", ERROR_STR, __func__, start_stop_params->i006->name, err_str);
    } 
 
