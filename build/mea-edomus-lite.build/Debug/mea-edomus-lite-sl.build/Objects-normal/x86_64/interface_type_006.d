@@ -1,13 +1,13 @@
 dependencies: \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/interfaces/type_006/interface_type_006.c \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/interfaces/type_006/interface_type_006.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/pythonPluginServer.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/cJSON.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_error.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/interfacesServer.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/xPLServer.h \
-  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/cJSON.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_queue.h \
-  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_error.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/uthash.h \
-  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/pythonPluginServer.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/globals.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/consts.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/serial.h \

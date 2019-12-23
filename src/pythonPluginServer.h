@@ -4,7 +4,6 @@
 //  Created by Patrice Dietsch on 04/05/13.
 //
 //
-
 #ifndef __pythonPluginServer_h
 #define __pythonPluginServer_h
 #ifdef __APPLE__
@@ -16,7 +15,9 @@
 #include <pthread.h>
 
 #include "cJSON.h"
+#include "mea_error.h"
 
+/*
 #define DEBUG_PyEval_AcquireLock(id, last_time) { \
    printf("CHRONO : Demande Lock par %s a %u ms\n",(id),start_chrono((last_time))); \
    PyEval_AcquireLock(); \
@@ -27,7 +28,7 @@
    PyEval_ReleaseLock(); \
    fprintf(stderr,"CHRONO : Liberation Lock par %s apres %u\n",(id), take_chrono((last_time))); \
 }
-
+*/
 
 //typedef enum {XBEEDATA=1, XPLMSG=2, COMMISSIONNING=3, ENOCEANDATA=4, GENERICSERIALDATA=5, DATAFROMSENSOR=6 } pythonPlugin_type;
 typedef enum {XBEEDATA=1, XPLMSG=2, COMMISSIONNING=3, DATAFROMSENSOR=6, XPLMSG_JSON=12, DATAFROMSENSOR_JSON=16, CUSTOM_JSON=30 } pythonPlugin_type;
