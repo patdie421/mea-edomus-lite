@@ -5,12 +5,6 @@
 //  Created by Patrice Dietsch on 21/02/2015.
 //
 //
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
-
 #include "interface_type_XXX.h"
 
 #include <stdio.h>
@@ -30,6 +24,7 @@
 #include "consts.h"
 #include "tokens.h"
 #include "tokens_da.h"
+#include "cJSON.h"
 #include "mea_verbose.h"
 #include "macros.h"
 #include "mea_string_utils.h"
@@ -98,14 +93,12 @@ int clean_interface_type_XXX(void *ixxx)
 {
    interface_type_XXX_t *iXXX = (interface_type_XXX_t *)ixxx;
 
-   if(iXXX->parameters)
-   {
+   if(iXXX->parameters) {
       free(iXXX->parameters);
       iXXX->parameters=NULL;
    }
 
-   if(iXXX->xPL_callback_data)
-   {
+   if(iXXX->xPL_callback_data) {
       free(iXXX->xPL_callback_data);
       iXXX->xPL_callback_data=NULL;
    }
@@ -113,8 +106,7 @@ int clean_interface_type_XXX(void *ixxx)
    if(iXXX->xPL_callback2)
       iXXX->xPL_callback2=NULL;
 
-   if(iXXX->thread)
-   {
+   if(iXXX->thread) {
       free(iXXX->thread);
       iXXX->thread=NULL;
    }
@@ -129,8 +121,7 @@ xpl2_f get_xPLCallback_interface_type_XXX(void *ixxx)
 
    if(iXXX == NULL)
       return NULL;
-   else
-   {
+   else {
       return iXXX->xPL_callback2;
    }
 }
@@ -153,8 +144,7 @@ int set_xPLCallback_interface_type_XXX(void *ixxx, xpl2_f cb)
 
    if(iXXX == NULL)
       return -1;
-   else
-   {
+   else {
       iXXX->xPL_callback2 = cb;
       return 0;
    }
@@ -167,8 +157,7 @@ int set_monitoring_id_interface_type_XXX(void *ixxx, int id)
 
    if(iXXX == NULL)
       return -1;
-   else
-   {
+   else {
       iXXX->monitoring_id = id;
       return 0;
    }
@@ -192,22 +181,20 @@ int get_interface_id_interface_type_XXX(void *ixxx)
 }
 
 
-int16_t api_interface_type_XXX(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
+int16_t api_interface_type_XXX_json(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
 {
    interface_type_XXX_t *iXXX = (interface_type_XXX_t *)ixxx;
-   PyObject *pyArgs = (PyObject *)args;
-   PyObject **pyRes = (PyObject **)res;
+   cJSON *pyArgs = (cJSON *)args;
+   cJSON **pyRes = (cJSON **)res;
    
-   if(strcmp(cmnd, "test") == 0)
-   {
-      *res = PYSTRING_FROMSTRING("New style Api call OK !!!");
+   if(strcmp(cmnd, "test") == 0) {
+      *res = (void *)cJSON_CreateString("New style Api call OK !!!");
       *nerr=0;
       strncpy(err, "no error", l_err);
 
       return 0;
    }
-   else
-   {
+   else {
       strncpy(err, "unknown function", l_err);
 
       return -254;
@@ -233,8 +220,7 @@ interface_type_XXX_t *malloc_and_init_interface_type_XXX(sqlite3 *sqlite3_param_
    interface_type_XXX_t *iXXX;
                   
    iXXX=(interface_type_XXX_t *)malloc(sizeof(interface_type_XXX_t));
-   if(!iXXX)
-   {
+   if(!iXXX) {
       VERBOSE(2) {
         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
         perror("");
@@ -244,8 +230,7 @@ interface_type_XXX_t *malloc_and_init_interface_type_XXX(sqlite3 *sqlite3_param_
    iXXX->thread_is_running=0;
                   
    struct interface_type_XXX_data_s *iXXX_start_stop_params=(struct interface_type_XXX_data_s *)malloc(sizeof(struct interface_type_XXX_data_s));
-   if(!iXXX_start_stop_params)
-   {
+   if(!iXXX_start_stop_params) {
       free(iXXX);
       iXXX=NULL;
 
@@ -295,11 +280,9 @@ void *_thread_interface_type_XXX(void *args)
    params->iXXX->thread_is_running=1;
    process_heartbeat(params->iXXX->monitoring_id);
 
-//   sqlite3 *params_db=params->param_db;
    int ret;
 
-   while(1)
-   {
+   while(1) {
       process_heartbeat(params->iXXX->monitoring_id);
       process_update_indicator(params->iXXX->monitoring_id, interface_type_XXX_xplin_str, params->iXXX->indicators.xplin);
 
@@ -323,8 +306,7 @@ pthread_t *start_interface_type_XXX_thread(interface_type_XXX_t *iXXX, void *fd,
    struct callback_data_s *callback_data=NULL;
 
    thread_params=malloc(sizeof(struct thread_params_s));
-   if(!thread_params)
-   {
+   if(!thread_params) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
          perror("");
@@ -336,8 +318,7 @@ pthread_t *start_interface_type_XXX_thread(interface_type_XXX_t *iXXX, void *fd,
    thread_params->iXXX=(void *)iXXX;
 
    thread=(pthread_t *)malloc(sizeof(pthread_t));
-   if(!thread)
-   {
+   if(!thread) {
       VERBOSE(2) mea_log_printf("%s (%s) : %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR);
       goto clean_exit;
    }
@@ -350,14 +331,12 @@ pthread_t *start_interface_type_XXX_thread(interface_type_XXX_t *iXXX, void *fd,
    return thread;
 
 clean_exit:
-   if(thread)
-   {
+   if(thread) {
       free(thread);
       thread=NULL;
    }
 
-   if(thread_params)
-   {
+   if(thread_params) {
       free(thread_params);
       thread_params=NULL;
    }
@@ -374,8 +353,7 @@ int stop_interface_type_XXX(int my_id, void *data, char *errmsg, int l_errmsg)
 
    VERBOSE(1) mea_log_printf("%s (%s) : %s shutdown thread ... ", INFO_STR, __func__, start_stop_params->iXXX->name);
 
-   if(start_stop_params->iXXX->xPL_callback_data)
-   {
+   if(start_stop_params->iXXX->xPL_callback_data) {
       free(start_stop_params->iXXX->xPL_callback_data);
       start_stop_params->iXXX->xPL_callback_data=NULL;
    }
@@ -383,15 +361,12 @@ int stop_interface_type_XXX(int my_id, void *data, char *errmsg, int l_errmsg)
    if(start_stop_params->iXXX->xPL_callback2)
       start_stop_params->iXXX->xPL_callback2=NULL;
 
-   if(start_stop_params->iXXX->thread)
-   {
+   if(start_stop_params->iXXX->thread) {
       pthread_cancel(*(start_stop_params->iXXX->thread));
 
       int counter=100;
-      while(counter--)
-      {
-         if(start_stop_params->iXXX->thread_is_running)
-         {
+      while(counter--) {
+         if(start_stop_params->iXXX->thread_is_running) {
             usleep(100);
          }
          else
@@ -429,8 +404,7 @@ int start_interface_type_XXX(int my_id, void *data, char *errmsg, int l_errmsg)
    start_stop_params->iXXX->thread=start_interface_type_XXX_thread(start_stop_params->iXXX, NULL, start_stop_params->sqlite3_param_db, (thread_f)_thread_interface_type_XXX);
 
    xpl_callback_params=(struct callback_xpl_data_s *)malloc(sizeof(struct callback_xpl_data_s)); 
-   if(!xpl_callback_params)
-   {
+   if(!xpl_callback_params) {
       strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
@@ -438,7 +412,6 @@ int start_interface_type_XXX(int my_id, void *data, char *errmsg, int l_errmsg)
       mea_notify_printf('E', "%s can't be launched - %s.\n", start_stop_params->iXXX->name, err_str);
       goto clean_exit;
    }
-//   xpl_callback_params->param_db=start_stop_params->sqlite3_param_db;
 
    start_stop_params->iXXX->xPL_callback_data=xpl_callback_params;
    start_stop_params->iXXX->xPL_callback2=_interface_type_XXX_xPL_callback2;
@@ -446,8 +419,7 @@ int start_interface_type_XXX(int my_id, void *data, char *errmsg, int l_errmsg)
    return 0;
 
 clean_exit:
-   if(xpl_callback_params)
-   {
+   if(xpl_callback_params) {
       free(xpl_callback_params);
       xpl_callback_params=NULL;
    }
@@ -471,7 +443,7 @@ int get_fns_interface_type_XXX(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->clean = (clean_f)&clean_interface_type_XXX;
 
    interfacesFns->api = (api_f)&api_interface_type_XXX;
-   interfacesFns->pairing = (api_f)&pairing_interface_type_XXX;
+   interfacesFns->pairing = (api_f)&pairing_interface_type_XXX_json;
    interfacesFns->lib = NULL;
 
    interfacesFns->plugin_flag = 0;
