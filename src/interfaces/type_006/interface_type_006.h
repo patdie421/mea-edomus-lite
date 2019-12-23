@@ -8,10 +8,10 @@
 #ifndef __interface_type_006_h
 #define __interface_type_006_h
 #include "pythonPluginServer.h"
-#include "interfacesServer.h"
 
 #include <signal.h>
 
+#include "interfacesServer.h"
 #include "xPLServer.h"
 
 #define INTERFACE_TYPE_006 465

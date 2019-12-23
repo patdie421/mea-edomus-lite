@@ -7,15 +7,14 @@
 //
 #ifndef __interface_type_003_h
 #define __interface_type_003_h
+#include "pythonPluginServer.h"
+
 #include <signal.h>
 
 #include "interface_type_003.h"
-
 #include "enocean.h"
-
 #include "interfacesServer.h"
 #include "xPLServer.h"
-#include "pythonPluginServer.h"
 #include "cJSON.h"
 
 
