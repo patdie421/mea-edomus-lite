@@ -484,7 +484,8 @@ def mea_commissionningRequest(data):
             
             else:
                if len(i[0])==3:
-                  ret=mea.sendXbeeCmd(data["ID_XBEE"], data["ADDR_H"], data["ADDR_L"], i[0][1:3].upper(), "");
+                  # ret=mea.sendXbeeCmd(data["ID_XBEE"], data["ADDR_H"], data["ADDR_L"], i[0][1:3].upper(), "");
+                  ret=mea.interfaceAPI(api_key, "sendXbeeCmd", data["ADDR_H"], data["ADDR_L"], bytes(i[0][1:3].upper()), "")
                   if ret == 0:
                      verbose(3, "ERROR (", fn_name, ") - Transmission error for", i[0], "= ", numVal)
          enable_change_detection(data,mem)

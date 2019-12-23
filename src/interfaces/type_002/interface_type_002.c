@@ -66,8 +66,8 @@ typedef void (*thread_f)(void *);
 
 // parametres valide pour les capteurs ou actionneurs pris en compte par le type 2.
 char *valid_xbee_plugin_params[]={"S:PLUGIN","S:PARAMETERS", NULL};
-#define XBEE_PLUGIN_PARAMS_PLUGIN      0
-#define XBEE_PLUGIN_PARAMS_PARAMETERS  1
+#define PLUGIN_PARAMS_PLUGIN      0
+#define PLUGIN_PARAMS_PARAMETERS  1
 
 
 char *printf_mask_addr="%02x%02x%02x%02x-%02x%02x%02x%02x";
@@ -75,7 +75,6 @@ char *printf_mask_addr="%02x%02x%02x%02x-%02x%02x%02x%02x";
 
 struct callback_data_s // donnee "userdata" pour les callbacks
 {
-   PyThreadState   *mainThreadState;
    xbee_xd_t       *xd;
    mea_queue_t     *queue;
    pthread_mutex_t *callback_lock;
@@ -136,6 +135,7 @@ mea_error_t display_frame(int ret, unsigned char *resp, uint16_t l_resp)
    return NOERROR;
 }
 
+
 mea_error_t print_frame(int ret, unsigned char *resp, uint16_t l_resp)
 {
    DEBUG_SECTION {
@@ -145,6 +145,7 @@ mea_error_t print_frame(int ret, unsigned char *resp, uint16_t l_resp)
    }
    return NOERROR;
 }
+
 
 void display_addr(char *a)
 {
@@ -348,7 +349,7 @@ int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    int nb_plugin_params;
        
    plugin_params=alloc_parsed_parameters(device_info->parameters, valid_xbee_plugin_params, &nb_plugin_params, &err, 0);
-   if(!plugin_params || !plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
+   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(plugin_params)
           release_parsed_parameters(&plugin_params);
       return ERROR; // si pas de parametre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin pour ce capteur
@@ -358,18 +359,17 @@ int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    data=device_info_to_json_alloc(device_info);
    cJSON *msg=mea_xplMsgToJson_alloc(xplMsgJson);
    cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
-   if(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s)
-      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
+   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
    cJSON_AddNumberToObject(data, DEVICE_TYPE_ID_STR_C, (double)device_info->type_id);
    cJSON_AddNumberToObject(data, get_token_string_by_id(ID_XBEE_ID), (double)((long)interface->xd));
    cJSON_AddNumberToObject(data, API_KEY_STR_C, interface->id_interface);
 
-   python_cmd_json(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
    interface->indicators.senttoplugin++;
+
    release_parsed_parameters(&plugin_params);
-         
-   DBG_FREE(plugin_params);
    plugin_params=NULL;
 
    return NOERROR;
@@ -444,7 +444,7 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
    int nb_plugin_params=-1;
       
    plugin_params=alloc_parsed_parameters(parameters, valid_xbee_plugin_params, &nb_plugin_params, &err, 0);
-   if(!plugin_params || !plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
+   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(plugin_params)
          release_parsed_parameters(&plugin_params);
       return ERROR;
@@ -454,12 +454,12 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
    cJSON_AddNumberToObject(_data, get_token_string_by_id(ID_XBEE_ID), (double)((long)callback_commissionning->i002->xd));
    cJSON_AddNumberToObject(_data, "LOCAL_XBEE_ADDR_H", (double)callback_commissionning->i002->local_xbee->l_addr_64_h);
    cJSON_AddNumberToObject(_data, "LOCAL_XBEE_ADDR_L", (double)callback_commissionning->i002->local_xbee->l_addr_64_l);
-   if(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s) {
-      cJSON_AddStringToObject(_data, get_token_string_by_id(INTERFACE_PARAMETERS_ID), plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
+   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
+      cJSON_AddStringToObject(_data, get_token_string_by_id(INTERFACE_PARAMETERS_ID), plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
    }
    cJSON_AddNumberToObject(_data, API_KEY_STR_C, callback_commissionning->i002->id_interface);
 
-   python_cmd_json(plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, COMMISSIONNING, data);
+   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, COMMISSIONNING, data);
    
    *(callback_commissionning->senttoplugin)=*(callback_commissionning->senttoplugin)+1;
 
@@ -529,7 +529,7 @@ mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, st
 //      int todbflag=0;
 
       params->plugin_params=alloc_parsed_parameters(parameters, valid_xbee_plugin_params, &(params->nb_plugin_params), &err, 0);
-      if(!params->plugin_params || !params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
+      if(!params->plugin_params || !params->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
          if(params->plugin_params)
             release_parsed_parameters(&(params->plugin_params));
          continue; // si pas de paramètre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin
@@ -540,6 +540,7 @@ mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, st
 
       struct device_info_s device_info;
       device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
+
       cJSON *data = device_info_to_json_alloc(&device_info);
       if(sscanf((char *)dev, "MESH://%x-%x", &addr_h, &addr_l)==2) {
          cJSON_AddNumberToObject(data, get_token_string_by_id(ADDR_H_ID), (double)addr_h);
@@ -551,16 +552,17 @@ mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, st
       cJSON_AddNumberToObject(data, "l_cmd_data", e->l_cmd-12);
       cJSON_AddNumberToObject(data, "data_type", data_type);
       cJSON_AddNumberToObject(data, get_token_string_by_id(ID_XBEE_ID), (double)((long)params->xd));
-      if(params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s) {
-         cJSON_AddStringToObject(data, get_token_string_by_id(DEVICE_PARAMETERS_ID), params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
+      if(params->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
+         cJSON_AddStringToObject(data, get_token_string_by_id(DEVICE_PARAMETERS_ID), params->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
       }
       cJSON_AddNumberToObject(data, API_KEY_STR_C, device_info.interface_id);
       
-      python_cmd_json(params->plugin_params->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, XBEEDATA, data);
+      python_cmd_json(params->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XBEEDATA, data);
       
       params->i002->indicators.senttoplugin++;
 
       release_parsed_parameters(&(params->plugin_params));
+
       jsonDevice=jsonDevice->next;
    }
 
@@ -912,6 +914,7 @@ static uint32_t _indianConvertion(uint32_t val_x86)
    return val_xbee;
 }
 
+
 int mea_sendAtCmdAndWaitResp_json(interface_type_002_t *i002, cJSON *args, cJSON **res, int16_t *_nerr, char *_err, int l_err)
 //cJSON *mea_sendAtCmdAndWaitResp_json(PyObject *self, PyObject *args)
 {
@@ -1037,6 +1040,108 @@ int mea_sendAtCmdAndWaitResp_json(interface_type_002_t *i002, cJSON *args, cJSON
 }
 
 
+static int mea_sendAtCmd_json(interface_type_002_t *i002, cJSON *args)
+{
+   unsigned char at_cmd[81];
+   uint16_t l_at_cmd;
+   xbee_xd_t *xd=i002->xd;
+   cJSON *arg;
+   
+   xbee_host_t *host=NULL;
+
+   // récupération des paramètres et contrôle des types
+   if(args->type!=cJSON_Array || cJSON_GetArraySize(args)!=3) {
+      return -255;
+   }
+
+   uint32_t addr_h;
+   arg=cJSON_GetArrayItem(args, 2);
+   if(arg->type==cJSON_Number) {
+      addr_h=(uint32_t)arg->valuedouble;
+   }
+   else {
+      return -255;
+   }
+
+   uint32_t addr_l;
+   arg=cJSON_GetArrayItem(args, 3);
+   if(arg->type==cJSON_Number) {
+      addr_l=(uint32_t)arg->valuedouble;
+   }
+   else {
+      return -255;
+   }
+
+   char *at;
+   arg=cJSON_GetArrayItem(args, 4);
+   if(arg->type==cJSON_String || arg->type==cJSON_ByteArray) {
+      at=arg->valuestring;
+      if(arg->type==cJSON_ByteArray) {
+         at[arg->valueint]=0;
+      }
+   }
+   else {
+      return -255;
+   }
+   at_cmd[0]=at[0];
+   at_cmd[1]=at[1];
+
+   arg=cJSON_GetArrayItem(args, 5);
+   if(arg->type==cJSON_Number) {
+      uint32_t val=(uint32_t)arg->valuedouble;
+      uint32_t val_xbee=_indianConvertion(val);
+      char *val_xbee_ptr=(char *)&val_xbee;
+      
+      for(int16_t i=0;i<sizeof(uint32_t);i++)
+         at_cmd[2+i]=val_xbee_ptr[i];
+      l_at_cmd=6;
+   }
+   else if(arg->type==cJSON_String || arg->type==cJSON_ByteArray) {
+      int l=0;
+      char *at_arg=(char *)arg->valuestring;
+      if(arg->type==cJSON_String) {
+         l=(int)strlen(at_arg);
+      }
+      else {
+         l=arg->valueint;
+      }
+      uint16_t i;
+      for(i=0;i<l;i++)
+         at_cmd[2+i]=at_arg[i];
+      if(i>0)
+         l_at_cmd=2+i;
+      else
+         l_at_cmd=2;
+   }
+   else {
+      return -255;
+   }
+
+   int16_t err;
+   
+   if(addr_l != 0xFFFFFFFF && addr_h != 0xFFFFFFFF) {
+      host=(xbee_host_t *)malloc(sizeof(xbee_host_t)); // description de l'xbee directement connecté
+      xbee_get_host_by_addr_64(xd, host, addr_h, addr_l, &err);
+      if(err!=XBEE_ERR_NOERR) {
+         DEBUG_SECTION mea_log_printf("%s (%s) : host not found.\n", DEBUG_STR,__func__);
+         return -254;
+      }
+   }
+   else
+      host=NULL;
+   
+   int16_t nerr;
+   // ret=
+   xbee_atCmdSend(xd, host, at_cmd, l_at_cmd, &nerr);
+   
+   if(host) {
+      free(host);
+      host=NULL;
+   }
+   return 0;
+}
+
+
 int16_t api_interface_type_002_json(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
 {
    interface_type_002_t *i002 = (interface_type_002_t *)ixxx;
@@ -1047,6 +1152,19 @@ int16_t api_interface_type_002_json(void *ixxx, char *cmnd, void *args, int nb_a
    if(strcmp(cmnd, "sendXbeeCmdAndWaitResp") == 0) {
       int ret=0;
       ret=mea_sendAtCmdAndWaitResp_json((void *)i002, jsonArgs, jsonRes, nerr, err, l_err);
+      if(ret<0) {
+         strncpy(err, "error", l_err);
+         return -1;
+      }
+      else {
+         strncpy(err, "no error", l_err);
+         *nerr=0;
+         return 0;
+      }
+   }
+   else if(strcmp(cmnd, "sendXbeeCmd") == 0) {
+      int ret=0;
+      ret=mea_sendAtCmd_json((void *)i002, jsonArgs);
       if(ret<0) {
          strncpy(err, "error", l_err);
          return -1;
@@ -1345,7 +1463,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
     * exécution du plugin de l'interface
     */
    interface_parameters=alloc_parsed_parameters(start_stop_params->i002->parameters, valid_xbee_plugin_params, &interface_nb_parameters, &err, 0);
-   if(!interface_parameters || !interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s) {
+   if(!interface_parameters || !interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(interface_parameters) {
          release_parsed_parameters(&interface_parameters);
          
@@ -1360,12 +1478,12 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
       cJSON_AddNumberToObject(data, get_token_string_by_id(ID_XBEE_ID), (double)((long)xd));
       cJSON_AddNumberToObject(data, get_token_string_by_id(INTERFACE_ID_ID), start_stop_params->i002->id_interface);
       cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)start_stop_params->i002->id_interface);
-      if(interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s) {
-         cJSON_AddStringToObject(data, get_token_string_by_id(INTERFACE_PARAMETERS_ID), interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PARAMETERS].value.s);
+      if(interface_parameters->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
+         cJSON_AddStringToObject(data, get_token_string_by_id(INTERFACE_PARAMETERS_ID), interface_parameters->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
       }
       cJSON_AddNumberToObject(data, API_KEY_STR_C, start_stop_params->i002->id_interface);
       
-      python_call_function_json_alloc(interface_parameters->parameters[XBEE_PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
+      python_call_function_json_alloc(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
 
       if(interface_parameters)
          release_parsed_parameters(&interface_parameters);

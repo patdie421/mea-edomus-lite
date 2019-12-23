@@ -43,8 +43,8 @@ typedef void (*thread_f)(void *);
 
 // parametres valide pour les capteurs ou actionneurs pris en compte par le type 2.
 char *valid_genericserial_plugin_params[]={"S:PLUGIN","S:PARAMETERS", NULL};
-#define GENERICSERIAL_PLUGIN_PARAMS_PLUGIN      0
-#define GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS  1
+#define PLUGIN_PARAMS_PLUGIN      0
+#define PLUGIN_PARAMS_PARAMETERS  1
 
 struct callback_xpl_data_s
 {
@@ -98,7 +98,7 @@ static int interface_type_006_data_to_plugin(cJSON *jsonInterface, cJSON *jsonDe
    char *parameters = cJSON_GetObjectItem(jsonDevice, "parameters")->valuestring;
 
    plugin_params=alloc_parsed_parameters(parameters, valid_genericserial_plugin_params, &nb_plugin_params, &err, 0);
-   if(!plugin_params || !plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s) {
+   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(plugin_params)
          release_parsed_parameters(&plugin_params);
       return -1;
@@ -112,11 +112,11 @@ static int interface_type_006_data_to_plugin(cJSON *jsonInterface, cJSON *jsonDe
    cJSON_AddNumberToObject(data,API_KEY_STR_C,(double)device_info.interface_id);
    cJSON_AddItemToObject(data,DATA_STR_C,cJSON_CreateByteArray(_data, l_data));
    cJSON_AddNumberToObject(data,L_DATA_STR_C, (double)l_data);
-   if(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s) {
-      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s);
+   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
+      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
    }
 
-   python_cmd_json(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
+   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
 
    if(plugin_params) {
       release_parsed_parameters(&plugin_params);
@@ -158,7 +158,7 @@ int16_t _interface_type_006_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    mea_strtolower(device);
  
    plugin_params=alloc_parsed_parameters(device_info->parameters, valid_genericserial_plugin_params, &nb_plugin_params, &err, 0);
-   if(!plugin_params || !plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s) {
+   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(plugin_params) {
          release_parsed_parameters(&plugin_params);
          nb_plugin_params=0;
@@ -172,10 +172,10 @@ int16_t _interface_type_006_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    cJSON *msg=mea_xplMsgToJson_alloc(xplMsgJson);
    cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
    cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)i006->id_interface);
-   if(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s)
-      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s);
+   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
 
-   python_cmd_json(plugin_params->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
    i006->indicators.senttoplugin++;
 
@@ -709,7 +709,7 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
    start_stop_params->i006->real_speed=(int)speed;
 
    interface_parameters=alloc_parsed_parameters(start_stop_params->i006->parameters, valid_genericserial_plugin_params, &interface_nb_parameters, &err, 0);
-   if(!interface_parameters || !interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s) {
+   if(!interface_parameters || !interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(interface_parameters) {
          // pas de plugin spécifié
          release_parsed_parameters(&interface_parameters);
@@ -721,11 +721,11 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
          VERBOSE(5) mea_log_printf("%s (%s) : invalid or no python plugin parameters (%s)\n", ERROR_STR, __func__, start_stop_params->i006->parameters);
    }
    else {
-      start_stop_params->i006->interface_plugin_name = malloc(strlen(interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s)+1);
-      strcpy(start_stop_params->i006->interface_plugin_name, interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s);
-      if(interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s) {
-         start_stop_params->i006->interface_plugin_parameters = malloc(strlen(interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PARAMETERS].value.s));
-         strcpy(start_stop_params->i006->interface_plugin_name, interface_parameters->parameters[GENERICSERIAL_PLUGIN_PARAMS_PLUGIN].value.s);
+      start_stop_params->i006->interface_plugin_name = malloc(strlen(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s)+1);
+      strcpy(start_stop_params->i006->interface_plugin_name, interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s);
+      if(interface_parameters->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
+         start_stop_params->i006->interface_plugin_parameters = malloc(strlen(interface_parameters->parameters[PLUGIN_PARAMS_PARAMETERS].value.s));
+         strcpy(start_stop_params->i006->interface_plugin_name, interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s);
       }
       cJSON *data=cJSON_CreateObject();
       cJSON_AddNumberToObject(data, INTERFACE_ID_STR_C, start_stop_params->i006->id_interface);

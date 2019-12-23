@@ -372,7 +372,9 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
    
    i010->indicators.senttoplugin++;
 
-   return -1;
+   release_parsed_parameters(&plugin_params);
+   
+   return 0;
 }
 
 
@@ -859,43 +861,6 @@ int16_t api_interface_type_010_json(void *ixxx, char *cmnd, void *args, int nb_a
    }
 }
 
-/*
-int16_t api_interface_type_010(void *ixxx, char *cmnd, void *args, int nb_args, void **res, int16_t *nerr, char *err, int l_err)
-{
-//   interface_type_010_t *i010 = (interface_type_010_t *)ixxx;
-
-   PyObject *pyArgs = (PyObject *)args;
-   PyObject **pyRes = (PyObject **)res;
-   
-   if(strcmp(cmnd, "mea_writeData") == 0) {
-      int ret=api_write_data(ixxx, pyArgs, pyRes, nerr, err, l_err);
-      if(ret<0) {
-         strncpy(err, "error", l_err);
-         return -1;
-      }
-      else {
-         strncpy(err, "no error", l_err);
-         *nerr=0;
-         return 0;
-      }
-   }
-
-   else if(strcmp(cmnd, "test") == 0)
-   {
-      *res = PYSTRING_FROMSTRING("New style Api call OK !!!");
-      *nerr=0;
-      strncpy(err, "no error", l_err);
-
-      return 0;
-   }
-
-   else {
-      strncpy(err, "unknown function", l_err);
-
-      return -254;
-   }
-}
-*/
 
 interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *jsonInterface)
 {
@@ -1250,12 +1215,7 @@ int start_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
 
    xpl_callback_params=(struct callback_xpl_data_s *)malloc(sizeof(struct callback_xpl_data_s));
    if(!xpl_callback_params) {
-#ifdef _POSIX_SOURCE
-       char *ret;
-#else
-       int ret;
-#endif
-       ret=strerror_r(errno, err_str, sizeof(err_str));
+       strerror_r(errno, err_str, sizeof(err_str));
        VERBOSE(2) {
           mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
        }

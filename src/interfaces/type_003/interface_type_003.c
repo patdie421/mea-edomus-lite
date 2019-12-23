@@ -47,8 +47,6 @@ typedef void (*thread_f)(void *);
 
 // parametres valide pour les capteurs ou actionneurs pris en compte par le type 3.
 char *valid_enocean_plugin_params[]={"S:PLUGIN","S:PLUGIN_PARAMETERS", NULL};
-// #define ENOCEAN_PLUGIN_PARAMS_PLUGIN      0
-// #define ENOCEAN_PLUGIN_PARAMS_PARAMETERS  1
 
 struct enocean_callback_data_s // donnee "userdata" pour les callbacks
 {
@@ -128,7 +126,7 @@ int16_t _interface_type_003_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    int nb_plugin_params;
 
    plugin_params=alloc_parsed_parameters(device_info->parameters, valid_enocean_plugin_params, &nb_plugin_params, &err, 0);
-   if(!plugin_params || !plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
+   if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(plugin_params)
          release_parsed_parameters(&plugin_params);
       return -1;
@@ -140,10 +138,10 @@ int16_t _interface_type_003_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
    cJSON_AddNumberToObject(data, XPL_ENOCEAN_ADDR_STR_C, (double)enocean_addr);
    cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)i003->id_interface);
-   if(plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s)
-      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
+   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
 
-   python_cmd_json(plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
    release_parsed_parameters(&plugin_params);
    plugin_params=NULL;
@@ -326,7 +324,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
                   int err;
                   char *parameters = cJSON_GetObjectItem(jsonDevice, PARAMETERS_STR_C)->valuestring;
                      udata->plugin_params=alloc_parsed_parameters(parameters, valid_enocean_plugin_params, &(udata->nb_plugin_params), &err, 0);
-                  if(!udata->plugin_params || !udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
+                  if(!udata->plugin_params || !udata->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
                      goto _thread_interface_type_003_enocean_next_device_loop;
                   }
                   
@@ -338,9 +336,9 @@ void *_thread_interface_type_003_enocean_data(void *args)
                   cJSON_AddItemToObject(data, DATA_STR_C, cJSON_CreateByteArray((char *)e->data, e->l_data));
                   cJSON_AddNumberToObject(data, L_DATA_STR_C, (double)e->l_data);
                   cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)(long)udata->i003->id_interface);
-                  if(udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s)
-                     cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
-                  python_cmd_json(udata->plugin_params->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+                  if(udata->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+                     cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, udata->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
+                  python_cmd_json(udata->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
                   udata->i003->indicators.senttoplugin++;
 
 _thread_interface_type_003_enocean_next_device_loop:
@@ -896,7 +894,7 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
     * exécution du plugin d'interface
     */
    interface_parameters=alloc_parsed_parameters(start_stop_params->i003->parameters, valid_enocean_plugin_params, &interface_nb_parameters, &err, 0);
-   if(!interface_parameters || !interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
+   if(!interface_parameters || !interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(interface_parameters) {
          // pas de plugin spécifié
          release_parsed_parameters(&interface_parameters);
@@ -912,10 +910,11 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
       cJSON *data=cJSON_CreateObject();
       if(data) {
          cJSON_AddNumberToObject(data, INTERFACE_ID_STR_C, start_stop_params->i003->id_interface);
-         if(interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s) {
-            cJSON_AddStringToObject(data, INTERFACE_PARAMETERS_STR_C, interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PARAMETERS].value.s);
+         if(interface_parameters->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
+            cJSON_AddStringToObject(data, INTERFACE_PARAMETERS_STR_C, interface_parameters->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
          }
-         result=python_call_function_json_alloc(interface_parameters->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
+
+         result=python_call_function_json_alloc(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
          if(result) {
             char *s=cJSON_Print(result);
             DEBUG_SECTION mea_log_printf("%s (%s) : Result of call of mea_init : %s\n", DEBUG_STR, __func__, s);

@@ -367,7 +367,6 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
 cJSON *enocean_pairing_get(void *context, void *parameters) /* TO TEST */
 {
    interface_type_003_t *i003 = (interface_type_003_t *)context;
-//   cJSON *p=(cJSON *)parameters;
    cJSON *result=NULL;
 
    result=cJSON_CreateObject();
@@ -480,7 +479,7 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
    parsed_parameters_t *pluginParams=NULL;
 
    pluginParams=alloc_parsed_parameters(i003->parameters, valid_enocean_plugin_params, &nbPluginParams, &err, 0);
-   if(!pluginParams || !pluginParams->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s) {
+   if(!pluginParams || !pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
       if(pluginParams) {
          // pas de plugin spécifié
          release_parsed_parameters(&pluginParams);
@@ -492,7 +491,8 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
       }
    }
    else {
-   _j=mea_call_python_function_json_alloc(pluginParams->parameters[ENOCEAN_PLUGIN_PARAMS_PLUGIN].value.s, "pairing_get_devices", j);
+   _j=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "pairing_get_devices", j);
+//   _j=mea_call_python_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "pairing_get_devices", j);
    }
 
    if(_j && _j->type==cJSON_Object) {

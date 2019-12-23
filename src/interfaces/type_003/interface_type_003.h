@@ -65,8 +65,8 @@ struct interface_type_003_data_s {
 };
 
 extern char *valid_enocean_plugin_params[];
-#define ENOCEAN_PLUGIN_PARAMS_PLUGIN      0
-#define ENOCEAN_PLUGIN_PARAMS_PARAMETERS  1
+#define PLUGIN_PARAMS_PLUGIN      0
+#define PLUGIN_PARAMS_PARAMETERS  1
 
 #define PLUGIN_DATA_MAX_SIZE 81
 
