@@ -601,7 +601,7 @@ static void sockaddr_to_string(char *buf, size_t len,
    // Only Windoze Vista (and newer) have inet_ntop()
    strncpy(buf, inet_ntoa(usa->sin.sin_addr), len);
 #else
-   inet_ntop(usa->sa.sa_family, (void *) &usa->sin.sin_addr, buf, len);
+   inet_ntop(usa->sa.sa_family, (void *) &usa->sin.sin_addr, buf, (socklen_t)len);
 #endif
 }
 
@@ -711,7 +711,7 @@ static char * mg_strdup(const char *str) {
 }
 
 static const char *mg_strcasestr(const char *big_str, const char *small_str) {
-   int i, big_len = strlen(big_str), small_len = strlen(small_str);
+   int i, big_len = (int)strlen(big_str), small_len = (int)strlen(small_str);
    
    for (i = 0; i <= big_len - small_len; i++) {
       if (mg_strncasecmp(big_str + i, small_str, small_len) == 0) {
@@ -877,9 +877,9 @@ static int match_prefix(const char *pattern, int pattern_len, const char *str) {
    int i, j, len, res;
    
    if ((or_str = (const char *) memchr(pattern, '|', pattern_len)) != NULL) {
-      res = match_prefix(pattern, or_str - pattern, str);
+      res = (int)match_prefix(pattern, (int)(or_str - pattern), str);
       return res > 0 ? res :
-      match_prefix(or_str + 1, (pattern + pattern_len) - (or_str + 1), str);
+      match_prefix(or_str + 1, (int)((pattern + pattern_len) - (or_str + 1)), str);
    }
    
    i = j = 0;
@@ -1487,7 +1487,7 @@ static int64_t push(FILE *fp, SOCKET sock, SSL *ssl, const char *buf,
             if (ferror(fp))
                n = -1;
          } else {
-            n = send(sock, buf + sent, (size_t) k, MSG_NOSIGNAL);
+            n = (int)send(sock, buf + sent, (size_t) k, MSG_NOSIGNAL);
          }
       
       if (n <= 0)
@@ -1508,13 +1508,13 @@ static int pull(FILE *fp, struct mg_connection *conn, char *buf, int len) {
       // Use read() instead of fread(), because if we're reading from the CGI
       // pipe, fread() may block until IO buffer is filled up. We cannot afford
       // to block and must pass all read bytes immediately to the client.
-      nread = read(fileno(fp), buf, (size_t) len);
+      nread = (int)read(fileno(fp), buf, (size_t) len);
 #ifndef NO_SSL
    } else if (conn->ssl != NULL) {
       nread = SSL_read(conn->ssl, buf, len);
 #endif
    } else {
-      nread = recv(conn->client.sock, buf, (size_t) len, 0);
+      nread = (int)recv(conn->client.sock, buf, (size_t) len, 0);
    }
    
    return conn->ctx->stop_flag ? -1 : nread;
@@ -1554,7 +1554,7 @@ int mg_read(struct mg_connection *conn, void *buf, size_t len) {
       
       // Return buffered data
       body = conn->buf + conn->request_len + conn->consumed_content;
-      buffered_len = &conn->buf[conn->data_len] - body;
+      buffered_len = (int)(&conn->buf[conn->data_len] - body);
       if (buffered_len > 0) {
          if (len < (size_t) buffered_len) {
             buffered_len = (int) len;
@@ -1716,7 +1716,7 @@ int mg_get_var(const char *data, size_t data_len, const char *name,
             assert(s >= p);
             
             // Decode variable into destination buffer
-            len = mg_url_decode(p, (size_t)(s - p), dst, dst_len, 1);
+            len = mg_url_decode(p, (int)((size_t)(s - p)), dst, (int)dst_len, 1);
             
             // Redirect error code from -1 to -2 (destination buffer too small).
             if (len == -1) {
@@ -1757,7 +1757,7 @@ int mg_get_cookie(const char *cookie_header, const char *var_name,
                p--;
             }
             if ((size_t) (p - s) < dst_size) {
-               len = p - s;
+               len = (int)(p - s);
                mg_strlcpy(dst, s, (size_t) len + 1);
             } else {
                len = -3;
@@ -1785,7 +1785,7 @@ static void convert_uri_to_file_name(struct mg_connection *conn, char *buf,
    
    rewrite = conn->ctx->config[REWRITE];
    while ((rewrite = next_option(rewrite, &a, &b)) != NULL) {
-      if ((match_len = match_prefix(a.ptr, a.len, uri)) > 0) {
+      if ((match_len = match_prefix(a.ptr, (int)a.len, uri)) > 0) {
          mg_snprintf(conn, buf, buf_len - 1, "%.*s%s", (int) b.len, b.ptr,
                      uri + match_len);
          break;
@@ -1815,7 +1815,7 @@ static void convert_uri_to_file_name(struct mg_connection *conn, char *buf,
       if (*p == '/') {
          *p = '\0';
          if (match_prefix(conn->ctx->config[CGI_EXTENSIONS],
-                          strlen(conn->ctx->config[CGI_EXTENSIONS]), buf) > 0 &&
+                          (int)strlen(conn->ctx->config[CGI_EXTENSIONS]), buf) > 0 &&
              mg_stat(conn, buf, filep)) {
             // Shift PATH_INFO block one character right, e.g.
             //  "/x.cgi/foo/bar\x00" => "/x.cgi\x00/foo/bar\x00"
@@ -2388,7 +2388,7 @@ static char *mg_fgets(char *buf, size_t size, struct file *filep, char **p) {
       *p = eof;
       return eof;
    } else if (filep->fp != NULL) {
-      return fgets(buf, size, filep->fp);
+      return fgets(buf, (int)size, filep->fp);
    } else {
       return NULL;
    }
@@ -2653,8 +2653,8 @@ static int WINCDECL compare_dir_entries(const void *p1, const void *p2) {
 static int must_hide_file(struct mg_connection *conn, const char *path) {
    const char *pw_pattern = "**" PASSWORDS_FILE_NAME "$";
    const char *pattern = conn->ctx->config[HIDE_FILES];
-   return match_prefix(pw_pattern, strlen(pw_pattern), path) > 0 ||
-   (pattern != NULL && match_prefix(pattern, strlen(pattern), path) > 0);
+   return match_prefix(pw_pattern, (int)strlen(pw_pattern), path) > 0 ||
+   (pattern != NULL && match_prefix(pattern, (int)strlen(pattern), path) > 0);
 }
 
 static int scan_directory(struct mg_connection *conn, const char *dir,
@@ -2803,7 +2803,7 @@ static void send_file_data(struct mg_connection *conn, struct file *filep,
          }
          
          // Read from file, exit the loop on error
-         if ((num_read = fread(buf, 1, (size_t) to_read, filep->fp)) <= 0) {
+         if ((num_read = (int)fread(buf, 1, (size_t) to_read, filep->fp)) <= 0) {
             break;
          }
          
@@ -3081,7 +3081,7 @@ static int forward_body_data(struct mg_connection *conn, FILE *fp,
       }
       
       body = conn->buf + conn->request_len + conn->consumed_content;
-      buffered_len = &conn->buf[conn->data_len] - body;
+      buffered_len = (int)(&conn->buf[conn->data_len] - body);
       assert(buffered_len >= 0);
       assert(conn->consumed_content == 0);
       
@@ -3446,7 +3446,7 @@ static int put_dir(struct mg_connection *conn, const char *path) {
    int len, res = 1;
    
    for (s = p = path + 2; (p = strchr(s, '/')) != NULL; s = ++p) {
-      len = p - path;
+      len = (int)(p - path);
       if (len >= (int) sizeof(buf)) {
          res = -1;
          break;
@@ -3539,7 +3539,7 @@ static void do_ssi_include(struct mg_connection *conn, const char *ssi,
    } else {
       fclose_on_exec(&file);
       if (match_prefix(conn->ctx->config[SSI_EXTENSIONS],
-                       strlen(conn->ctx->config[SSI_EXTENSIONS]), path) > 0) {
+                       (int)strlen(conn->ctx->config[SSI_EXTENSIONS]), path) > 0) {
          send_ssi_file(conn, path, &file, include_level + 1);
       } else {
          send_file_data(conn, &file, 0, INT64_MAX);
@@ -4055,7 +4055,7 @@ static int set_throttle(const char *spec, uint32_t remote_ip, const char *uri) {
          if ((remote_ip & mask) == net) {
             throttle = (int) v;
          }
-      } else if (match_prefix(vec.ptr, vec.len, uri) > 0) {
+      } else if (match_prefix(vec.ptr, (int)vec.len, uri) > 0) {
          throttle = (int) v;
       }
    }
@@ -4103,7 +4103,7 @@ int mg_upload(struct mg_connection *conn, const char *destination_dir) {
       return num_uploaded_files;
    }
    
-   boundary_len = strlen(boundary);
+   boundary_len = (int)strlen(boundary);
    bl = boundary_len + 4;  // \r\n--<boundary>
    for (;;) {
       // Pull in headers
@@ -4287,7 +4287,7 @@ static void handle_request(struct mg_connection *conn) {
 #endif
 #if !defined(NO_CGI)
               } else if (match_prefix(conn->ctx->config[CGI_EXTENSIONS],
-                                      strlen(conn->ctx->config[CGI_EXTENSIONS]),
+                                      (int)strlen(conn->ctx->config[CGI_EXTENSIONS]),
                                       path) > 0) {
                  if (strcmp(ri->request_method, "POST") &&
                      strcmp(ri->request_method, "HEAD") &&
@@ -4299,7 +4299,7 @@ static void handle_request(struct mg_connection *conn) {
                  }
 #endif // !NO_CGI
               } else if (match_prefix(conn->ctx->config[SSI_EXTENSIONS],
-                                      strlen(conn->ctx->config[SSI_EXTENSIONS]),
+                                      (int)strlen(conn->ctx->config[SSI_EXTENSIONS]),
                                       path) > 0) {
                  handle_ssi_file_request(conn, path);
               } else if (is_not_modified(conn, &file)) {

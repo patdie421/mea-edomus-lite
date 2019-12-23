@@ -1481,7 +1481,6 @@ struct moveforward_dest_s {
    cJSON *e;
    UT_hash_handle hh;
 };
-
 struct moveforward_dest_s *moveforward_dests = NULL;
 
 //int automator_match_inputs_rules(cJSON *rules, cJSON *xplMsgJson)

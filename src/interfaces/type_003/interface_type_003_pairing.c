@@ -11,6 +11,8 @@
 #include "python_utils.h"
 #include "mea_timer.h"
 #include "parameters_utils.h"
+#include "tokens.h"
+#include "tokens_da.h"
 
 
 int16_t enocean_teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, uint16_t l_data, uint8_t *eep, int16_t teach) /* TO TEST */
@@ -371,7 +373,7 @@ cJSON *enocean_pairing_get(void *context, void *parameters) /* TO TEST */
 
    result=cJSON_CreateObject();
    if(result) {
-      cJSON_AddItemToObject(result, "state", cJSON_CreateNumber((double)i003->pairing_state));
+      cJSON_AddItemToObject(result, STATE_STR_C, cJSON_CreateNumber((double)i003->pairing_state));
       cJSON_AddItemToObject(result, "type",  cJSON_CreateNumber((double)0));
    }
    return result;
@@ -395,7 +397,7 @@ cJSON *enocean_pairing_start(void *context, void *parameters) /* TO TEST */
    
    result=cJSON_CreateObject();
    if(result) {
-      cJSON_AddItemToObject(result, "state", cJSON_CreateNumber((double)ENOCEAN_PAIRING_ON));
+      cJSON_AddItemToObject(result, STATE_STR_C, cJSON_CreateNumber((double)ENOCEAN_PAIRING_ON));
    }
    return result;
 }
@@ -418,7 +420,7 @@ cJSON *enocean_pairing_end(void *context, void *parameters) /* TO TEST */
    
    result=cJSON_CreateObject();
    if(result) {
-      cJSON_AddItemToObject(result, "state", cJSON_CreateNumber((double)ENOCEAN_PAIRING_OFF));
+      cJSON_AddItemToObject(result, STATE_STR_C, cJSON_CreateNumber((double)ENOCEAN_PAIRING_OFF));
    }
    return result;
 }
@@ -464,13 +466,13 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
    snprintf(name, sizeof(name)-1, "%s_%02x%02x%02x%02x", i003->name, addr[0], addr[1], addr[2], addr[3]);
       
    j=cJSON_CreateObject();
-   cJSON_AddStringToObject(j, "name", name);
-   cJSON_AddNumberToObject(j, "id_type", INTERFACE_TYPE_003);
-   cJSON_AddStringToObject(j, "description", "");
-   cJSON_AddStringToObject(j, "dev", interfaceDevName);
-   cJSON_AddStringToObject(j, "parameters", "PLUGIN=enocean_default");
-   cJSON_AddNumberToObject(j, "state", 2); // delegate
-   cJSON_AddItemToObject(j, "devices", cJSON_CreateObject());
+   cJSON_AddStringToObject(j, NAME_STR_C, name);
+   cJSON_AddNumberToObject(j, ID_TYPE_STR_C, INTERFACE_TYPE_003);
+   cJSON_AddStringToObject(j, DESCRIPTION_STR_C, "");
+   cJSON_AddStringToObject(j, DEV_STR_C, interfaceDevName);
+   cJSON_AddStringToObject(j, PARAMETERS_STR_C, "PLUGIN=enocean_default");
+   cJSON_AddNumberToObject(j, STATE_STR_C, 2); // delegate
+   cJSON_AddItemToObject(j, DEVICES_STR_C, cJSON_CreateObject());
    cJSON_AddItemToObject(j, "_pairing_data", pairing_data);
    
    // call plugin to get json devices

@@ -758,47 +758,6 @@ static int api_write_data_json(interface_type_010_t *ixxx, cJSON *args, cJSON **
    return 0;
 }
 
-/*
-static int api_write_data(interface_type_010_t *ixxx, PyObject *args, PyObject **res, int16_t *nerr, char *err, int l_err)
-{
-   if(ixxx->file_desc_out == -1) {
-      *nerr=253;
-      return -253;
-   }
-   PyObject *arg;
-   int16_t ret;
-   *nerr=255;
-   *res = NULL;
-
-   // récupération des paramètres et contrôle des types
-   if(PyTuple_Size(args)!=3)
-      return -255;
-
-   Py_buffer py_packet;
-   arg=PyTuple_GetItem(args, 2);
-   if(PyObject_CheckBuffer(arg)) {
-      ret=PyObject_GetBuffer(arg, &py_packet, PyBUF_SIMPLE);
-      if(ret<0)
-      return -255;
-   }
-   else
-      return -255;
-
-   ret=write(ixxx->file_desc_out, py_packet.buf, py_packet.len);
-   if(ret<0) {
-      VERBOSE(5) {
-         mea_log_printf("%s (%s) : write - ", ERROR_STR, __func__);
-         perror("");
-      }
-   }
- 
-   PyBuffer_Release(&py_packet);
- 
-   nerr=0;
-
-   return 0;
-}
-*/
 
 void *pairing_interface_type_010(enum pairing_cmd_e cmd, void *context)
 {
