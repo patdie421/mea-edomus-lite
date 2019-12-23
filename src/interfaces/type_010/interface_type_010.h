@@ -7,12 +7,12 @@
 //
 #ifndef __interface_type_010_h
 #define __interface_type_010_h
-#include "interfacesServer.h"
+#include "pythonPluginServer.h"
 
 #include <signal.h>
 
+#include "interfacesServer.h"
 #include "xPLServer.h"
-#include "pythonPluginServer.h"
 
 #define INTERFACE_TYPE_010 3010
 
