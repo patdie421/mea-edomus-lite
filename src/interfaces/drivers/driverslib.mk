@@ -39,9 +39,6 @@ LIBDIR=$(BASEDIR)/lib/mealib/$(TECHNO)
 SOURCES=arduino_pins.c \
 comio2.c \
 enocean.c \
-netatmo.c \
-philipshue.c \
-philipshue_color.c \
 serial.c \
 xbee.c
 
