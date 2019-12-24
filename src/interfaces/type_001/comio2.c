@@ -552,7 +552,7 @@ int16_t _comio2_read_frame(int fd, char *cmd_data, uint16_t *l_cmd_data, int16_t
             checksum+=(unsigned char)c;
             i=0;
             step++;
-            DEBUG_SECTION mea_log_printf("%s (%s) : frame size is %u, data are ",DEBUG_STR,__func__,(int)(*l_cmd_data & 0xFF));
+            DEBUG_SECTION mea_log_printf("%s (%s) : frame size is %u, data are\n",DEBUG_STR,__func__,(int)(*l_cmd_data & 0xFF));
             break;
             
          case 2:

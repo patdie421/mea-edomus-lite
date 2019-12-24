@@ -616,9 +616,9 @@ void *_timeServer_thread(void *data)
       }
 
       if((last_te_tv_sec != te.tv_sec) && (te.tv_sec % 60) == 0) { // toutes les minutes
-         DEBUG_SECTION2(DEBUGFLAG) {
-            mea_log_printf("%s (%s) : Traitement minute\n", INFO_STR, __func__);
-         }
+//         DEBUG_SECTION2(DEBUGFLAG) {
+//            mea_log_printf("%s (%s) : Traitement minute\n", INFO_STR, __func__);
+//         }
          localtime_r(&(mea_time_value), &mea_tm); // conversion en tm
       }
 

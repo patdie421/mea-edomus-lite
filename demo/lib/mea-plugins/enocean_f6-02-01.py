@@ -38,6 +38,7 @@ debug=0
 # 19 0x00   0 Optionnal7 Security level
 # 20 0x38  56 CRC8D
 
+
 def mea_xplCmndMsg(data):
    fn_name=sys._getframe().f_code.co_name
    try:
@@ -47,7 +48,7 @@ def mea_xplCmndMsg(data):
       return 0
 
    mem=mea.getMemory(id_sensor)
-
+   print data
    x=data["xplmsg"]
    body=x["body"]
 

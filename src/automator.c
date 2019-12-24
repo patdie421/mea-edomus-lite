@@ -1145,7 +1145,7 @@ static int automator_timerCtrl(cJSON *parameters)
             timerunitval = TIMER_CSEC;
          else
             return -1;
-         VERBOSE(9) mea_log_printf("%s (%s) : start timer %s\n", INFO_STR, __func__, timername);
+//         VERBOSE(9) mea_log_printf("%s (%s) : start timer %s\n", INFO_STR, __func__, timername);
          int ret=mea_datetime_startTimer2(timername, (int)v.val.floatval, timerunitval, automatorServer_timer_wakeup, NULL); 
          return ret;
       }

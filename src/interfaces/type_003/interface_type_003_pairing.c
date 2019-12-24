@@ -369,14 +369,9 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
 cJSON *enocean_pairing_get(void *context, void *parameters) /* TO TEST */
 {
    interface_type_003_t *i003 = (interface_type_003_t *)context;
-   cJSON *result=NULL;
+//   cJSON *result=NULL;
 
-   result=cJSON_CreateObject();
-   if(result) {
-      cJSON_AddItemToObject(result, STATE_STR_C, cJSON_CreateNumber((double)i003->pairing_state));
-      cJSON_AddItemToObject(result, "type",  cJSON_CreateNumber((double)0));
-   }
-   return result;
+   return cJSON_CreateNumber((double)i003->pairing_state);
 }
 
 
@@ -385,7 +380,7 @@ cJSON *enocean_pairing_start(void *context, void *parameters) /* TO TEST */
    interface_type_003_t *i003 = (interface_type_003_t *)context;
    int16_t nerr=0;
    cJSON *p=NULL;
-   cJSON *result=NULL;
+//   cJSON *result=NULL;
 
    if(parameters)
       p=(cJSON *)parameters;
@@ -395,11 +390,14 @@ cJSON *enocean_pairing_start(void *context, void *parameters) /* TO TEST */
    i003->pairing_state=ENOCEAN_PAIRING_ON;
    i003->pairing_startms=mea_now();
    
+   return cJSON_CreateTrue();
+/*
    result=cJSON_CreateObject();
    if(result) {
       cJSON_AddItemToObject(result, STATE_STR_C, cJSON_CreateNumber((double)ENOCEAN_PAIRING_ON));
    }
    return result;
+*/
 }
 
 
@@ -408,7 +406,7 @@ cJSON *enocean_pairing_end(void *context, void *parameters) /* TO TEST */
    interface_type_003_t *i003 = (interface_type_003_t *)context;
    int16_t nerr=0;
    cJSON *p=NULL;
-   cJSON *result=NULL;
+//   cJSON *result=NULL;
 
    if(parameters)
       p=(cJSON *)parameters;
@@ -418,11 +416,14 @@ cJSON *enocean_pairing_end(void *context, void *parameters) /* TO TEST */
    i003->pairing_state=ENOCEAN_PAIRING_OFF;
    i003->pairing_startms=-1.0;
    
+   return cJSON_CreateTrue();
+/*
    result=cJSON_CreateObject();
    if(result) {
       cJSON_AddItemToObject(result, STATE_STR_C, cJSON_CreateNumber((double)ENOCEAN_PAIRING_OFF));
    }
    return result;
+*/
 }
 
 
@@ -454,11 +455,11 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
    "devices": { }
 */
 
-   cJSON *j=NULL, *_j=NULL, *_more=NULL;
+   cJSON *j=NULL, *_j=NULL;
    cJSON *pairing_data=NULL;
    char name[256];
 
-   _more=cJSON_CreateObject();
+   pairing_data=cJSON_CreateObject();
    cJSON_AddNumberToObject(pairing_data, "RORG", (double)eep[0]);
    cJSON_AddNumberToObject(pairing_data, "FUNC", (double)eep[1]);
    cJSON_AddNumberToObject(pairing_data, "TYPE", (double)eep[2]);

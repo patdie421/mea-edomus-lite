@@ -2,7 +2,7 @@
 	"I001":	{
 		"id_type":	100,
 		"dev":	"SERIAL://tty.usbmodem14201:57600",
-		"state":	1,
+		"state":	0,
 		"description":	"",
 		"parameters":	"",
 		"devices":	{
@@ -17,7 +17,7 @@
 		},
 		"id_interface":	100
 	},
-	"I005":	{
+	"I003":	{
 		"id_type":	300,
 		"description":	"",
 		"dev":	"SERIAL://tty.usbserial-FTY1A5FM:9600",
@@ -32,19 +32,19 @@
 		"description":	"",
 		"dev":	"SERIAL://ttyUSB1:9600",
 		"parameters":	"",
-		"state":	1,
+		"state":	0,
 		"devices":	{
 	},
 		"id_interface":	102
 	},
-	"I005-00-29-c6-89":	{
+	"I003-00-29-c6-89":	{
 		"id_type":	300,
 		"description":	"",
-		"dev":	"I005://00-29-c6-89",
+		"dev":	"I003://00-29-c6-89",
 		"parameters":	"",
 		"state":	2,
 		"devices":	{
-			"I005S001":	{
+			"I003S001":	{
 				"id_type":	0,
 				"description":	"Demo enocean input 1",
 				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:A",
@@ -60,7 +60,7 @@
 		"description":	"",
 		"dev":	"PIPE:///tmp/meapipe",
 		"parameters":	"PLUGIN=mea_text_inout;FSTARTSTR={{{;FENDSTR=}}};DIRECTION=BOTH",
-		"state":	1,
+		"state":	0,
 		"devices":	{
 			"I010S001":	{
 				"id_type":	0,
@@ -78,23 +78,37 @@
 				"id_sensor_actuator":	1003,
 				"id_interface":	104
 			},
-			"o02a":	{
-				"id_type":	0,
-				"description":	"Demo input 3",
-				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:o02a",
-				"state":	1,
-				"id_sensor_actuator":	1004,
-				"id_interface":	104
-			},
 			"I010A001":	{
 				"id_type":	1,
 				"description":	"Demo actuator 1",
 				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010A001",
 				"state":	1,
-				"id_sensor_actuator":	1005,
+				"id_sensor_actuator":	1004,
 				"id_interface":	104
 			}
 		},
 		"id_interface":	104
+	},
+	"I003_0031F674":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"i003://00-31-f6-74",
+		"parameters":	"PLUGIN=enocean_default",
+		"state":	2,
+		"devices":	{
+			"I003S101":	{
+				"id_type":	0,
+				"description":	"Demo enocean input 1",
+				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:A",
+				"state":	1
+			},
+			"I003S102":	{
+				"id_type":	0,
+				"description":	"Demo enocean input 2",
+				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:B",
+				"state":	1
+			}
+		},
+		"id_interface":	105
 	}
 }
