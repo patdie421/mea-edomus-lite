@@ -3,7 +3,7 @@
 # trap '' INT
 ORG="`pwd`"
 
-SERVICE_HOMEDIR="/Users/patrice/Developpement/Logiciels/mea-edomus-lite/demo"
+SERVICE_HOMEDIR="/data/dev/mea-edomus-lite/demo"
 INTERPRETER=node
 WAITTIME=5
 ME=`basename $0`

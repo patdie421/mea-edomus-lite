@@ -2,67 +2,145 @@
 	"I001":	{
 		"id_type":	100,
 		"description":	"",
-		"dev":	"SERIAL://ttyS0:57600",
+		"dev":	"SERIAL://ttyACM0:57600",
 		"parameters":	"",
 		"state":	1,
 		"devices":	{
-	        }
+			"I001I01":	{
+				"description":	"",
+				"id_type":	0,
+				"state":	1,
+				"parameters":	"pin=d4;type=digital"
+			},
+			"I001I02":	{
+				"description":	"",
+				"id_type":	0,
+				"state":	1,
+				"parameters":	"pin=d10;type=digital"
+			},
+			"I001I03":	{
+				"description":	"",
+				"id_type":	0,
+				"state":	1,
+				"parameters":	"pin=d12;type=digital"
+			},
+			"I001I04":	{
+				"description":	"",
+				"id_type":	0,
+				"state":	1,
+				"parameters":	"pin=a13;type=analog;COMPUTE=TEMP;ALGO=TMP36"
+			},
+			"I001C01":	{
+				"description":	"",
+				"id_type":	1000,
+				"state":	1,
+				"parameters":	"counter=1;POLLING_PERIODE=60"
+			},
+			"I001C02":	{
+				"description":	"",
+				"id_type":	1000,
+				"state":	1,
+				"parameters":	"counter=0;POLLING_PERIODE=120"
+			},
+			"I001O01":	{
+				"description":	"",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=d5;type=analog"
+			},
+			"I001O02":	{
+				"description":	"",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=d11;type=digital"
+			},
+			"I001O03":	{
+				"description":	"",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=d13;type=digital"
+			},
+			"I001O04":	{
+				"description":	"",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=ai0;type=digital"
+			},
+			"I001O05":	{
+				"description":	"",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=ai1;type=digital"
+			},
+			"I001O06":	{
+				"description":	"",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=ai3;type=digital"
+			}
+		},
+		"id_interface":	100
 	},
-	"I005":	{
+	"I003":	{
 		"id_type":	300,
 		"description":	"",
-		"dev":	"SERIAL://tty.usbserial-FTY1A5FM:9600",
+		"dev":	"SERIAL://ttyUSB0:9600",
 		"parameters":	"",
-		"state":	1,
+		"state":	0,
 		"devices":	{
-	        }
 	},
-	"I005-00-29-c6-89":	{
+		"id_interface":	101
+	},
+	"I003-00-29-c6-89":	{
 		"id_type":	300,
 		"description":	"",
-		"dev":	"I005://00-29-c6-89",
+		"dev":	"I003://00-29-c6-89",
 		"parameters":	"",
 		"state":	2,
 		"devices":	{
-			"I005S001":	{
+			"I003S001":	{
 				"id_type":	0,
 				"description":	"Demo enocean input 1",
 				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:A",
-				"state":	1
+				"state":	1,
+				"id_sensor_actuator":	1000,
+				"id_interface":	102
 			}
-		}
+		},
+		"id_interface":	102
 	},
 	"I010":	{
 		"id_type":	3010,
 		"description":	"",
 		"dev":	"PIPE:///tmp/meapipe",
 		"parameters":	"PLUGIN=mea_text_inout;FSTARTSTR={{{;FENDSTR=}}};DIRECTION=BOTH",
-		"state":	1,
+		"state":	0,
 		"devices":	{
 			"I010S001":	{
 				"id_type":	0,
 				"description":	"Demo input 1",
 				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S001",
-				"state":	1
+				"state":	1,
+				"id_sensor_actuator":	1001,
+				"id_interface":	103
 			},
 			"I010S002":	{
 				"id_type":	0,
 				"description":	"Demo input 2",
 				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S002",
-				"state":	1
-			},
-			"o02a":	{
-				"id_type":	0,
-				"description":	"Demo input 3",
-				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:o02a",
-				"state":	1
+				"state":	1,
+				"id_sensor_actuator":	1002,
+				"id_interface":	103
 			},
 			"I010A001":	{
 				"id_type":	1,
 				"description":	"Demo actuator 1",
 				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010A001",
-				"state":	1
+				"state":	1,
+				"id_sensor_actuator":	1003,
+				"id_interface":	103
 			}
-		}
+		},
+		"id_interface":	103
 	}
 }

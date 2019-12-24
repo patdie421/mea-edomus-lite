@@ -7,7 +7,7 @@ from lib import http
 from lib import session
 from lib import display
 
-from dateutil.parser import parse
+# from dateutil.parser import parse
 
 
 def get_users(host, port, sessionid):
@@ -96,7 +96,8 @@ def _rollback(host, port, sessionid, args, _args):
    elif len(args.keyvalue)==0:
       date_str=args.user
       try:
-         _datetime = parse(date_str)
+#         _datetime = parse(date_str)
+         _datetime = date_str
       except:
          display.error("bad date format: "+date_str)
          return False

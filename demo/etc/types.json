@@ -13,15 +13,15 @@
       "flag":0,
       "typeoftype":10
    },
-   "TYP001": {
-      "id_type":1000,
+   "TYP003": {
+      "id_type":300,
       "description":"",
       "parameters":"",
       "flag":0,
       "typeoftype":10
    },
-   "TYP003": {
-      "id_type":300,
+   "TYP006": {
+      "id_type":465,
       "description":"",
       "parameters":"",
       "flag":0,

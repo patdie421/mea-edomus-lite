@@ -8,7 +8,7 @@ from lib import display
 from lib.mea_utils import *
 from modules import type
 
-from dateutil.parser import parse
+# from dateutil.parser import parse
 
 interface_states={ "0":0, "1":1, "2":2, "enabled":1, "disabled":0, "delegated":2, "inactive":0, "active":1 }
 device_states={ "0":0, "1":1, "enabled":1, "disabled":0, "inactive":0, "active":1 }
@@ -251,7 +251,8 @@ def _rollback(host, port, sessionid, args, _args):
    elif len(args.option)==0:
       date_str=args.name
       try:
-         _datetime = parse(date_str)
+#         _datetime = parse(date_str)
+         _datetime = date_str
       except:
          display.error("bad date format: "+date_str)
          return False
