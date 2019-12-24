@@ -804,14 +804,14 @@ void *_comio2_thread(void *args)
                case COMIO2_TRAP_ID:
                   if( (frame[1]-1) < COMIO2_MAX_TRAP )
                   {
-                     VERBOSE(9) mea_log_printf("%s  (%s) : Trap #%d catched\n",INFO_STR,__func__,frame[1]);
+                     VERBOSE(9) mea_log_printf("%s (%s) : Trap #%d catched\n",INFO_STR,__func__,frame[1]);
                      if(ad->tabTraps[frame[1]-1].trap != NULL)
                         ad->tabTraps[frame[1]-1].trap(frame[1]-1, (char *)&(frame[2]), l_frame-2, ad->tabTraps[frame[1]-1].userdata);
                      else
-                        VERBOSE(9) mea_log_printf("%s  (%s) : no callback defined for trap %d\n",INFO_STR,__func__,frame[1]);
+                        VERBOSE(9) mea_log_printf("%s (%s) : no callback defined for trap %d\n",INFO_STR,__func__,frame[1]);
                   }
                   else
-                     VERBOSE(9) mea_log_printf("%s  (%s) : trap#(%d) > COMIO2_MAX_TRAP\n",INFO_STR,__func__,frame[1]);
+                     VERBOSE(9) mea_log_printf("%s (%s) : trap#(%d) > COMIO2_MAX_TRAP\n",INFO_STR,__func__,frame[1]);
                   break;
             }
          }

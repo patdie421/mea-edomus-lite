@@ -88,7 +88,7 @@ typedef int    (*clean_f)(void *);
 typedef int    (*get_type_f)(void);
 typedef int    (*get_interface_id_f)(void *);
 typedef int    (*update_devices_f)(void *);
-typedef void * (*pairing_f)(enum pairing_cmd_e cmd, void *);
+typedef void * (*pairing_f)(enum pairing_cmd_e cmd, void *, void *);
 typedef int    (*api_f)(void *ixxx, char *, void *, int, void **, int16_t *, char *, int); // *cmnd, void *args, int nb_args, void **res, char *err, int l_err
 
 struct interfacesServer_interfaceFns_s {

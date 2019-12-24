@@ -759,7 +759,7 @@ static int api_write_data_json(interface_type_010_t *ixxx, cJSON *args, cJSON **
 }
 
 
-void *pairing_interface_type_010(enum pairing_cmd_e cmd, void *context)
+void *pairing_interface_type_010(enum pairing_cmd_e cmd, void *context, void *parameters)
 {
    interface_type_010_t *i010=(interface_type_010_t *)context;
    

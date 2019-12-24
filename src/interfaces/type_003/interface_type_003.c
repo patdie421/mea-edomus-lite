@@ -663,6 +663,12 @@ int16_t api_interface_type_003_json(void *ixxx, char *cmnd, void *args, int nb_a
 }
 
 
+void *pairing_interface_type_003(enum pairing_cmd_e cmd, void *context, void *parameters)
+{
+   return enocean_pairingCtrl(cmd, context, parameters);
+}
+
+
 interface_type_003_t *malloc_and_init_interface_type_003(int id_driver, cJSON *jsonInterface)
 {
    interface_type_003_t *i003;
@@ -980,6 +986,7 @@ int get_fns_interface_type_003(struct interfacesServer_interfaceFns_s *interface
    interfacesFns->set_xPLCallback = (set_xPLCallback_f)&set_xPLCallback_interface_type_003;
    interfacesFns->get_type = (get_type_f)&get_type_interface_type_003;
    interfacesFns->api = (api_f)&api_interface_type_003_json;
+   interfacesFns->pairing = (pairing_f)&pairing_interface_type_003;
    interfacesFns->lib = NULL;
    interfacesFns->type = interfacesFns->get_type();
    interfacesFns->plugin_flag = 0;
