@@ -197,7 +197,8 @@ int load_interface_type_001(interface_type_001_t *i001, cJSON *jsonInterface)
                }
                break;
             }
-               
+            
+            case 1:
             case 1002: // relais
             case 501: // type OUTPUT standard
             {
@@ -211,6 +212,7 @@ int load_interface_type_001(interface_type_001_t *i001, cJSON *jsonInterface)
                break;
             }
             
+            case 0:
             case 1001: // entrées
             case 500: // type INPUT standard
             {

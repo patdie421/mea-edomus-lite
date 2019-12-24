@@ -1,4 +1,22 @@
 {
+	"I001":	{
+		"id_type":	100,
+		"dev":	"SERIAL://tty.usbmodem14201:57600",
+		"state":	1,
+		"description":	"",
+		"parameters":	"",
+		"devices":	{
+			"CPROD":	{
+				"description":	"",
+				"id_type":	1000,
+				"state":	1,
+				"id_sensor_actuator":	1000,
+				"id_interface":	100,
+				"parameters":	"COUNTER=1"
+			}
+		},
+		"id_interface":	100
+	},
 	"I005":	{
 		"id_type":	300,
 		"description":	"",
@@ -7,7 +25,7 @@
 		"state":	1,
 		"devices":	{
 	},
-		"id_interface":	100
+		"id_interface":	101
 	},
 	"I002":	{
 		"id_type":	200,
@@ -17,7 +35,7 @@
 		"state":	1,
 		"devices":	{
 	},
-		"id_interface":	101
+		"id_interface":	102
 	},
 	"I005-00-29-c6-89":	{
 		"id_type":	300,
@@ -31,11 +49,11 @@
 				"description":	"Demo enocean input 1",
 				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:A",
 				"state":	1,
-				"id_sensor_actuator":	1000,
-				"id_interface":	102
+				"id_sensor_actuator":	1001,
+				"id_interface":	103
 			}
 		},
-		"id_interface":	102
+		"id_interface":	103
 	},
 	"I010":	{
 		"id_type":	3010,
@@ -49,34 +67,34 @@
 				"description":	"Demo input 1",
 				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S001",
 				"state":	1,
-				"id_sensor_actuator":	1001,
-				"id_interface":	103
+				"id_sensor_actuator":	1002,
+				"id_interface":	104
 			},
 			"I010S002":	{
 				"id_type":	0,
 				"description":	"Demo input 2",
 				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S002",
 				"state":	1,
-				"id_sensor_actuator":	1002,
-				"id_interface":	103
+				"id_sensor_actuator":	1003,
+				"id_interface":	104
 			},
 			"o02a":	{
 				"id_type":	0,
 				"description":	"Demo input 3",
 				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:o02a",
 				"state":	1,
-				"id_sensor_actuator":	1003,
-				"id_interface":	103
+				"id_sensor_actuator":	1004,
+				"id_interface":	104
 			},
 			"I010A001":	{
 				"id_type":	1,
 				"description":	"Demo actuator 1",
 				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010A001",
 				"state":	1,
-				"id_sensor_actuator":	1004,
-				"id_interface":	103
+				"id_sensor_actuator":	1005,
+				"id_interface":	104
 			}
 		},
-		"id_interface":	103
+		"id_interface":	104
 	}
 }

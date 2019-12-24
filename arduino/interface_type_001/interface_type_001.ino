@@ -5,7 +5,7 @@
 #include <Comio2.h>
 #include <Pulses.h>
 
-// #define COUNTERS_SIMULATOR 1
+#define COU
 
 // utilisation des ports (ARDUINO UNO) Dans ce sketch
 /* PORTD
@@ -77,6 +77,28 @@ unsigned char *comio_mem=NULL; // pour accès direct à la mémoire comio2
 int _tmp36=-1;
 
 // Objet d'accès au compteur
+int myAvailableFn();
+int myReadFn();
+
+/******************************************************************************************/
+/* Fonctions "utilitaires"                                                                */
+/******************************************************************************************/
+void long_to_array(unsigned long val, unsigned char data[])
+{
+  for(int i=0;i<4;i++)
+  {
+    data[i]= val & 0x000000FF;
+    val = val >> 8;
+  }
+}
+
+
+inline unsigned long my_diff_millis(unsigned long chrono, unsigned long now)
+{
+  return now >= chrono ? now - chrono : 0xFFFFFFFF - chrono + now;
+}
+
+
 InterfaceCompteurERDF compteurs(ACTIVATION_PIN, SELECTION_PIN, myReadFn, myAvailableFn);
 
 #define COUNTERS_READ_INTERVAL 1000*20 // 1 lecture toutes les 20 secondes
@@ -90,7 +112,7 @@ var_t;
 
 
 #define NB_VARS 2
-char *base="BASE";
+char *base=(char *)"BASE";
 var_t vars[]={
   { base, 0, CNTR0_DATA0 },
   { base, 1, CNTR1_DATA0 }
@@ -156,23 +178,6 @@ int comio2_serial_flush()
 {
    Serial.flush();
    return 0;
-}
-
-/******************************************************************************************/
-/* Fonctions "utilitaires"                                                                */
-/******************************************************************************************/
-void long_to_array(unsigned long val, unsigned char data[])
-{
-  for(int i=0;i<4;i++)
-  {
-    data[i]= val & 0x000000FF;
-    val = val >> 8;
-  }
-}
-
-inline unsigned long my_diff_millis(unsigned long chrono, unsigned long now)
-{
-  return now >= chrono ? now - chrono : 0xFFFFFFFF - chrono + now;
 }
 
 
@@ -277,17 +282,17 @@ void counter1_inter()
 /******************************************************************************************/
 #ifdef COUNTERS_SIMULATOR
 
-unsigned long simulation_counter0=1000
-unsigned long simulation_counter1=100
+unsigned long simulation_counter0=1000;
+unsigned long simulation_counter1=100;
 
 void process_simulator()
 {
-  long c=random(100)
+  long c=random(100000);
   if(c<10 && !counter_flag0) {
      counter_flag0=1;
      simulation_counter0++;
   }
-  long c=random(100)
+  c=random(100000);
   if(c<5 && !counter_flag1) {
      counter_flag1=1;
      simulation_counter1++;

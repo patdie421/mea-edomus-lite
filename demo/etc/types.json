@@ -6,6 +6,13 @@
       "flag":0,
       "typeoftype":10
    },
+   "TYP001": {
+      "id_type":1000,
+      "description":"",
+      "parameters":"",
+      "flag":0,
+      "typeoftype":10
+   },
    "TYP003": {
       "id_type":300,
       "description":"",
@@ -19,6 +26,13 @@
       "parameters":"",
       "flag":0,
       "typeoftype":10
+   },
+   "COUNTER": {
+      "id_type":1000,
+      "description":"",
+      "parameters":"",
+      "flag":0,
+      "typeoftype":0
    },
    "INPUT": {
       "id_type":0,
