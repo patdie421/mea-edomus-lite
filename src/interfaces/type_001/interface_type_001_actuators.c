@@ -342,4 +342,3 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
    }
    return ERROR;
 }
-

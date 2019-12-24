@@ -1356,7 +1356,7 @@ cJSON *setPairingState_alloc(char *interfaceName, int state)
                      else {
                         cmd=PAIRING_CMD_ON;
                      }
-                     result = iq->fns->pairing(cmd, iq->context);
+                     result = iq->fns->pairing(cmd, iq->context, NULL);
                      break;
                   }
                }
@@ -1399,7 +1399,7 @@ cJSON *getAvailablePairing_alloc()
             int monitoring_id = iq->fns->get_monitoring_id(iq->context);
             if(monitoring_id>-1 && process_is_running(monitoring_id)) {
                if(iq->fns->pairing) {
-                  cJSON *state = iq->fns->pairing(PAIRING_CMD_GETSTATE, iq->context);
+                  cJSON *state = iq->fns->pairing(PAIRING_CMD_GETSTATE, iq->context, NULL);
                   if(state->type==cJSON_Number) {
                      cJSON_AddNumberToObject(result, iq->name, state->valuedouble);
                      cJSON_Delete(state);
