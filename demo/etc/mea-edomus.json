@@ -1,15 +1,15 @@
 {
-  "MEAPATH": "/Users/patrice/Developpement/Logiciels/mea-edomus-lite/demo",
-  "LOGPATH": "/Users/patrice/Developpement/Logiciels/mea-edomus-lite/demo/var/log",
-  "PLUGINPATH": "/Users/patrice/Developpement/Logiciels/mea-edomus-lite/demo/lib/mea-plugins",
-  "DRIVERSPATH": "/Users/patrice/Developpement/Logiciels/mea-edomus-lite/build/Debug",
+  "MEAPATH": "/data/dev/mea-edomus-lite/demo",
+  "LOGPATH": "/data/dev/mea-edomus-lite/demo/var/log",
+  "PLUGINPATH": "/data/dev/mea-edomus-lite/demo/lib/mea-plugins",
+  "DRIVERSPATH": "/data/dev/mea-edomus-lite/demo/lib/mea-drivers",
   "XPL_VENDORID": "mea",
   "XPL_DEVICEID": "edomus",
-  "XPL_INSTANCEID": "demo",
+  "XPL_INSTANCEID": "demo2",
   "VERBOSELEVEL": "1",
   "HTTP_PORT": "8083",
-  "INTERFACE": "en0",
-  "RULESFILE": "/Users/patrice/Developpement/Logiciels/mea-edomus-lite/demo/lib/mea-rules/automator.rules",
-  "RULESFILESPATH": "/Users/patrice/Developpement/Logiciels/mea-edomus-lite/demo/lib/mea-rules"
+  "INTERFACE": "wlan0",
+  "RULESFILE": "/data/dev/mea-edomus-lite/demo/lib/mea-rules/automator.rules",
+  "RULESFILESPATH": "/data/dev/mea-edomus-lite/demo/lib/mea-rules"
 }
 
