@@ -13,6 +13,7 @@
 #include "parameters_utils.h"
 #include "tokens.h"
 #include "tokens_da.h"
+#include "mea_verbose.h"
 
 
 int16_t enocean_teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, uint16_t l_data, uint8_t *eep, int16_t teach) /* TO TEST */
@@ -508,6 +509,10 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
       cJSON_AddItemToObject(j, DEVICES_STR_C, cJSON_CreateObject());
    }
 
+   char *s=cJSON_Print(j);
+   mea_log_printf("%s\n", s);
+   free(s);
+   s=NULL;
    addInterface(j);
    cJSON_Delete(j);
 
