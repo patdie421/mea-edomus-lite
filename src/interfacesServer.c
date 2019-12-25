@@ -873,7 +873,7 @@ int addDevice(char *interface, cJSON *device)
    else
       return -5;
 
-   obj=cJSON_GetObjectItem(device, PARAMETERS_STR_C );
+   obj=cJSON_GetObjectItem(device, DESCRIPTION_STR_C );
    if(!obj)
       description="";
    else if(obj->type==cJSON_String)
