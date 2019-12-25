@@ -280,13 +280,6 @@ void *_thread_interface_type_003_enocean_data(void *args)
          
          udata->i003->indicators.enoceandatain++;
          addr = e->enocean_addr;
-//         d=addr & 0xFF;
-//         addr = addr >> 8;
-//         c=addr & 0xFF;
-//         addr = addr >> 8;
-//         b=addr & 0xFF;
-//         addr = addr >> 8;
-//         a=addr & 0xFF;
 
          _addr[3]=addr & 0xFF;
          addr = addr >> 8;
@@ -330,8 +323,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
                   
                   struct device_info_s device_info;
                   device_info_from_json(&device_info, jsonDevice, jsonInterface, NULL);
-                  cJSON *data=NULL;
-                  data=device_info_to_json_alloc(&device_info);
+                  cJSON *data=device_info_to_json_alloc(&device_info);
                   cJSON_AddNumberToObject(data, XPL_ENOCEAN_ADDR_STR_C, (double)e->enocean_addr);
                   cJSON_AddItemToObject(data, DATA_STR_C, cJSON_CreateByteArray((char *)e->data, e->l_data));
                   cJSON_AddNumberToObject(data, L_DATA_STR_C, (double)e->l_data);
@@ -351,7 +343,6 @@ _thread_interface_type_003_enocean_next_device_loop:
             }
             cJSON_Delete(jsonInterface);
          }
-
 
          free(e->data);
          e->data=NULL;
