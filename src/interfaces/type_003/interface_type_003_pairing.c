@@ -455,7 +455,7 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
    "devices": { }
 */
 
-   cJSON *j=NULL, *_j=NULL;
+   cJSON *j=NULL, *_devices=NULL;
    cJSON *pairing_data=NULL;
    char name[256];
    char strAddr[40];
@@ -500,22 +500,29 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
       }
    }
    else {
-   _j=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
-//   _j=mea_call_python_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "pairing_get_devices", j);
+      _devices=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
    }
-
+/*
    if(_j && _j->type==cJSON_Object) {
       cJSON_AddItemToObject(j, DEVICES_STR_C, _j);
    }
    else {
       cJSON_AddItemToObject(j, DEVICES_STR_C, cJSON_CreateObject());
    }
-
-   char *s=cJSON_Print(j);
+*/
+   char *s=cJSON_Print(_devices);
    mea_log_printf("%s\n", s);
    free(s);
    s=NULL;
+   
    addInterface(j);
+   if(_devices->type==cJSON_Array) {
+      cJSON *jsonDevice=_devices->child;
+      while(jsonDevice) {
+         addDevice(name, jsonDevice);
+         jsonDevice=jsonDevice->next;
+      }
+   }
    cJSON_Delete(j);
 
    return 0;
