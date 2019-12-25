@@ -460,17 +460,17 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
    char name[256];
    char strAddr[40];
 
+   snprintf(strAddr, sizeof(strAddr)-1, "%02x%02x%02x%02x", addr[0], addr[1], addr[2], addr[3]);
+   snprintf(name, sizeof(name)-1, "%s_%s", i003->name, strAddr);
+
    pairing_data=cJSON_CreateObject();
    cJSON_AddNumberToObject(pairing_data, "RORG", (double)eep[0]);
    cJSON_AddNumberToObject(pairing_data, "FUNC", (double)eep[1]);
    cJSON_AddNumberToObject(pairing_data, "TYPE", (double)eep[2]);
-
-   snprintf(strAddr, sizeof(strAddr)-1, "%02x%02x%02x%02x", addr[0], addr[1], addr[2], addr[3]);
-   snprintf(name, sizeof(name)-1, "%s_%s", i003->name, strAddr);
+   cJSON_AddStringToObject(pairing_data, "interface_name", i003->name);
+   cJSON_AddStringToObject(pairing_data, "addr", strAddr);
       
    j=cJSON_CreateObject();
-   cJSON_AddStringToObject(j, "interface_name", i003->name);
-   cJSON_AddStringToObject(j, "addr", strAddr);
    cJSON_AddStringToObject(j, NAME_STR_C, name);
    cJSON_AddNumberToObject(j, ID_TYPE_STR_C, INTERFACE_TYPE_003);
    cJSON_AddStringToObject(j, DESCRIPTION_STR_C, "");
@@ -478,8 +478,10 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
    cJSON_AddStringToObject(j, PARAMETERS_STR_C, "");
    cJSON_AddNumberToObject(j, STATE_STR_C, 2); // delegate
 //   cJSON_AddItemToObject(j, DEVICES_STR_C, cJSON_CreateObject());
-   cJSON_AddItemToObject(j, "_pairing_data", pairing_data);
-   
+
+   cJSON *jj=cJSON_Duplicate(j, 1);
+   cJSON_AddItemToObject(jj, "_pairing_data", pairing_data);
+
    // call plugin to get json devices
    int err=0;
    int nbPluginParams=0;
@@ -498,7 +500,6 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
       }
    }
    else {
-   cJSON *jj=cJSON_Duplicate(j, 1);
    _j=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
 //   _j=mea_call_python_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "pairing_get_devices", j);
    }
