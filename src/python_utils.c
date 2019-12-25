@@ -233,6 +233,9 @@ cJSON *mea_PyObjectToJson(PyObject *p)
    else if(PyFloat_Check(p)) {
       j=cJSON_CreateNumber(PyFloat_AsDouble(p));
    }
+   else if(PyInt_Check(p)) {
+      j=cJSON_CreateNumber(PyLong_AsDouble(p));
+   }
    else if(PyLong_Check(p)) {
       j=cJSON_CreateNumber(PyLong_AsDouble(p));
    }
