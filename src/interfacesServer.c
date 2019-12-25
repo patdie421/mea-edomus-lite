@@ -1395,7 +1395,7 @@ cJSON *getAvailablePairing_alloc()
       mea_queue_first(_interfaces);
       while(1) {
          mea_queue_current(_interfaces, (void **)&iq);
-         if(iq->context) {
+         if(iq->context && iq->delegate_flag == 0) {
             int monitoring_id = iq->fns->get_monitoring_id(iq->context);
             if(monitoring_id>-1 && process_is_running(monitoring_id)) {
                if(iq->fns->pairing) {
@@ -1497,7 +1497,7 @@ int dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson)
    int ret=0;
    interfaces_queue_elem_t *iq;
  
-   DEBUG_SECTION mea_log_printf("%s (%s) : reception message xPL\n", INFO_STR, __func__);
+//   DEBUG_SECTION mea_log_printf("%s (%s) : reception message xPL\n", INFO_STR, __func__);
  
    cJSON *device = NULL;
    device=cJSON_GetObjectItem(xplMsgJson, XPL_DEVICE_STR_C);

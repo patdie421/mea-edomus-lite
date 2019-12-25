@@ -292,7 +292,7 @@ void *_automator_thread(void *data)
 //            DEBUG_SECTION2(DEBUGFLAG) displayXPLMsg(e->msg);
          }
          else if(e->type == 2) {
-             DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : timer wakeup signal\n", INFO_STR, __func__);
+//            DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : timer wakeup signal\n", INFO_STR, __func__);
          }
 
 /* For DEBUG

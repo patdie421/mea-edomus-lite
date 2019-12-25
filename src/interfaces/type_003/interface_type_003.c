@@ -338,7 +338,7 @@ void *_thread_interface_type_003_enocean_data(void *args)
                   cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)(long)udata->i003->id_interface);
                   if(udata->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
                      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, udata->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
-                  python_cmd_json(udata->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+                  python_cmd_json(udata->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
                   udata->i003->indicators.senttoplugin++;
 
 _thread_interface_type_003_enocean_next_device_loop:
@@ -361,8 +361,7 @@ _thread_interface_type_003_enocean_next_device_loop:
          pthread_testcancel();
       }
       else {
-         // pb d'accès aux données de la file
-         DEBUG_SECTION mea_log_printf("%s (%s) : mea_queue_out_elem - no data in queue\n", DEBUG_STR, __func__);
+         // DEBUG_SECTION mea_log_printf("%s (%s) : mea_queue_out_elem - no data in queue\n", DEBUG_STR, __func__);
       }
       pthread_testcancel();
    }
