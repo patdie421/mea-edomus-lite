@@ -28,7 +28,7 @@
 				"description":	"AI3 : analog input only.\nCOMPUTE values : {TEMP,VOLTAGE,RAW}\nALGO values: {TMP36 if COMPUTE=TEMP, AREF5 or AREF11 if COMPUTE=VOLTAGE.}",
 				"id_type":	0,
 				"state":	1,
-				"parameters":	"pin=ai3;type=analog;COMPUTE=TEMP;ALGO=TMP36"
+				"parameters":	"pin=ai3;type=analog;COMPUTE=TEMP;ALGO=TMP36;POLLING_PERIODE=30"
 			},
 			"I001C01":	{
 				"description":	"First power counter (COUNTER=0). POLLING_PERIODE (optional) in s, default=600",

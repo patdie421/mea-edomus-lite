@@ -498,7 +498,8 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
       }
    }
    else {
-   _j=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", j);
+   cJSON *jj=cJSON_Duplicate(j, 1);
+   _j=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
 //   _j=mea_call_python_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "pairing_get_devices", j);
    }
 
