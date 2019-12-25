@@ -234,7 +234,7 @@ cJSON *mea_PyObjectToJson(PyObject *p)
       j=cJSON_CreateNumber(PyFloat_AsDouble(p));
    }
    else if(PyInt_Check(p)) {
-      j=cJSON_CreateNumber(PyLong_AsDouble(p));
+      j=cJSON_CreateNumber((double)PyInt_AsLong(p));
    }
    else if(PyLong_Check(p)) {
       j=cJSON_CreateNumber(PyLong_AsDouble(p));
