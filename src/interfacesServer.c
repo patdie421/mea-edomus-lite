@@ -1268,7 +1268,7 @@ int resyncDevices(cJSON *jsonInterfaces, char *file)
 int interfaceCommit()
 {
    char jsonInterfacesFile[1024]="";
-   snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", appParameters_get("MEAPATH", NULL));
+   snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", appParameters_get(MEAPATH_STR_C, NULL));
    cJSON *_jsonInterfaces = NULL;
    
    if(mea_filebackup(jsonInterfacesFile)==0) {
@@ -2152,7 +2152,7 @@ int start_interfaces_load_json(cJSON *params_list)
       jsonTypes=NULL;
    }
 
-   char *meapath=appParameters_get("MEAPATH", params_list);
+   char *meapath=appParameters_get(MEAPATH_STR_C, params_list);
    if(1) {
       char jsonInterfacesFile[1024];
       snprintf(jsonInterfacesFile, sizeof(jsonInterfacesFile)-1, "%s/etc/interfaces.json", meapath);

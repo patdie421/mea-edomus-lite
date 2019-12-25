@@ -1856,8 +1856,6 @@
 		4EF6867A2369B0E20084B302 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				4E52DCBD23AD456F00789CF6 /* mea_rest_api_metric.h */,
-				4E52DCBB23AD456300789CF6 /* mea_rest_api_metric.c */,
 				4EF686822369B0E20084B302 /* utilslib.mk */,
 				4EF6869F2369B0E20084B302 /* main.c */,
 				4EF686A12369B0E20084B302 /* macros.h */,
@@ -1885,6 +1883,8 @@
 				4EF686A02369B0E20084B302 /* mea_queue.c */,
 				4EF686AC2369B0E20084B302 /* mea_rest_api.h */,
 				4EF686892369B0E20084B302 /* mea_rest_api.c */,
+				4E52DCBD23AD456F00789CF6 /* mea_rest_api_metric.h */,
+				4E52DCBB23AD456300789CF6 /* mea_rest_api_metric.c */,
 				4E81D8F723A188D800A68BCD /* mea_rest_api_configuration.h */,
 				4E81D8F823A188D800A68BCD /* mea_rest_api_configuration.c */,
 				4E81D8FC23A188D800A68BCD /* mea_rest_api_interface.h */,

@@ -2,14 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+#include "tokens.h"
+#include "tokens_da.h"
 #include "users.h"
 
 #include "configuration.h"
 #include "mea_verbose.h"
 #include "mea_json_utils.h"
 
-char *_users2 = "{ \
-\"admin\": { \"password\":\"changeme\", \"fullname\":\"administrator\", \"profile\":1 } \
+char *_users2 = "{\
+\"admin\":{\"password\":\"changeme\",\"fullname\":\"administrator\",\"profile\":1}\
 }";
 cJSON *users2 = NULL;
 char *usersfullpath=NULL;
@@ -23,7 +26,7 @@ char *user_getFileFullPath()
 
 int initUsers()
 {
-   char *meapath=appParameters_get("MEAPATH", NULL);
+   char *meapath=appParameters_get(MEAPATH_STR_C, NULL);
    char *usersfile=appParameters_get("USERSFILE", NULL);
    char *etc="/etc/";
    int usersfullpath_l=(int)(strlen(meapath)+strlen(etc)+strlen(usersfile)+1);
@@ -40,9 +43,6 @@ int initUsers()
    users2=loadJson_alloc(usersfullpath);
    if(!users2) {
       users2=cJSON_Parse(_users2);
-      // if(users2) {
-      //   writeJson(usersfullpath, users2);
-      // }
    }
    
    return 0;

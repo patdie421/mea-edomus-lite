@@ -30,7 +30,6 @@ static void *mea_eval_userdata = NULL;
 static getVarVal_f _getVarVal = NULL;
 static getVarId_f _getVarId = NULL;
 
-
 static inline int  mea_eval_operatorPriorityCmpN(int op1, int op2);
 static inline int  mea_eval_getOperatorN(char *str, char **newptr);
 static inline void mea_eval_getSpace(char *p, char **newptr);

@@ -12,7 +12,7 @@ cJSON *appParameters = NULL;
 
 char *appParameters_defaults = 
 "{\"MEAPATH\":\".\",\
-\"HTML_PATH\":\"./html\",\
+\"HTMLPATH\":\"./html\",\
 \"LOGPATH\":\"./var/log\",\
 \"PLUGINPATH\":\"./lib/mea-plugins\",\
 \"DRIVERSPATH\":\"./lib/mea-drivers\",\
@@ -20,7 +20,7 @@ char *appParameters_defaults =
 \"XPL_DEVICEID\":\"edomus\",\
 \"XPL_INSTANCEID\":\"0\",\
 \"VERBOSELEVEL\":\"1\",\
-\"HTTP_PORT\":\"8083\",\
+\"HTTPPORT\":\"8083\",\
 \"INTERFACE\":\"eth0\",\
 \"RULESFILE\":\"mea-edomus.rules\",\
 \"USERSFILE\":\"users.json\",\
@@ -55,8 +55,6 @@ cJSON *filterByJson_alloc(cJSON *j, cJSON *f)
 
    cJSON *_j=cJSON_CreateObject();
    cJSON *e = j->child;
-
-//   char *s=NULL;
 
    while(e) {
       if(e->type==cJSON_String && cJSON_GetObjectItem(f,e->string)) {

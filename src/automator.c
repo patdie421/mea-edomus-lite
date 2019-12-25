@@ -489,60 +489,6 @@ enum function_e function_getNum(char *str, char *params, int l_params)
    return -1;
 }
 
-/*
-enum function_e function_getNum(char *str, char *params, int l_params)
-{
-   char fn[VALUE_MAX_STR_SIZE];
-   int l=VALUE_MAX_STR_SIZE;
-   char *fnPtr=fn;
-
-   while(l && isalnum(*str)) {
-      *fnPtr=*str;
-      ++fnPtr;
-      ++str;
-      --l;
-   }
-   *fnPtr=0;
-
-   if(*str!='[')
-      return -1;
-   ++str;
-
-   int16_t start = 0;
-   int16_t end = _FN_LIST_END - 1;
-   int16_t _cmpres;
-   do {
-      int16_t middle=(end + start) / 2;
-      if(middle<0)
-         return -1;
-      _cmpres=(int)strcmp(functionsList2[functions_index[middle]].name, fn);
-//      _cmpres=(int)strcmp(functionsList2[middle].name, fn);
-      if(_cmpres==0) {
-         while(*str && *str!=']' && l_params) {
-            *params=*str;
-            ++str;
-            ++params;
-            --l_params;
-         }
-         *params=0;
-
-         if(*str==']' && *(str+1)==0) {
-            return functionsList2[functions_index[middle]].num;
-//            return functionsList2[middle].num;
-         }
-         else
-            return -1;
-      }
-      if(_cmpres<0)
-         start=middle+1;
-      if(_cmpres>0)
-         end=middle-1;
-   }
-   while(start<=end);
-
-   return -1;
-}
-*/
 
 static int input_getEdge(char *expr, int direction,  struct value_s *v, cJSON *xplMsgJson)
 {

@@ -291,10 +291,11 @@ void *_automator_thread(void *data)
          if(e->type==1) {
 //            DEBUG_SECTION2(DEBUGFLAG) displayXPLMsg(e->msg);
          }
+/*
          else if(e->type == 2) {
-//            DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : timer wakeup signal\n", INFO_STR, __func__);
+            DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : timer wakeup signal\n", INFO_STR, __func__);
          }
-
+*/
 /* For DEBUG
          if(e->type == 1 && e->msg_json) {
             char *tmp = cJSON_Print(e->msg_json);
@@ -304,7 +305,6 @@ void *_automator_thread(void *data)
          else
             mea_log_printf("e:%p type:%d\n", e, e->type);
 */ 
-
          automator_matchInputsRules(_inputs_rules, e->msg_json);
 
          int n=automator_playOutputRules(_outputs_rules);

@@ -31,6 +31,7 @@ char *no_valid_json_data_str="no valid json data";
 char *bad_method_str="bad method";
 char *not_authorized_str="not authorized";
 char *success_str="success";
+char *forbidden_str="forbidden";
 
 
 int mea_rest_api_init()

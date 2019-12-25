@@ -75,21 +75,18 @@ int actuator_pin_type_i001(int token_type_id, int pin_id)
 
 int valide_actuator_i001(int token_type_id, int pin_id, int token_action_id, int *err)
 {   
-   if(token_type_id==-1)
-   {
+   if(token_type_id==-1) {
       *err=1;
       VERBOSE(5) mea_log_printf("%s (%s) : bad i/o type (%d)\n",ERROR_STR,__func__,token_type_id);
    }
    
-   if(pin_id==-1)
-   {
+   if(pin_id==-1) {
       *err=2;
       VERBOSE(5) mea_log_printf("%s (%s) : bad pin (%d)\n",ERROR_STR,__func__,pin_id);
    }
    
    int ret=actuator_pin_type_i001(token_type_id, pin_id);
-   if(!ret)
-   {
+   if(!ret) {
       *err=3;
       VERBOSE(5) mea_log_printf("%s (%s) : bad pin (%d) for pin type (%d)\n",ERROR_STR,__func__,pin_id,token_type_id);
       return 0;
@@ -110,8 +107,7 @@ struct actuator_s *interface_type_001_valid_and_malloc_actuator(int16_t id_senso
    int err;
    
    struct actuator_s *actuator=(struct actuator_s *)malloc(sizeof(struct actuator_s));
-   if(!actuator)
-   {
+   if(!actuator) {
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
          perror(""); }
@@ -119,13 +115,11 @@ struct actuator_s *interface_type_001_valid_and_malloc_actuator(int16_t id_senso
    }
 
    relay_params=alloc_parsed_parameters((char *)parameters, valid_relay_params, &nb_relay_params, &err,1);
-   if(relay_params)
-   {
+   if(relay_params) {
       type_id=get_token_id_by_string(relay_params->parameters[ACTUATOR_PARAMS_TYPE].value.s);
       pin_id=mea_getArduinoPin(relay_params->parameters[ACTUATOR_PARAMS_PIN].value.s);
       
-      if(valide_actuator_i001(type_id,pin_id,action_id,&err))
-      {
+      if(valide_actuator_i001(type_id,pin_id,action_id,&err)) {
          strncpy(actuator->name, (char *)name, sizeof(actuator->name)-1);
          actuator->name[sizeof(actuator->name)-1]=0;
          mea_strtolower(actuator->name);
@@ -138,22 +132,19 @@ struct actuator_s *interface_type_001_valid_and_malloc_actuator(int16_t id_senso
          
          return actuator;
       }
-      else
-      {
+      else {
          VERBOSE(2) mea_log_printf("%s (%s) : parametres (%s) non valides\n",ERROR_STR,__func__,parameters);
          goto valid_and_malloc_relay_clean_exit;
       }
    }
-   else
-   {
+   else {
       VERBOSE(1) {
          mea_log_printf("%s (%s) : %s/%s invalid. Check parameters.\n",ERROR_STR,__func__,name,parameters);
       }
    }
    
 valid_and_malloc_relay_clean_exit:
-   if(actuator)
-   {
+   if(actuator) {
       free(actuator);
       actuator=NULL;
    }
@@ -181,11 +172,9 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
       return ERROR;
    
    struct actuator_s *iq;
-   while(1)
-   {
+   while(1) {
       mea_queue_current(i001->actuators_list, (void **)&iq);
-      if(mea_strcmplower(iq->name, device)==0) // OK, c'est bien pour moi ...
-      {
+      if(mea_strcmplower(iq->name, device)==0) {  // OK, c'est bien pour moi ...
          char *current=NULL;
          cJSON *j = NULL;
          j=cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_CURRENT_ID));
@@ -194,10 +183,8 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
          if(!current)
             return ERROR;
          int current_id=get_token_id_by_string(current);
-         if(type_id==XPL_OUTPUT_ID && iq->arduino_pin_type==DIGITAL_ID)
-         {
-            switch(current_id)
-            {
+         if(type_id==XPL_OUTPUT_ID && iq->arduino_pin_type==DIGITAL_ID) {
+            switch(current_id) {
                case XPL_PULSE_ID:
                {
                   int pulse_width;
@@ -205,8 +192,7 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                   j=cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_DATA1_ID));
                   if(j)
                      data1=j->valuestring;
-                  if(data1)
-                  {
+                  if(data1) {
                      pulse_width=atoi(data1);
                      if(pulse_width<=0)
                         pulse_width=250;
@@ -219,16 +205,13 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                   sval[0]=iq->arduino_pin;
                   sval[1]=((pulse_width / 100) & 0xFF);
                   ret=comio2_call_proc(i001->ad, 0, (char *)sval, 2, &comio2_err);
-                  if(ret!=0)
-                  {
+                  if(ret!=0) {
                      VERBOSE(9) mea_log_printf("%s (%s) : comio2_call_proc error (comio2_err=%d)\n", INFO_STR, __func__, comio2_err);
                      (i001->indicators.nbactuatorsouterr)++;
-
                      return ERROR;
                   }
                   
                   (i001->indicators.nbactuatorsout)++;
-//DBSERVER                  dbServer_add_data_to_sensors_values(iq->actuator_id, 1, 0, sval[1], XPL_PULSE_STR_C);
                   return NOERROR;
                }
                
@@ -245,8 +228,7 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                   sval[0]=iq->arduino_pin;
                   sval[1]=o;
                   ret=comio2_call_proc(i001->ad, 1, (char *)sval, 2, &comio2_err);
-                  if(ret!=0)
-                  {
+                  if(ret!=0) {
                      VERBOSE(9) mea_log_printf("%s (%s) : comio2_call_proc error (comio2_err=%d)\n", INFO_STR, __func__, comio2_err);
                      (i001->indicators.nbactuatorsouterr)++;
 
@@ -262,8 +244,7 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
             }
             
          }
-         else if(type_id==VARIABLE_ID && iq->arduino_pin_type==ANALOG_ID)
-         {
+         else if(type_id==VARIABLE_ID && iq->arduino_pin_type==ANALOG_ID) {
             int o=0;
             switch(current_id)
             {
@@ -277,13 +258,11 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                {
                   int16_t inc_dec=0; // +1 = inc ; -1 = dec
                   char *str;
-                  if(current[0]=='-')
-                  {
+                  if(current[0]=='-') {
                      inc_dec=-1;
                      str=&current[1];
                   }
-                  else if (current[0]=='+')
-                  {
+                  else if (current[0]=='+') {
                      inc_dec=1;
                      str=&current[1];
                   }
@@ -293,27 +272,26 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                   ret=sscanf(str,"%d%n", &o, &n);
                   if(o>255) o=255;
                         
-                  if(ret==1 && !(strlen(str)-n))
-                  {
-                     if(inc_dec)
-                     {
+                  if(ret==1 && !(strlen(str)-n)) {
+                     if(inc_dec) {
                         o=iq->old_val+(uint16_t)o*(uint16_t)inc_dec;
                      }
                      if(o>255) o=255;
                      if(o<  0) o=0;
                   }
-                  else
-                  {
+                  else {
                      VERBOSE(9) mea_log_printf("%s (%s) : %s ???\n", INFO_STR, __func__, current);
                      return ERROR; // erreur de syntaxe ...
                   }
                }
                break;
             }
-            if(o>255)
+            if(o>255) {
                o=255;
-            else if(o<0)
+            }
+            else if(o<0) {
                o=0;
+            }
             iq->old_val=(uint16_t)o;
                   
             VERBOSE(9) mea_log_printf("%s (%s) : %s set %d on pin %d\n", INFO_STR, __func__, device, o, iq->arduino_pin);
@@ -321,8 +299,7 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
             sval[0]=iq->arduino_pin;
             sval[1]=o;
             ret=comio2_call_proc(i001->ad, 2, (char *)sval, 2, &comio2_err);
-            if(ret!=0)
-            {
+            if(ret!=0) {
                VERBOSE(9) mea_log_printf("%s (%s) : comio2_call_proc error (comio2_err=%d)\n", INFO_STR, __func__, comio2_err);
                (i001->indicators.nbactuatorsouterr)++;
                return ERROR;
@@ -337,8 +314,9 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
          return ERROR;
       }
       ret=mea_queue_next(i001->actuators_list);
-      if(ret<0)
+      if(ret<0) {
          break;
+      }
    }
    return ERROR;
 }

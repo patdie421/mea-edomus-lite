@@ -82,12 +82,14 @@ int16_t interface_type_001_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
    }
 
    j = cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_DEVICE_ID)); 
-   if(j)
+   if(j) {
       device=j->valuestring;
+   }
 
    j = cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_TYPE_ID)); 
-   if(j)
+   if(j) {
       type=j->valuestring;
+   }
 
    VERBOSE(9) mea_log_printf("%s (%s) : xPL Message to process : %s\n", INFO_STR, __func__, schema);
 
@@ -105,8 +107,9 @@ int16_t interface_type_001_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
    else if(mea_strcmplower(schema, XPL_SENSORREQUEST_STR_C) == 0) {
       char *request = NULL;
       j = cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_REQUEST_ID)); 
-      if(j)
+      if(j) {
          request = j->valuestring;
+      }
       if(!request) {
          VERBOSE(5) mea_log_printf("%s (%s) : xPL message no request\n", INFO_STR, __func__);
          return 0;
@@ -116,8 +119,8 @@ int16_t interface_type_001_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
          return 0;
       }
       
-//      interface_type_001_counters_process_xpl_msg2(i001, xplMsgJson, device, type);
-//      interface_type_001_sensors_process_xpl_msg2(i001, xplMsgJson, device, type);
+      interface_type_001_counters_process_xpl_msg2(i001, xplMsgJson, device, type);
+      interface_type_001_sensors_process_xpl_msg2(i001, xplMsgJson, device, type);
    }
    
    return 0;

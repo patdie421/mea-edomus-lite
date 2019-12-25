@@ -7,7 +7,7 @@
   "XPL_DEVICEID": "edomus",
   "XPL_INSTANCEID": "demo",
   "VERBOSELEVEL": "1",
-  "HTTP_PORT": "8083",
+  "HTTPPORT": "8083",
   "INTERFACE": "eth0",
   "RULESFILE": "/app/lib/mea-rules/automator.rules",
   "RULESFILESPATH": "/app/lib/mea-rules"
