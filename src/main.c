@@ -278,7 +278,6 @@ int main(int argc, const char * argv[])
    static struct option long_options[] = {
       {"basepath",          required_argument, 0,  MEA_PATH             }, // 'p'
       {"verboselevel",      required_argument, 0,  VERBOSELEVEL         }, // 'v'
-//      {"apiport",           required_argument, 0,  HTTP_PORT            }, // 'g'
       {"help",              no_argument,       0,  'h'                  }, // 'h'
       {0,                   0,                 0,  0                    }
    };
@@ -313,8 +312,8 @@ int main(int argc, const char * argv[])
 
    // initialisation de la liste des parametres à NULL sauf MEAPATH
    //
-   if(!appParameters_get("MEAPATH", NULL))
-      appParameters_set("MEAPATH","/usr/local/mea-edomus",NULL);
+   if(!appParameters_get(MEAPATH_STR_C, NULL))
+      appParameters_set(MEAPATH_STR_C,"/usr/local/mea-edomus", NULL);
 
 
    //
@@ -334,7 +333,7 @@ int main(int argc, const char * argv[])
 
          case 'p':
 	 case MEA_PATH:
-            appParameters_set("MEAPATH", optarg, NULL);
+            appParameters_set(MEAPATH_STR_C, optarg, NULL);
             break;
 
          case 'v':
@@ -344,8 +343,8 @@ int main(int argc, const char * argv[])
             break;
 
 //         case 'g':
-//	 case HTTP_PORT:
-//	    appParameters_set("HTTP_PORT", optarg, NULL);
+//	 case HTTPPORT:
+//	    appParameters_set("HTTPPORT", optarg, NULL);
 //            break;
 
          default:
@@ -369,7 +368,7 @@ int main(int argc, const char * argv[])
 #endif
 
    char cfgfile[1024];
-   snprintf(cfgfile,sizeof(cfgfile)-1, "%s/etc/mea-edomus.json", appParameters_get("MEAPATH", NULL));
+   snprintf(cfgfile,sizeof(cfgfile)-1, "%s/etc/mea-edomus.json", appParameters_get(MEAPATH_STR_C, NULL));
    ret = read_all_application_parameters(cfgfile);
 
    if(ret) {
@@ -550,14 +549,15 @@ int main(int argc, const char * argv[])
    time_t start_time;
    long uptime = 0;
    start_time = time(NULL);
-   int apiport = atoi(appParameters_get("HTTP_PORT",NULL));
+   int apiport = atoi(appParameters_get("HTTPPORT",NULL));
 
    while(1) { // boucle principale
       // supervision "externe" des process
       if(process_is_running(httpServer_monitoring_id)==RUNNING) {
          char response[512];
          // interrogation du serveur HTTP Interne pour heartbeat ... (voir le passage d'un parametre pour sécuriser ...)
-         gethttp(localhost_const, apiport, "/CMD/ping.php", response, sizeof(response)); // a remplacer par un guiServer_ping();
+//         gethttp(localhost_const, apiport, "/CMD/ping.php", response, sizeof(response)); // a remplacer par un guiServer_ping();
+         gethttp(localhost_const, apiport, "/CMD/ping", response, sizeof(response)); // a remplacer par un guiServer_ping();
       }
 
       // indicateur de fonctionnement de mea-edomus

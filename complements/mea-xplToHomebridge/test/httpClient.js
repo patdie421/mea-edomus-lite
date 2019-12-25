@@ -3,12 +3,12 @@ var commander = require('commander');
 var url = require("url");
 
 const contentType={'content-type':'application/json'}
-const HTTP_PORT=7102
+const HTTPPORT=7102
 
 var server = http.createServer(requestHandler);
 
-server.listen(HTTP_PORT, function() {
-      console.log("Server listening on port #"+HTTP_PORT);
+server.listen(HTTPPORT, function() {
+      console.log("Server listening on port #"+HTTPPORT);
    }
 );
 

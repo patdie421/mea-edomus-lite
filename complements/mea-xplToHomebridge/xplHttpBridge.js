@@ -8,7 +8,7 @@ var url = require("url");
 
 const contentType={'content-type':'application/json'}
 const defaultTimeOut=5000
-const HTTP_PORT=7101
+const HTTPPORT=7101
 
 commander.option("--networkInterface <name>", "Specify the network interface name");
 commander.option("--hubPingDelaySecond <sec>", "");
@@ -28,8 +28,8 @@ setInterval(manageCallbacksQueue, 5*60*1000);
 
 var server = http.createServer(requestHandler);
 
-server.listen(HTTP_PORT, function() {
-      console.log("Server listening on port #"+HTTP_PORT);
+server.listen(HTTPPORT, function() {
+      console.log("Server listening on port #"+HTTPPORT);
    }
 );
 

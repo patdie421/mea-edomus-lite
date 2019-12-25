@@ -209,7 +209,7 @@ void _httpErrno(struct mg_connection *conn, int n, char *msg)
 }
 
 
-int gui_ping(struct mg_connection *conn)
+int http_ping(struct mg_connection *conn)
 {
    process_heartbeat(_httpServer_monitoring_id); // le heartbeat est fait de l'extérieur ...
       
@@ -260,8 +260,8 @@ static int _begin_request_handler(struct mg_connection *conn)
       }
       else if(l_tokens==2 && strcmp(tokens[0],"CMD")==0) {
 
-         if(strcmp(tokens[1],"PING.PHP")==0 && method==HTTP_GET_ID) {
-            return gui_ping(conn);
+         if(strcmp(tokens[1],"PING")==0 && method==HTTP_GET_ID) {
+            return http_ping(conn);
          }
 
       }
@@ -341,26 +341,26 @@ int start_httpServer(int my_id, void *data, char *errmsg, int l_errmsg)
    struct httpServerData_s *httpServerData = (struct httpServerData_s *)data;
 //   char *phpcgibin=NULL;
 
-   if(appParameters_get("HTML_PATH", httpServerData->params_list) &&
-      appParameters_get("HTTP_PORT", httpServerData->params_list)) {
+   if(appParameters_get("HTMLPATH", httpServerData->params_list) &&
+      appParameters_get("HTTPPORT", httpServerData->params_list)) {
 
       _httpServer_monitoring_id=my_id;
-      err=_start_httpServer(atoi(appParameters_get("HTTP_PORT", httpServerData->params_list)), appParameters_get("HTML_PATH", httpServerData->params_list));
+      err=_start_httpServer(atoi(appParameters_get("HTTPPORT", httpServerData->params_list)), appParameters_get("HTMLPATH", httpServerData->params_list));
       if(err==NOERROR) { 
-         VERBOSE(2) mea_log_printf("%s (%s) : GUISERVER %s.\n", INFO_STR, __func__, launched_successfully_str);
+         VERBOSE(2) mea_log_printf("%s (%s) : http server %s.\n", INFO_STR, __func__, launched_successfully_str);
          process_heartbeat(_httpServer_monitoring_id); // un premier heartbeat pour le faire au plus vite ...
          return 0;
       }
       else {
-         VERBOSE(2) mea_log_printf("%s (%s) : GUISERVER can't be launched.\n", ERROR_STR, __func__);
+         VERBOSE(2) mea_log_printf("%s (%s) : http server can't be launched.\n", ERROR_STR, __func__);
          return -1;
       }
    }
    else {
-      VERBOSE(3) mea_log_printf("%s (%s) : can't start GUI Server (parameters errors).\n",ERROR_STR,__func__);
+      VERBOSE(3) mea_log_printf("%s (%s) : can't start http server (parameters errors).\n",ERROR_STR,__func__);
    }
    
-   VERBOSE(2) mea_log_printf("%s (%s) : GUISERVER can't be launched.\n", ERROR_STR, __func__);
+   VERBOSE(2) mea_log_printf("%s (%s) : http server can't be launched.\n", ERROR_STR, __func__);
    
    return -1;
 }

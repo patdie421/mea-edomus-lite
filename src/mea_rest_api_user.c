@@ -188,38 +188,6 @@ int _userCreate(cJSON *jsonData)
    return 0;
 }
 
-/*
-cJSON *getJsonDataAction(struct mg_connection *conn, cJSON *jsonData)
-{
-   cJSON *action=cJSON_GetObjectItem(jsonData, ACTION_STR_C);
-   if(!action) {
-      returnResponseAndDeleteJsonData(conn, 400, 1, "no action", jsonData);
-      return NULL;
-   }
-   if(!(action->type==cJSON_String)) {
-      returnResponseAndDeleteJsonData(conn, 400, 1, "action not a string", jsonData);
-      return NULL;
-   }
-   
-   return action;
-}
-
-
-cJSON *getJsonDataParameters(struct mg_connection *conn, cJSON *jsonData)
-{
-   cJSON *parameters=cJSON_GetObjectItem(jsonData, PARAMETERS_STR_C);
-   
-   if(!parameters) {
-      returnResponseAndDeleteJsonData(conn, 400, 1, "no parameter", jsonData);
-      return NULL;
-   }
-   if(parameters->type!=cJSON_Object) {
-      returnResponseAndDeleteJsonData(conn, 400, 1, "parameters not an object", jsonData);
-      return NULL;
-   }
-   return parameters;
-}
-*/
 
 int mea_rest_api_user_GET(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
@@ -287,33 +255,6 @@ int mea_rest_api_user_POST(struct mg_connection *conn, int method, char *tokens[
 
                default: return returnResponse(conn, 400, 1, "unknown action");
          }
-/*
-         if(mea_strcmplower(action->valuestring,"create")==0) {
-            parameters=getJsonDataParameters(conn, jsonData);
-            if(!parameters) {
-               return 1;
-            }
-            int ret=_userCreate(parameters);
-            if(ret==0)
-               return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
-            else
-               return returnResponseAndDeleteJsonData(conn, 200, ret, "user not created", jsonData);
-         }
-         else if(mea_strcmplower(action->valuestring,"commit")==0) {
-            int ret=_usersCommit();
-            if(ret==0)
-               return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
-            else
-               return returnResponseAndDeleteJsonData(conn, 200, ret, "commit not done", jsonData);
-         }
-         else if(mea_strcmplower(action->valuestring,"rollback")==0) {
-            int ret=_usersRollback();
-            if(ret==0)
-               return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
-            else
-               return returnResponseAndDeleteJsonData(conn, 200, ret, "rollback not done", jsonData);
-         }
-         */
       }
       else {
          return returnResponse(conn, 200, 1, NO_VALID_JSON_DATA);
@@ -337,11 +278,11 @@ int mea_rest_api_user_PUT(struct mg_connection *conn, int method, char *tokens[]
    if(jsonData) {
       parameters=getJsonDataParameters(conn, jsonData);
       if(!parameters) {
-         return 1;
+         return returnResponseAndDeleteJsonData(conn, 404, 1, "no parameters", jsonData);
       }
       action=getJsonDataAction(conn, jsonData);
       if(!action) {
-         return 1;
+         return returnResponseAndDeleteJsonData(conn, 404, 1, "no action", jsonData);
       }
    }
    else {
@@ -353,45 +294,40 @@ int mea_rest_api_user_PUT(struct mg_connection *conn, int method, char *tokens[]
       returnResponseAndDeleteJsonData(conn, 500, 1, "profile not defined",jsonData);
    }
 
-   char *user=getSessionUser_alloc((char *)meaSessionId);
-   if(!user) {
-      return returnResponseAndDeleteJsonData(conn, 500, 1, "user not defined", jsonData);
-   }
-
    if(l_tokens==0) {
-      if(mea_strcmplower(action->valuestring, PASSWORD_STR_C)==0) {
-         int ret=_userUpdatePassword(user, parameters);
-         free(user);
-         if(ret==0) {
-            return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
-         }
-         else {
-            return returnResponseAndDeleteJsonData(conn, 400, ret, "password not updated", jsonData);
-         }
+      if(mea_strcmplower(action->valuestring, PASSWORD_STR_C)!=0) {
+         return returnResponseAndDeleteJsonData(conn, 404, 1, "unknown action", jsonData);
+      }
+
+      char *user=getSessionUser_alloc((char *)meaSessionId);
+      if(!user) {
+         return returnResponseAndDeleteJsonData(conn, 500, 1, "user not defined", jsonData);
+      }
+      int ret=_userUpdatePassword(user, parameters);
+      free(user);
+      user=NULL;
+
+      if(ret==0) {
+         return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
       }
       else {
-         return returnResponseAndDeleteJsonData(conn, 404, 1, "unknown action", jsonData);
+         return returnResponseAndDeleteJsonData(conn, 400, ret, "password not updated", jsonData);
       }
    }
    else if(l_tokens==1) {
-      if(profile>0) {
-         if(mea_strcmplower(action->valuestring, UPDATE_STR_C)==0) {
-            int ret=_userUpdate(tokens[0], parameters);
-            if(ret==0) {
-               return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
-            }
-            else {
-               return returnResponseAndDeleteJsonData(conn, 400, ret, "user not updated", jsonData);
-            }
-         }
-         else {
-            return returnResponseAndDeleteJsonData(conn, 404, 1, "unknown action", jsonData);
-         }
+      if(profile<1) {
+         return returnResponseAndDeleteJsonData(conn, 403, 99, FORBIDDEN, jsonData);
       }
-      else {
-         return returnResponseAndDeleteJsonData(conn, 401, 99, NOT_AUTHORIZED, jsonData);
+      if(mea_strcmplower(action->valuestring, UPDATE_STR_C) != 0) {
+         return returnResponseAndDeleteJsonData(conn, 404, 1, "unknown action", jsonData);
       }
+      int ret=_userUpdate(tokens[0], parameters);
+      if(ret!=0) {
+         return returnResponseAndDeleteJsonData(conn, 200, 0, NULL, jsonData);
+      }
+      return returnResponseAndDeleteJsonData(conn, 200, 0, NULL, jsonData);
    }
+
    return returnResponseAndDeleteJsonData(conn, 404, 1, NULL, jsonData);
 }
 
@@ -448,7 +384,7 @@ int mea_rest_api_user(struct mg_connection *conn, int method, char *tokens[], in
             return mea_rest_api_user_POST(conn, method, tokens, l_tokens);
          }
          else {
-            return returnResponse(conn, 401, 98, NOT_AUTHORIZED);
+            return returnResponse(conn, 403, 98, FORBIDDEN);
          }
       case HTTP_PUT_ID:
          return mea_rest_api_user_PUT(conn, method, tokens, l_tokens);
@@ -458,7 +394,7 @@ int mea_rest_api_user(struct mg_connection *conn, int method, char *tokens[], in
             return mea_rest_api_user_DELETE(conn, method, tokens, l_tokens);
          }
          else {
-            return returnResponse(conn, 401, 98, NOT_AUTHORIZED);
+            return returnResponse(conn, 403, 98, FORBIDDEN);
          }
 
       default:

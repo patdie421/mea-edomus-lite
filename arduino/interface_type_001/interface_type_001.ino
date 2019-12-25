@@ -5,7 +5,7 @@
 #include <Comio2.h>
 #include <Pulses.h>
 
-#define COU
+#define COUNTERS_SIMULATOR 1
 
 // utilisation des ports (ARDUINO UNO) Dans ce sketch
 /* PORTD
@@ -282,8 +282,8 @@ void counter1_inter()
 /******************************************************************************************/
 #ifdef COUNTERS_SIMULATOR
 
-unsigned long simulation_counter0=1000;
-unsigned long simulation_counter1=100;
+unsigned long simulation_counter0=10000;
+unsigned long simulation_counter1=1000;
 
 void process_simulator()
 {
@@ -302,8 +302,8 @@ void process_simulator()
 
 void read_counters()
 {
-  long_to_array(simulation_counter0 / 1000, (unsigned char *)&(comio_mem[vars[0].addr]));
-  long_to_array(simulation_counter1 / 1000, (unsigned char *)&(comio_mem[vars[1].addr]));
+  long_to_array(simulation_counter0 /* / 1000 */, (unsigned char *)&(comio_mem[vars[0].addr]));
+  long_to_array(simulation_counter1 /* / 1000 */, (unsigned char *)&(comio_mem[vars[1].addr]));
 }
 
 void process_counters()
