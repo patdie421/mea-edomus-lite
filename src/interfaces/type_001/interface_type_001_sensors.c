@@ -464,11 +464,6 @@ mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i0
                cJSON_AddItemToObject(msg_json, XPLTARGET_STR_C, cJSON_CreateString("*"));
             }
 
-            char *s=cJSON_Print(msg_json);
-            VERBOSE(9) mea_log_printf("ICI: %s\n", s);
-            free(s);
-            s=NULL;
-            
             mea_sendXPLMessage2(msg_json);
 
             i001->indicators.nbsensorsxplsent++;
