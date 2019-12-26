@@ -477,7 +477,6 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
    cJSON_AddStringToObject(j, DEV_STR_C, interfaceDevName);
    cJSON_AddStringToObject(j, PARAMETERS_STR_C, "");
    cJSON_AddNumberToObject(j, STATE_STR_C, 2); // delegate
-//   cJSON_AddItemToObject(j, DEVICES_STR_C, cJSON_CreateObject());
 
    cJSON *jj=cJSON_Duplicate(j, 1);
    cJSON_AddItemToObject(jj, "_pairing_data", pairing_data);
@@ -502,18 +501,11 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
    else {
       _devices=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
    }
-/*
-   if(_j && _j->type==cJSON_Object) {
-      cJSON_AddItemToObject(j, DEVICES_STR_C, _j);
-   }
-   else {
-      cJSON_AddItemToObject(j, DEVICES_STR_C, cJSON_CreateObject());
-   }
-*/
-   char *s=cJSON_Print(_devices);
-   mea_log_printf("%s\n", s);
-   free(s);
-   s=NULL;
+
+//   char *s=cJSON_Print(_devices);
+//   mea_log_printf("%s\n", s);
+//   free(s);
+//   s=NULL;
    
    addInterface(j);
    if(_devices->type==cJSON_Array) {
