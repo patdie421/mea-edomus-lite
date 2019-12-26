@@ -174,7 +174,8 @@ struct devices_index_s *addInterfaceDevicesToDevicesIndex(struct devices_index_s
          }
 
          e=(struct devices_index_s *)malloc(sizeof(struct devices_index_s));
-         strncpy(e->name, name, sizeof(e->name));
+//         strncpy(e->name, name, sizeof(e->name));
+         mea_strncpytrimlower(e->name, name, sizeof(e->name));
          e->device=jsonDevice;
          HASH_ADD_STR(devices_index, name, e);
 
@@ -316,7 +317,8 @@ int createDevicesIndex(struct devices_index_s **devices_index, cJSON *jsonInterf
          while( jsonDevice ) {
             char *name=jsonDevice->string;
             struct devices_index_s *e=(struct devices_index_s *)malloc(sizeof(struct devices_index_s));
-            strncpy(e->name, name, sizeof(e->name));
+//            strncpy(e->name, name, sizeof(e->name));
+            mea_strncpytrimlower(e->name, name, sizeof(e->name));
             e->device=jsonDevice;
             HASH_ADD_STR(*devices_index, name, e);
  
@@ -462,8 +464,12 @@ cJSON *findDeviceByNameThroughIndex_alloc(struct devices_index_s *devices_index,
    if(!devices_index)
       return NULL;
  
+   int _name_l=(int)strlen(name)+1;
+   char *_name=alloca(_name_l);
+   mea_strncpytrimlower(_name, name,_name_l);
+
    cJSON *d = NULL;
-   HASH_FIND_STR(devices_index, name, e);
+   HASH_FIND_STR(devices_index, _name, e);
    if(e) {
       d=cJSON_Duplicate(e->device, 1);
    }
@@ -803,7 +809,11 @@ int deleteDevice(char *interface, char *name)
          cJSON *jsonDevices=cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
          if(jsonDevices) {
             struct devices_index_s *e=NULL;
-            HASH_FIND_STR(devices_index, name, e);
+            int _name_l=(int)strlen(name)+1;
+            char *_name=alloca(_name_l);
+            mea_strncpytrimlower(_name, name, _name_l);
+            
+            HASH_FIND_STR(devices_index, _name, e);
             if(e) {
                HASH_DEL(devices_index, e);
                free(e);
@@ -840,11 +850,14 @@ int addDevice(char *interface, cJSON *device)
    // verification des parametres
    //
    obj=cJSON_GetObjectItem(device, NAME_STR_C);
-   if(obj && obj->type==cJSON_String)
+   if(obj && obj->type==cJSON_String) {
       name=obj->valuestring;
-   else
+   }
+   else {
       return -2;
-   mea_strtoupper(name);
+   }
+//   mea_strtoupper(name);
+   mea_strtolower(name);
 
    obj=cJSON_GetObjectItem(device, ID_TYPE_STR_C);
    if(obj && obj->type==cJSON_Number) {
