@@ -212,14 +212,13 @@ int mea_sendXplMsgJson(cJSON *xplMsgJson)
    }
 
    if(!type || !schema || !source || !target || !xplBodyStrPtr) {
-      mea_log_printf("ICI ICI ICI ICI ICI\n");
       return -1;
    }
 
    char *msg = (char *)alloca(2048);
 
    int n=sprintf(msg,"%s\n{\nhop=1\nsource=%s\ntarget=%s\n}\n%s\n{\n%s}\n",type,source,target,schema,xplBodyStr);
-
+   mea_log_printf("%s\n",msg);
    if(n>0) {
       int ret=mea_xPLSendMessage(xpl_sdb, xpl_broadcastAddr, msg, n);
       if(ret<0)
