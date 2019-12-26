@@ -177,15 +177,21 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
    struct actuator_s *iq;
    while(1) {
       mea_queue_current(i001->actuators_list, (void **)&iq);
-      VERBOSE(9) mea_log_printf("%s (%s) : name: %s device: %s\n", INFO_STR, __func__, iq->name,device);
+      VERBOSE(9) mea_log_printf("%s (%s) : name: %s device: %s\n", DEBUG_STR, __func__, iq->name,device);
       if(mea_strcmplower(iq->name, device)==0) {  // OK, c'est bien pour moi ...
          char *current=NULL;
          cJSON *j = NULL;
          j=cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_CURRENT_ID));
-         if(j)
+         char *s=cJSON_Print(j);
+         VERBOSE(9) mea_log_printf("%s\n", s);
+         free(s);
+         if(j) {
             current = j->valuestring;
-         if(!current)
+         }
+         if(!current) {
+            VERBOSE(9) mea_log_printf("%s (%s) : no current\n", DEBUG_STR, __func__);
             return ERROR;
+         }
          int current_id=get_token_id_by_string(current);
          if(type_id==XPL_OUTPUT_ID && iq->arduino_pin_type==DIGITAL_ID) {
             switch(current_id) {
