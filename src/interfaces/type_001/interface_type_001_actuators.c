@@ -163,7 +163,11 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
    int16_t comio2_err;
 
    (i001->indicators.nbactuatorsxplrecv)++;
-   
+
+   char *s=cJSON_Print(xplMsgJson);
+   VERBOSE(9) mea_log_printf("%s\n", s);
+   free(s);
+
    type_id=get_token_id_by_string(type);
    VERBOSE(9) mea_log_printf("%s (%s) : type_id: %d\n", INFO_STR, __func__, type_id);
    if(type_id != XPL_OUTPUT_ID && type_id !=VARIABLE_ID)
@@ -182,9 +186,6 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
          char *current=NULL;
          cJSON *j = NULL;
          j=cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_CURRENT_ID));
-         char *s=cJSON_Print(j);
-         VERBOSE(9) mea_log_printf("%s\n", s);
-         free(s);
          if(j) {
             current = j->valuestring;
          }
