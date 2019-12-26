@@ -164,24 +164,17 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
 
    (i001->indicators.nbactuatorsxplrecv)++;
 
-   char *s=cJSON_Print(xplMsgJson);
-   VERBOSE(9) mea_log_printf("%s\n", s);
-   free(s);
-
    type_id=get_token_id_by_string(type);
-   VERBOSE(9) mea_log_printf("%s (%s) : type_id: %d\n", INFO_STR, __func__, type_id);
    if(type_id != XPL_OUTPUT_ID && type_id !=VARIABLE_ID)
       return ERROR;
    
    if(mea_queue_first(i001->actuators_list)==-1) {
-      VERBOSE(9) mea_log_printf("%s (%s) : queue error\n", ERROR_STR, __func__);
       return ERROR;
    }
    
    struct actuator_s *iq;
    while(1) {
       mea_queue_current(i001->actuators_list, (void **)&iq);
-      VERBOSE(9) mea_log_printf("%s (%s) : name: %s device: %s\n", DEBUG_STR, __func__, iq->name,device);
       if(mea_strcmplower(iq->name, device)==0) {  // OK, c'est bien pour moi ...
          char *current=NULL;
          cJSON *j = NULL;
@@ -190,7 +183,6 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
             current = j->valuestring;
          }
          if(!current) {
-            VERBOSE(9) mea_log_printf("%s (%s) : no current\n", DEBUG_STR, __func__);
             return ERROR;
          }
          int current_id=get_token_id_by_string(current);
