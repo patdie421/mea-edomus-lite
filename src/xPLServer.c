@@ -211,8 +211,9 @@ int mea_sendXplMsgJson(cJSON *xplMsgJson)
       e=e->next;
    }
 
-   if(!type || !schema || !source || !target || !xplBodyStrPtr)
+   if(!type || !schema || !source || !target || !xplBodyStrPtr) {
       return -1;
+   }
 
    char *msg = (char *)alloca(2048);
 
@@ -242,8 +243,9 @@ uint16_t mea_sendXPLMessage2(cJSON *xplMsgJson)
    j=cJSON_GetObjectItem(xplMsgJson, XPLSOURCE_STR_C);
    if(j) {
       str=j->valuestring;
-      if(str)
+      if(str) {
          sscanf(str, "%*[^-]-%[^.].%*s", deviceID);
+      }
    }
 
    if(deviceID[0]!=0 && strcmp(deviceID, INTERNAL_STR_C)==0) { // source interne => dispatching sans passer par le réseau
@@ -256,8 +258,9 @@ uint16_t mea_sendXPLMessage2(cJSON *xplMsgJson)
    j=cJSON_GetObjectItem(xplMsgJson, XPLTARGET_STR_C);
    if(j) {
       str=j->valuestring;
-      if(str)
+      if(str) {
          sscanf(str, "%*[^-]-%[^.].%*s", deviceID);
+      }
    }
 
    if(deviceID[0]!=0 && strcmp(str,INTERNAL_STR_C)==0) { // destination interne, retour à mettre dans une file (avec timestamp) ...
@@ -287,8 +290,8 @@ uint16_t mea_sendXPLMessage2(cJSON *xplMsgJson)
       return 0;
    }
    else {
+      mea_log_printf("ICI ICI ICI ICI\n");
       mea_sendXplMsgJson(xplMsgJson);
-
       return 0;
    }
 }

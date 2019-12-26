@@ -466,6 +466,8 @@ mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i0
 
             char *s=cJSON_Print(msg_json);
             VERBOSE(9) mea_log_printf("ICI: %s\n", s);
+            free(s);
+            s=NULL;
             
             mea_sendXPLMessage2(msg_json);
 
