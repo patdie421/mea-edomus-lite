@@ -149,9 +149,6 @@ char *mea_setXPLInstanceID(char *value)
 
 char *mea_getMyXPLAddr()
 {
-   if(xpl_my_addr[0]==0) {
-      sprintf(xpl_my_addr,"%s-%s.%s", xpl_vendorID, xpl_deviceID, xpl_instanceID);
-   }
    return xpl_my_addr;
 }
 
@@ -405,6 +402,8 @@ int16_t set_xpl_address(cJSON *params_list)
    mea_setXPLVendorID(appParameters_get("XPL_VENDORID", params_list));
    mea_setXPLDeviceID(appParameters_get("XPL_DEVICEID", params_list));
    mea_setXPLInstanceID(appParameters_get("XPL_INSTANCEID", params_list));
+
+  sprintf(xpl_my_addr,"%s-%s.%s", xpl_vendorID, xpl_deviceID, xpl_instanceID);
 
    return 0;
 }
