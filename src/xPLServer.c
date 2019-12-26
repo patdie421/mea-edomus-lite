@@ -149,6 +149,9 @@ char *mea_setXPLInstanceID(char *value)
 
 char *mea_getMyXPLAddr()
 {
+   if(xpl_my_addr[0]==0) {
+      sprintf(xpl_my_addr,"%s-%s.%s", xpl_vendorID, xpl_deviceID, xpl_instanceID);
+   }
    return xpl_my_addr;
 }
 
