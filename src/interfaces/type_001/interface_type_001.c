@@ -103,7 +103,10 @@ int16_t interface_type_001_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
          VERBOSE(5) mea_log_printf("%s (%s) : xPL message no type\n", INFO_STR, __func__);
          return 0;
       }
+
+      VERBOSE(5) mea_log_printf("%s (%s) : ICI\n", INFO_STR, __func__);
       return xpl_actuator2(i001, xplMsgJson, device, type);
+      VERBOSE(5) mea_log_printf("%s (%s) : LA\n", INFO_STR, __func__);
    }
    else if(mea_strcmplower(schema, XPL_SENSORREQUEST_STR_C) == 0) {
       char *request = NULL;
