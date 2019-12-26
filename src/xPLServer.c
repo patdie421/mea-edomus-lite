@@ -212,6 +212,7 @@ int mea_sendXplMsgJson(cJSON *xplMsgJson)
    }
 
    if(!type || !schema || !source || !target || !xplBodyStrPtr) {
+      mea_log_printf("ICI ICI ICI ICI ICI\n");
       return -1;
    }
 
@@ -290,7 +291,6 @@ uint16_t mea_sendXPLMessage2(cJSON *xplMsgJson)
       return 0;
    }
    else {
-      mea_log_printf("ICI ICI ICI ICI\n");
       mea_sendXplMsgJson(xplMsgJson);
       return 0;
    }
