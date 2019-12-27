@@ -98,8 +98,9 @@ int16_t _interface_type_010_xPL_callback2(cJSON *xplMsgJson, struct device_info_
 
    plugin_params=alloc_parsed_parameters(device_info->parameters, valid_plugin_010_params, &nb_plugin_params, &err, 0);
    if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
-      if(plugin_params)
+      if(plugin_params) {
          release_parsed_parameters(&plugin_params);
+      }
       return -1;
    }
    
@@ -108,9 +109,9 @@ int16_t _interface_type_010_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    cJSON *msg=mea_xplMsgToJson_alloc(xplMsgJson);
    cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
    cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)i010->id_interface);
-   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
       cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
-
+   }
    python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
    release_parsed_parameters(&plugin_params);
@@ -220,8 +221,9 @@ static int init_interface_type_010_data_source(interface_type_010_t *i010)
    i010->line_buffer_l = INIT_LINE_BUFFER_SIZE;
    i010->line_buffer_ptr = 0;
    i010->line_buffer = (char *)malloc(i010->line_buffer_l);
-   if(!i010->line_buffer)
+   if(!i010->line_buffer) {
       return -1;
+   }
 
    i010->file_desc_in = -1;
    i010->file_desc_out = -1;
@@ -230,8 +232,9 @@ static int init_interface_type_010_data_source(interface_type_010_t *i010)
       case FT_PIPE:
       {
          int p=init_interface_type_010_data_source_pipe(i010);
-         if(p>=0)
+         if(p>=0) {
             return 0;
+         }
          else
             return -1;
       }
@@ -390,9 +393,9 @@ static int interface_type_010_data_to_plugin(interface_type_010_t *i010)
    }
 
    ret=interface_type_010_data_preprocessor(i010);
-   if(ret==-1)
+   if(ret==-1) {
       return -1;
-
+   }
    
    if(ret==1) {
    }
@@ -425,24 +428,29 @@ int haveFrameStartStr(interface_type_010_t *i010)
       return -1;
    int l=(int)strlen(i010->fstartstr);
    char *s=&(i010->line_buffer[i010->line_buffer_ptr-l]);
-   if(strncmp(s, i010->fstartstr, l) == 0)
+   if(strncmp(s, i010->fstartstr, l) == 0) {
       return 0;
-   else
+   }
+   else {
       return -1;
+   }
 }
 
 
 int haveFrameEndStr(interface_type_010_t *i010)
 {
-   if(!i010->fendstr || !i010->fendstr[0])
+   if(!i010->fendstr || !i010->fendstr[0]) {
       return -1;
+   }
 
    int l=(int)strlen(i010->fendstr);
    char *s=&(i010->line_buffer[i010->line_buffer_ptr-l]);
-   if(strncmp(s, i010->fendstr, l) == 0)
+   if(strncmp(s, i010->fendstr, l) == 0) {
       return l;
-   else
+   }
+   else {
       return -1;
+   }
 }
 
 
@@ -520,8 +528,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010)
          i010->line_buffer[i010->line_buffer_ptr++]=c;
          if(i010->line_buffer_ptr>=i010->line_buffer_l) {
             char *tmp = realloc(i010->line_buffer, i010->line_buffer_l + INC_LINE_BUFFER_SIZE);
-            if(!tmp)
-            {
+            if(!tmp) {
                i010->line_buffer_ptr = 0;
                VERBOSE(5) {
                   mea_log_printf("%s (%s) : realloc error - ", ERROR_STR, __func__);
@@ -529,8 +536,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010)
                }
                break;
             }
-            else
-            {
+            else {
                i010->line_buffer = tmp;
                i010->line_buffer_l+=INC_LINE_BUFFER_SIZE;
             }
@@ -615,8 +621,9 @@ int clean_interface_type_010(void *ixxx)
       i010->parameters=NULL;
    }
 
-   if(i010->xPL_callback2)
+   if(i010->xPL_callback2) {
       i010->xPL_callback2=NULL;
+   }
 
    if(i010->thread) {
       free(i010->thread);
@@ -666,8 +673,9 @@ xpl2_f get_xPLCallback_interface_type_010(void *ixxx)
 {
    interface_type_010_t *i010 = (interface_type_010_t *)ixxx;
 
-   if(i010 == NULL)
+   if(i010 == NULL) {
       return NULL;
+   }
    else {
       return i010->xPL_callback2;
    }
@@ -678,10 +686,12 @@ int get_monitoring_id_interface_type_010(void *ixxx)
 {
    interface_type_010_t *i010 = (interface_type_010_t *)ixxx;
 
-   if(i010 == NULL)
+   if(i010 == NULL) {
       return -1;
-   else
+   }
+   else {
       return i010->monitoring_id;
+   }
 }
 
 
@@ -689,8 +699,9 @@ int set_xPLCallback_interface_type_010(void *ixxx, xpl2_f cb)
 {
    interface_type_010_t *i010 = (interface_type_010_t *)ixxx;
 
-   if(i010 == NULL)
+   if(i010 == NULL) {
       return -1;
+   }
    else {
       i010->xPL_callback2 = cb;
       return 0;
@@ -702,8 +713,9 @@ int set_monitoring_id_interface_type_010(void *ixxx, int id)
 {
    interface_type_010_t *i010 = (interface_type_010_t *)ixxx;
 
-   if(i010 == NULL)
+   if(i010 == NULL) {
       return -1;
+   }
    else {
       i010->monitoring_id = id;
       return 0;
@@ -721,10 +733,12 @@ int get_interface_id_interface_type_010(void *ixxx)
 {
    interface_type_010_t *i010 = (interface_type_010_t *)ixxx;
 
-   if(i010 == NULL)
+   if(i010 == NULL) {
       return -1;
-   else
+   }
+   else {
       return i010->id_interface;
+   }
 }
 
 
@@ -737,8 +751,9 @@ static int api_write_data_json(interface_type_010_t *ixxx, cJSON *args, cJSON **
       return -253;
    }
 
-   if(args->type!=cJSON_Array || cJSON_GetArraySize(args)!=3)
+   if(args->type!=cJSON_Array || cJSON_GetArraySize(args)!=3) {
       return -255;
+   }
 
    cJSON *arg=cJSON_GetArrayItem(args, 2);
 

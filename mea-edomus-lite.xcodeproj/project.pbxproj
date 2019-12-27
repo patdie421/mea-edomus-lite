@@ -652,23 +652,6 @@
 		4EF686BA2369B0E20084B302 /* build.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = build.mk; sourceTree = "<group>"; };
 		4EF686BB2369B0E20084B302 /* plugin.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = plugin.c; sourceTree = "<group>"; };
 		4EF686BC2369B0E20084B302 /* interface_type_010.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interface_type_010.h; sourceTree = "<group>"; };
-		4EF686BE2369B0E20084B302 /* comio2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = comio2.h; sourceTree = "<group>"; };
-		4EF686BF2369B0E20084B302 /* philipshue_color.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = philipshue_color.c; sourceTree = "<group>"; };
-		4EF686C02369B0E20084B302 /* serial.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = serial.c; sourceTree = "<group>"; };
-		4EF686C12369B0E20084B302 /* philipshue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = philipshue.c; sourceTree = "<group>"; };
-		4EF686C22369B0E20084B302 /* xbee.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xbee.h; sourceTree = "<group>"; };
-		4EF686C32369B0E20084B302 /* enocean.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = enocean.h; sourceTree = "<group>"; };
-		4EF686C42369B0E20084B302 /* arduino_pins.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = arduino_pins.h; sourceTree = "<group>"; };
-		4EF686C52369B0E20084B302 /* netatmo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = netatmo.h; sourceTree = "<group>"; };
-		4EF686C62369B0E20084B302 /* serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = serial.h; sourceTree = "<group>"; };
-		4EF686C72369B0E20084B302 /* philipshue_color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = philipshue_color.h; sourceTree = "<group>"; };
-		4EF686C82369B0E20084B302 /* comio2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = comio2.c; sourceTree = "<group>"; };
-		4EF686C92369B0E20084B302 /* driverslib.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = driverslib.mk; sourceTree = "<group>"; };
-		4EF686CA2369B0E20084B302 /* xbee.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xbee.c; sourceTree = "<group>"; };
-		4EF686CB2369B0E20084B302 /* philipshue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = philipshue.h; sourceTree = "<group>"; };
-		4EF686CC2369B0E20084B302 /* netatmo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = netatmo.c; sourceTree = "<group>"; };
-		4EF686CD2369B0E20084B302 /* arduino_pins.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = arduino_pins.c; sourceTree = "<group>"; };
-		4EF686CE2369B0E20084B302 /* enocean.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = enocean.c; sourceTree = "<group>"; };
 		4EF686D02369B0E20084B302 /* interface_type_004.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = interface_type_004.c; sourceTree = "<group>"; };
 		4EF686D12369B0E20084B302 /* philipshue_color.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = philipshue_color.c; sourceTree = "<group>"; };
 		4EF686D22369B0E20084B302 /* philipshue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = philipshue.c; sourceTree = "<group>"; };
@@ -1951,7 +1934,6 @@
 			isa = PBXGroup;
 			children = (
 				4EF686B82369B0E20084B302 /* type_010 */,
-				4EF686BD2369B0E20084B302 /* drivers */,
 				4EF686CF2369B0E20084B302 /* type_004 */,
 				4EF686D82369B0E20084B302 /* type_003 */,
 				4EF686DF2369B0E20084B302 /* type_002 */,
@@ -1972,30 +1954,6 @@
 				4EF686BA2369B0E20084B302 /* build.mk */,
 			);
 			path = type_010;
-			sourceTree = "<group>";
-		};
-		4EF686BD2369B0E20084B302 /* drivers */ = {
-			isa = PBXGroup;
-			children = (
-				4EF686BE2369B0E20084B302 /* comio2.h */,
-				4EF686BF2369B0E20084B302 /* philipshue_color.c */,
-				4EF686C02369B0E20084B302 /* serial.c */,
-				4EF686C12369B0E20084B302 /* philipshue.c */,
-				4EF686C22369B0E20084B302 /* xbee.h */,
-				4EF686C32369B0E20084B302 /* enocean.h */,
-				4EF686C42369B0E20084B302 /* arduino_pins.h */,
-				4EF686C52369B0E20084B302 /* netatmo.h */,
-				4EF686C62369B0E20084B302 /* serial.h */,
-				4EF686C72369B0E20084B302 /* philipshue_color.h */,
-				4EF686C82369B0E20084B302 /* comio2.c */,
-				4EF686C92369B0E20084B302 /* driverslib.mk */,
-				4EF686CA2369B0E20084B302 /* xbee.c */,
-				4EF686CB2369B0E20084B302 /* philipshue.h */,
-				4EF686CC2369B0E20084B302 /* netatmo.c */,
-				4EF686CD2369B0E20084B302 /* arduino_pins.c */,
-				4EF686CE2369B0E20084B302 /* enocean.c */,
-			);
-			path = drivers;
 			sourceTree = "<group>";
 		};
 		4EF686CF2369B0E20084B302 /* type_004 */ = {
