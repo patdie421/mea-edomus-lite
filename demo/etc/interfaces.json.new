@@ -1,0 +1,68 @@
+{
+	"I001":	{
+		"id_type":	100,
+		"description":	"",
+		"dev":	"SERIAL://ttyS0:57600",
+		"parameters":	"",
+		"state":	1,
+		"devices":	{
+	        }
+	},
+	"I005":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"SERIAL://tty.usbserial-FTY1A5FM:9600",
+		"parameters":	"",
+		"state":	1,
+		"devices":	{
+	        }
+	},
+	"I005-00-29-c6-89":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"I005://00-29-c6-89",
+		"parameters":	"",
+		"state":	2,
+		"devices":	{
+			"I005S001":	{
+				"id_type":	0,
+				"description":	"Demo enocean input 1",
+				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:A",
+				"state":	1
+			}
+		}
+	},
+	"I010":	{
+		"id_type":	3010,
+		"description":	"",
+		"dev":	"PIPE:///tmp/meapipe",
+		"parameters":	"PLUGIN=mea_text_inout;FSTARTSTR={{{;FENDSTR=}}};DIRECTION=BOTH",
+		"state":	1,
+		"devices":	{
+			"I010S001":	{
+				"id_type":	0,
+				"description":	"Demo input 1",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S001",
+				"state":	1
+			},
+			"I010S002":	{
+				"id_type":	0,
+				"description":	"Demo input 2",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S002",
+				"state":	1
+			},
+			"o02a":	{
+				"id_type":	0,
+				"description":	"Demo input 3",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:o02a",
+				"state":	1
+			},
+			"I010A001":	{
+				"id_type":	1,
+				"description":	"Demo actuator 1",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010A001",
+				"state":	1
+			}
+		}
+	}
+}
