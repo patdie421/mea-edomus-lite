@@ -1272,6 +1272,9 @@ cJSON *jsonInterfacesLoad(char *file)
 
    lowerInterfacesNames(_jsonInterfaces);
 
+   char *s=cJSON_Print(_jsonInterfaces);
+   mea_log_printf("%s\n",s);
+   free(s);
    relinkInterfacesDevices(_jsonInterfaces, &nextInterfaceId, &nextDeviceId);
 
    return _jsonInterfaces;
