@@ -1247,9 +1247,9 @@ int lowerDevicesNames(cJSON *jsonDevices)
 }
 
 
-int lowerInterfacesNames(cJSON *interfaces)
+int lowerInterfacesNames(cJSON *_jsonInterfaces)
 {
-   cJSON *jsonInterface=jsonInterfaces->child;
+   cJSON *jsonInterface=_jsonInterfaces->child;
    while(jsonInterface) {
       mea_strtolower(jsonInterface->string);
       lowerDevicesNames(cJSON_GetObjectItem(jsonInterface,"devices"));
