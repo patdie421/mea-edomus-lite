@@ -230,7 +230,7 @@ struct devs_index_s *removeInterfaceFromIndexByInterfaceId(struct devs_index_s *
 }
 
 
-struct devices_index_s * removeDeviceFromIndexByInterfaceId(struct devices_index_s *devices_index, int interface_id)
+struct devices_index_s *removeDeviceFromIndexByInterfaceId(struct devices_index_s *devices_index, int interface_id)
 {
    struct devices_index_s *e = NULL, *tmp = NULL;
    
@@ -567,7 +567,8 @@ int addInterface(cJSON *jsonData)
 
    if(strlen(_name)>=3) { // ajouter check du nom de l'interface (que des lettres, chiffres et _)
       strncpy(name, _name, sizeof(name)-1);
-      mea_strtoupper(name);
+//      mea_strtoupper(name);
+      mea_strtolower(name);
       cJSON_DeleteItemFromObject(newInterface, NAME_STR_C);
    }
    else
@@ -665,12 +666,7 @@ int updateInterface(char *interface, cJSON *jsonData)
       _jsonInterfaceOld=cJSON_DetachItemFromObject(jsonInterfaces, interface);
       
       cJSON_AddItemToObject(jsonInterfaces, interface, _jsonInterface);
-/*
-      struct devs_index_s *_e = (struct devs_index_s *)malloc(sizeof(struct devs_index_s));
-      mea_strncpytrimlower(_e->devName, (char *)cJSON_GetObjectItem(_jsonInterface, "dev")->valuestring, sizeof(_e->devName)-1);
-      _e->interface=_jsonInterface;
-      HASH_ADD_STR(devs_index, devName, _e);
-*/
+
       ret=0;
    }
 
@@ -856,7 +852,6 @@ int addDevice(char *interface, cJSON *device)
    else {
       return -2;
    }
-//   mea_strtoupper(name);
    mea_strtolower(name);
 
    obj=cJSON_GetObjectItem(device, ID_TYPE_STR_C);
@@ -1238,6 +1233,32 @@ cJSON *findInterfaceById(cJSON *jsonInterfaces, int id)
 }
 
 
+int lowerDevicesNames(cJSON *jsonDevices)
+{
+   if(!jsonDevices || jsonDevices->type!=cJSON_Object) {
+      return -1;
+   }
+   cJSON *jsonDevice=jsonDevices->child;
+   while(jsonDevice) {
+      mea_strtolower(jsonDevice->string);
+      jsonDevice = jsonDevice->next;
+   }
+   return 0;
+}
+
+
+int lowerInterfacesNames(cJSON *interfaces)
+{
+   cJSON *jsonInterface=jsonInterfaces->child;
+   while(jsonInterface) {
+      mea_strtolower(jsonInterface->string);
+      lowerDevicesNames(cJSON_GetObjectItem(jsonInterface,"devices"));
+      jsonInterface = jsonInterface->next;
+   }
+   return 0;
+}
+
+
 cJSON *jsonInterfacesLoad(char *file)
 {
    cJSON *_jsonInterfaces=loadJson_alloc(file);
@@ -1248,6 +1269,8 @@ cJSON *jsonInterfacesLoad(char *file)
       cJSON_Delete(_jsonInterfaces);
       return NULL;
    }
+
+   lowerInterfacesNames(_jsonInterfaces);
 
    relinkInterfacesDevices(_jsonInterfaces, &nextInterfaceId, &nextDeviceId);
 

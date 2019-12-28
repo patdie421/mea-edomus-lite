@@ -237,6 +237,9 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
 
                      return ERROR;
                   }
+                  /*
+                     ajouter ici l'emission d'un message xpl
+                   */
                   (i001->indicators.nbactuatorsout)++;
                   return NOERROR;
                }
@@ -308,10 +311,9 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                return ERROR;
             }
             (i001->indicators.nbactuatorsout)++;
-/* DBSERVER
-            if(iq->todbflag==1)
-               dbServer_add_data_to_sensors_values(iq->actuator_id, (double)o, 0, 0.0, "");
-*/
+            /*
+               ajouter ici l'emission d'un message xpl
+             */
             return NOERROR;
          }
          return ERROR;
