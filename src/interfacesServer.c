@@ -174,7 +174,6 @@ struct devices_index_s *addInterfaceDevicesToDevicesIndex(struct devices_index_s
          }
 
          e=(struct devices_index_s *)malloc(sizeof(struct devices_index_s));
-//         strncpy(e->name, name, sizeof(e->name));
          mea_strncpytrimlower(e->name, name, sizeof(e->name));
          e->device=jsonDevice;
          HASH_ADD_STR(devices_index, name, e);
@@ -542,12 +541,14 @@ int deleteInterface(char *interface)
 
 int addInterface(cJSON *jsonData)
 {
-   if(jsonData == NULL || jsonData->type != cJSON_Object)
+   if(jsonData == NULL || jsonData->type != cJSON_Object) {
       return -1;
+   }
 
    cJSON *newInterface=cJSON_Parse(interface_template);
-   if(!newInterface)
+   if(!newInterface) {
       return -1;
+   }
 
    cJSON *e=jsonData->child;
    while(e) {
@@ -559,26 +560,27 @@ int addInterface(cJSON *jsonData)
       e=e->next;
    }
 
-   char name[41];
+   char name[256];
    int id_type=(int)cJSON_GetObjectItem(newInterface, ID_TYPE_STR_C)->valuedouble;
    int state=(int)cJSON_GetObjectItem(newInterface, STATE_STR_C)->valuedouble;
    char *_name=(char *)cJSON_GetObjectItem(newInterface, NAME_STR_C)->valuestring;
    char *dev=(char *)cJSON_GetObjectItem(newInterface, DEV_STR_C)->valuestring;
 
    if(strlen(_name)>=3) { // ajouter check du nom de l'interface (que des lettres, chiffres et _)
-      strncpy(name, _name, sizeof(name)-1);
-//      mea_strtoupper(name);
-      mea_strtolower(name);
+      mea_strcpylower(name, _name);
       cJSON_DeleteItemFromObject(newInterface, NAME_STR_C);
    }
-   else
+   else {
       goto addInterface_clean_exit;
+   }
 
-   if(state<0 || state>2)
+   if(state<0 || state>2) {
       goto addInterface_clean_exit;
+   }
 
-   if(id_type<0) // ajouter le check de l'id interface dans jsonTypes
+   if(id_type<0) { // ajouter le check de l'id interface dans jsonTypes
       goto addInterface_clean_exit;
+   }
 
    cJSON_AddItemToObject(newInterface, DEVICES_STR_C, cJSON_CreateObject());
    cJSON_AddItemToObject(newInterface, ID_INTERFACE_STR_C, cJSON_CreateNumber(nextInterfaceId));
@@ -634,12 +636,15 @@ int updateInterface(char *interface, cJSON *jsonData)
    if(jsonData->type!=cJSON_Object)
       return -1;
 
+   char *_interface=alloca(strlen(interface)+1);
+   mea_strcpylower(_interface, interface);
+
    cJSON *jsonInterfaceTemplate=cJSON_Parse(interface_template);
 
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
 
-   cJSON *jsonInterface=cJSON_GetObjectItem(jsonInterfaces, interface);
+   cJSON *jsonInterface=cJSON_GetObjectItem(jsonInterfaces, _interface);
    if(jsonInterface) {
       id_interface=(int)cJSON_GetObjectItem(jsonInterface, ID_INTERFACE_STR_C)->valuedouble;
       cJSON *e=jsonInterface->child;
@@ -663,9 +668,9 @@ int updateInterface(char *interface, cJSON *jsonData)
       devices_index=removeDeviceFromIndexByInterfaceId(devices_index, id_interface);
       devs_index=removeInterfaceFromIndexByInterfaceId(devs_index, id_interface);
 
-      _jsonInterfaceOld=cJSON_DetachItemFromObject(jsonInterfaces, interface);
+      _jsonInterfaceOld=cJSON_DetachItemFromObject(jsonInterfaces, _interface);
       
-      cJSON_AddItemToObject(jsonInterfaces, interface, _jsonInterface);
+      cJSON_AddItemToObject(jsonInterfaces, _interface, _jsonInterface);
 
       ret=0;
    }
@@ -744,18 +749,22 @@ int updateDevice(char *interface, char *name, cJSON *device)
    if(obj &&obj->type==cJSON_String)
       description=obj->valuestring;
 
+   char *_interface=alloca(strlen(interface)+1);
+   mea_strcpylower(_interface, interface);
+   char *_name=alloca(strlen(name)+1);
+   mea_strcpylower(_name, name);
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
 
    if(jsonInterfaces) {
       ret=-10;
-      cJSON *jsonInterface=cJSON_GetObjectItem(jsonInterfaces, interface);
+      cJSON *jsonInterface=cJSON_GetObjectItem(jsonInterfaces, _interface);
       if(jsonInterface) {
          id_interface=(int)cJSON_GetObjectItem(jsonInterface, ID_INTERFACE_STR_C)->valuedouble;
          ret=-11;
          cJSON *jsonDevices=cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
          if(jsonDevices) {
-            cJSON *d=cJSON_GetObjectItem(jsonDevices, name); 
+            cJSON *d=cJSON_GetObjectItem(jsonDevices, _name);
             ret=-12;
             if(d) {
                if(id_type>=0)
@@ -791,7 +800,7 @@ int deleteDevice(char *interface, char *name)
 {
    int ret=-1;
    int id_interface=-1;
-
+   
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_wrlock(&jsonInterfaces_rwlock);
 
@@ -968,16 +977,20 @@ char *getDevicesAsString_alloc(char *interface)
 char *getDeviceAsStringByName_alloc(char *interface, char *device)
 {
    char *s=NULL;
-
+   char *_interface=alloca(strlen(interface)+1);
+   char *_device=alloca(strlen(device)+1);
+   mea_strcpylower(_interface, interface);
+   mea_strcpylower(_device, device);
+   
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
 
    if(jsonInterfaces) {
-      cJSON *jsonInterface=cJSON_GetObjectItem(jsonInterfaces, interface);
+      cJSON *jsonInterface=cJSON_GetObjectItem(jsonInterfaces, _interface);
       if(jsonInterface) {
          cJSON *jsonDevices=cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
          if(jsonDevices) {
-            cJSON *jsonDevice=cJSON_GetObjectItem(jsonDevices, device);
+            cJSON *jsonDevice=cJSON_GetObjectItem(jsonDevices, _device);
             if(jsonDevices) {
                s=cJSON_Print(jsonDevice);
             }
@@ -995,11 +1008,13 @@ char *getDeviceAsStringByName_alloc(char *interface, char *device)
 char *getInterfaceAsStringByName_alloc(char *name)
 {
    char *s=NULL;
-
+   char *_name=alloca(strlen(name)+1);
+   mea_strcpylower(_name, name);
+   
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&jsonInterfaces_rwlock);
    pthread_rwlock_rdlock(&jsonInterfaces_rwlock);
 
-   cJSON *jsonInterface = cJSON_GetObjectItem(jsonInterfaces, name);
+   cJSON *jsonInterface = cJSON_GetObjectItem(jsonInterfaces, _name);
    if(jsonInterface) {
       s=cJSON_Print(jsonInterface);
    }
@@ -1271,10 +1286,6 @@ cJSON *jsonInterfacesLoad(char *file)
    }
 
    lowerInterfacesNames(_jsonInterfaces);
-
-   char *s=cJSON_Print(_jsonInterfaces);
-   mea_log_printf("%s\n",s);
-   free(s);
    relinkInterfacesDevices(_jsonInterfaces, &nextInterfaceId, &nextDeviceId);
 
    return _jsonInterfaces;
