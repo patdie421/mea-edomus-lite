@@ -4,12 +4,6 @@
 //  Created by Patrice DIETSCH on 08/07/12.
 //  Copyright (c) 2012 -. All rights reserved.
 //
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -342,11 +336,6 @@ int main(int argc, const char * argv[])
             _v=atoi(optarg);
             break;
 
-//         case 'g':
-//	 case HTTPPORT:
-//	    appParameters_set("HTTPPORT", optarg, NULL);
-//            break;
-
          default:
             VERBOSE(1) mea_log_printf("%s (%s) : Paramètre \"%s\" inconnu.\n",ERROR_STR,__func__,optarg);
             usage((char *)argv[0]);
@@ -380,7 +369,7 @@ int main(int argc, const char * argv[])
    //
    // stdout et stderr vers fichier log
    //
-   char log_file[1024];
+   char log_file[256];
 
    if(!appParameters_get("LOGPATH",NULL) || !strlen(appParameters_get("LOGPATH",NULL))) {
       appParameters_set("LOGPATH","/var/log",NULL);
@@ -556,8 +545,7 @@ int main(int argc, const char * argv[])
       if(process_is_running(httpServer_monitoring_id)==RUNNING) {
          char response[512];
          // interrogation du serveur HTTP Interne pour heartbeat ... (voir le passage d'un parametre pour sécuriser ...)
-//         gethttp(localhost_const, apiport, "/CMD/ping.php", response, sizeof(response)); // a remplacer par un guiServer_ping();
-         gethttp(localhost_const, apiport, "/CMD/ping", response, sizeof(response)); // a remplacer par un guiServer_ping();
+         gethttp(localhost_const, apiport, "/CMD/ping", response, sizeof(response)); 
       }
 
       // indicateur de fonctionnement de mea-edomus

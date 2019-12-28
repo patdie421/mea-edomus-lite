@@ -134,7 +134,12 @@ PyObject *mea_jsonToPyObject(cJSON *e)
          break;
                
       case cJSON_Number:
-         p = PyFloat_FromDouble((double)e->valuedouble);
+         if((double)((long)e->valuedouble)==e->valuedouble) {
+            p = PyLong_FromLong((long)e->valuedouble);
+         }
+         else {
+            p = PyFloat_FromDouble((double)e->valuedouble);
+         }
          break;
 
       case cJSON_String:

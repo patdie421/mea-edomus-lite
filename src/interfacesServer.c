@@ -129,9 +129,9 @@ struct types_index_s *deleteTypesIndex(struct types_index_s **types_index)
 
 struct devs_index_s *addInterfaceToDevsIndex(struct devs_index_s *devs_index, cJSON *jsonInterface)
 {
-   if(!jsonInterface)
+   if(!jsonInterface) {
       return NULL;
- 
+   }
 
    char *devName = cJSON_GetObjectItem(jsonInterface, DEV_STR_C)->valuestring;
  
@@ -154,9 +154,9 @@ struct devs_index_s *addInterfaceToDevsIndex(struct devs_index_s *devs_index, cJ
 
 struct devices_index_s *addInterfaceDevicesToDevicesIndex(struct devices_index_s *devices_index, cJSON *jsonInterface)
 {
-   if(!jsonInterface)
+   if(!jsonInterface) {
       return NULL;
- 
+   }
 
   cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
  
@@ -284,8 +284,9 @@ struct devs_index_s *deleteDevsIndex(struct devs_index_s **devs_index)
 
 int createDevsIndex(struct devs_index_s **devs_index, cJSON *jsonInterfaces)
 {
-   if(!jsonInterfaces)
+   if(!jsonInterfaces) {
       return -1;
+   }
  
    cJSON *jsonInterface = jsonInterfaces->child;
    while( jsonInterface ) {
@@ -304,8 +305,9 @@ int createDevsIndex(struct devs_index_s **devs_index, cJSON *jsonInterfaces)
 
 int createDevicesIndex(struct devices_index_s **devices_index, cJSON *jsonInterfaces)
 {
-   if(!jsonInterfaces)
+   if(!jsonInterfaces) {
       return -1;
+   }
  
    cJSON *jsonInterface=jsonInterfaces->child;
    while( jsonInterface ) {
@@ -316,7 +318,6 @@ int createDevicesIndex(struct devices_index_s **devices_index, cJSON *jsonInterf
          while( jsonDevice ) {
             char *name=jsonDevice->string;
             struct devices_index_s *e=(struct devices_index_s *)malloc(sizeof(struct devices_index_s));
-//            strncpy(e->name, name, sizeof(e->name));
             mea_strncpytrimlower(e->name, name, sizeof(e->name));
             e->device=jsonDevice;
             HASH_ADD_STR(*devices_index, name, e);
@@ -333,8 +334,9 @@ int createDevicesIndex(struct devices_index_s **devices_index, cJSON *jsonInterf
 
 int createTypesIndex(struct types_index_s **types_index, cJSON *jsonTypes)
 {
-   if(!jsonTypes)
+   if(!jsonTypes) {
       return -1;
+   }
  
    cJSON *jsonType = jsonTypes->child;
    while( jsonType ) {
@@ -355,15 +357,16 @@ int createTypesIndex(struct types_index_s **types_index, cJSON *jsonTypes)
 
 cJSON *findInterfaceByIdThroughLoop_alloc(cJSON *jsonInterfaces, int _id)
 {
-   if(!jsonInterfaces)
+   if(!jsonInterfaces) {
       return NULL;
+   }
 
    cJSON *jsonInterface = jsonInterfaces->child;
    while( jsonInterface ) {
       int id_interface = (int)cJSON_GetObjectItem(jsonInterface, ID_INTERFACE_STR_C)->valuedouble;
 
       if(id_interface==_id) {
-	 return cJSON_Duplicate(jsonInterface, 1);
+	      return cJSON_Duplicate(jsonInterface, 1);
       }
 
       jsonInterface=jsonInterface->next;
@@ -375,8 +378,9 @@ cJSON *findInterfaceByIdThroughLoop_alloc(cJSON *jsonInterfaces, int _id)
 
 cJSON *findInterfaceByNameThroughLoop_alloc(cJSON *jsonInterfaces, char *name)
 {
-   if(!jsonInterfaces)
+   if(!jsonInterfaces) {
       return NULL;
+   }
 
    cJSON *jsonInterface = jsonInterfaces->child;
    while( jsonInterface ) {
@@ -426,8 +430,9 @@ cJSON *findInterfaceByDevNameThroughIndex_alloc(struct devs_index_s *_devs_index
 {
    struct devs_index_s *e = NULL;
  
-   if(!_devs_index)
+   if(!_devs_index) {
       _devs_index=devs_index;
+   }
  
    cJSON *d = NULL;
  
@@ -460,8 +465,9 @@ cJSON *findDeviceByNameThroughIndex_alloc(struct devices_index_s *devices_index,
 {
    struct devices_index_s *e = NULL;
  
-   if(!devices_index)
+   if(!devices_index) {
       return NULL;
+   }
  
    int _name_l=(int)strlen(name)+1;
    char *_name=alloca(_name_l);
@@ -481,8 +487,9 @@ cJSON *findTypeByIdThroughIndex(struct types_index_s *types_index, int id)
 {
    struct types_index_s *e = NULL;
 
-   if(!types_index)
+   if(!types_index) {
       return NULL;
+   }
  
    cJSON *t = NULL;
    HASH_FIND_INT(types_index, &id, e);
@@ -508,8 +515,9 @@ int deleteInterface(char *interface)
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
 
-   if(id_interface==-1)
+   if(id_interface==-1) {
       return -1;
+   }
 
    devices_index=removeDeviceFromIndexByInterfaceId(devices_index, id_interface);
    devs_index=removeInterfaceFromIndexByInterfaceId(devs_index, id_interface);
@@ -633,8 +641,9 @@ int updateInterface(char *interface, cJSON *jsonData)
    int id_interface=-1;
    cJSON *_jsonInterface=NULL, *_jsonInterfaceOld=NULL;
 
-   if(jsonData->type!=cJSON_Object)
+   if(jsonData->type!=cJSON_Object) {
       return -1;
+   }
 
    char *_interface=alloca(strlen(interface)+1);
    mea_strcpylower(_interface, interface);
@@ -695,13 +704,15 @@ int updateInterface(char *interface, cJSON *jsonData)
 
    struct devices_index_s *_devices_index=NULL;
    _devices_index=addInterfaceDevicesToDevicesIndex(devices_index, _jsonInterface);
-   if(_devices_index)
+   if(_devices_index) {
       devices_index=_devices_index;
+   }
 
    struct devs_index_s *_devs_index=NULL;
    _devs_index=addInterfaceToDevsIndex(devs_index, _jsonInterface);
-   if(_devs_index)
+   if(_devs_index) {
       devs_index=_devs_index;
+   }
 
    if(_jsonInterfaceOld) {
       cJSON_Delete(_jsonInterfaceOld);
@@ -789,8 +800,9 @@ int updateDevice(char *interface, char *name, cJSON *device)
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
 
-   if(ret==0)
+   if(ret==0) {
       update_interface_devices(id_interface);
+   }
 
    return ret;
 }
@@ -832,8 +844,9 @@ int deleteDevice(char *interface, char *name)
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
 
-   if(ret==0)
+   if(ret==0) {
       update_interface_devices(id_interface);
+   }
 
    return ret;
 }
@@ -867,36 +880,47 @@ int addDevice(char *interface, cJSON *device)
    if(obj && obj->type==cJSON_Number) {
       id_type=(int)obj->valuedouble;
       cJSON *jsonType=findTypeByIdThroughIndex(types_index, id_type);
-      if(jsonType==NULL || (int)cJSON_GetObjectItem(jsonType, TYPEOFTYPE_STR_C)->valuedouble == TYPEOFTYPE_INTERFACE)
+      if(jsonType==NULL || (int)cJSON_GetObjectItem(jsonType, TYPEOFTYPE_STR_C)->valuedouble == TYPEOFTYPE_INTERFACE) {
          return -3;
+      }
    }
-   else
+   else {
       return -3;
+   }
 
    obj=cJSON_GetObjectItem(device, STATE_STR_C);
    if(obj && obj->type==cJSON_Number)
-      if(obj->valuedouble!=0.0 && obj->valuedouble!=1.0)
+      if(obj->valuedouble!=0.0 && obj->valuedouble!=1.0) {
          return -4;
-      else
+      }
+      else {
          state=(int)obj->valuedouble;
-   else
+      }
+   else {
       return -4;
+   }
 
    obj=cJSON_GetObjectItem(device, PARAMETERS_STR_C );
-   if(!obj)
+   if(!obj) {
       parameters="";
-   else if(obj->type==cJSON_String)
+   }
+   else if(obj->type==cJSON_String) {
       parameters=obj->valuestring;
-   else
+   }
+   else {
       return -5;
+   }
 
    obj=cJSON_GetObjectItem(device, DESCRIPTION_STR_C );
-   if(!obj)
+   if(!obj) {
       description="";
-   else if(obj->type==cJSON_String)
+   }
+   else if(obj->type==cJSON_String) {
       description=obj->valuestring;
-   else
+   }
+   else {
       return -6;
+   }
 
 
    //
@@ -943,8 +967,9 @@ int addDevice(char *interface, cJSON *device)
    pthread_rwlock_unlock(&jsonInterfaces_rwlock);
    pthread_cleanup_pop(0);
 
-   if(ret==0)
+   if(ret==0) {
       update_interface_devices(id_interface);
+   }
 
    return ret; 
 }
@@ -1073,11 +1098,13 @@ char *getTypesAsString_alloc()
 
 int checkJsonDevices(cJSON *jsonDevices)
 {
-   if(!jsonDevices)
+   if(!jsonDevices) {
       return -1;
+   }
 
-   if(!(jsonDevices->type == cJSON_Object))
+   if(!(jsonDevices->type == cJSON_Object)) {
       return -1;
+   }
 
    cJSON *jsonDevice=jsonDevices->child;
    while(jsonDevice) {
@@ -1087,14 +1114,18 @@ int checkJsonDevices(cJSON *jsonDevices)
       cJSON *json_parameters = cJSON_GetObjectItem(jsonDevice, PARAMETERS_STR_C );
       cJSON *json_state = cJSON_GetObjectItem(jsonDevice, STATE_STR_C);
 
-      if( (json_id_type == NULL) || !(json_id_type->type == cJSON_Number))
+      if( (json_id_type == NULL) || !(json_id_type->type == cJSON_Number)) {
          return -1;
-      if( (json_id_description == NULL) || !(json_id_description->type == cJSON_String))
+      }
+      if( (json_id_description == NULL) || !(json_id_description->type == cJSON_String)) {
          return -1;
-      if( (json_parameters == NULL) || !(json_parameters->type == cJSON_String))
+      }
+      if( (json_parameters == NULL) || !(json_parameters->type == cJSON_String)) {
          return -1;
-      if( (json_state == NULL) || !(json_state->type == cJSON_Number))
+      }
+      if( (json_state == NULL) || !(json_state->type == cJSON_Number)) {
          return -1;
+      }
 
       jsonDevice=jsonDevice->next;
    }
@@ -1104,11 +1135,13 @@ int checkJsonDevices(cJSON *jsonDevices)
 
 int checkJsonInterfaces(cJSON *jsonInterfaces)
 {
-   if(!jsonInterfaces)
+   if(!jsonInterfaces) {
       return -1;
+   }
 
-   if(!(jsonInterfaces->type == cJSON_Object))
+   if(!(jsonInterfaces->type == cJSON_Object)) {
       return -1;
+   }
 
    cJSON *jsonInterface=jsonInterfaces->child;
    while(jsonInterface) {
@@ -1233,14 +1266,16 @@ int checkJsonTypes(cJSON *jsonTypes)
 
 cJSON *findInterfaceById(cJSON *jsonInterfaces, int id)
 {
-   if(!jsonInterfaces)
+   if(!jsonInterfaces) {
       return NULL;
+   }
  
    cJSON *jsonInterface=jsonInterfaces->child;
    while( jsonInterface ) {
       int  id_interface=cJSON_GetObjectItem(jsonInterface, ID_INTERFACE_STR_C)->valuedouble;
-      if(id_interface == id)
+      if(id_interface == id) {
          return jsonInterface;
+      }
       jsonInterface = jsonInterface->next;
    }
  
@@ -1277,8 +1312,9 @@ int lowerInterfacesNames(cJSON *_jsonInterfaces)
 cJSON *jsonInterfacesLoad(char *file)
 {
    cJSON *_jsonInterfaces=loadJson_alloc(file);
-   if(_jsonInterfaces==NULL)
+   if(_jsonInterfaces==NULL) {
       return NULL;
+   }
 
    if(checkJsonInterfaces(_jsonInterfaces)==-1) {
       cJSON_Delete(_jsonInterfaces);
@@ -1295,8 +1331,9 @@ cJSON *jsonInterfacesLoad(char *file)
 cJSON *jsonTypesLoad(char *file)
 {
    cJSON *_jsonTypes=loadJson_alloc(file);
-   if(_jsonTypes==NULL)
+   if(_jsonTypes==NULL) {
       return NULL;
+   }
 
    if(checkJsonTypes(_jsonTypes)==-1) {
       cJSON_Delete(_jsonTypes);
@@ -1333,10 +1370,12 @@ int interfaceCommit()
       int ret=writeJson(jsonInterfacesFile, _jsonInterfaces);
       cJSON_Delete(_jsonInterfaces);
 
-      if(ret==0)
+      if(ret==0) {
          return 0;
-      else
+      }
+      else {
          return 3;
+      }
    }
    else {
       return 2;
@@ -1476,8 +1515,9 @@ cJSON *device_info_to_json_alloc(struct device_info_s *device_info)
 {
    cJSON *jsonDeviceInfo=cJSON_CreateObject();
 
-   if(!jsonDeviceInfo)
+   if(!jsonDeviceInfo) {
       return NULL;
+   }
 
    cJSON_AddNumberToObject(jsonDeviceInfo, DEVICE_ID_STR_C, device_info->id);
    cJSON_AddStringToObject(jsonDeviceInfo, DEVICE_NAME_STR_C, device_info->name);
@@ -1498,8 +1538,9 @@ cJSON *device_info_to_json_alloc(struct device_info_s *device_info)
 
 int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, cJSON *jsonInterface, cJSON *jsonType)
 {
-   if(!device_info)
+   if(!device_info) {
       return -1;
+   }
 
    // BUG:
    if(!jsonInterface) {
@@ -1509,16 +1550,18 @@ int device_info_from_json(struct device_info_s *device_info, cJSON *jsonDevice, 
       int id_interface=(int)_id_interface->valuedouble;
       jsonInterface=findInterfaceById(jsonInterfaces, id_interface);
    }
-   if(!jsonInterface)
+   if(!jsonInterface) {
       return -1;
+   }
 
    int type_id = (int)cJSON_GetObjectItem(jsonDevice, ID_TYPE_STR_C)->valuedouble;
    if(!jsonType) {
       jsonType = findTypeByIdThroughIndex(types_index, type_id);
    }
 
-   if(!jsonType)
+   if(!jsonType) {
       return -4;
+   }
 
    device_info->name              = (char *)jsonDevice->string;
    device_info->id                =    (int)cJSON_GetObjectItem(jsonDevice, ID_SENSOR_ACTUATOR_STR_C)->valuedouble;
@@ -1594,31 +1637,28 @@ int dispatchXPLMessageToInterfaces2(cJSON *xplMsgJson)
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)&interfaces_queue_rwlock);
    pthread_rwlock_rdlock(&interfaces_queue_rwlock);
  
-//   while(1) {
- 
-      if(_interfaces && _interfaces->nb_elem) {
-         mea_queue_first(_interfaces);
-         while(1) {
-            mea_queue_current(_interfaces, (void **)&iq);
-            if(iq->context && id_interface == iq->id) {
-               int monitoring_id = iq->fns->get_monitoring_id(iq->context);
-               if(monitoring_id>-1 && process_is_running(monitoring_id)) {
-                  xpl2_f xPL_callback2 = iq->fns->get_xPLCallback(iq->context);
-                  if(xPL_callback2) {
-                     xPL_callback2(xplMsgJson, &device_info, iq->context);
-                     break;
-                  }
+   if(_interfaces && _interfaces->nb_elem) {
+      mea_queue_first(_interfaces);
+      while(1) {
+         mea_queue_current(_interfaces, (void **)&iq);
+         if(iq->context && id_interface == iq->id) {
+            int monitoring_id = iq->fns->get_monitoring_id(iq->context);
+            if(monitoring_id>-1 && process_is_running(monitoring_id)) {
+               xpl2_f xPL_callback2 = iq->fns->get_xPLCallback(iq->context);
+               if(xPL_callback2) {
+                  xPL_callback2(xplMsgJson, &device_info, iq->context);
+                  break;
                }
-               break;
             }
-            ret=mea_queue_next(_interfaces);
-            if(ret<0) {
-               ret=-1;
-               break;
-            }
+            break;
+         }
+         ret=mea_queue_next(_interfaces);
+         if(ret<0) {
+            ret=-1;
+            break;
          }
       }
-//   }
+   }
 
    pthread_rwlock_unlock(&interfaces_queue_rwlock);
    pthread_cleanup_pop(0);
@@ -1781,10 +1821,7 @@ next:
    plugins_list[next_int].type = -1;
    plugins_list[next_int].name = NULL;
    plugins_list[next_int].free_flag  = -1;
-/*
-   for(int i=0; plugins_list[i].type!=-1; i++)
-      printf("%s %d %d\n", plugins_list[i].name, plugins_list[i].type, plugins_list[i].free_flag);
-*/
+
    return 0;
 }
 #endif
@@ -1898,13 +1935,15 @@ int16_t interfacesServer_call_interface_api(int id_interface, char *cmnd, void *
          }
  
          ret=mea_queue_next(_interfaces);
-         if(ret<0)
+         if(ret<0) {
             break;
+         }
       }
    }
  
-   if(found)
+   if(found) {
       ret=iq->fns->api(iq->context, cmnd, args, nb_args, res, nerr, err, l_err);
+   }
  
    pthread_rwlock_unlock(&interfaces_queue_rwlock);
    pthread_cleanup_pop(0);
@@ -2134,8 +2173,9 @@ int remove_delegate_links(mea_queue_t *interfaces_list, char *interface)
       }
  
       ret=mea_queue_next(interfaces_list);
-      if(ret<0)
+      if(ret<0) {
          break;
+     }
    }
 
    return 0;
@@ -2173,8 +2213,9 @@ int link_delegates(mea_queue_t *interfaces_list)
                   }
                }
  
-               if(mea_queue_next(interfaces_list_clone)<0)
+               if(mea_queue_next(interfaces_list_clone)<0) {
                   break;
+               }
             }
          }
          else {
@@ -2182,8 +2223,9 @@ int link_delegates(mea_queue_t *interfaces_list)
       }
  
       ret=mea_queue_next(interfaces_list);
-      if(ret<0)
+      if(ret<0) {
          break;
+      }
    }
  
    return 0;
@@ -2280,8 +2322,6 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
    int  id_interface=cJSON_GetObjectItem(jsonInterface, ID_INTERFACE_STR_C)->valuedouble;
    int  id_type=cJSON_GetObjectItem(jsonInterface, ID_TYPE_STR_C)->valuedouble;
    char *dev=cJSON_GetObjectItem(jsonInterface, DEV_STR_C)->valuestring;
-//   char *parameters=cJSON_GetObjectItem(jsonInterface, "parameters")->valuestring;
-//   char *description=cJSON_GetObjectItem(jsonInterface, "description")->valuestring;
 
    if(state==1) {
       iq=(interfaces_queue_elem_t *)malloc(sizeof(interfaces_queue_elem_t));

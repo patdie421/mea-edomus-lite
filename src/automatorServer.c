@@ -94,8 +94,9 @@ mea_error_t automatorServer_add_msg(cJSON *msg_json)
    automator_msg_t *e=NULL;
    int ret=NOERROR;
    e=(automator_msg_t *)malloc(sizeof(automator_msg_t));
-   if(!e)
+   if(!e) {
       return ERROR;
+   }
 
    e->type=1;
    e->msg_json = msg_json;
@@ -146,8 +147,9 @@ int automatorServer_timer_wakeup(char *name, void *userdata)
 
    automator_msg_t *e=NULL;
    e=(automator_msg_t *)malloc(sizeof(automator_msg_t));
-   if(!e)
+   if(!e) {
       return -1;
+   }
 
    e->type=2;
    e->msg_json=NULL;
@@ -159,13 +161,15 @@ int automatorServer_timer_wakeup(char *name, void *userdata)
       if(automator_msg_queue->nb_elem>=1)
          pthread_cond_broadcast(&automator_msg_queue_cond);
    }
-   else
+   else {
       retour=-1;
+   }
    pthread_mutex_unlock(&automator_msg_queue_lock);
    pthread_cleanup_pop(0);
 
-   if(retour==0)
+   if(retour==0) {
       return 0;
+   }
 
 automatorServer_add_msg_clean_exit:
    if(e) {
@@ -255,15 +259,18 @@ void *_automator_thread(void *data)
                sleep(1); // on attend un peu, on va peut-être pouvoir se reprendre
             }
          }
-         else
+         else {
             errcntr=0;
+         }
       }
      
       e=NULL;
-      if (ret==0 && automator_msg_queue && !timeout) // pas d'erreur, on récupère un élément dans la queue
+      if (ret==0 && automator_msg_queue && !timeout) {// pas d'erreur, on récupère un élément dans la queue
          ret=mea_queue_out_elem(automator_msg_queue, (void **)&e);
-      else
+      }
+      else {
          ret=-1;
+      }
       
       pthread_mutex_unlock(&automator_msg_queue_lock);
       pthread_cleanup_pop(0);
@@ -275,8 +282,9 @@ void *_automator_thread(void *data)
          
          automator_matchInputsRules(_inputs_rules, NULL);
          int n= automator_playOutputRules(_outputs_rules);
-         if(n>0)
+         if(n>0) {
             automator_xplout_indicator+=n;
+         }
 
          if(automator_send_all_inputs_flag!=0) {
             automator_send_all_inputs();
@@ -308,8 +316,9 @@ void *_automator_thread(void *data)
          automator_matchInputsRules(_inputs_rules, e->msg_json);
 
          int n=automator_playOutputRules(_outputs_rules);
-         if(n>0)
+         if(n>0) {
             automator_xplout_indicator+=n;
+         }
 
          if(automator_send_all_inputs_flag!=0) {
             automator_send_all_inputs();
@@ -419,10 +428,12 @@ int stop_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
       pthread_cancel(*_automatorServer_thread_id);
       int counter=100;
       while(counter--) {
-         if(_automatorServer_thread_is_running)
+         if(_automatorServer_thread_is_running) {
             usleep(100);
-         else
+         }
+         else {
             break;
+         }
       }
       DEBUG_SECTION2(DEBUGFLAG) mea_log_printf("%s (%s) : %s, fin après %d itération(s)\n",DEBUG_STR, __func__, automator_server_name_str, 100-counter);
       
@@ -455,7 +466,6 @@ int start_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
    char err_str[80], notify_str[256];
 
    if(appParameters_get("RULESFILE", automatorServer_start_stop_params->params_list)) {
-//      setAutomatorRulesFile(automatorServer_start_stop_params->params_list[RULES_FILE]);
       setAutomatorRulesFile(appParameters_get("RULESFILE", automatorServer_start_stop_params->params_list));
       
       _automatorServer_thread_id=automatorServer();
