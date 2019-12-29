@@ -27,8 +27,8 @@ typedef struct interface_type_XXX_s
 {
    int              id_interface;
    int              id_driver;
-   char             name[41];
-   char             dev[81];
+   char             name[256];
+   char             dev[256];
    int              monitoring_id;
    pthread_t       *thread;
    volatile sig_atomic_t thread_is_running;

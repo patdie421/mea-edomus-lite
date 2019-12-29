@@ -59,7 +59,7 @@ main()
       double rise, set, civ_start, civ_end, naut_start, naut_end,
              astr_start, astr_end;
       int    rs, civ, naut, astr;
-      char buf[80];
+      char buf[256];
 
       printf( "Longitude (+ is east) and latitude (+ is north) : " );
       fgets(buf, 80, stdin);

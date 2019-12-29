@@ -554,12 +554,12 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
 {
    int16_t ret;
    
-   char dev[81];
-   char buff[81];
+   char dev[256];
+   char buff[256];
    speed_t speed;
    int fd = 0;
    comio2_ad_t *ad=NULL;
-   char err_str[81];
+   char err_str[256];
 
    pthread_t *interface_type_001_thread_id=NULL; // descripteur du thread
    

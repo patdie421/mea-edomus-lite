@@ -76,7 +76,7 @@ static void configChangedHandler(xPL_ServicePtr theService, xPL_ObjectPtr userDa
 
 /* Write a date/time stamp */
 void printTimestamp() {
-  char dateTimeBuffer[41];
+  char dateTimeBuffer[256];
   time_t rightNow;
 
   time(&rightNow);

@@ -260,7 +260,7 @@ void _managed_processes_process_jobs_scheduling()
 
    time(&cur_time);
    tm = localtime(&cur_time);
-   char errmsg[81];
+   char errmsg[256];
    int16_t l_errormsg=80;
   
    int i=0; 
@@ -1211,7 +1211,7 @@ int _managed_processes_processes_check_heartbeats(int doRecovery)
             managed_processes.processes_table[i]->heartbeat_status=0;
             if(doRecovery) {
                if(managed_processes.processes_table[i]->heartbeat_counter<=5) {
-                  char errmsg[80];
+                  char errmsg[256];
                   if(managed_processes.processes_table[i]->heartbeat_recovery) {
                      int ret=0;
                      

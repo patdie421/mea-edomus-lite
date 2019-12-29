@@ -18,8 +18,8 @@ extern char *netatmo_thermostat_mode[];
 
 struct netatmo_token_s
 {
-   char access[81];
-   char refresh[81]; 
+   char access[256];
+   char refresh[256]; 
    time_t expire_in;
 };
 
@@ -53,8 +53,8 @@ struct netatmo_data_s
 struct netatmo_module_s
 {
    char id[18];
-   char name[40];
-   char type[20];
+   char name[256];
+   char type[256];
    int battery;
    struct netatmo_data_s data;
 };
@@ -62,7 +62,7 @@ struct netatmo_module_s
 struct netatmo_station_data_s
 {
    char id[18];
-   char name[40];
+   char name[25§];
    struct netatmo_data_s data;
    int nb_modules;
    struct netatmo_module_s modules_data[5];

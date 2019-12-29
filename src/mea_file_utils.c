@@ -18,7 +18,7 @@
 
 int mea_filebackup(char *filename)
 {
-   char _time[40];
+   char _time[256];
    char filenamebak[1024];
    
    time_t timestamp = time(NULL); 

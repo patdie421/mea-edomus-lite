@@ -458,7 +458,7 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
    cJSON *j=NULL, *_devices=NULL;
    cJSON *pairing_data=NULL;
    char name[256];
-   char strAddr[40];
+   char strAddr[256];
 
    snprintf(strAddr, sizeof(strAddr)-1, "%02x%02x%02x%02x", addr[0], addr[1], addr[2], addr[3]);
    snprintf(name, sizeof(name)-1, "%s_%s", i003->name, strAddr);

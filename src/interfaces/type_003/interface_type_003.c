@@ -815,8 +815,8 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
  * \return    0 = Ok ou -1 = KO
  **/
 {
-   char dev[81];
-   char buff[80];
+   char dev[256];
+   char buff[256];
    speed_t speed;
 
    int fd=-1;

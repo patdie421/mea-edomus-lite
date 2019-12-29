@@ -15,7 +15,7 @@
 int16_t learning_state = 0;
 
 int16_t device_found=-1;
-uint8_t device_data[40];
+uint8_t device_data[256];
 uint16_t device_l_data=0;
 
 int16_t pairing_as_f60201(enocean_ed_t *ed, uint32_t addr_dec, uint32_t device_addr);

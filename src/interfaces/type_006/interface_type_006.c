@@ -671,8 +671,8 @@ int restart_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg
 
 int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
 {
-   char dev[81];
-   char buff[80];
+   char dev[256];
+   char buff[256];
    speed_t speed;
    int err=0;
    char err_str[128];

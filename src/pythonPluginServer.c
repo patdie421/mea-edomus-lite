@@ -78,8 +78,9 @@ void _pythonPlugin_thread_cleanup_PyEval_AcquireLock(void *arg)
 {
    PyThreadState *tempState=(PyThreadState *)arg;
    
-   if(tempState)
+   if(tempState) {
       PyThreadState_Swap(tempState);
+   }
    PyEval_ReleaseLock();
 }
 
@@ -118,11 +119,13 @@ mea_error_t _pythonPluginServer_add_to_cmd_queue(pythonPlugin_cmd_t *e)
    pthread_mutex_lock(&pythonPluginCmd_queue_lock);
    if(pythonPluginCmd_queue) {
       mea_queue_in_elem(pythonPluginCmd_queue, e);
-      if(pythonPluginCmd_queue->nb_elem>=1)
+      if(pythonPluginCmd_queue->nb_elem>=1) {
          pthread_cond_broadcast(&pythonPluginCmd_queue_cond);
+      }
    }
-   else
+   else {
       ret=ERROR;
+   }
    pthread_mutex_unlock(&pythonPluginCmd_queue_lock);
    pthread_cleanup_pop(0);
    
@@ -194,8 +197,9 @@ cJSON *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int
    e->result=&result;
    
    e->data=(char *)malloc(l_data);
-   if(!e->data)
+   if(!e->data) {
       goto pythonPluginServer_exec_cmd_clean_exit;
+   }
    memcpy(e->data, data, l_data);
    e->l_data=l_data;
  
@@ -259,13 +263,15 @@ mea_error_t pythonPluginServer_add_cmd(char *module, void *data, int l_data)
    e->result=NULL;
 
    e->python_module=(char *)malloc(strlen(module)+1);
-   if(!e->python_module)
+   if(!e->python_module) {
       goto pythonPluginServer_add_cmd_clean_exit;
+   }
    strcpy(e->python_module, module);
 
    e->data=(char *)malloc(l_data);
-   if(!e->data)
+   if(!e->data) {
       goto pythonPluginServer_add_cmd_clean_exit;
+   }
    memcpy(e->data, data, l_data);
    
    e->l_data=l_data;
@@ -333,8 +339,9 @@ cJSON *call_pythonPlugin(char *module, char *function, int type, PyObject *data_
          }
       }
       else {
-         if(errno!=ENOENT)
+         if(errno!=ENOENT) {
             perror("");
+         }
       }
    }
    
@@ -510,10 +517,12 @@ void *_pythonPlugin_thread(void *data)
          }
       }
       
-      if (pythonPluginCmd_queue && !pass) // pas d'erreur, on récupère un élément dans la queue
+      if (pythonPluginCmd_queue && !pass) { // pas d'erreur, on récupère un élément dans la queue
          ret=mea_queue_out_elem(pythonPluginCmd_queue, (void **)&e);
-      else
+      }
+      else {
          ret=-1;
+      }
 
       pthread_mutex_unlock(&pythonPluginCmd_queue_lock);
       pthread_cleanup_pop(0);
@@ -635,8 +644,9 @@ pthread_t *pythonPluginServer()
 
    pthread_detach(*pythonPlugin_thread);
    
-   if(pythonPlugin_thread)   
+   if(pythonPlugin_thread) {
       return pythonPlugin_thread;
+   }
 
 pythonPluginServer_clean_exit:
    if(pythonPlugin_thread) {
@@ -671,8 +681,7 @@ int stop_pythonPluginServer(int my_id, void *data, char *errmsg, int l_errmsg)
       pthread_cancel(*_pythonPluginServer_thread_id);
       int counter=100;
 //      int stopped=-1;
-      while(counter--)
-      {
+      while(counter--) {
          if(_pythonPluginServer_thread_is_running) {
             usleep(100); // will sleep for 1 ms
          }
@@ -713,7 +722,7 @@ int start_pythonPluginServer(int my_id, void *data, char *errmsg, int l_errmsg)
 {
    struct pythonPluginServer_start_stop_params_s *pythonPluginServer_start_stop_params = (struct pythonPluginServer_start_stop_params_s *)data;
 
-   char err_str[80], notify_str[256];
+   char err_str[256], notify_str[256];
 
    if(appParameters_get("PLUGINPATH", pythonPluginServer_start_stop_params->params_list)) {
       setPythonPluginPath(appParameters_get("PLUGINPATH", pythonPluginServer_start_stop_params->params_list));

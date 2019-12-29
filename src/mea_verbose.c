@@ -169,17 +169,19 @@ void mea_log_printf(char const* fmt, ...)
    va_list args;
    static char *date_format="[%Y-%m-%d %H:%M:%S]";
 
-   char date_str[40];
+   char date_str[256];
    time_t t;
    struct tm t_tm;
 
    t=time(NULL);
 
-   if (localtime_r(&t, &t_tm) == NULL)
+   if (localtime_r(&t, &t_tm) == NULL) {
       return;
+   }
 
-   if (strftime(date_str, sizeof(date_str), date_format, &t_tm) == 0)
+   if (strftime(date_str, sizeof(date_str), date_format, &t_tm) == 0) {
       return;
+   }
 
    va_start(args, fmt);
 

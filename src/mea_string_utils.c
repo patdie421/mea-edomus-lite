@@ -27,16 +27,18 @@ void mea_strcpylower(char *d, char *s)
 
 void mea_strncpylower(char *d, char *s, int n)
 {
-   if(n<0)
+   if(n<0) {
       return;
+   }
    while(*s && n) {
       *d=tolower(*s);
       --n;
       ++d;
       ++s;
    }
-   if(n)
+   if(n) {
       *d=0;
+   }
 }
 
 
@@ -44,13 +46,14 @@ void mea_strcpytrim(char *d, char *s)
 {
    char *p=d;
 
-   while(*s && *s==' ') ++s;
+   while(*s && *s==' ') { ++s; }
 
    while(*s) {
       *d=*s;
       ++d;
-      if(*s!=' ')
+      if(*s!=' ') {
          p=d;
+      }
       ++s;
    }
    *p=0;
@@ -61,13 +64,14 @@ void mea_strcpytrimlower(char *d, char *s)
 {
    char *p=d;
 
-   while(*s && *s==' ') ++s;
+   while(*s && *s==' ') { ++s; }
 
    while(*s) {
       *d=tolower(*s);
       ++d;
-      if(*s!=' ')
+      if(*s!=' ') {
          p=d;
+      }
       ++s;
    }
    *p=0;
@@ -76,43 +80,49 @@ void mea_strcpytrimlower(char *d, char *s)
 
 void mea_strncpytrim(char *d, char *s, int n)
 {
-   if(n<0)
+   if(n<0) {
       return;
+   }
 
    char *p=d;
-   while(*s && *s==' ') ++s;
+   while(*s && *s==' ') { ++s; }
 
    while(*s && n) {
       *d=*s;
       --n;
       ++d;
-      if(*s!=' ')
+      if(*s!=' ') {
          p=d;
+      }
       ++s;
    }
-   if(n)
+   if(n) {
       *p=0;
+   }
 }
 
 
 void mea_strncpytrimlower(char *d, char *s, int n)
 {
-   if(n<0)
+   if(n<0) {
       return;
+   }
 
    char *p=d;
-   while(*s && *s==' ') ++s;
+   while(*s && *s==' ') { ++s; }
 
    while(*s && n) {
       *d=tolower(*s);
       --n;
       ++d;
-      if(*s!=' ')
+      if(*s!=' ') {
          p=d;
+      }
       ++s;
    }
-   if(n)
+   if(n) {
       *p=0;
+   }
 }
 
 
@@ -131,10 +141,11 @@ char *mea_strltrim(char *s)
   * \return    pointeur sur le premier caractère "non blanc" de la chaine
   */
 {
-   if(!s)
+   if(!s) {
       return NULL;
+   }
 
-   while(*s && isspace(*s)) s++;
+   while(*s && isspace(*s)) { s++; }
    return s;
 }
 
@@ -150,19 +161,22 @@ char *mea_strltrim2(char *s)
   * \return    pointeur sur la chaine ou NULL si (s=NULL)
   */
 {
-   if(!s)
+   if(!s) {
       return NULL;
+   }
 
-   if(!*s)
+   if(!*s) {
       return s;
+   }
 
    char *p=s;
 
-   while(*s && isspace(*s)) s++;
+   while(*s && isspace(*s)) { s++; }
 
    int i;
-   for(i=0;*s;i++,s++)
+   for(i=0;*s;i++,s++) {
       p[i]=*s;
+   }
    p[i]=0;
    
    return p;
@@ -182,8 +196,9 @@ char *mea_strltrim_alloc(char *s)
 {
    char *s_trimed = NULL;
    
-   if(!s)
+   if(!s) {
       return NULL;
+   }
 
    s_trimed=mea_strltrim(s);
    
@@ -191,8 +206,9 @@ char *mea_strltrim_alloc(char *s)
    if(!s_trimed) {
       return NULL;
    }
-   else
+   else {
       return s_trimed;
+   }
 }
 
 
@@ -207,11 +223,13 @@ char *mea_strrtrim(char *s)
   * \return    pointeur sur le début de la chaine ou NULL (si s=NULL)
   */
 {
-   if(!s)
+   if(!s) {
       return NULL;
+   }
 
-   if(!*s) // chaine vide
+   if(!*s) { // chaine vide
       return s;
+   }
 
    char* back = s + strlen(s);
    while(isspace(*--back));
@@ -234,8 +252,9 @@ char *mea_strrtrim_alloc(char *s)
    char *s_trimed;
    char *s_new;
    
-   if(!s)
+   if(!s) {
       return NULL;
+   }
 
    s_trimed=mea_string_alloc_and_copy(s);
    if(!s_trimed) {
@@ -245,8 +264,9 @@ char *mea_strrtrim_alloc(char *s)
       mea_strrtrim(s_trimed);
       s_new=(char *)realloc(s_trimed, strlen(s_trimed)+1);
 
-      if(s_new)
+      if(s_new) {
          return s_new;
+      }
       else {
          free(s_trimed);
          s_trimed=NULL;
@@ -299,14 +319,16 @@ char *mea_strtrim_alloc(char *s)
    s_trimed=mea_strltrim(s);
    if(s_trimed) {
       s_trimed=mea_strrtrim_alloc(s_trimed);
-      if(s_trimed)
+      if(s_trimed) {
          return s_trimed;
+      }
       else {
          return NULL;
       }
    }
-   else
+   else {
       return NULL;
+   }
 }
 
 
@@ -321,11 +343,14 @@ void mea_strtoupper(char *str)
  * \return    pas de retour.
  */
 {
-   if(!str)
+   if(!str) {
       return;
-   uint16_t i=0;   
-   for(;i<strlen(str);i++)
+   }
+
+   uint16_t i=0;
+   for(;i<strlen(str);i++) {
       str[i]=toupper(str[i]);
+   }
 }
 
 
@@ -340,12 +365,14 @@ void mea_strtolower(char *str)
  * \return    pas de retour.
  */
 {
-   if(!str)
+   if(!str) {
       return;
+   }
 
    uint16_t i=0;
-   for(;i<strlen(str);i++)
+   for(;i<strlen(str);i++) {
       str[i]=tolower(str[i]);
+   }
 }
 
 
@@ -362,8 +389,9 @@ int16_t mea_strcmplower(char *str1, char *str2)
  * \return    0 chaines égales, 1 chaines différentes
  */
 {
-   if(!str1 || !str2)
+   if(!str1 || !str2) {
       return -1;
+   }
    
    int i=0;
    for(;str1[i] && str2[i];i++) {
@@ -389,14 +417,17 @@ int16_t mea_strcmplower2(char *str1, char *str2)
 {
    int i;
 
-   if(!str1 || !str2)
+   if(!str1 || !str2) {
       return 0;
+   }
 
    for(i=0;str1[i];i++) {
-      if(tolower(str1[i])<tolower(str2[i]))
+      if(tolower(str1[i])<tolower(str2[i])) {
          return -1;
-      else if(tolower(str1[i])>tolower(str2[i]))
+      }
+      else if(tolower(str1[i])>tolower(str2[i])) {
          return 1;
+      }
    }
 
    if(str1[i] && !str2[i]) {
@@ -428,17 +459,21 @@ int16_t mea_strncmplower(char *str1, char *str2, int n)
    if(n<1)
       return 0;
    
-   if(!str1 || !str2)
+   if(!str1 || !str2) {
       return 0;
+   }
 
    for(i=0;str1[i] && i<n;i++) {
-      if(tolower(str1[i])!=tolower(str2[i]))
+      if(tolower(str1[i])!=tolower(str2[i])) {
          return 1;
+      }
    }
-   if(i==n || str1[i]==str2[i])
+   if(i==n || str1[i]==str2[i]) {
       return 0;
-   else
+   }
+   else {
       return 1;
+   }
 }
 
 
@@ -467,10 +502,12 @@ int16_t mea_strsplit(char str[], char separator, char *tokens[], uint16_t l_toke
       if(str[i]==separator) {
          str[i]=0;
          j++;
-         if(j<l_tokens)
+         if(j<l_tokens) {
             tokens[j]=&(str[i+1]);
-         else
+         }
+         else {
             return -1;
+         }
       }
    }
    return j+1;
@@ -604,8 +641,9 @@ int mea_strisnumeric(char *str)
 {
    int i=0;
    for(;str[i];i++) {
-      if(!isdigit(str[i]))
+      if(!isdigit(str[i])) {
          return -1;
+      }
    }
    return 0;
 }
@@ -764,29 +802,37 @@ int main(int argc, char *argv[])
    char *str1, *str2, *str1bis, *str2bis = NULL;
 
    str1bis=mea_strtrim_alloc(s1);
-   if(str1bis)
+   if(str1bis) {
       fprintf(stderr,"str1bis=\"%s\"\n",str1bis);
-   else
+   }
+   else {
       fprintf(stderr,"str1bis=NULL\n");
+   }
    free(str1bis);
 
    str1=mea_strltrim2(s1);
-   if(str1)
+   if(str1) {
       fprintf(stderr,"str1=\"%s\"\n",str1);
-   else
+   }
+   else {
       fprintf(stderr,"str1=NULL\n");
+   }
 
    str2=mea_strltrim_alloc(s2);
-   if(str2)
+   if(str2) {
       fprintf(stderr,"str2=\"%s\"\n",str2);
-   else
+   }
+   else {
       fprintf(stderr,"str2=NULL\n");
+   }
 
    str2bis = mea_strrtrim_alloc(s2);
-   if(str2bis)
+   if(str2bis) {
       fprintf(stderr,"str2bis=\"%s\"\n",str2bis);
-   else
+   }
+   else {
       fprintf(stderr,"str2bis=NULL\n");
+   }
 
    char d1[80],d2[80];
 

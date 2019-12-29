@@ -98,8 +98,9 @@ static int16_t _parsed_parameters_add_to_cache(char **parameters_to_find, char *
    struct _parsed_parameters_cache_list_s *s  = NULL;
    struct _parsed_parameters_cache_elems_s *e = NULL;
 
-   if(_parsed_parameters_cache_counter >= PARSED_PARAMETERS_CACHING_MAX)
+   if(_parsed_parameters_cache_counter >= PARSED_PARAMETERS_CACHING_MAX) {
       return -1;
+   }
 
    if(_parsed_parameters_cache_rwlock==NULL) {
 #ifdef PARSED_PARAMETERS_CACHING_AUTOINIT   
@@ -168,19 +169,22 @@ static parsed_parameters_t *_parsed_parameters_get_from_cache(char *parameters_t
    struct _parsed_parameters_cache_elems_s *e = NULL;
    parsed_parameters_t *ret=NULL;
 
-   if(_parsed_parameters_cache_rwlock==NULL)
+   if(_parsed_parameters_cache_rwlock==NULL) {
       return NULL;
+   }
 
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)_parsed_parameters_cache_rwlock );
    pthread_rwlock_rdlock(_parsed_parameters_cache_rwlock);
       
    HASH_FIND(hh, _parsed_parameters_cache_list, parameters_to_find, nb_params * sizeof(char *), s);
-   if(!s)
+   if(!s) {
       goto _parsed_parameters_get_clean_exit;
+   }
   
    HASH_FIND(hh, s->parsed_parameters_cache_elems, parameters_string, strlen(parameters_string), e);
-   if(!e)
+   if(!e) {
      goto _parsed_parameters_get_clean_exit;
+   }
    
    e->last_access=time(NULL);
    ret=e->parsed_parameters;
@@ -196,9 +200,11 @@ _parsed_parameters_get_clean_exit:
 
 int16_t is_in_assocs_list(struct assoc_s *assocs_list, int val1, int val2)
 {
-   for(int i=0;assocs_list[i].val1!=-1;i++)
-      if(assocs_list[i].val1==val1 && assocs_list[i].val2==val2)
+   for(int i=0;assocs_list[i].val1!=-1;i++) {
+      if(assocs_list[i].val1==val1 && assocs_list[i].val2==val2) {
          return 1;
+      }
+   }
    return 0;
 }
 
@@ -287,8 +293,9 @@ char *getToken(char *str)
    
    // vérification des caractères
    for(int i=0;str[i];i++) {
-      if(!(isalpha(str[i]) || isdigit(str[i]) || str[i]=='_' || str[i]=='.' || str[i]==':'))
+      if(!(isalpha(str[i]) || isdigit(str[i]) || str[i]=='_' || str[i]=='.' || str[i]==':')) {
          return NULL;
+      }
       
       str[i]=toupper(str[i]);
    }
@@ -346,18 +353,21 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
    int ret;
    parsed_parameters_t *parsed_parameters;
    
-   if(err)
+   if(err) {
       *err=0;
+   }
       
    if(parameters_string == NULL) {
-      if(err)
+      if(err) {
          *err=11;
+      }
       return NULL;
    }
    
    if(strlen(parameters_string)==0) {
-      if(err)
+      if(err) {
          *err=10;
+      }
       return NULL;
    }
    
@@ -380,8 +390,9 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
 
    value=malloc(strlen(parameters_string+1)); // taille de valeur au max (et même un peu plus).
    if(!value) {
-      if(err)
+      if(err) {
          *err=1;
+      }
       return NULL;
    }
    
@@ -391,8 +402,9 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
          fprintf (MEA_STDERR, "%s (%s) : %s - ",DEBUG_STR, __func__, MALLOC_ERROR_STR);
          perror("");
       }
-      if(err)
+      if(err) {
          *err=1; // erreur système, voir errno
+      }
       return NULL;
    }
  
@@ -405,8 +417,9 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
       }
       free(parsed_parameters);
       parsed_parameters=NULL;
-      if(err)
+      if(err) {
          *err=1; // erreur système, voir errno
+      }
       return NULL;
    }
  
@@ -415,14 +428,16 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
  
    while(1) {
       ret=sscanf(ptr, "%20[^=;]=%[^;]%n", label, value, &n); // /!\ pas plus de 20 caractères pour un TOKEN
-      if(ret==EOF) // plus rien à lire
+      if(ret==EOF) { // plus rien à lire
          break;
+      }
       
       if(ret==2) {
          // ici on traite les données lues
          label_token=getToken(label);
-         if(value_to_upper)
+         if(value_to_upper) {
             mea_strtoupper(value);
+         }
          value_token=value;
          
          char trouvee=0;
@@ -463,8 +478,9 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
                            free(parsed_parameters);
                            parsed_parameters=NULL;
                         }
-                        if(err)
+                        if(err) {
                            *err=1; // erreur système, voir errno
+                        }
                         goto malloc_parsed_parameters_exit;
                      }
                      strncpy(parsed_parameters->parameters[i].value.s, value_token,r);
@@ -480,8 +496,9 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
                      free(parsed_parameters);
                      parsed_parameters=NULL;
                   }
-                  if(err)
+                  if(err) {
                      *err=2; // erreur de syntaxe;
+                  }
                   goto malloc_parsed_parameters_exit;
                }
                break;
@@ -493,8 +510,9 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
                free(parsed_parameters);
                parsed_parameters=NULL;
             }
-            if(err)
+            if(err) {
                *err=3; // label inconnu
+            }
             goto malloc_parsed_parameters_exit;
          }
          // déplacement du pointeur sur les données suivantes
@@ -503,12 +521,14 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
       
       if(*ptr == ';') { // séparateur, on passe au caractère suivant
          ptr++;
-         if(!ret) // si on avait rien lu
+         if(!ret) { // si on avait rien lu
             ret=2; // on fait comme si on avait lu ...
+         }
       }
       
-      if(*ptr == 0) // fin de ligne, OK.
+      if(*ptr == 0) { // fin de ligne, OK.
          break; // sortie de la boucle
+      }
 
       if(ret<2) { // si on a pas un label et une valeur
          if(parsed_parameters) {
@@ -516,8 +536,9 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
             free(parsed_parameters);
             parsed_parameters=NULL;
          }
-         if(err)
+         if(err) {
             *err=4; // label sans valeur
+         }
          goto malloc_parsed_parameters_exit;
       }
    }
@@ -544,8 +565,9 @@ void display_parsed_parameters(parsed_parameters_t *mpp)
    DEBUG_SECTION {
       if(mpp) {
          for(int i=0;i<mpp->nb;i++) {
-            if(mpp->parameters[i].label==NULL)
+            if(mpp->parameters[i].label==NULL) {
                continue;
+            }
             printf("%d:%s = ", i, mpp->parameters[i].label);
             switch((int)(mpp->parameters[i].type)) {
                case 1:
@@ -606,8 +628,9 @@ int main(int argc, char *argv[])
    parsed_parameters_init();
 
    params1_1=alloc_parsed_parameters(test1_str, params1_str, &nb_params, &err, 0);   
-   for(int i=0;i<nb_params;i++)
+   for(int i=0;i<nb_params;i++) {
       fprintf(stderr,"%s = %s\n",params1_1->parameters[i].label, params1_1->parameters[i].value.s);
+   }
    release_parsed_parameters(&params1_1);
 
    double t0=millis();

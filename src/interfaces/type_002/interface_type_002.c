@@ -918,9 +918,9 @@ static uint32_t _indianConvertion(uint32_t val_x86)
 int mea_sendAtCmdAndWaitResp_json(interface_type_002_t *i002, cJSON *args, cJSON **res, int16_t *_nerr, char *_err, int l_err)
 //cJSON *mea_sendAtCmdAndWaitResp_json(PyObject *self, PyObject *args)
 {
-   unsigned char at_cmd[81];
+   unsigned char at_cmd[256];
    uint16_t l_at_cmd;
-   unsigned char resp[81];
+   unsigned char resp[256];
    uint16_t l_resp;
    int16_t ret;
    cJSON *arg;
@@ -1042,7 +1042,7 @@ int mea_sendAtCmdAndWaitResp_json(interface_type_002_t *i002, cJSON *args, cJSON
 
 static int mea_sendAtCmd_json(interface_type_002_t *i002, cJSON *args)
 {
-   unsigned char at_cmd[81];
+   unsigned char at_cmd[256];
    uint16_t l_at_cmd;
    xbee_xd_t *xd=i002->xd;
    cJSON *arg;

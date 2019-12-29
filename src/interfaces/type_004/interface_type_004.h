@@ -74,10 +74,10 @@ struct scenesListElem_s {
 typedef struct interface_type_004_s
 {
    int              id_interface;
-   char             name[41];
+   char             name[256];
    char             dev[256];
-   char             server[41];
-   char             user[41];
+   char             server[256];
+   char             user[256];
    int              port;
    int              monitoring_id;
    pthread_t       *thread;

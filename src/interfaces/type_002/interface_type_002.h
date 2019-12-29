@@ -59,8 +59,8 @@ extern char *interface_type_002_commissionning_request_str;
 typedef struct interface_type_002_s
 {
    int              id_interface;
-   char             name[41];
-   char             dev[81];
+   char             name[256];
+   char             dev[256];
    int              monitoring_id;
    xbee_xd_t       *xd;
    xbee_host_t     *local_xbee;

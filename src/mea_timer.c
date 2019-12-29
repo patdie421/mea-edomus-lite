@@ -70,8 +70,9 @@ int16_t mea_init_timer(mea_timer_t *aTimer, uint32_t aDelay, uint16_t restartSta
       aTimer->autorestart=restartStatus;
       return 0;
    }
-   else
+   else {
       return -1;
+   }
 }
 
 

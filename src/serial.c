@@ -119,9 +119,9 @@ int32_t get_speed_from_speed_t(speed_t speed)
 int16_t get_dev_and_speed(char *device, char *dev, int16_t dev_l, speed_t *speed)
 {
    *speed=0;
-   char _dev[41];
-   char reste[41];
-   char vitesse[41];
+   char _dev[256];
+   char reste[256];
+   char vitesse[256];
 
    char *_dev_ptr;
    char *reste_ptr;

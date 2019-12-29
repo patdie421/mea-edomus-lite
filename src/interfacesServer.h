@@ -58,7 +58,7 @@ struct device_info_s
 
 struct devices_index_s
 {
-   char name[41];
+   char name[256];
    cJSON *device;
    UT_hash_handle hh;
 };
@@ -72,7 +72,7 @@ struct types_index_s
 
 struct devs_index_s
 {
-   char devName[81];
+   char devName[256];
    cJSON *interface;
    UT_hash_handle hh;
 };

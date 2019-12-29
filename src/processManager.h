@@ -18,7 +18,7 @@
 
 struct process_indicator_s
 {
-   char name[41];
+   char name[256];
    long value;
 };
 
@@ -41,7 +41,7 @@ struct managed_processes_scheduling_data_s
 
 struct managed_processes_process_s
 {
-   char name[41];
+   char name[256];
    char description[256];
 
    time_t last_heartbeat;

@@ -67,7 +67,7 @@ struct interface_type_001_indicators_s
 typedef struct interface_type_001_s
 {
    uint16_t interface_id;
-   char name[41];
+   char name[256];
    pthread_t  *thread_id; // thread id
    volatile sig_atomic_t thread_is_running;
    int monitoring_id;
@@ -86,7 +86,7 @@ typedef struct interface_type_001_s
 struct interface_type_001_start_stop_params_s
 {
    interface_type_001_t *i001;
-   char dev[81];
+   char dev[256];
 };
 
 

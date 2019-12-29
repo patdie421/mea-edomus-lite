@@ -889,7 +889,7 @@ int main(int argc, char *argv[])
 {
    struct netatmo_token_s token;
    struct netatmo_thermostat_data_s data;
-   char err[80];
+   char err[256];
    int ret;
 
    ret=netatmo_get_token("563e5ce3cce37c07407522f2","lE1CUF1k3TxxSceiPpmIGY8QXJWIeXJv0tjbTRproMy4","patrice.dietsch@gmail.com","WEBcdpii10", "read_thermostat write_thermostat read_station", &token, err, sizeof(err)-1);

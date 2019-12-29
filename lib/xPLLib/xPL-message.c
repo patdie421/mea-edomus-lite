@@ -691,7 +691,7 @@ static Bool parseMessageHeader(xPL_MessagePtr theMessage, xPL_NameValueListPtr n
   String dashPtr = NULL, periodPtr = NULL;
   xPL_NameValuePairPtr theNameValue;
   String theVendor, theDeviceID, theInstanceID;
-  char groupNameBuffer[40];
+  char groupNameBuffer[256];
 
   /* Parse the hop count */
   if ((theNameValue = xPL_getNamedValuePair(nameValueList, "HOP")) == NULL) {

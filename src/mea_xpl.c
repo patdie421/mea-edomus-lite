@@ -263,8 +263,9 @@ int16_t mea_xPLReadMessage(int16_t fd, int32_t timeoutms, char *data, int *l_dat
    int ret = select(fd+1, &input_set, NULL, NULL, &timeout);
    if(ret<=0) {
       *l_data=0;
-      if(ret == 0)
+      if(ret == 0) {
          *nerr = -1; // timeout
+      }
       else {
          ret=-1;
          *nerr = -2;
@@ -333,10 +334,12 @@ cJSON *mea_xplMsgToJson_alloc(cJSON *xplMsgJson)
    jsonBody=cJSON_CreateObject();
 
    if(!jsonXplMsg || !jsonBody) {
-      if(jsonXplMsg)
+      if(jsonXplMsg) {
          cJSON_Delete(jsonXplMsg);
-      if(jsonBody)
+      }
+      if(jsonBody) {
          cJSON_Delete(jsonBody);
+      }
       return NULL;
    }
 

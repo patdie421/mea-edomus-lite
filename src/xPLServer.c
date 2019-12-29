@@ -71,7 +71,7 @@ volatile sig_atomic_t _xPLServer_thread_is_running=0;
 int   xpl_sd=-1;
 int   xpl_sdb=-1;
 int   xpl_port=-1;
-char  xpl_ip[40];
+char  xpl_ip[256];
 struct sockaddr_in *xpl_broadcastAddr=NULL;
 char  xpl_interface[255]="";
 char  xpl_interval=1; // valeur minimum

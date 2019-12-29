@@ -45,7 +45,7 @@ enum device_type_e { THERMOSTAT, STATION };
 struct type005_device_queue_elem_s
 {
    enum device_type_e device_type;
-   char device_id[81];
+   char device_id[256];
 
    mea_queue_t modules_list;
 };
@@ -58,7 +58,7 @@ union module_data_u
 
 struct type005_module_queue_elem_s
 {
-   char module_id[81];
+   char module_id[256];
    
    union module_data_u d1, d2;
    union module_data_u *current, *last;
@@ -71,7 +71,7 @@ struct type005_sensor_actuator_queue_elem_s
 {
    int id;
    int type;
-   char name[41];
+   char name[256];
    int todbflag;
    int sensor;
    int actuator;
@@ -342,7 +342,7 @@ int16_t interface_type_005_xPL_actuator2(interface_type_005_t *i005,
 // xPLSend -m cmnd -c control.basic device=therm01 mode=away
 // xPLSend -m cmnd -c control.basic device=therm01 mode=program
    int16_t ret=-1;
-   char err[81];
+   char err[256];
    if(e->type==501)
    {
       char *mode     = NULL;
@@ -419,7 +419,7 @@ int16_t interface_type_005_xPL_sensor2(interface_type_005_t *i005,
 // xPLSend -m cmnd -c sensor.request device=temp02 request=current
    if(e->type==500)
    {
-      char ntype[41], str_value[41], str_last[41];
+      char ntype[256], str_value[256], str_last[256];
 
       if(interface_type_005_current_last(e, ntype, str_value, str_last, NULL, NULL, NULL)<0)
          return -1;
@@ -1167,7 +1167,7 @@ static int interface_type_005_getData(interface_type_005_t *i005)
 {
    struct type005_device_queue_elem_s *d_elem;
    int ret = -1;
-   char err[80];
+   char err[256];
 
    mea_queue_first(&(i005->devices_list));
    for(int i=0;i<i005->devices_list.nb_elem;i++)
@@ -1274,7 +1274,7 @@ void *_thread_interface_type_005(void *thread_data)
    int auth_flag=0;
    mea_timer_t refresh_timer;
    mea_timer_t getdata_timer;
-   char err[80];
+   char err[256];
    int ret;
 
    mea_init_timer(&refresh_timer,0,0);

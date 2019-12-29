@@ -971,9 +971,9 @@ load_interface_type_004_clean_exit:
 
 int16_t get_huesystem_connection_parameters(char *device, char *server, uint16_t l_server, int *port, char *user, uint16_t l_user)
 {
-   char _server[41];
+   char _server[256];
    int  _port=0;
-   char _user[41];
+   char _user[256];
    int n=0, r=0;
    
    char *_device=mea_strtrim(device); // on eleve les blancs devant et derrière
@@ -1241,9 +1241,9 @@ int start_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg)
 {
    int16_t ret;
    
-   char server[41];
+   char server[256];
    int  port=0;
-   char user[41];
+   char user[256];
    
    pthread_t *interface_type_004_thread_id=NULL; // descripteur du thread
    

@@ -54,10 +54,10 @@ struct interface_type_005_indicators_s
 typedef struct interface_type_005_s
 {
    int              id_interface;
-   char             name[41];
-   char             dev[81];
-   char             user[81];
-   char             password[81];
+   char             name[256];
+   char             dev[256];
+   char             user[256];
+   char             password[256];
    char            *parameters;
    xpl2_f           xPL_callback2;
    mea_queue_t      devices_list;

@@ -50,7 +50,7 @@ struct mea_datetime_value_s *mea_datetime_values_cache = NULL;
 // gestion des timers
 struct mea_datetime_timer_s
 {
-   char   name[41];
+   char   name[256];
    long   duration;
    enum   datetime_timer_unit_e unit;
    enum   datetime_timer_state_e state;

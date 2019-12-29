@@ -176,8 +176,9 @@ static cJSON *mea_PyTupleToJsonArray(PyObject *p)
    int l=(int)PyTuple_Size(p);
    for(int i=0;i<l;i++) {
       cJSON *v=mea_PyObjectToJson(PyTuple_GetItem(p,i));
-      if(v)
+      if(v) {
          cJSON_AddItemToArray(j, v);
+      }
    }
       
    return j;
@@ -193,8 +194,9 @@ static cJSON *mea_PyListToJsonArray(PyObject *p)
    int l=(int)PyList_Size(p);
    for(int i=0;i<l;i++) {
       cJSON *v=mea_PyObjectToJson(PyList_GetItem(p,i));
-      if(v)
+      if(v) {
          cJSON_AddItemToArray(j, v);
+      }
    }
       
    return j;
@@ -212,8 +214,9 @@ static cJSON *mea_PyObjectToJsonObject(PyObject *p)
 
    while (PyDict_Next(p, &pos, &key, &value)) {
       cJSON *v=mea_PyObjectToJson(value);
-      if(v)
+      if(v) {
          cJSON_AddItemToObject(j, PYSTRING_ASSTRING(key), v);
+      }
    }
    
    return j;
