@@ -21,8 +21,6 @@
 #include <errno.h>
 #include <string.h>
 
-//#include "debug.h"
-
 #include "globals.h"
 
 #include "mea_verbose.h"
@@ -148,8 +146,9 @@ valid_and_malloc_relay_clean_exit:
       free(actuator);
       actuator=NULL;
    }
-   if(relay_params)
+   if(relay_params) {
       release_parsed_parameters(&relay_params);
+   }
 
    return NULL;
 }
@@ -165,8 +164,9 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
    (i001->indicators.nbactuatorsxplrecv)++;
 
    type_id=get_token_id_by_string(type);
-   if(type_id != XPL_OUTPUT_ID && type_id !=VARIABLE_ID)
+   if(type_id != XPL_OUTPUT_ID && type_id !=VARIABLE_ID) {
       return ERROR;
+   }
    
    if(mea_queue_first(i001->actuators_list)==-1) {
       return ERROR;
@@ -193,15 +193,18 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                   int pulse_width;
                   char *data1=NULL;
                   j=cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_DATA1_ID));
-                  if(j)
+                  if(j) {
                      data1=j->valuestring;
+                  }
                   if(data1) {
                      pulse_width=atoi(data1);
-                     if(pulse_width<=0)
+                     if(pulse_width<=0) {
                         pulse_width=250;
+                     }
                   }
-                  else
+                  else {
                      pulse_width=250;
+                  }
 
                   VERBOSE(9) mea_log_printf("%s (%s) : %s PLUSE %d ms on %d\n", INFO_STR, __func__, device, pulse_width, iq->arduino_pin);
                   
@@ -222,9 +225,9 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                case LOW_ID:
                {
                   int o=0;
-                  
-                  if(current_id==HIGH_ID)
+                  if(current_id==HIGH_ID) {
                      o=255;
+                 }
                   
                   VERBOSE(9) mea_log_printf("%s (%s) : %s set %d on pin %d\n", INFO_STR, __func__, device, o, iq->arduino_pin);
                   
@@ -238,7 +241,7 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                      return ERROR;
                   }
                   /*
-                     ajouter ici l'emission d'un message xpl
+                     TODO : ajouter ici l'emission d'un message xpl
                    */
                   (i001->indicators.nbactuatorsout)++;
                   return NOERROR;
@@ -272,18 +275,26 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
                      inc_dec=1;
                      str=&current[1];
                   }
-                  else str=current;
+                  else {
+                     str=current;
+                  }
                         
                   int n;
                   ret=sscanf(str,"%d%n", &o, &n);
-                  if(o>255) o=255;
+                  if(o>255) {
+                     o=255;
+                  }
                         
                   if(ret==1 && !(strlen(str)-n)) {
                      if(inc_dec) {
                         o=iq->old_val+(uint16_t)o*(uint16_t)inc_dec;
                      }
-                     if(o>255) o=255;
-                     if(o<  0) o=0;
+                     if(o>255) {
+                        o=255;
+                     }
+                     else if(o<0) {
+                        o=0;
+                     }
                   }
                   else {
                      VERBOSE(9) mea_log_printf("%s (%s) : %s ???\n", INFO_STR, __func__, current);

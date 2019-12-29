@@ -346,11 +346,13 @@ mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i0
    i001->indicators.nbsensorsxplrecv++;
    if(type) {
       type_id=get_token_id_by_string(type);
-      if(type_id==-1)
+      if(type_id==-1) {
          return ERROR; // type inconnu, on ne peut pas traiter
+      }
    }
-   else
+   else {
       no_type=1; // type par defaut, le type est celui du capteur
+   }
    
    mea_queue_first(sensors_list);
    for(int i=0; i<sensors_list->nb_elem; i++) {
@@ -414,10 +416,12 @@ mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i0
             case XPL_INPUT_ID:
             {
                if(sensor->arduino_pin_type==DIGITAL_ID) {
-                  if(sensor->val==0)
+                  if(sensor->val==0) {
                      snprintf(value, sizeof(value)-1, "%s", LOW_STR_C);
-                  else
+                  }
+                  else {
                      snprintf(value, sizeof(value)-1, "%s", HIGH_STR_C);
+                  }
                   unit=NULL;
                   send_xpl_flag=1;
                }

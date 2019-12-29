@@ -75,8 +75,9 @@ int16_t interface_type_001_xPL_callback2(cJSON *xplMsgJson, struct device_info_s
    (i001->indicators.nbxplin)++;
 
    j = cJSON_GetObjectItem(xplMsgJson, XPLSCHEMA_STR_C); 
-   if(j)
+   if(j) {
       schema = j->valuestring;
+   }
    else {
       VERBOSE(5) mea_log_printf("%s (%s) : xPL message no schema\n", INFO_STR, __func__);
       return 0;
@@ -249,8 +250,9 @@ int set_xPLCallback_interface_type_001(void *ixxx, xpl2_f cb)
 {
    interface_type_001_t *i001 = (interface_type_001_t *)ixxx;
 
-   if(i001 == NULL)
+   if(i001 == NULL) {
       return -1;
+   }
    else {
       i001->xPL_callback2 = cb;
       return 0;
@@ -262,10 +264,12 @@ xpl2_f get_xPLCallback_interface_type_001(void *ixxx)
 {
    interface_type_001_t *i001 = (interface_type_001_t *)ixxx;
 
-   if(i001 == NULL)
+   if(i001 == NULL) {
       return NULL;
-   else
+   }
+   else {
       return i001->xPL_callback2;
+   }
 }
 
 
@@ -273,8 +277,9 @@ int set_monitoring_id_interface_type_001(void *ixxx, int id)
 {
    interface_type_001_t *i001 = (interface_type_001_t *)ixxx;
 
-   if(i001 == NULL)
+   if(i001 == NULL) {
       return -1;
+   }
    else {
       i001->monitoring_id = id;
       return 0;
@@ -286,10 +291,12 @@ int get_monitoring_id_interface_type_001(void *ixxx)
 {
    interface_type_001_t *i001 = (interface_type_001_t *)ixxx;
 
-   if(i001 == NULL)
+   if(i001 == NULL) {
       return -1;
-   else
+   }
+   else {
       return i001->monitoring_id;
+   }
 }
 
 
@@ -396,8 +403,9 @@ interface_type_001_t *malloc_and_init2_interface_type_001(int id_driver, cJSON *
 
 int clean_interface_type_001(interface_type_001_t *i001)
 {
-   if(i001==NULL)
+   if(i001==NULL) {
       return 0;
+   }
 
    if(i001->counters_list) {
       struct counter_s *counter;
@@ -516,8 +524,9 @@ int restart_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg
 
 int stop_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
 {
-   if(!data)
+   if(!data) {
       return -1;
+   }
 
    struct interface_type_001_start_stop_params_s *start_stop_params=(struct interface_type_001_start_stop_params_s *)data;
 
@@ -622,15 +631,15 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
    }
    else {
       VERBOSE(5) mea_log_printf("%s (%s) : no sensor/actuator active for this interface (%d) - ",ERROR_STR,__func__,start_stop_params->i001->interface_id);
-
       goto start_interface_type_001_clean_exit;
    }
    
    start_stop_params->i001->ad=ad;
    
    interface_type_001_thread_params=malloc(sizeof(struct interface_type_001_thread_params_s));
-   if(!interface_type_001_thread_params)
+   if(!interface_type_001_thread_params) {
       goto start_interface_type_001_clean_exit;
+   }
    
    interface_type_001_thread_params->it001=start_stop_params->i001;
    
@@ -663,8 +672,9 @@ start_interface_type_001_clean_exit:
       free(interface_type_001_thread_id);
       interface_type_001_thread_id=NULL;
    }
-   if(fd)
+   if(fd) {
       comio2_close(ad);
+   }
    if(ad) {
       free(ad);
       ad=NULL;

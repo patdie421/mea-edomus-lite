@@ -99,8 +99,9 @@ static int interface_type_006_data_to_plugin(cJSON *jsonInterface, cJSON *jsonDe
 
    plugin_params=alloc_parsed_parameters(parameters, valid_genericserial_plugin_params, &nb_plugin_params, &err, 0);
    if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
-      if(plugin_params)
+      if(plugin_params) {
          release_parsed_parameters(&plugin_params);
+      }
       return -1;
    }
 
@@ -191,8 +192,9 @@ void *_thread_interface_type_006_genericserial_data_cleanup(void *args)
 {
    struct genericserial_thread_params_s *params=(struct genericserial_thread_params_s *)args;
 
-   if(!params)
+   if(!params) {
       return NULL;
+   }
    
    if(params->i006->fd!=-1) {
       close(params->i006->fd);
@@ -402,8 +404,9 @@ int clean_interface_type_006(void *ixxx)
       i006->parameters=NULL;
    }
 
-   if(i006->xPL_callback2)
+   if(i006->xPL_callback2) {
       i006->xPL_callback2=NULL;
+   }
 
    if(i006->thread) {
       free(i006->thread);
@@ -428,10 +431,12 @@ xpl2_f get_xPLCallback_interface_type_006(void *ixxx)
 {
    interface_type_006_t *i006 = (interface_type_006_t *)ixxx;
 
-   if(i006 == NULL)
+   if(i006 == NULL) {
       return NULL;
-   else
+   }
+   else {
       return i006->xPL_callback2;
+   }
 }
 
 
@@ -439,10 +444,12 @@ int get_monitoring_id_interface_type_006(void *ixxx)
 {
    interface_type_006_t *i006 = (interface_type_006_t *)ixxx;
 
-   if(i006 == NULL)
+   if(i006 == NULL) {
       return -1;
-   else
+   }
+   else {
       return i006->monitoring_id;
+   }
 }
 
 
@@ -450,8 +457,9 @@ int set_xPLCallback_interface_type_006(void *ixxx, xpl2_f cb)
 {
    interface_type_006_t *i006 = (interface_type_006_t *)ixxx;
 
-   if(i006 == NULL)
+   if(i006 == NULL) {
       return -1;
+   }
    else {
       i006->xPL_callback2 = cb;
       return 0;
@@ -463,8 +471,9 @@ int set_monitoring_id_interface_type_006(void *ixxx, int id)
 {
    interface_type_006_t *i006 = (interface_type_006_t *)ixxx;
 
-   if(i006 == NULL)
+   if(i006 == NULL) {
       return -1;
+   }
    else {
       i006->monitoring_id = id;
       return 0;
@@ -587,8 +596,9 @@ interface_type_006_t *malloc_and_init2_interface_type_006(int id_driver, cJSON *
    strncpy(i006->name, (char *)name, sizeof(i006->name)-1);
    i006->id_interface=id_interface;
    i006->parameters=(char *)malloc(strlen((char *)parameters)+1);
-   if(i006->parameters)
+   if(i006->parameters) {
       strcpy(i006->parameters,(char *)parameters);
+   }
    i006->indicators.senttoplugin=0;
    i006->indicators.xplin=0;
    i006->indicators.serialin=0;
@@ -621,8 +631,9 @@ interface_type_006_t *malloc_and_init2_interface_type_006(int id_driver, cJSON *
 
 int stop_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
 {
-   if(!data)
+   if(!data) {
       return -1;
+   }
 
    struct interface_type_006_data_s *start_stop_params=(struct interface_type_006_data_s *)data;
 
@@ -652,8 +663,9 @@ int stop_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
       }
       DEBUG_SECTION mea_log_printf("%s (%s) : %s, fin après %d itération(s)\n",DEBUG_STR, __func__,start_stop_params->i006->name,100-counter);
 
-      if(!start_stop_params->i006->thread)
+      if(!start_stop_params->i006->thread) {
          free(start_stop_params->i006->thread);
+      }
       start_stop_params->i006->thread=NULL;
    }
  
@@ -695,8 +707,7 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
          goto clean_exit;
       }
    }
-   else
-   {
+   else {
       VERBOSE(2) mea_log_printf("%s (%s) : incorrect device/speed interface - %s\n", ERROR_STR, __func__, start_stop_params->i006->dev);
       goto clean_exit;
    }
@@ -712,8 +723,9 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
          interface_parameters=NULL;
          VERBOSE(9) mea_log_printf("%s (%s) : no python plugin specified\n", INFO_STR, __func__);
       }
-      else
+      else {
          VERBOSE(5) mea_log_printf("%s (%s) : invalid or no python plugin parameters (%s)\n", ERROR_STR, __func__, start_stop_params->i006->parameters);
+      }
    }
    else {
       start_stop_params->i006->interface_plugin_name = malloc(strlen(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s)+1);
@@ -756,10 +768,8 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
       return 0;
    }
 
-   {
-      strerror_r(errno, err_str, sizeof(err_str));
-      VERBOSE(2) mea_log_printf("%s  (%s) : %s can't start - %s.\n", ERROR_STR, __func__, start_stop_params->i006->name, err_str);
-   } 
+   strerror_r(errno, err_str, sizeof(err_str));
+   VERBOSE(2) mea_log_printf("%s  (%s) : %s can't start - %s.\n", ERROR_STR, __func__, start_stop_params->i006->name, err_str);
 
 clean_exit:
    if(start_stop_params->i006->thread) {
