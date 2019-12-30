@@ -8,12 +8,12 @@
 #include "enocean.h"
 #include "cJSON.h"
 #include "mea_verbose.h"
-#include "python_utils.h"
 #include "mea_timer.h"
 #include "parameters_utils.h"
 #include "tokens.h"
 #include "tokens_da.h"
 #include "mea_verbose.h"
+#include "mea_plugins_utils.h"
 
 
 int16_t enocean_teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, uint16_t l_data, uint8_t *eep, int16_t teach) /* TO TEST */
@@ -499,7 +499,8 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
       }
    }
    else {
-      _devices=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
+//      _devices=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
+      _devices=plugin_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
    }
 
 //   char *s=cJSON_Print(_devices);

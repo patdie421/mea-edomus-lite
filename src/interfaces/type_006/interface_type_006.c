@@ -27,7 +27,7 @@
 #include "macros.h"
 #include "parameters_utils.h"
 
-#include "python_utils.h"
+#include "mea_plugins_utils.h"
 #include "processManager.h"
 #include "interfacesServer.h"
 #include "mea_xpl.h"
@@ -76,7 +76,8 @@ int interface_type_006_call_serialDataPre(struct genericserial_thread_params_s *
       if(params->i006->interface_plugin_parameters) {
          cJSON_AddStringToObject(data, PLUGIN_PARAMETERS_STR_C, params->i006->interface_plugin_parameters);
       }
-      cJSON *result=python_call_function_json_alloc(params->i006->interface_plugin_name, "mea_dataPreprocessor", data);
+//      cJSON *result=python_call_function_json_alloc(params->i006->interface_plugin_name, "mea_dataPreprocessor", data);
+      cJSON *result=plugin_call_function_json_alloc(params->i006->interface_plugin_name, "mea_dataPreprocessor", data);
       
       if(result) {
          cJSON_Delete(result);
@@ -117,7 +118,8 @@ static int interface_type_006_data_to_plugin(cJSON *jsonInterface, cJSON *jsonDe
       cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
    }
 
-   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
+//   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
+   plugin_fireandforget_function_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
 
    if(plugin_params) {
       release_parsed_parameters(&plugin_params);
@@ -176,7 +178,8 @@ int16_t _interface_type_006_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
       cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
 
-   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+//   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+   plugin_fireandforget_function_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
    i006->indicators.senttoplugin++;
 
@@ -721,10 +724,10 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
          release_parsed_parameters(&interface_parameters);
          interface_nb_parameters=0;
          interface_parameters=NULL;
-         VERBOSE(9) mea_log_printf("%s (%s) : no python plugin specified\n", INFO_STR, __func__);
+         VERBOSE(9) mea_log_printf("%s (%s) : no plugin specified\n", INFO_STR, __func__);
       }
       else {
-         VERBOSE(5) mea_log_printf("%s (%s) : invalid or no python plugin parameters (%s)\n", ERROR_STR, __func__, start_stop_params->i006->parameters);
+         VERBOSE(5) mea_log_printf("%s (%s) : invalid or no plugin parameters (%s)\n", ERROR_STR, __func__, start_stop_params->i006->parameters);
       }
    }
    else {
@@ -740,7 +743,8 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
          cJSON_AddStringToObject(data, INTERFACE_PARAMETERS_STR_C, start_stop_params->i006->interface_plugin_parameters);
       }
       
-      cJSON *result=python_call_function_json_alloc(start_stop_params->i006->interface_plugin_name, "mea_init", data);
+//      cJSON *result=python_call_function_json_alloc(start_stop_params->i006->interface_plugin_name, "mea_init", data);
+      cJSON *result=plugin_call_function_json_alloc(start_stop_params->i006->interface_plugin_name, "mea_init", data);
       
       if(result) {
          cJSON_Delete(result);

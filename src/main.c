@@ -4,6 +4,12 @@
 //  Created by Patrice DIETSCH on 08/07/12.
 //  Copyright (c) 2012 -. All rights reserved.
 //
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
+#include <Python.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>

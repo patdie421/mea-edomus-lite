@@ -39,8 +39,7 @@
 
 #include "xbee.h"
 #include "serial.h"
-#include "pythonPluginServer.h"
-#include "python_utils.h"
+#include "mea_plugins_utils.h"
 
 #include "processManager.h"
 #include "mea_xpl.h"
@@ -365,7 +364,8 @@ int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    cJSON_AddNumberToObject(data, get_token_string_by_id(ID_XBEE_ID), (double)((long)interface->xd));
    cJSON_AddNumberToObject(data, API_KEY_STR_C, interface->id_interface);
 
-   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+//   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+   plugin_fireandforget_function_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
    interface->indicators.senttoplugin++;
 
@@ -459,7 +459,8 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
    }
    cJSON_AddNumberToObject(_data, API_KEY_STR_C, callback_commissionning->i002->id_interface);
 
-   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, COMMISSIONNING, data);
+   //python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, COMMISSIONNING, data);
+   plugin_fireandforget_function_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, COMMISSIONNING, data);
    
    *(callback_commissionning->senttoplugin)=*(callback_commissionning->senttoplugin)+1;
 
@@ -557,7 +558,8 @@ mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, st
       }
       cJSON_AddNumberToObject(data, API_KEY_STR_C, device_info.interface_id);
       
-      python_cmd_json(params->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XBEEDATA, data);
+//      python_cmd_json(params->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XBEEDATA, data);
+      plugin_fireandforget_function_json(params->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XBEEDATA, data);
       
       params->i002->indicators.senttoplugin++;
 
@@ -1483,7 +1485,8 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
       }
       cJSON_AddNumberToObject(data, API_KEY_STR_C, start_stop_params->i002->id_interface);
       
-      python_call_function_json_alloc(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
+      //python_call_function_json_alloc(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
+      plugin_call_function_json_alloc(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
 
       if(interface_parameters)
          release_parsed_parameters(&interface_parameters);

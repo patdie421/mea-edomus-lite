@@ -27,7 +27,7 @@
 #include "configuration.h"
 
 #include "pythonPluginServer.h"
-#include "python_utils.h"
+#include "mea_python_json_utils.h"
 #include "processManager.h"
 
 // #define free(x) free(x);

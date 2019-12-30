@@ -36,8 +36,7 @@
 #include "mea_xpl.h"
 
 #include "processManager.h"
-#include "pythonPluginServer.h"
-#include "python_utils.h"
+#include "mea_plugins_utils.h"
 #include "interfacesServer.h"
 
 
@@ -112,7 +111,8 @@ int16_t _interface_type_010_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
       cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
    }
-   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+//   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+   plugin_fireandforget_function_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
    release_parsed_parameters(&plugin_params);
    plugin_params=NULL;
@@ -283,7 +283,8 @@ int interface_type_010_data_preprocessor(interface_type_010_t *i010)
             cJSON_AddStringToObject(data, PLUGIN_PARAMETERS_STR_C, i010->interface_plugin_parameters);
          }
       }
-      cJSON *result=python_call_function_json_alloc(i010->interface_plugin_name, "mea_dataPreprocessor", data);
+//      cJSON *result=python_call_function_json_alloc(i010->interface_plugin_name, "mea_dataPreprocessor", data);
+      cJSON *result=plugin_call_function_json_alloc(i010->interface_plugin_name, "mea_dataPreprocessor", data);
       
       if(result) {
          cJSON_Delete(result);
@@ -311,7 +312,8 @@ int interface_type_010_pairing(interface_type_010_t *i010)
       j=cJSON_CreateObject();
       cJSON_AddItemToObject(j, DATA_STR_C, cJSON_CreateByteArray((char *)i010->line_buffer, i010->line_buffer_ptr));
       cJSON_AddNumberToObject(j, L_DATA_STR_C, (double)i010->line_buffer_ptr);
-      _j=python_call_function_json_alloc(name, "pairing_get_devices", j);
+//      _j=python_call_function_json_alloc(name, "pairing_get_devices", j);
+      _j=plugin_call_function_json_alloc(name, "pairing_get_devices", j);
 
       VERBOSE(5) {
          char *s=cJSON_Print(_j);
@@ -371,7 +373,8 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
    cJSON_AddItemToObject(data,DATA_STR_C,cJSON_CreateByteArray(i010->line_buffer, i010->line_buffer_ptr));
    cJSON_AddNumberToObject(data,L_DATA_STR_C, (double)i010->line_buffer_ptr);
 
-   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
+//   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
+   plugin_fireandforget_function_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
    
    i010->indicators.senttoplugin++;
 
@@ -1059,7 +1062,8 @@ void *_thread_interface_type_010(void *args)
       if(params->i010->interface_plugin_parameters) {
          cJSON_AddStringToObject(jsonData, INTERFACE_PARAMETERS_STR_C, params->i010->interface_plugin_parameters);
       }
-      result=python_call_function_json_alloc(params->i010->interface_plugin_name, "mea_init", jsonData);
+//      result=python_call_function_json_alloc(params->i010->interface_plugin_name, "mea_init", jsonData);
+      result=plugin_call_function_json_alloc(params->i010->interface_plugin_name, "mea_init", jsonData);
       if(result) {
          cJSON_Delete(result);
       }

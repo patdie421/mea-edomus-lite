@@ -31,7 +31,7 @@
 #include "enocean.h"
 #include "serial.h"
 #include "parameters_utils.h"
-#include "python_utils.h"
+#include "mea_plugins_utils.h"
 #include "mea_xpl.h"
 #include "processManager.h"
 
@@ -141,7 +141,8 @@ int16_t _interface_type_003_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
       cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
 
-   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+   //python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+   plugin_fireandforget_function_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
    release_parsed_parameters(&plugin_params);
    plugin_params=NULL;
@@ -330,7 +331,8 @@ void *_thread_interface_type_003_enocean_data(void *args)
                   cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)(long)udata->i003->id_interface);
                   if(udata->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
                      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, udata->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
-                  python_cmd_json(udata->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
+//                  python_cmd_json(udata->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
+                  plugin_fireandforget_function_json(udata->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
                   udata->i003->indicators.senttoplugin++;
 
 _thread_interface_type_003_enocean_next_device_loop:
@@ -880,10 +882,10 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
          // pas de plugin spécifié
          release_parsed_parameters(&interface_parameters);
          interface_parameters=NULL;
-         VERBOSE(9) mea_log_printf("%s (%s) : no python plugin specified\n", INFO_STR, __func__);
+         VERBOSE(9) mea_log_printf("%s (%s) : no plugin specified\n", INFO_STR, __func__);
       }
       else {
-         VERBOSE(5) mea_log_printf("%s (%s) : invalid or no python plugin parameters (%s)\n", ERROR_STR, __func__, start_stop_params->i003->parameters);
+         VERBOSE(5) mea_log_printf("%s (%s) : invalid or no plugin parameters (%s)\n", ERROR_STR, __func__, start_stop_params->i003->parameters);
       }
    }
    else {
@@ -895,7 +897,8 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
             cJSON_AddStringToObject(data, INTERFACE_PARAMETERS_STR_C, interface_parameters->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
          }
 
-         result=python_call_function_json_alloc(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
+//         result=python_call_function_json_alloc(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
+         result=plugin_call_function_json_alloc(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
          if(result) {
             char *s=cJSON_Print(result);
             DEBUG_SECTION mea_log_printf("%s (%s) : Result of call of mea_init : %s\n", DEBUG_STR, __func__, s);

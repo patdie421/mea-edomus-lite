@@ -11,8 +11,8 @@
 #include <Python.h>
 #endif
 
-#ifndef mea_eDomus_python_utils_h
-#define mea_eDomus_python_utils_h
+#ifndef mea_python_json_utils_h
+#define mea_python_json_utils_h
 
 #include "cJSON.h"
 #include "interfacesServer.h"
@@ -73,7 +73,9 @@ int mea_call_python_function2(PyObject *pFunc, PyObject *plugin_params_dict);
 
 cJSON    *mea_PyObjectToJson(PyObject *p);
 PyObject *mea_jsonToPyObject(cJSON *j);
+/*
 int       python_cmd_json(char *module, int type, cJSON *data);
 cJSON    *python_call_function_json_alloc(char *module, char *function, cJSON *data);
+*/
 
 #endif

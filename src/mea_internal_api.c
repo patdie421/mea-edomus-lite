@@ -19,7 +19,7 @@
 #include "enocean.h"
 #include "mea_verbose.h"
 
-#include "python_utils.h"
+#include "mea_python_json_utils.h"
 #include "interfacesServer.h"
 
 #include "mea_internal_api.h"
