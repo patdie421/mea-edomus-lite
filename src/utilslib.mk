@@ -41,8 +41,9 @@ SOURCES= cJSON.c \
 consts.c \
 processManager.c  \
 parameters_utils.c  \
-python_utils.c  \
 mea_queue.c  \
+mea_python_json_utils.c \
+mea_plugins_utils.c \
 mea_sockets_utils.c \
 mea_string_utils.c \
 mea_timer.c  \

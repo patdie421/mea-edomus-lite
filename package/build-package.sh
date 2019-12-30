@@ -26,6 +26,9 @@ mkdir -p $SOURCE/package/tmp/lib/mea-plugins
 mkdir -p $SOURCE/package/tmp/lib/mea-drivers
 mkdir -p $SOURCE/package/tmp/lib/mea-rules
 mkdir -p $SOURCE/package/tmp/etc
+mkdir -p $SOURCE/package/tmp/cli
+mkdir -p $SOURCE/package/tmp/cli/lib
+mkdir -p $SOURCE/package/tmp/cli/modules
 if [ "$TECHNO" == "linux" ]
 then
    mkdir -p $SOURCE/package/tmp/etc/init.d
@@ -64,6 +67,10 @@ then
 fi
 
 cp $SOURCE/mea-edomus.$TECHNO $SOURCE/package/tmp/bin/mea-edomus
+
+cp -R $SOURCE/cli/*.py $SOURCE/package/tmp/cli
+cp -R $SOURCE/cli/modules/*.py $SOURCE/package/tmp/cli/modules
+cp -R $SOURCE/cli/lib/*.py $SOURCE/package/tmp/cli/lib
 
 if [ -f $SOURCE/complements/xplhub/src/xplhub/xplhub ]
 then
