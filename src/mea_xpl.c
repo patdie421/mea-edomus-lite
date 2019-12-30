@@ -122,44 +122,6 @@ int mea_xPLConnectBroadcast(char *xPLInterfaceName, char *ip, int l_ip, struct s
    return sockfd;
 }
 
-/*
- // Try to increase the receive buffer as big as possible.  if we make it bigger, return TRUE.  Otherwise, if no change, FALSE
- int16_t maximizeReceiveBufferSize(int thefd)
- {
- int startRcvBuffSize, idealRcvBuffSize, finalRcvBuffSize;
- socklen_t buffLen = sizeof(int);
- 
- // Get current receive buffer size
- if (getsockopt(thefd, SOL_SOCKET, SO_RCVBUF, &startRcvBuffSize, &buffLen) != 0)
- VERBOSE(5) mea_log_printf("Unable to read receive socket buffer size - %s (%d)\n", strerror(errno), errno);
- else
- VERBOSE(5)mea_log_printf("Initial receive socket buffer size is %d bytes\n", startRcvBuffSize);
- 
- // Try to increase the buffer (maybe multiple times)
- for (idealRcvBuffSize = 1024000; idealRcvBuffSize > startRcvBuffSize; ) {
- // Attempt to set the buffer size
- if (setsockopt(thefd, SOL_SOCKET, SO_RCVBUF, &idealRcvBuffSize, sizeof(int)) != 0) {
- VERBOSE(5) mea_log_printf("Not able to set receive buffer to %d bytes - retrying\n", idealRcvBuffSize);
- idealRcvBuffSize -= 64000;
- continue;
- }
- 
- // We did it!  Get the current size and bail out
- buffLen = sizeof(int);
- if (getsockopt(thefd, SOL_SOCKET, SO_RCVBUF, &finalRcvBuffSize, &buffLen) != 0)
- VERBOSE(5) mea_log_printf("Unable to read receive socket buffer size - %s (%d)\n", strerror(errno), errno);
- else
- VERBOSE(5) mea_log_printf("Actual receive socket buffer size is %d bytes\n", finalRcvBuffSize);
- 
- if(finalRcvBuffSize > startRcvBuffSize)
- return 0;
- }
- 
- // We weren't able to increase it
- 
- return -1;
- }
- */
 
 /* Attempt to make a hub based connection */
 int mea_xPLConnectHub(int *xPLPort)

@@ -141,8 +141,9 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
    close(fd_dest);
  
 mea_rotate_open_log_file_clean_exit:
-   if(fd)
+   if(fd) {
       fclose(fd);
+   }
 
    if(name_old) {
       free(name_old);

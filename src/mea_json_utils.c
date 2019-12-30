@@ -72,5 +72,3 @@ cJSON *loadJson_alloc(char *file)
       return NULL;
    }
 }
-
-

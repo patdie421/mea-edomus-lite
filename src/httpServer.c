@@ -269,7 +269,9 @@ static int _begin_request_handler(struct mg_connection *conn)
    }
 
 
-   return 0;
+   httpResponse(conn, 404, NULL, "");
+//   _httpErrno(conn, 1, "not found");
+   return 1;
 }
 
 

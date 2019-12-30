@@ -125,9 +125,11 @@ int16_t mea_test_timer(mea_timer_t *aTimer)
          }
          return 0;
       }
-      else
+      else {
          return -1;
+      }
    }
-   else
+   else {
       return -1;
+   }
 }

@@ -1,0 +1,8 @@
+API Callback
+   enregistrement callback
+   appeler les callbacks en fonction de l'abonnement
+
+InterfacesServers / REST API
+   finaliser les "types"
+
+

@@ -134,11 +134,9 @@ int mea_socket_connect(int *s, char *hostname, int port)
    serv_addr.sin_port   = htons(port);
    bcopy((char *)serv_info->h_addr, (char *)&serv_addr.sin_addr.s_addr, serv_info->h_length);
    
-//   if(connect(sock, (const struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
    if(mea_connect(sock, (const struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
       DEBUG_SECTION {
          mea_log_printf("%s (%s) :  connect - can't connect (hostname=%s, port=%d)\n", ERROR_STR, __func__, hostname, port);
-//         perror("");
       }
       close(sock);
       return -1;
@@ -149,24 +147,11 @@ int mea_socket_connect(int *s, char *hostname, int port)
 }
 
 
-//pthread_mutex_t mea_socket_send_lock;
-//int mea_socket_send_lock_is_init=0;
 int mea_socket_send(int *s, char *message, int l_message)
 {
    int ret;
    
-//   if(mea_socket_send_lock_is_init==0) {
-//      pthread_mutex_init(&mea_socket_send_lock, NULL);
-//      mea_socket_send_lock_is_init=1;
-//   }
-   
-//   pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&mea_socket_send_lock );
-//   pthread_mutex_lock(&mea_socket_send_lock);
-   
    ret=(int)send(*s, message, l_message, 0);
-
-//   pthread_mutex_unlock(&mea_socket_send_lock);
-//   pthread_cleanup_pop(0);
 
    if(ret < 0) {
       DEBUG_SECTION {
@@ -180,8 +165,6 @@ int mea_socket_send(int *s, char *message, int l_message)
 }
 
 
-//pthread_mutex_t mea_socket_read_lock;
-//int mea_socket_read_lock_is_init=0;
 int mea_socket_read(int *s, char *message, int l_message, int t)
 {
    fd_set input_set;
@@ -189,14 +172,7 @@ int mea_socket_read(int *s, char *message, int l_message, int t)
    char buff[80];
    ssize_t l=0;
    
-//   if(mea_socket_read_lock_is_init==0) {
-//      pthread_mutex_init(&mea_socket_read_lock, NULL);
-//      mea_socket_read_lock_is_init=1;
-//   }
-
    int16_t ret=0;
-//   pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&mea_socket_read_lock );
-//   pthread_mutex_lock(&mea_socket_read_lock);
    if(t) {
       timeout.tv_sec  = t;
       timeout.tv_usec = 0;
@@ -209,14 +185,14 @@ int mea_socket_read(int *s, char *message, int l_message, int t)
 
    if(ret>=0) {
       l = recv(*s, buff, sizeof(buff), 0);
-      if(l<0)
+      if(l<0) {
          ret=-1;
+      }
    }
-//   pthread_mutex_unlock(&mea_socket_read_lock);
-//   pthread_cleanup_pop(0);
 
-   if(ret<0)
+   if(ret<0) {
       return -1;
+   }
       
    if(l>l_message) {
       memcpy(message, buff, l_message);

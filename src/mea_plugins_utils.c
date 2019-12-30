@@ -6,15 +6,11 @@
 //
 //
 #include "pythonPluginServer.h"
-#include <stdio.h>
-
 #include "cJSON.h"
-
 #include "mea_plugins_utils.h"
 
 
 int plugin_fireandforget_function_json(char *module, int type, cJSON *data)
-//int python_cmd_json(char *module, int type, cJSON *data)
 {
    plugin_queue_elem_t *plugin_elem = (plugin_queue_elem_t *)malloc(sizeof(plugin_queue_elem_t));
    if(plugin_elem) {
@@ -30,7 +26,6 @@ int plugin_fireandforget_function_json(char *module, int type, cJSON *data)
 
 
 cJSON *plugin_call_function_json_alloc(char *module, char *function, cJSON *data)
-//cJSON *python_call_function_json_alloc(char *module, char *function, cJSON *data)
 {
    cJSON *result=NULL;
    

@@ -14,8 +14,9 @@
 
 unsigned long mea_queue_nb_elem(mea_queue_t *queue)
 {
-   if(!queue)
+   if(!queue) {
       return -1;
+   }
 
    return queue->nb_elem;
 }
@@ -25,12 +26,14 @@ mea_error_t mea_queue_in_elem(mea_queue_t *queue, void *data)
 {
    struct mea_queue_elem *new;
    
-   if(!queue)
+   if(!queue) {
       return ERROR;
+   }
 
    new=(struct mea_queue_elem *)malloc(sizeof(struct mea_queue_elem));
-   if(!new)
+   if(!new) {
       return ERROR;
+   }
    
    new->d=data;
    
@@ -60,8 +63,9 @@ mea_error_t mea_queue_out_elem(mea_queue_t *queue, void **data)
 {
    struct mea_queue_elem *ptr;
    
-   if(!queue)
+   if(!queue) {
       return ERROR;
+   }
    
    if(queue->last) {
       ptr=queue->last;
@@ -78,8 +82,9 @@ mea_error_t mea_queue_out_elem(mea_queue_t *queue, void **data)
       free(ptr);
       ptr=NULL;
    }
-   else
+   else {
       return ERROR;
+   }
    
    queue->nb_elem--;
 #ifdef QUEUE_ENABLE_INDEX
@@ -92,8 +97,9 @@ mea_error_t mea_queue_out_elem(mea_queue_t *queue, void **data)
 
 mea_error_t mea_queue_init(mea_queue_t *queue)
 {
-   if(!queue)
+   if(!queue) {
       return ERROR;
+   }
 
    queue->clone_flag=0;
    queue->first=NULL;
@@ -113,8 +119,9 @@ mea_error_t mea_queue_init(mea_queue_t *queue)
 
 mea_error_t mea_queue_clone(mea_queue_t *n, mea_queue_t *s)
 {
-   if(!s)
+   if(!s) {
       return ERROR;
+   }
 
    n->clone_flag=1;
    n->first=s->first;
@@ -134,8 +141,9 @@ mea_error_t mea_queue_clone(mea_queue_t *n, mea_queue_t *s)
 
 mea_error_t mea_queue_first(mea_queue_t *queue)
 {
-    if(!queue || !queue->first)
+    if(!queue || !queue->first) {
       return ERROR;
+    }
    
    queue->current=queue->first;
    return NOERROR;
@@ -144,8 +152,9 @@ mea_error_t mea_queue_first(mea_queue_t *queue)
 
 mea_error_t mea_queue_last(mea_queue_t *queue)
 {
-   if(!queue || !queue->last)
+   if(!queue || !queue->last) {
       return ERROR;
+   }
    
    queue->current=queue->last;
    return NOERROR;
@@ -154,8 +163,9 @@ mea_error_t mea_queue_last(mea_queue_t *queue)
 
 mea_error_t mea_queue_next(mea_queue_t *queue)
 {
-   if(!queue || !queue->current)
+   if(!queue || !queue->current) {
       return ERROR;
+   }
    
    if(!queue->current->next) {
       queue->current=NULL;
@@ -169,8 +179,10 @@ mea_error_t mea_queue_next(mea_queue_t *queue)
 
 mea_error_t mea_queue_prev(mea_queue_t *queue)
 {
-   if(!queue || !queue->current)
+   if(!queue || !queue->current) {
       return ERROR;
+   }
+
    if(!queue->current->prev) {
       queue->current=NULL;
       return ERROR;
@@ -186,8 +198,9 @@ mea_error_t mea_queue_cleanup(mea_queue_t *queue, mea_queue_free_data_f f)
 {
    struct mea_queue_elem *ptr;
    
-   if(!queue)
+   if(!queue) {
       return ERROR;
+   }
 
    while(queue->nb_elem>0) {
       if(queue->last) {
@@ -202,14 +215,16 @@ mea_error_t mea_queue_cleanup(mea_queue_t *queue, mea_queue_free_data_f f)
             queue->last->next=NULL;
          }
          if(ptr->d) {
-            if(f)
+            if(f) {
                f(ptr->d);
+            }
          }
          free(ptr);
          ptr=NULL;
       }
-      else 
+      else {
          return NOERROR;
+      }
       
       queue->nb_elem--;    
    }
@@ -245,20 +260,21 @@ mea_error_t mea_queue_current(mea_queue_t *queue, void **data)
 
 mea_error_t mea_queue_remove_current(mea_queue_t *queue)
 {
-   if(!queue)
+   if(!queue) {
       return ERROR;
+   }
 
-    if(queue->nb_elem==0)
-       return ERROR;
+   if(queue->nb_elem==0)
+      return ERROR;
    
-    if(queue->nb_elem==1) {
-       free(queue->current);
-       queue->current=NULL;
-       queue->first=NULL;
-       queue->last=NULL;
-       queue->nb_elem=0;
-       return NOERROR;
-    }
+   if(queue->nb_elem==1) {
+      free(queue->current);
+      queue->current=NULL;
+      queue->first=NULL;
+      queue->last=NULL;
+      queue->nb_elem=0;
+      return NOERROR;
+   }
    
    struct mea_queue_elem *prev;
    struct mea_queue_elem *next;
@@ -276,11 +292,13 @@ mea_error_t mea_queue_remove_current(mea_queue_t *queue)
       next->prev=queue->current->prev;
    }
    
-   if(queue->current==queue->first)
+   if(queue->current==queue->first) {
       queue->first=queue->current->next;
+   }
    
-   if(queue->current==queue->last)
+   if(queue->current==queue->last) {
       queue->last=queue->current->prev;
+   }
    
    queue->nb_elem--;
    
@@ -300,12 +318,14 @@ mea_error_t mea_queue_process_all_elem_data(mea_queue_t *queue, void (*f)(void *
 {
    struct mea_queue_elem *ptr;
    
-   if(!queue)
+   if(!queue) {
       return ERROR;
+   }
 
    ptr=queue->first;
-   if(!ptr)
+   if(!ptr) {
       return ERROR;
+   }
    do {
       f(ptr->d);
       ptr=ptr->next;
@@ -321,12 +341,14 @@ mea_error_t mea_queue_find_elem(mea_queue_t *queue, mea_queue_compare_data_f cmp
    struct mea_queue_elem *ptr;
    
    *data=NULL;
-   if(!queue)
+   if(!queue) {
       return ERROR;
+   }
 
    ptr=queue->first;
-   if(!ptr)
+   if(!ptr) {
       return ERROR;
+   }
    do {
       if(cmpf(data_to_find, ptr->d)==0) {
          *data=ptr->d;
@@ -344,33 +366,37 @@ mea_error_t mea_queue_find_elem(mea_queue_t *queue, mea_queue_compare_data_f cmp
 mea_error_t mea_queue_get_elem_by_index(mea_queue_t *queue, int i, void **data)
 {
    *data=NULL;
-   if(!queue || !queue->index)
+   if(!queue || !queue->index) {
       return ERROR;
-   if(queue->index_status!=1)
+   }
+   if(queue->index_status!=1) {
       return ERROR;
+   }
 
    if(i>=0 && i<queue->nb_elem) {
       *data=queue->index[i];
       return NOERROR;
    }
-   else
+   else {
       return ERROR;
+   }
 }
 
 
 static int _create_index(mea_queue_t *queue)
 {
-   if(queue->nb_elem<=0)
+   if(queue->nb_elem<=0) {
       return ERROR;
+   }
 
-   if(!queue)
+   if(!queue) {
       return ERROR;
+   }
 
    int i=0;
    struct mea_queue_elem *ptr;
    ptr=queue->first;
-   do
-   {
+   do {
       queue->index[i++]=ptr->d;
       ptr=ptr->next;
 
@@ -388,8 +414,9 @@ static int _create_index(mea_queue_t *queue)
 
 mea_error_t mea_queue_create_index(mea_queue_t *queue, mea_queue_compare_data_f f)
 {
-   if(!queue)
+   if(!queue) {
       return ERROR;
+   }
 
    if(queue->index) {
       free(queue->index);
@@ -401,8 +428,9 @@ mea_error_t mea_queue_create_index(mea_queue_t *queue, mea_queue_compare_data_f 
    
    if(queue->nb_elem>0) {
       queue->index=malloc(queue->nb_elem * sizeof(void *));
-      if(!queue->index)
+      if(!queue->index) {
          return ERROR;
+      }
 
       if(_create_index(queue)!=ERROR) {
          queue->index_status = 1;
@@ -424,20 +452,25 @@ mea_error_t mea_queue_recreate_index(mea_queue_t *queue, char force)
 {
    void  **old_index=NULL;
    
-   if(!queue)
+   if(!queue) {
       return ERROR;
+   }
 
-   if(queue->index_status==1 && force==0)
+   if(queue->index_status==1 && force==0) {
       return NOERROR;
+   }
       
-   if(!queue->first)
+   if(!queue->first) {
       return NOERROR;
+   }
       
-   if(!queue->index_order_f)
+   if(!queue->index_order_f) {
       return ERROR;
+   }
       
-   if(queue->index)
+   if(queue->index) {
       old_index=queue->index;
+   }
 
    queue->index=malloc(queue->nb_elem * sizeof(void *));
    if(!queue->index) {
@@ -462,10 +495,12 @@ mea_error_t mea_queue_recreate_index(mea_queue_t *queue, char force)
 
 mea_error_t mea_queue_remove_index(mea_queue_t *queue)
 {
-   if(!queue)
+   if(!queue) {
       return ERROR;
-   if(!queue->index)
+   }
+   if(!queue->index) {
       return NOERROR;
+   }
    free(queue->index);
    queue->index=NULL;
    queue->index_order_f = NULL;
@@ -477,8 +512,9 @@ mea_error_t mea_queue_remove_index(mea_queue_t *queue)
 
 mea_error_t mea_queue_find_elem_using_index(mea_queue_t *queue, void *data_to_find, void **data)
 {
-   if(!queue || !queue->index || !queue->index_status || !queue->nb_elem)
+   if(!queue || !queue->index || !queue->index_status || !queue->nb_elem) {
       return ERROR;
+   }
    unsigned long start = 0;
    unsigned long end = queue->nb_elem - 1;
    unsigned long middle = 0;
@@ -492,18 +528,19 @@ mea_error_t mea_queue_find_elem_using_index(mea_queue_t *queue, void *data_to_fi
    _tmp_qe.next=NULL;
    _tmp_qe.prev=NULL;
 
-   do
-   {
+   do {
       middle = (end + start) / 2;
       _cmpres=queue->index_order_f(&data_to_find, &(queue->index[middle]));
       if(_cmpres==0) {
          *data=queue->index[middle];
          return NOERROR;
       }
-      if(_cmpres>0)
+      if(_cmpres>0) {
          start=middle+1;
-      else
+      }
+      else {
          end=middle-1;
+      }
 
    }
    while(start<=end);

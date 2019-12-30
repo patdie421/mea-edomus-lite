@@ -694,6 +694,7 @@ int updateInterface(char *interface, cJSON *jsonData)
 
       remove_delegate_links(_interfaces, _jsonInterfaceOld->string);
       remove_interface(_interfaces, id_interface);
+
       if(prepare_interface(_interfaces, _params_list, _jsonInterface, 1)==0) {
          link_delegates(_interfaces);
       }
@@ -1344,14 +1345,6 @@ cJSON *jsonTypesLoad(char *file)
 }
 
 
-int resyncDevices(cJSON *jsonInterfaces, char *file)
-{
-   // TODO: 
-
-   return 0;
-}
-
-
 int interfaceCommit()
 {
    char jsonInterfacesFile[1024]="";
@@ -1413,7 +1406,7 @@ int interfaceRollback()
 
 int jsonTypesSave()
 {
-   // TODO:
+   // TODO: sauvegarde des types
 
    return 0;
 }
@@ -1954,7 +1947,7 @@ int16_t interfacesServer_call_interface_api(int id_interface, char *cmnd, void *
 
 int start_interface(int id_interface)
 {
-   // TODO:
+   // TODO: demarrage d'une interface par id
 
    return 0;
 }
@@ -1962,7 +1955,7 @@ int start_interface(int id_interface)
 
 int stop_interface(int id_interface)
 {
-   // TODO:
+   // TODO: arret d'une interface par id
 
    return 0;
 }
@@ -2142,14 +2135,6 @@ void stop_interfaces()
 }
  
  
-int clean_not_linked(mea_queue_t *interfaces_list)
-{
-   // TODO:
- 
-   return 0;
-}
- 
-
 int remove_delegate_links(mea_queue_t *interfaces_list, char *interface)
 {
    int ret = 0;
@@ -2178,6 +2163,13 @@ int remove_delegate_links(mea_queue_t *interfaces_list, char *interface)
      }
    }
 
+   return 0;
+}
+
+
+int unlink_delegates(mea_queue_t *interfaces_list)
+{
+   // TODO: suppression des liens avec les interfaces
    return 0;
 }
 
@@ -2232,6 +2224,15 @@ int link_delegates(mea_queue_t *interfaces_list)
 }
  
  
+int clean_not_linked(mea_queue_t *interfaces_list)
+{
+   unlink_delegates(_interfaces);
+   link_delegates(_interfaces);
+ 
+   return 0;
+}
+ 
+
 int start_interfaces_load_json(cJSON *params_list)
 {
     if(jsonInterfaces) {
