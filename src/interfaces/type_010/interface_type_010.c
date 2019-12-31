@@ -354,6 +354,25 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
 {
    int err = 0;
 
+/* TO TEST
+   cJSON *plugin_params=parsed_parameters_json_alloc((char *)device_info->parameters, valid_plugin_010_params, &nb_plugin_params, &err, 0);
+   if(!plugin_params) {
+      return -1;
+   }
+   
+   cJSON *_plugin=cJSON_GetObjectItem(plugin_params, "PLUGIN");
+   if(!plugin || plugin->type!=cJSON_String) {
+      return -1;
+   }
+   
+   char *plugin=_plugin->valuestring;
+   char *plugin_parameters=NULL;
+   
+   cJSON *_parameters=cJSON_GetObjectItem(plugin_params, "PLUGIN_PARAMETERS");
+   if(_parameters && _parameters->type==cJSON_String) {
+      plugin_parameters=_parameters->valuestring;
+   }
+*/
    parsed_parameters_t *plugin_params=NULL;
    int nb_plugin_params;
 
@@ -367,17 +386,26 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
    cJSON *data = device_info_to_json_alloc(device_info);
    cJSON_AddNumberToObject(data,API_KEY_STR_C,(double)i010->id_interface);
    cJSON_AddNumberToObject(data,DEVICE_TYPE_ID_STR_C,(double)device_info->id);
+/* TO TEST
+   if(_parameters) {
+      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, _parameters);
+   }
+*/
    if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
       cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
    }
    cJSON_AddItemToObject(data,DATA_STR_C,cJSON_CreateByteArray(i010->line_buffer, i010->line_buffer_ptr));
    cJSON_AddNumberToObject(data,L_DATA_STR_C, (double)i010->line_buffer_ptr);
-
-//   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
+/* TO TEST
+   plugin_fireandforget_function_json(plugin, DATAFROMSENSOR_JSON, data);
+*/
    plugin_fireandforget_function_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
    
    i010->indicators.senttoplugin++;
 
+/* TO TEST
+   cJSON_Delete(plugin_params);
+*/
    release_parsed_parameters(&plugin_params);
    
    return 0;

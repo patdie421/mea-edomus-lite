@@ -13,7 +13,7 @@
 #include <pthread.h>
 
 #include "uthash.h"
-
+#include "cJSON.h"
 #include "macros.h"
 #include "mea_verbose.h"
 
@@ -589,6 +589,56 @@ void display_parsed_parameters(parsed_parameters_t *mpp)
          }
       }
    }
+}
+
+
+cJSON *parsed_parameters_to_json_alloc(parsed_parameters_t *mpp)
+{
+   cJSON *j=cJSON_CreateObject();
+   if(!j) {
+      return NULL;
+   }
+
+   if(mpp) {
+      for(int i=0;i<mpp->nb;i++) {
+         if(mpp->parameters[i].label==NULL) {
+            continue;
+         }
+         
+         switch((int)(mpp->parameters[i].type)) {
+            case 1:
+               cJSON_AddNumberToObject(j,mpp->parameters[i].label,(double)mpp->parameters[i].value.i);
+               break;
+            case 2:
+               cJSON_AddNumberToObject(j,mpp->parameters[i].label,(double)mpp->parameters[i].value.l);
+               break;
+            case 3:
+               cJSON_AddNumberToObject(j,mpp->parameters[i].label,(double)mpp->parameters[i].value.f);
+               break;
+            case 4:
+               cJSON_AddStringToObject(j,mpp->parameters[i].label,mpp->parameters[i].value.s);
+               break;
+            default:
+               break;
+         }
+      }
+   }
+   
+   return j;
+}
+
+
+json *parsed_parameters_json_alloc(char *parameters_string, char *parameters_to_find[], int *nb_params, int *err, int value_to_upper)
+{
+   cJSON *j=NULL;
+   
+   parsed_parameters_t *pp=alloc_parsed_parameters(parameters_string, parameters_to_find, nb_params, err, value_to_upper);
+   if(pp) {
+      j=parsed_parameters_to_json_alloc(pp);
+      release_parsed_parameters(&pp);
+   }
+   
+   return j;
 }
 
 

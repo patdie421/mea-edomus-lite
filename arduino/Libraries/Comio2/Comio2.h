@@ -8,7 +8,7 @@
 //#define _COMIO1_COMPATIBLITY_MODE_
 
 #ifdef _COMIO1_COMPATIBLITY_MODE_
-// Taille des mÃ©moires en fonction du type d'arduino (type de microcontroleur)
+// Taille des mémoires en fonction du type d'arduino (type de microcontroleur)
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1284P__)
 // un MEGA
 #define COMIO_MAX_D            54 // nombre max d' E/S logiques
@@ -55,7 +55,7 @@
 // COMIO2 : version 2 du protocole
 #define COMIO2_MAX_FX          16 // nombre maximum de fonctions déclarables
 #define COMIO2_MAX_MEMORY      32
-#define COMIO2_MAX_DATA        40 // taille maximum d'une trame de données interractive
+#define COMIO2_MAX_DATA        40 // taille maximum d'une trame de données
 
 #define COMIO2_CMD_ERROR        0
 #define COMIO2_CMD_READMEMORY   1

@@ -39,6 +39,7 @@ struct device_info_s
    uint16_t id;
    char *name;
    char *parameters;
+   cJSON *parameters_json;
    uint16_t state;
 
    uint16_t type_id;
