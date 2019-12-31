@@ -335,6 +335,7 @@ int16_t interface_type_001_counters_poll_inputs2(interface_type_001_t *i001)
    struct electricity_counter_s *counter;
 
    mea_queue_first(counters_list);
+   VERBOSE(9) mea_log_printf("%s (%s) : start counters polling\n", INFO_STR, __func__);
    for(int16_t i=0; i<counters_list->nb_elem; i++) {
       mea_queue_current(counters_list, (void **)&counter);
 
