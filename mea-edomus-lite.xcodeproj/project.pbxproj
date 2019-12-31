@@ -24,7 +24,6 @@
 		4E026F71238DC4DC000D62C2 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6869F2369B0E20084B302 /* main.c */; };
 		4E026F72238DC4DC000D62C2 /* datetimeServer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686832369B0E20084B302 /* datetimeServer.c */; };
 		4E026F73238DC4DC000D62C2 /* processManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686AF2369B0E20084B302 /* processManager.c */; };
-		4E026F74238DC4DC000D62C2 /* python_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6868E2369B0E20084B302 /* python_utils.c */; };
 		4E026F75238DC4DC000D62C2 /* configuration.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF687082369B0E20084B302 /* configuration.c */; };
 		4E026F76238DC4DC000D62C2 /* xPLServer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6869D2369B0E20084B302 /* xPLServer.c */; };
 		4E026F77238DC4DC000D62C2 /* mea_json_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686A42369B0E20084B302 /* mea_json_utils.c */; };
@@ -61,7 +60,6 @@
 		4E1EC657236AD144004E3F63 /* mea_rest_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686892369B0E20084B302 /* mea_rest_api.c */; };
 		4E1EC658236AD144004E3F63 /* mea_sockets_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6868C2369B0E20084B302 /* mea_sockets_utils.c */; };
 		4E1EC659236AD144004E3F63 /* mea_xpl.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6868D2369B0E20084B302 /* mea_xpl.c */; };
-		4E1EC65A236AD144004E3F63 /* python_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6868E2369B0E20084B302 /* python_utils.c */; };
 		4E1EC65B236AD144004E3F63 /* automator.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686902369B0E20084B302 /* automator.c */; };
 		4E1EC65C236AD144004E3F63 /* mea_internal_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686932369B0E20084B302 /* mea_internal_api.c */; };
 		4E1EC65D236AD144004E3F63 /* parameters_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686942369B0E20084B302 /* parameters_utils.c */; };
@@ -116,7 +114,6 @@
 		4E1EC69B236ADD4D004E3F63 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6869F2369B0E20084B302 /* main.c */; };
 		4E1EC69C236ADD4D004E3F63 /* datetimeServer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686832369B0E20084B302 /* datetimeServer.c */; };
 		4E1EC69E236ADD4D004E3F63 /* processManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686AF2369B0E20084B302 /* processManager.c */; };
-		4E1EC6A0236ADD4D004E3F63 /* python_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6868E2369B0E20084B302 /* python_utils.c */; };
 		4E1EC6A1236ADD4D004E3F63 /* configuration.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF687082369B0E20084B302 /* configuration.c */; };
 		4E1EC6A2236ADD4D004E3F63 /* xPLServer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6869D2369B0E20084B302 /* xPLServer.c */; };
 		4E1EC6A3236ADD4D004E3F63 /* mea_json_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686A42369B0E20084B302 /* mea_json_utils.c */; };
@@ -215,6 +212,12 @@
 		4EAD8B522396F51B00C120A7 /* mea_rest_api_pairing.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EAD8B512396F51B00C120A7 /* mea_rest_api_pairing.c */; };
 		4EAD8B532396F51B00C120A7 /* mea_rest_api_pairing.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EAD8B512396F51B00C120A7 /* mea_rest_api_pairing.c */; };
 		4EAD8B542396F51B00C120A7 /* mea_rest_api_pairing.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EAD8B512396F51B00C120A7 /* mea_rest_api_pairing.c */; };
+		4ECEEBA023BBE7270003C5C7 /* mea_plugins_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ECEEB9D23BBE6FA0003C5C7 /* mea_plugins_utils.c */; };
+		4ECEEBA123BBE7270003C5C7 /* mea_python_json_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ECEEB9C23BBE6FA0003C5C7 /* mea_python_json_utils.c */; };
+		4ECEEBA223BBE7270003C5C7 /* mea_plugins_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ECEEB9D23BBE6FA0003C5C7 /* mea_plugins_utils.c */; };
+		4ECEEBA323BBE7270003C5C7 /* mea_python_json_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ECEEB9C23BBE6FA0003C5C7 /* mea_python_json_utils.c */; };
+		4ECEEBA423BBE7290003C5C7 /* mea_plugins_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ECEEB9D23BBE6FA0003C5C7 /* mea_plugins_utils.c */; };
+		4ECEEBA523BBE7290003C5C7 /* mea_python_json_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ECEEB9C23BBE6FA0003C5C7 /* mea_python_json_utils.c */; };
 		4EF687862369E0410084B302 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF685912369B0E10084B302 /* cJSON.c */; };
 		4EF687872369E1180084B302 /* mea-compilr2.yacc in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6858F2369B0E10084B302 /* mea-compilr2.yacc */; };
 		4EF687882369E12D0084B302 /* mea-compilr2.lex in Sources */ = {isa = PBXBuildFile; fileRef = 4EF685902369B0E10084B302 /* mea-compilr2.lex */; };
@@ -311,6 +314,10 @@
 		4EAD8B4F2396F10A00C120A7 /* my_dht22.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = my_dht22.py; sourceTree = "<group>"; };
 		4EAD8B502396F51B00C120A7 /* mea_rest_api_pairing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mea_rest_api_pairing.h; sourceTree = "<group>"; };
 		4EAD8B512396F51B00C120A7 /* mea_rest_api_pairing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mea_rest_api_pairing.c; sourceTree = "<group>"; };
+		4ECEEB9A23BBE6FA0003C5C7 /* mea_plugins_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mea_plugins_utils.h; sourceTree = "<group>"; };
+		4ECEEB9B23BBE6FA0003C5C7 /* mea_python_json_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mea_python_json_utils.h; sourceTree = "<group>"; };
+		4ECEEB9C23BBE6FA0003C5C7 /* mea_python_json_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mea_python_json_utils.c; sourceTree = "<group>"; };
+		4ECEEB9D23BBE6FA0003C5C7 /* mea_plugins_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mea_plugins_utils.c; sourceTree = "<group>"; };
 		4EF6850C2369B0E10084B302 /* Makefile.ubuntu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile.ubuntu; sourceTree = "<group>"; };
 		4EF6850D2369B0E10084B302 /* sonar-project.properties */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "sonar-project.properties"; sourceTree = "<group>"; };
 		4EF6850F2369B0E10084B302 /* xPLLib.tgz */ = {isa = PBXFileReference; lastKnownFileType = file; path = xPLLib.tgz; sourceTree = "<group>"; };
@@ -607,7 +614,6 @@
 		4EF6868B2369B0E20084B302 /* pythonPluginServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pythonPluginServer.h; sourceTree = "<group>"; };
 		4EF6868C2369B0E20084B302 /* mea_sockets_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mea_sockets_utils.c; sourceTree = "<group>"; };
 		4EF6868D2369B0E20084B302 /* mea_xpl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mea_xpl.c; sourceTree = "<group>"; };
-		4EF6868E2369B0E20084B302 /* python_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = python_utils.c; sourceTree = "<group>"; };
 		4EF6868F2369B0E20084B302 /* configuration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = configuration.h; sourceTree = "<group>"; };
 		4EF686902369B0E20084B302 /* automator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = automator.c; sourceTree = "<group>"; };
 		4EF686912369B0E20084B302 /* curl_adds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = curl_adds.h; sourceTree = "<group>"; };
@@ -699,7 +705,6 @@
 		4EF687022369B0E20084B302 /* interface_type_001_sensors.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = interface_type_001_sensors.c; sourceTree = "<group>"; };
 		4EF687032369B0E20084B302 /* interface_type_001.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = interface_type_001.c; sourceTree = "<group>"; };
 		4EF687042369B0E20084B302 /* arduino_pins.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = arduino_pins.c; sourceTree = "<group>"; };
-		4EF687052369B0E20084B302 /* python_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = python_utils.h; sourceTree = "<group>"; };
 		4EF687062369B0E20084B302 /* curl_adds.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = curl_adds.c; sourceTree = "<group>"; };
 		4EF687072369B0E20084B302 /* automator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = automator.h; sourceTree = "<group>"; };
 		4EF687082369B0E20084B302 /* configuration.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = configuration.c; sourceTree = "<group>"; };
@@ -1839,6 +1844,10 @@
 		4EF6867A2369B0E20084B302 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				4ECEEB9D23BBE6FA0003C5C7 /* mea_plugins_utils.c */,
+				4ECEEB9A23BBE6FA0003C5C7 /* mea_plugins_utils.h */,
+				4ECEEB9C23BBE6FA0003C5C7 /* mea_python_json_utils.c */,
+				4ECEEB9B23BBE6FA0003C5C7 /* mea_python_json_utils.h */,
 				4EF686822369B0E20084B302 /* utilslib.mk */,
 				4EF6869F2369B0E20084B302 /* main.c */,
 				4EF686A12369B0E20084B302 /* macros.h */,
@@ -1894,8 +1903,6 @@
 				4EF6868D2369B0E20084B302 /* mea_xpl.c */,
 				4EF6868B2369B0E20084B302 /* pythonPluginServer.h */,
 				4EF686AA2369B0E20084B302 /* pythonPluginServer.c */,
-				4EF687052369B0E20084B302 /* python_utils.h */,
-				4EF6868E2369B0E20084B302 /* python_utils.c */,
 				4EF686912369B0E20084B302 /* curl_adds.h */,
 				4EF687062369B0E20084B302 /* curl_adds.c */,
 				4EF686922369B0E20084B302 /* tokens.h */,
@@ -2358,6 +2365,7 @@
 				4E026F77238DC4DC000D62C2 /* mea_json_utils.c in Sources */,
 				4E026F69238DC4DC000D62C2 /* mea_queue.c in Sources */,
 				4E026F65238DC4DC000D62C2 /* mea_rest_api.c in Sources */,
+				4ECEEBA523BBE7290003C5C7 /* mea_python_json_utils.c in Sources */,
 				4E026F66238DC4DC000D62C2 /* mea_timer.c in Sources */,
 				4E026F68238DC4DC000D62C2 /* mea_verbose.c in Sources */,
 				4E81D90223A188D800A68BCD /* mea_rest_api_interface.c in Sources */,
@@ -2375,7 +2383,6 @@
 				4E026F72238DC4DC000D62C2 /* datetimeServer.c in Sources */,
 				4E52DCC023AD458900789CF6 /* mea_rest_api_metric.c in Sources */,
 				4E026F73238DC4DC000D62C2 /* processManager.c in Sources */,
-				4E026F74238DC4DC000D62C2 /* python_utils.c in Sources */,
 				4E026F75238DC4DC000D62C2 /* configuration.c in Sources */,
 				4E026F76238DC4DC000D62C2 /* xPLServer.c in Sources */,
 				4E026F78238DC4DC000D62C2 /* consts.c in Sources */,
@@ -2398,6 +2405,7 @@
 				4E81D91723A188D800A68BCD /* mea_file_utils.c in Sources */,
 				4E026F82238DC4DC000D62C2 /* sunriset.c in Sources */,
 				4E026F84238DC4DC000D62C2 /* tokens.c in Sources */,
+				4ECEEBA423BBE7290003C5C7 /* mea_plugins_utils.c in Sources */,
 				4E026F87238DC4DC000D62C2 /* cJSON.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2411,6 +2419,7 @@
 				4E1EC67C236AD1CC004E3F63 /* interface_type_006.c in Sources */,
 				4E81D90623A188D800A68BCD /* mea_rest_api_user.c in Sources */,
 				4E1EC663236AD144004E3F63 /* pythonPluginServer.c in Sources */,
+				4ECEEBA123BBE7270003C5C7 /* mea_python_json_utils.c in Sources */,
 				4E1EC657236AD144004E3F63 /* mea_rest_api.c in Sources */,
 				4E1EC665236AD144004E3F63 /* mea_timer.c in Sources */,
 				4E1EC67D236AD1CC004E3F63 /* plugin.c in Sources */,
@@ -2438,8 +2447,8 @@
 				4E1EC675236AD1B7004E3F63 /* interface_type_004.c in Sources */,
 				4E1EC664236AD144004E3F63 /* processManager.c in Sources */,
 				4E1EC671236AD19C004E3F63 /* plugin.c in Sources */,
-				4E1EC65A236AD144004E3F63 /* python_utils.c in Sources */,
 				4E1EC681236AD255004E3F63 /* configuration.c in Sources */,
+				4ECEEBA023BBE7270003C5C7 /* mea_plugins_utils.c in Sources */,
 				4E1EC67E236AD1F6004E3F63 /* xPLServer.c in Sources */,
 				4E1EC662236AD144004E3F63 /* mea_json_utils.c in Sources */,
 				4E12DA48236DAEA500B35CAF /* interface_type_003.c in Sources */,
@@ -2480,6 +2489,7 @@
 				4E1EC688236ADD4D004E3F63 /* pythonPluginServer.c in Sources */,
 				4E1EC689236ADD4D004E3F63 /* mea_rest_api.c in Sources */,
 				4E81D91623A188D800A68BCD /* mea_file_utils.c in Sources */,
+				4ECEEBA323BBE7270003C5C7 /* mea_python_json_utils.c in Sources */,
 				4E1EC68A236ADD4D004E3F63 /* mea_timer.c in Sources */,
 				4E1EC68C236ADD4D004E3F63 /* serial.c in Sources */,
 				4EAD8B532396F51B00C120A7 /* mea_rest_api_pairing.c in Sources */,
@@ -2500,7 +2510,6 @@
 				4E1EC69E236ADD4D004E3F63 /* processManager.c in Sources */,
 				4E81D90123A188D800A68BCD /* mea_rest_api_interface.c in Sources */,
 				4E81D8FE23A188D800A68BCD /* mea_rest_api_session.c in Sources */,
-				4E1EC6A0236ADD4D004E3F63 /* python_utils.c in Sources */,
 				4E1EC6A1236ADD4D004E3F63 /* configuration.c in Sources */,
 				4E1EC6A2236ADD4D004E3F63 /* xPLServer.c in Sources */,
 				4E81D90423A188D800A68BCD /* mea_rest_api_service.c in Sources */,
@@ -2516,6 +2525,7 @@
 				4E1EC6AA236ADD4D004E3F63 /* interface_type_001_counters.c in Sources */,
 				4E1EC6AB236ADD4D004E3F63 /* httpServer.c in Sources */,
 				4E1EC6AC236ADD4D004E3F63 /* interface_type_001_actuators.c in Sources */,
+				4ECEEBA223BBE7270003C5C7 /* mea_plugins_utils.c in Sources */,
 				4E1EC6AD236ADD4D004E3F63 /* automatorServer.c in Sources */,
 				4E1EC6AF236ADD4D004E3F63 /* sunriset.c in Sources */,
 				4E1EC6B0236ADD4D004E3F63 /* mea_internal_api.c in Sources */,

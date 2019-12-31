@@ -9,7 +9,7 @@ dependencies: \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/configuration.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/cJSON.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/pythonPluginServer.h \
-  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/python_utils.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_python_json_utils.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/interfacesServer.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/xPLServer.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/uthash.h \
