@@ -628,7 +628,7 @@ cJSON *parsed_parameters_to_json_alloc(parsed_parameters_t *mpp)
 }
 
 
-json *parsed_parameters_json_alloc(char *parameters_string, char *parameters_to_find[], int *nb_params, int *err, int value_to_upper)
+cJSON *parsed_parameters_json_alloc(char *parameters_string, char *parameters_to_find[], int *nb_params, int *err, int value_to_upper)
 {
    cJSON *j=NULL;
    

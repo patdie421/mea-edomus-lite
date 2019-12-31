@@ -18,7 +18,7 @@ dependencies: \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/tokens_da.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/parameters_utils.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/serial.h \
-  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/python_utils.h \
+  /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_plugins_utils.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/processManager.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_timer.h \
   /Users/patrice/Developpement/Logiciels/mea-edomus-lite/src/mea_xpl.h
