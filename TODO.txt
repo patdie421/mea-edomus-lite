@@ -5,4 +5,4 @@ API Callback
 InterfacesServers / REST API
    finaliser les "types"
 
-
+Python/JSON : affichage de "cJSON_BytesArray"

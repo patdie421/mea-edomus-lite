@@ -386,7 +386,7 @@ cJSON *call_pythonPlugin(char *module, char *function, int type, PyObject *data_
             cJSON *result=mea_PyObjectToJson(pValue);
             Py_DECREF(pValue);
             char *s=cJSON_Print(result);
-            DEBUG_SECTION mea_log_printf("%s (%s) : result of call of %s : %s (%ld)\n", DEBUG_STR, __func__, fx, s, exectime);
+            DEBUG_SECTION mea_log_printf("%s (%s) : result of call of %s : %s (%ld ms)\n", DEBUG_STR, __func__, fx, s, exectime);
             free(s);
             return_code=result;
          }

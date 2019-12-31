@@ -390,6 +390,7 @@ static char *print_value(cJSON *item,int depth,int fmt,printbuffer *p)
 			case cJSON_NULL:	{out=ensure(p,5);	if (out) strcpy(out,"null");	break;}
 			case cJSON_False:	{out=ensure(p,6);	if (out) strcpy(out,"false");	break;}
 			case cJSON_True:	{out=ensure(p,5);	if (out) strcpy(out,"true");	break;}
+			case cJSON_ByteArray:	{out=ensure(p,13);	if (out) strcpy(out,"<ByteArray>");	break;}
 			case cJSON_Number:	out=print_number(item,p);break;
 			case cJSON_String:	out=print_string(item,p);break;
 			case cJSON_Array:	out=print_array(item,depth,fmt,p);break;
@@ -403,6 +404,7 @@ static char *print_value(cJSON *item,int depth,int fmt,printbuffer *p)
 			case cJSON_NULL:	out=cJSON_strdup("null");	break;
 			case cJSON_False:	out=cJSON_strdup("false");break;
 			case cJSON_True:	out=cJSON_strdup("true"); break;
+			case cJSON_ByteArray:	out=cJSON_strdup("<ByteArray>"); break;
 			case cJSON_Number:	out=print_number(item,0);break;
 			case cJSON_String:	out=print_string(item,0);break;
 			case cJSON_Array:	out=print_array(item,depth,fmt,0);break;

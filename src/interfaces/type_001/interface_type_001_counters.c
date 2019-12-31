@@ -248,6 +248,7 @@ int16_t counter_read(interface_type_001_t *i001, struct electricity_counter_s *c
          if(comio2_err == COMIO2_ERR_DOWN) {
             return -1;
          }
+         retry++;
       }
 
    }
@@ -337,6 +338,7 @@ int16_t interface_type_001_counters_poll_inputs2(interface_type_001_t *i001)
    for(int16_t i=0; i<counters_list->nb_elem; i++) {
       mea_queue_current(counters_list, (void **)&counter);
 
+      VERBOSE(9) mea_log_printf("%s (%s) : polling counter %s / %d ?\n", INFO_STR, __func__, counter->name, (long)counter->counter);
       pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&(counter->lock));
       pthread_mutex_lock(&(counter->lock));
       
@@ -373,6 +375,7 @@ int16_t interface_type_001_counters_poll_inputs2(interface_type_001_t *i001)
 
       if(!mea_test_timer(&(counter->timer))) {
          if(counter_read(i001, counter)<0) {
+            VERBOSE(9) mea_log_printf("%s (%s) : can't read counter %s data\n", ERROR_STR, __func__, counter->name);
          }
          else {
             if(counter->counter!=counter->last_counter) {
