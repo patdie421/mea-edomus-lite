@@ -250,7 +250,6 @@ int16_t counter_read(interface_type_001_t *i001, struct electricity_counter_s *c
          }
          retry++;
       }
-
    }
    while(ret && retry<5);
 
@@ -259,9 +258,11 @@ int16_t counter_read(interface_type_001_t *i001, struct electricity_counter_s *c
       counter->wh_counter=c;
       counter->kwh_counter=c / 1000;
       counter->counter=c;
+      return 0;
    }
-   
-   return 0;
+   else {
+      return -1;
+   }
 }
 
 
@@ -338,7 +339,6 @@ int16_t interface_type_001_counters_poll_inputs2(interface_type_001_t *i001)
    for(int16_t i=0; i<counters_list->nb_elem; i++) {
       mea_queue_current(counters_list, (void **)&counter);
 
-      VERBOSE(9) mea_log_printf("%s (%s) : polling counter %s / %d ?\n", INFO_STR, __func__, counter->name, (long)counter->counter);
       pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&(counter->lock));
       pthread_mutex_lock(&(counter->lock));
       
@@ -383,8 +383,8 @@ int16_t interface_type_001_counters_poll_inputs2(interface_type_001_t *i001)
             counter_to_xpl2(i001, counter);
             VERBOSE(9) mea_log_printf("%s (%s) : counter %s %ld (WH=%ld KWH=%ld)\n", INFO_STR, __func__, counter->name, (long)counter->counter, (long)counter->wh_counter, (long)counter->kwh_counter);
          }
-         mea_queue_next(counters_list);
       }
+      mea_queue_next(counters_list);
    }
    return 0;
 }
