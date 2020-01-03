@@ -499,7 +499,7 @@ void *_thread_interface_type_001(void *args)
       
       cntr++;
       pthread_testcancel();
-      sleep(5);
+      sleep(1);
    }
    
    pthread_cleanup_pop(1);

@@ -12,8 +12,8 @@
 // valeurs max
 #define COMIO2_MAX_TRAP          255 
 #define COMIO2_MAX_USER_FRAME_ID 200 // plus grand id disponible pour les trames "standard"
-#define COMIO2_MAX_DATA_SIZE      40 // taille maximum de la zone data d'une trame
-#define COMIO2_MAX_FRAME_SIZE     80 // taille maximum d'une trame
+#define COMIO2_MAX_DATA_SIZE      80 // taille maximum de la zone data d'une trame
+#define COMIO2_MAX_FRAME_SIZE    120 // taille maximum d'une trame
 
 // numéros d'erreur 
 #define COMIO2_ERR_NOERR           0

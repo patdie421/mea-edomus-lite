@@ -214,7 +214,7 @@ void *_automator_thread(void *data)
          process_update_indicator(_automatorServer_monitoring_id, automator_err_str, err_indicator);
       }
    
-      timeout=0; // pour faire en sorte de n'avoir qu'un seul pthread_mutex_unlock en face du pthread_mutex_lock ci-dessus
+      timeout=0;
       if(automator_msg_queue && automator_msg_queue->nb_elem==0) {
          struct timeval tv;
          struct timespec ts;

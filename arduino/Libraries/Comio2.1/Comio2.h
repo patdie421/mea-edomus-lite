@@ -9,7 +9,7 @@
 // COMIO2 : version 2 du protocole
 #define COMIO2_MAX_FX          16 // nombre maximum de fonctions déclarables
 #define COMIO2_MAX_MEMORY      32 // en octet
-#define COMIO2_MAX_DATA        40 // taille maximum d'une trame de données
+#define COMIO2_MAX_DATA        80 // taille maximum d'une trame de données
 
 #define COMIO2_CMD_ERROR        0
 #define COMIO2_CMD_READMEMORY   1
