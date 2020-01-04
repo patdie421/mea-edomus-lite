@@ -182,17 +182,16 @@ cJSON *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int
    e->exec_cond=exec_cond;
    e->exec_lock=exec_lock;
    e->reload_flag=reload_flag;
+
    e->python_module=(char *)malloc(strlen(module)+1);
    if(!e->python_module)
       goto pythonPluginServer_exec_cmd_clean_exit;
    strcpy(e->python_module, module);
 
-   if(function) {
-      e->python_function=(char *)malloc(strlen(function)+1);
-      if(!e->python_function)
-         goto pythonPluginServer_exec_cmd_clean_exit;
-      strcpy(e->python_function, function);
-   }
+   e->python_function=(char *)malloc(strlen(function)+1);
+   if(!e->python_function)
+      goto pythonPluginServer_exec_cmd_clean_exit;
+   strcpy(e->python_function, function);
    
    e->result=&result;
    
@@ -204,6 +203,7 @@ cJSON *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int
    e->l_data=l_data;
  
    ret=_pythonPluginServer_add_to_cmd_queue(e);
+   e=NULL;
 
    struct timeval tv;
    struct timespec ts;
@@ -217,7 +217,7 @@ cJSON *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int
    int _ret=pthread_cond_timedwait(exec_cond, exec_lock, &ts);
    if(_ret!=0) {
       if(_ret==ETIMEDOUT) {
-         DEBUG_SECTION mea_log_printf("%s (%s) : pthread_cond_timedwait timeout",WARNING_STR, __func__);
+         DEBUG_SECTION mea_log_printf("%s (%s) : pthread_cond_timedwait timeout\n",WARNING_STR, __func__);
       }
       else {
          DEBUG_SECTION mea_log_printf("%s (%s) : pthread_cond_timedwait error - ",ERROR_STR, __func__);
@@ -229,6 +229,12 @@ cJSON *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int
    pthread_cleanup_pop(0);
    
 pythonPluginServer_exec_cmd_clean_exit:
+   if(e) {
+      _pythonPluginServer_clean_cmd(e);
+      free(e);
+      e=NULL;
+   }
+
    if(exec_cond) {
       pthread_cond_destroy(exec_cond);
       free(exec_cond);
@@ -278,9 +284,14 @@ mea_error_t pythonPluginServer_add_cmd(char *module, void *data, int l_data)
    e->reload_flag=0;
    
    ret=_pythonPluginServer_add_to_cmd_queue(e);
+   e=NULL;
 
 pythonPluginServer_add_cmd_clean_exit:
-
+   if(e) {
+      _pythonPluginServer_clean_cmd(e);
+      free(e);
+      e=NULL;
+   }
    return ret;
 }
 
@@ -568,7 +579,10 @@ void *_pythonPlugin_thread(void *data)
             *(e->result)=result;
          }
          else {
-            cJSON_Delete(result);
+            if(result) {
+               cJSON_Delete(result);
+               result=NULL;
+            }
          }
 
          Py_DECREF(pydict_data);

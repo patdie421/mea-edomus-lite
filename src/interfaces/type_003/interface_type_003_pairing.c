@@ -500,7 +500,7 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
    }
    else {
 //      _devices=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
-      _devices=plugin_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
+      _devices=plugin_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairingDevices", jj);
    }
 
 //   char *s=cJSON_Print(_devices);
