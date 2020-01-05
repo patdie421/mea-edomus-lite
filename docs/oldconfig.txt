@@ -1,0 +1,480 @@
+NTERFACES
+1|1|100|I001||SERIAL://ttyAMA0:9600||1
+2|2|200|I002||SERIAL://ttyUSB1:9600||1
+3|3|300|I003||SERIAL://ttyUSB0||1
+4|4|300|I003S001||I003://00-31-f6-74||2
+5|5|300|I003S002||I003://05-0e-81-d2||2
+6|6|300|I003S003|Cuisine|I003://01-94-c9-40||2
+
+
+SENSORS_ACTUATORS
+1|1|1000|1|PROD||2|COUNTER=0|1|0|0
+2|2|1000|1|CONSO||2|COUNTER=1|1|0|0
+3|3|500|4|S01A||2|PLUGIN=enocean_f6-02-01;PARAMETERS=CHANNEL:B|1|0|0
+4|4|500|4|S01B||2|PLUGIN=enocean_f6-02-01;PARAMETERS=CHANNEL:A|1|0|0
+5|5|501|5|O02A||2|PLUGIN=enocean_d2-01-xx-v2;PARAMETERS=CHANNEL:A|1|0|0
+6|6|500|5|S02A||2|PLUGIN=enocean_f6-02-01;PARAMETERS=CHANNEL:A|1|0|0
+7|7|500|5|S02B||2|PLUGIN=enocean_f6-02-01;PARAMETERS=CHANNEL:B|1|0|0
+8|8|501|5|O02B||2|PLUGIN=enocean_d2-01-xx-v2;PARAMETERS=CHANNEL:B|1|0|0
+9|9|501|6|O03A|Cuisine 1|2|PLUGIN=enocean_d2-01-xx-v2;PARAMETERS=CHANNEL:A|1|0|0
+10|10|501|6|O03B|Cuisine 2|2|PLUGIN=enocean_d2-01-xx-v2;PARAMETERS=CHANNEL:B|1|0|0
+
+
+APPLICATION_PARAMETERS
+4|PHPCGIPATH|/apps/mea-edomus/prod/bin|
+5|PHPINIPATH|/apps/mea-edomus/prod/etc|
+6|GUIPATH|/apps/mea-edomus/prod/lib/mea-gui|
+7|LOGPATH|/apps/mea-edomus/prod/var/log|
+8|PLUGINPATH|/apps/mea-edomus/prod/lib/mea-plugins|
+9|BUFFERDB|/apps/mea-edomus/prod/var/db/queries.db|
+10|DBSERVER|127.0.0.1|
+11|DBPORT|3306|
+12|DATABASE|meaedomus|
+13|USER|meaedomus|
+14|PASSWORD|meaedomus|
+15|VENDORID|mea|
+16|DEVICEID|edomus|
+17|INSTANCEID|home|
+18|VERBOSELEVEL|1|
+19|GUIPORT|8083|
+20|PHPSESSIONSPATH|/apps/mea-edomus/prod/var/sessions|
+21|NODEJSPATH|/apps/mea-edomus/prod/bin/node|
+22|NODEJSSOCKETIOPORT|8000|
+23|NODEJSDATAPORT|5600|
+24|PARAMSDBVERSION|12|
+25|INTERFACE|eth0|
+26|RULESFILE|/apps/mea-edomus/prod/lib/mea-rules/automator.rules|
+27|RULESFILESPATH|/apps/mea-edomus/prod/lib/mea-rules|
+28|COLLECTORID|1514318798|
+29|DRIVERSPATH|/apps/mea-edomus/prod/lib/mea-drivers|
+30|BACKUPDIRPATH|/apps/mea-edomus/prod/var/backup|
+
+
+TYPES
+1|100|INTYP01|Interface de type 01||1|10
+2|200|INTYP02|Interface de type 02||1|10
+3|300|INTYP03|Interface de type 03||1|10
+4|400|INTYP04|Interface de type 04||1|10
+5|455|INTYP05|Interface de type 05||1|10
+6|465|INTYP06|Interface de type 05||1|10
+7|201|XBEECA|Capteurs et actionneurs a interface XBee||1|10
+8|1000|PWRCTR|Capteur de compteur ERDF||1|0
+9|1001|TYP1IN|Entree interface type 01||1|0
+10|1002|TYP1OUT|Sortie interface type 01||1|1
+11|2000|XDHT22H|Humidité de DTH22||2|0
+12|2001|XDHT22T|Température de DTH22||2|0
+13|2002|XDHT22P|Pile de DTH22||2|0
+14|500|INPUT|Entrée||1|0
+15|501|OUTPUT|Sortie||1|1
+
+
+CONFIG.JSON
+{
+	"bridge": {
+		"name": "xplBridge",
+		"username": "CB:23:31:E3:CC:30",
+		"port": 51828,
+		"pin": "134-45-154"
+	},
+
+	"description": "This is an example configuration file with one fake accessory and one fake platform. You can use this as a template for creating your own configuration file containing devices you actually own.",
+
+	"accessories": [
+           {
+		"accessory": "HTTP-SWITCH",
+                "notificationID": "o02a",
+		"name": "o02a",
+		"switchType": "stateful",
+		"onUrl": {
+			"url": "http://localhost:7104/device/o02a/on",
+			"method": "get"
+		},
+		"offUrl": {
+			"url": "http://localhost:7104/device/o02a/off",
+			"method": "get"
+		},
+		"statusUrl": {
+			"url": "http://localhost:7104/device/o02a",
+			"method": "get"
+		},
+                "statusPattern":".*\"current\" *: *\"high\".*",
+                "pullInterval":60000
+	   },
+           {
+		"accessory": "HTTP-SWITCH",
+                "notificationID": "o02b",
+		"name": "o02b",
+		"switchType": "stateful",
+		"onUrl": {
+			"url": "http://localhost:7104/device/o02b/on",
+			"method": "get"
+		},
+		"offUrl": {
+			"url": "http://localhost:7104/device/o02b/off",
+			"method": "get"
+		},
+		"statusUrl": {
+			"url": "http://localhost:7104/device/o02b",
+			"method": "get"
+		},
+                "statusPattern":".*\"current\" *: *\"high\".*",
+                "pullInterval":60000
+	   },
+           {
+                "accessory": "HTTP-SWITCH",
+                "notificationID": "o03a",
+                "name": "o03a",
+                "switchType": "stateful",
+                "onUrl": {
+                        "url": "http://localhost:7104/device/o03a/on",
+                        "method": "get"
+                },
+                "offUrl": {
+                        "url": "http://localhost:7104/device/o03a/off",
+                        "method": "get"
+                },
+                "statusUrl": {
+                        "url": "http://localhost:7104/device/o03a",
+                        "method": "get"
+                },
+                "statusPattern":".*\"current\" *: *\"high\".*",
+                "pullInterval":60000
+           },
+           {
+                "accessory": "HTTP-SWITCH",
+                "notificationID": "o03b",
+                "name": "o03b",
+                "switchType": "stateful",
+                "onUrl": {
+                        "url": "http://localhost:7104/device/o03b/on",
+                        "method": "get"
+                },
+                "offUrl": {
+                        "url": "http://localhost:7104/device/o03b/off",
+                        "method": "get"
+                },
+                "statusUrl": {
+                        "url": "http://localhost:7104/device/o03b",
+                        "method": "get"
+                },
+                "statusPattern":".*\"current\" *: *\"high\".*",
+                "pullInterval":60000
+           }
+        ]
+}
+
+
+CONFIG.JSON
+{
+    "bridge": {
+        "name": "myenocean",
+        "username": "CB:23:3D:E3:CE:30",
+        "port": 51827,
+        "pin": "131-45-151"
+    },
+    
+    "description": "This is an example configuration file with one fake accessory and one fake platform. You can use this as a template for creating your own configuration file containing devices you actually own.",
+
+    "accessories": [
+    ],
+
+    "platforms": [
+       {
+          "platform":"AutomationSwitches",
+          "switches": [
+             {
+                "type":"switch",
+                "name":"S1",
+                "stored":true,
+                "default":false
+             } 
+          ]
+       }
+    ]
+}
+
+
+xplToHomebridge.json
+{
+   "xplSource": "mea-xpltohb.home",
+   "notifHost":"localhost",
+   "notifPort":7103,
+   "devices": {
+      "o02a" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o02a","current":"high","type":"output"},
+         "off": {"device":"o02a","current":"low","type":"output"},
+         "filters":  [
+            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      },
+      "o02b" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o02b","current":"high","type":"output"},
+         "off": {"device":"o02b","current":"low","type":"output"},
+         "filters":  [
+            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      },
+      "o03a" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o03a","current":"high","type":"output"},
+         "off": {"device":"o03a","current":"low","type":"output"},
+         "filters":  [
+            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      },
+      "o03b" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o03b","current":"high","type":"output"},
+         "off": {"device":"o03b","current":"low","type":"output"},
+         "filters":  [
+            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      }
+   }
+}
+NTERFACES
+1|1|100|I001||SERIAL://ttyAMA0:9600||1
+2|2|200|I002||SERIAL://ttyUSB1:9600||1
+3|3|300|I003||SERIAL://ttyUSB0||1
+4|4|300|I003S001||I003://00-31-f6-74||2
+5|5|300|I003S002||I003://05-0e-81-d2||2
+6|6|300|I003S003|Cuisine|I003://01-94-c9-40||2
+
+
+SENSORS_ACTUATORS
+1|1|1000|1|PROD||2|COUNTER=0|1|0|0
+2|2|1000|1|CONSO||2|COUNTER=1|1|0|0
+3|3|500|4|S01A||2|PLUGIN=enocean_f6-02-01;PARAMETERS=CHANNEL:B|1|0|0
+4|4|500|4|S01B||2|PLUGIN=enocean_f6-02-01;PARAMETERS=CHANNEL:A|1|0|0
+5|5|501|5|O02A||2|PLUGIN=enocean_d2-01-xx-v2;PARAMETERS=CHANNEL:A|1|0|0
+6|6|500|5|S02A||2|PLUGIN=enocean_f6-02-01;PARAMETERS=CHANNEL:A|1|0|0
+7|7|500|5|S02B||2|PLUGIN=enocean_f6-02-01;PARAMETERS=CHANNEL:B|1|0|0
+8|8|501|5|O02B||2|PLUGIN=enocean_d2-01-xx-v2;PARAMETERS=CHANNEL:B|1|0|0
+9|9|501|6|O03A|Cuisine 1|2|PLUGIN=enocean_d2-01-xx-v2;PARAMETERS=CHANNEL:A|1|0|0
+10|10|501|6|O03B|Cuisine 2|2|PLUGIN=enocean_d2-01-xx-v2;PARAMETERS=CHANNEL:B|1|0|0
+
+
+APPLICATION_PARAMETERS
+4|PHPCGIPATH|/apps/mea-edomus/prod/bin|
+5|PHPINIPATH|/apps/mea-edomus/prod/etc|
+6|GUIPATH|/apps/mea-edomus/prod/lib/mea-gui|
+7|LOGPATH|/apps/mea-edomus/prod/var/log|
+8|PLUGINPATH|/apps/mea-edomus/prod/lib/mea-plugins|
+9|BUFFERDB|/apps/mea-edomus/prod/var/db/queries.db|
+10|DBSERVER|127.0.0.1|
+11|DBPORT|3306|
+12|DATABASE|meaedomus|
+13|USER|meaedomus|
+14|PASSWORD|meaedomus|
+15|VENDORID|mea|
+16|DEVICEID|edomus|
+17|INSTANCEID|home|
+18|VERBOSELEVEL|1|
+19|GUIPORT|8083|
+20|PHPSESSIONSPATH|/apps/mea-edomus/prod/var/sessions|
+21|NODEJSPATH|/apps/mea-edomus/prod/bin/node|
+22|NODEJSSOCKETIOPORT|8000|
+23|NODEJSDATAPORT|5600|
+24|PARAMSDBVERSION|12|
+25|INTERFACE|eth0|
+26|RULESFILE|/apps/mea-edomus/prod/lib/mea-rules/automator.rules|
+27|RULESFILESPATH|/apps/mea-edomus/prod/lib/mea-rules|
+28|COLLECTORID|1514318798|
+29|DRIVERSPATH|/apps/mea-edomus/prod/lib/mea-drivers|
+30|BACKUPDIRPATH|/apps/mea-edomus/prod/var/backup|
+
+
+TYPES
+1|100|INTYP01|Interface de type 01||1|10
+2|200|INTYP02|Interface de type 02||1|10
+3|300|INTYP03|Interface de type 03||1|10
+4|400|INTYP04|Interface de type 04||1|10
+5|455|INTYP05|Interface de type 05||1|10
+6|465|INTYP06|Interface de type 05||1|10
+7|201|XBEECA|Capteurs et actionneurs a interface XBee||1|10
+8|1000|PWRCTR|Capteur de compteur ERDF||1|0
+9|1001|TYP1IN|Entree interface type 01||1|0
+10|1002|TYP1OUT|Sortie interface type 01||1|1
+11|2000|XDHT22H|Humidité de DTH22||2|0
+12|2001|XDHT22T|Température de DTH22||2|0
+13|2002|XDHT22P|Pile de DTH22||2|0
+14|500|INPUT|Entrée||1|0
+15|501|OUTPUT|Sortie||1|1
+
+
+CONFIG.JSON
+{
+	"bridge": {
+		"name": "xplBridge",
+		"username": "CB:23:31:E3:CC:30",
+		"port": 51828,
+		"pin": "134-45-154"
+	},
+
+	"description": "This is an example configuration file with one fake accessory and one fake platform. You can use this as a template for creating your own configuration file containing devices you actually own.",
+
+	"accessories": [
+           {
+		"accessory": "HTTP-SWITCH",
+                "notificationID": "o02a",
+		"name": "o02a",
+		"switchType": "stateful",
+		"onUrl": {
+			"url": "http://localhost:7104/device/o02a/on",
+			"method": "get"
+		},
+		"offUrl": {
+			"url": "http://localhost:7104/device/o02a/off",
+			"method": "get"
+		},
+		"statusUrl": {
+			"url": "http://localhost:7104/device/o02a",
+			"method": "get"
+		},
+                "statusPattern":".*\"current\" *: *\"high\".*",
+                "pullInterval":60000
+	   },
+           {
+		"accessory": "HTTP-SWITCH",
+                "notificationID": "o02b",
+		"name": "o02b",
+		"switchType": "stateful",
+		"onUrl": {
+			"url": "http://localhost:7104/device/o02b/on",
+			"method": "get"
+		},
+		"offUrl": {
+			"url": "http://localhost:7104/device/o02b/off",
+			"method": "get"
+		},
+		"statusUrl": {
+			"url": "http://localhost:7104/device/o02b",
+			"method": "get"
+		},
+                "statusPattern":".*\"current\" *: *\"high\".*",
+                "pullInterval":60000
+	   },
+           {
+                "accessory": "HTTP-SWITCH",
+                "notificationID": "o03a",
+                "name": "o03a",
+                "switchType": "stateful",
+                "onUrl": {
+                        "url": "http://localhost:7104/device/o03a/on",
+                        "method": "get"
+                },
+                "offUrl": {
+                        "url": "http://localhost:7104/device/o03a/off",
+                        "method": "get"
+                },
+                "statusUrl": {
+                        "url": "http://localhost:7104/device/o03a",
+                        "method": "get"
+                },
+                "statusPattern":".*\"current\" *: *\"high\".*",
+                "pullInterval":60000
+           },
+           {
+                "accessory": "HTTP-SWITCH",
+                "notificationID": "o03b",
+                "name": "o03b",
+                "switchType": "stateful",
+                "onUrl": {
+                        "url": "http://localhost:7104/device/o03b/on",
+                        "method": "get"
+                },
+                "offUrl": {
+                        "url": "http://localhost:7104/device/o03b/off",
+                        "method": "get"
+                },
+                "statusUrl": {
+                        "url": "http://localhost:7104/device/o03b",
+                        "method": "get"
+                },
+                "statusPattern":".*\"current\" *: *\"high\".*",
+                "pullInterval":60000
+           }
+        ]
+}
+
+
+CONFIG.JSON
+{
+    "bridge": {
+        "name": "myenocean",
+        "username": "CB:23:3D:E3:CE:30",
+        "port": 51827,
+        "pin": "131-45-151"
+    },
+    
+    "description": "This is an example configuration file with one fake accessory and one fake platform. You can use this as a template for creating your own configuration file containing devices you actually own.",
+
+    "accessories": [
+    ],
+
+    "platforms": [
+       {
+          "platform":"AutomationSwitches",
+          "switches": [
+             {
+                "type":"switch",
+                "name":"S1",
+                "stored":true,
+                "default":false
+             } 
+          ]
+       }
+    ]
+}
+
+
+xplToHomebridge.json
+{
+   "xplSource": "mea-xpltohb.home",
+   "notifHost":"localhost",
+   "notifPort":7103,
+   "devices": {
+      "o02a" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o02a","current":"high","type":"output"},
+         "off": {"device":"o02a","current":"low","type":"output"},
+         "filters":  [
+            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      },
+      "o02b" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o02b","current":"high","type":"output"},
+         "off": {"device":"o02b","current":"low","type":"output"},
+         "filters":  [
+            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      },
+      "o03a" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o03a","current":"high","type":"output"},
+         "off": {"device":"o03a","current":"low","type":"output"},
+         "filters":  [
+            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      },
+      "o03b" : {
+         "id":"device",
+         "value":"current",
+         "on": {"device":"o03b","current":"high","type":"output"},
+         "off": {"device":"o03b","current":"low","type":"output"},
+         "filters":  [
+            { "device": "^o.*$", "schema": "^sensor\\..*$", "current":"^.*$", "source":"^mea-.+\\.*$", "msgtype":["^.*-stat$","^.*-trig$"] }
+         ]
+      }
+   }
+}

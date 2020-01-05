@@ -34,7 +34,7 @@ def mea_pairingDevices(data):
       verbose(2, "ERROR (", fn_name, ") - enocean data error")
       return {}
 
-   if rorg==246:
+   if rorg==246: #f6
       devices=[
          {
             "name" : str(interface_name)+str(addr)+"S01",
@@ -51,6 +51,39 @@ def mea_pairingDevices(data):
             "state": 1
          }
       ]
+      return devices
+   elif rorg==210: #d2
+      if func==1:
+         devices=[
+            {
+               "name" : str(interface_name)+str(addr)+"A01",
+               "id_type": 1,
+               "description": "enocean d2 output 1",
+               "parameters": "PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:A",
+               "state": 1
+            },
+            {
+               "name": str(interface_name)+str(addr)+"A02",
+               "id_type": 1,
+               "description": "enocean d2 output 2",
+               "parameters": "PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:B",
+               "state": 1
+            },
+            {
+               "name" : str(interface_name)+str(addr)+"S01",
+               "id_type": 0,
+               "description": "enocean d2 status 1",
+               "parameters": "PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:A",
+               "state": 1
+            },
+            {
+               "name": str(interface_name)+str(addr)+"S02",
+               "id_type": 0,
+               "description": "enocean d2 status 2",
+               "parameters": "PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:B",
+               "state": 1
+            }
+         ]
       return devices
 
    return None
