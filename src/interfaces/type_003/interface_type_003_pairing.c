@@ -97,7 +97,7 @@ int16_t enocean_teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, ui
 
       int ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_UTE_TELEGRAM, ed->id, 0, device_addr, resp, 7, 0, &nerr);
 
-      fprintf(stderr,"RESPONSE = %d\n", ret);
+      fprintf(stderr,"enocean_teachinout - RESPONSE = %d\n", ret);
 
       eep[0]=data[13]; // (RORG)
       eep[1]=data[12]; // (FUNC)
@@ -193,7 +193,7 @@ int16_t enocean_teachinout_reversed(enocean_ed_t *ed, int16_t addr_dec, uint8_t 
 
       int ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_UTE_TELEGRAM, ed->id, addr_dec, device_addr, resp, 7, 0, &nerr);
 
-      fprintf(stderr,"RESPONSE = %d\n", ret);
+      fprintf(stderr,"enocean_teachinout_reversed - RESPONSE = %d\n", ret);
 
       eep[0]=data[7]; // (RORG)
       eep[1]=data[8]; // (FUNC)
@@ -337,19 +337,19 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
             fprintf(stderr, "=== UTE Telegram (D2) ===\n");
             fprintf(stderr, "Adresse    : %02x-%02x-%02x-%02x\n", data[14], data[15], data[16], data[17]);
 
-            int ret=0;
             if(data[7]!=0xd2)
                ret=enocean_teachinout(i003->ed, 0, data, l_data, eep, 1);
             else
                ret=enocean_teachinout_reversed(i003->ed, 0, data, l_data, eep, 1);
 
             ret=0;
+            fprintf(stderr, "ICI: %d\n", ret);
          }
          break;
       } 
    }
    else {  // quand on ne sais pas analyser le packet, on le dump
-      for(int i=0; i<l_data; i++)       {
+      for(int i=0; i<l_data; i++) {
          if(i && (i % 10) == 0)
             fprintf(stderr, "\n");
          fprintf(stderr, "0x%02x ", data[i]);
@@ -363,6 +363,7 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
       ret=-1;
    }
 
+   fprintf(stderr, "LA: %d\n", ret);
    return ret;
 }
 
