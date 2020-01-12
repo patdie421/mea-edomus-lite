@@ -17,7 +17,7 @@ void deviceTask(void *pvParameters)
    meaBLEServers.meaDevices[deviceId].state=2; // running state
 
    printf("DEVICE: ");
-   printf(meaBLEServers.meaDevices[deviceId].address);
+   printf("%s", meaBLEServers.meaDevices[deviceId].address);
    printf(" is running\n");
 
    for(;;) {

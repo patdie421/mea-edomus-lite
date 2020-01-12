@@ -35,6 +35,7 @@ static PyObject *mea_xplGetDeviceID(PyObject *self, PyObject *args);
 static PyObject *mea_xplGetInstanceID(PyObject *self, PyObject *args);
 static PyObject *mea_xplSendMsg(PyObject *self, PyObject *args);
 static PyObject *mea_interface_api(PyObject *self, PyObject *args);
+static PyObject *mea_get_interface(PyObject *self, PyObject *args);
 
 
 static PyMethodDef MeaMethods[] = {
@@ -42,8 +43,9 @@ static PyMethodDef MeaMethods[] = {
    {"xplGetVendorID",   mea_xplGetVendorID,   METH_VARARGS, "VendorID"},
    {"xplGetDeviceID",   mea_xplGetDeviceID,   METH_VARARGS, "DeviceID"},
    {"xplGetInstanceID", mea_xplGetInstanceID, METH_VARARGS, "InstanceID"},
-   {"xplSendMsg",       mea_xplSendMsg,       METH_VARARGS, "Envoie un message XPL"},
-   {"interfaceAPI",     mea_interface_api,    METH_VARARGS, "appel api d'interface"},
+   {"xplSendMsg",       mea_xplSendMsg,       METH_VARARGS, "send xPL message"},
+   {"interfaceAPI",     mea_interface_api,    METH_VARARGS, "call interface api"},
+   {"getInterface",     mea_get_interface,    METH_VARARGS, "get full interface description"},
    {NULL, NULL, 0, NULL}
 };
 
@@ -115,6 +117,43 @@ PyObject *mea_getMemory(PyObject *self, PyObject *args, PyObject *mea_memory)
 static PyObject *mea_api_getMemory(PyObject *self, PyObject *args)
 {
    return mea_getMemory(self, args, mea_memory);
+}
+
+
+static PyObject *mea_get_interface(PyObject *self, PyObject *args)
+{
+   PyObject *arg;
+
+   int id_interface=-1;
+   int nb_args=0;
+
+   nb_args=(int)PyTuple_Size(args);
+   if(nb_args!=1) {
+      PyErr_BadArgument();
+      return NULL;
+   }
+
+   arg=PyTuple_GetItem(args, 0);
+   if(PyNumber_Check(arg)) {
+      id_interface=(int)PyLong_AsLong(arg);
+   }
+   else {
+      PyErr_BadArgument();
+      return NULL;
+   }
+
+   cJSON *interfaceJson=getInterfaceById_alloc(id_interface);
+   PyObject *interfacePython=NULL;
+   if(interfaceJson!=NULL) {
+      interfacePython=mea_jsonToPyObject(interfaceJson);
+   }
+   else {
+      interfacePython=Py_None;
+      Py_INCREF(interfacePython);
+   }
+   cJSON_Delete(interfaceJson);
+
+   return interfacePython;
 }
 
 

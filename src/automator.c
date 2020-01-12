@@ -1366,7 +1366,7 @@ next_iteration: {}
 
       DEBUG_SECTION2(DEBUGFLAG) {
          mea_log_printf("%s (%s) : outputs rules processing time=%ld us\n", DEBUG_STR, __func__, exectime);
-      } 
+      }
    }
 
    return xplout_cntr;

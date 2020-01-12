@@ -96,7 +96,7 @@ int _comio2_open(comio2_ad_t *ad, char *dev, int speed)
    int fd=serial_open(dev, speed);
    if(fd != -1) {
       strncpy(ad->serial_dev_name,dev,sizeof(ad->serial_dev_name)-1);
-      ad->serial_dev_name[sizeof(ad->serial_dev_name)]=0;
+      ad->serial_dev_name[sizeof(ad->serial_dev_name)-1]=0;
       ad->speed=speed;
       ad->fd=fd;
    }

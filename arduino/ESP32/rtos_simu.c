@@ -134,7 +134,7 @@ BaseType_t xTaskCreate(
    TaskHandle_t *pxCreatedTask
 )
 {
-   pthread_t _thread=NULL;
+//   pthread_t _thread=NULL;
 
    if(pthread_create(pxCreatedTask, NULL, (void *)pvTaskCode, pvParameters)) {
       perror(__func__);
