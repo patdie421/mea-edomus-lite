@@ -301,10 +301,12 @@ void *_thread_interface_type_003_enocean_data(void *args)
             uint8_t eep[3]="";
             
             int _ret=enocean_pairing(udata->i003, e, addr, eep);
+            mea_log_printf("%s (%s) : et LA %d\n", INFO_STR, __func__, _ret);
             if(_ret<0) {
                mea_log_printf("%s (%s) : can't pair %02x-%02x-%02x-%02x\n", INFO_STR, __func__, _addr[0], _addr[1], _addr[2], _addr[3]);
             }
             else {
+               mea_log_printf("%s (%s) : pairing %02x-%02x-%02x-%02x in progress\n", INFO_STR, __func__, _addr[0], _addr[1], _addr[2], _addr[3]);
                enocean_update_interfaces((void *)udata->i003, interfaceDevName, _addr, eep);
                pairing_done=1;
             }

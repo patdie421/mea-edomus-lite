@@ -72,13 +72,12 @@ int16_t enocean_teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, ui
    }
    resp_request = resp_request << 4;
 
-   fprintf(stderr, "EEP        : %02x-%02x-%02x\n", data[13], data[12], data[11]);
-   fprintf(stderr, "nb channels: %d\n", data[8]);
-   fprintf(stderr, "op         : %u (%s communication)\n", operation, operationStr);
-   fprintf(stderr, "rs         : %u (%s EEP Teach-In-Response message expected)\n", response, responseStr);
-   fprintf(stderr, "rq         : %u (%s)\n", request, requestStr);
-   fprintf(stderr, "cmnd       : %u\n", cmnd);
-
+   mea_log_printf("%s (%s) : EEP        : %02x-%02x-%02x\n", ERROR_STR, __func__, data[13], data[12], data[11]);
+   mea_log_printf("%s (%s) : nb channels: %d\n", ERROR_STR, __func__, data[8]);
+   mea_log_printf("%s (%s) : op         : %u (%s communication)\n", ERROR_STR, __func__, operation, operationStr);
+   mea_log_printf("%s (%s) : rs         : %u (%s EEP Teach-In-Response message expected)\n", ERROR_STR, __func__, response, responseStr);
+   mea_log_printf("%s (%s) : rq         : %u (%s)\n", ERROR_STR, __func__, request, requestStr);
+   mea_log_printf("%s (%s) : cmnd       : %u\n", ERROR_STR, __func__, cmnd);
 
    if((request  != 3) &&
       (response == 0) &&
@@ -97,7 +96,7 @@ int16_t enocean_teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, ui
 
       int ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_UTE_TELEGRAM, ed->id, 0, device_addr, resp, 7, 0, &nerr);
 
-      fprintf(stderr,"RESPONSE = %d\n", ret);
+      mea_log_printf("%s (%s) : enocean_teachinout - RESPONSE = %d\n", ERROR_STR, __func__, ret);
 
       eep[0]=data[13]; // (RORG)
       eep[1]=data[12]; // (FUNC)
@@ -167,14 +166,12 @@ int16_t enocean_teachinout_reversed(enocean_ed_t *ed, int16_t addr_dec, uint8_t 
    }
    resp_request = resp_request << 4;
 
-   fprintf(stderr, "reversed !\n");
-   fprintf(stderr, "EEP        : %02x-%02x-%02x\n", data[7], data[8], data[9]);
-   fprintf(stderr, "nb channels: %d\n", data[12]);
-   fprintf(stderr, "op         : %u (%s communication)\n", operation, operationStr);
-   fprintf(stderr, "rs         : %u (%s EEP Teach-In-Response message expected)\n", response, responseStr);
-   fprintf(stderr, "rq         : %u (%s)\n", request, requestStr);
-   fprintf(stderr, "cmnd       : %u\n", cmnd);
-
+   printf("%s (%s) : EEP        : %02x-%02x-%02x\n", ERROR_STR, __func__, data[7], data[8], data[9]);
+   printf("%s (%s) : nb channels: %d\n", ERROR_STR, __func__, data[8]);
+   printf("%s (%s) : op         : %u (%s communication)\n", ERROR_STR, __func__, operation, operationStr);
+   printf("%s (%s) : rs         : %u (%s EEP Teach-In-Response message expected)\n", ERROR_STR, __func__, response, responseStr);
+   printf("%s (%s) : rq         : %u (%s)\n", ERROR_STR, __func__, request, requestStr);
+   printf("%s (%s) : cmnd       : %u\n", ERROR_STR, __func__, cmnd);
 
    if((request  != 3) &&
       (response == 0) &&
@@ -193,7 +190,7 @@ int16_t enocean_teachinout_reversed(enocean_ed_t *ed, int16_t addr_dec, uint8_t 
 
       int ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_UTE_TELEGRAM, ed->id, addr_dec, device_addr, resp, 7, 0, &nerr);
 
-      fprintf(stderr,"RESPONSE = %d\n", ret);
+      mea_log_printf("%s (%s) : enocean_teachinout_reversed - RESPONSE = %d\n", ERROR_STR, __func__, ret);
 
       eep[0]=data[7]; // (RORG)
       eep[1]=data[8]; // (FUNC)
@@ -216,15 +213,15 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
       
    if(data[4]==ENOCEAN_EVENT) {
       
-      fprintf(stderr,   "ENOCEAN_EVENT ...\n");
+      mea_log_printf("ENOCEAN_EVENT ...\n");
       if(data[6]==2) { // SA_CONFIRM_LEARN
-         fprintf(stderr,"   SA_CONFIRM_LEARN ...\n");
-         fprintf(stderr,"      PM Priority       : %02x", data[7]);
-         fprintf(stderr,"      manufacturer ID   : %02x...%02x", data[8] & 0b00000111, data[9]);
-         fprintf(stderr,"      EEP               : %02x-%02x-%02x\n", data[10], data[11], data[12]);
-         fprintf(stderr,"      RSSI              : %d", data[13]);
-         fprintf(stderr,"      PM Candidat ID    : %02x-%02x-%02x-%02x", data[14],data[15],data[16],data[17]);
-         fprintf(stderr,"      Smart Ack ClientID: %02x-%02x-%02x-%02x", data[18],data[19],data[20],data[21]);
+         mea_log_printf("   SA_CONFIRM_LEARN ...\n");
+         mea_log_printf("      PM Priority       : %02x", data[7]);
+         mea_log_printf("      manufacturer ID   : %02x...%02x", data[8] & 0b00000111, data[9]);
+         mea_log_printf("      EEP               : %02x-%02x-%02x\n", data[10], data[11], data[12]);
+         mea_log_printf("      RSSI              : %d", data[13]);
+         mea_log_printf("      PM Candidat ID    : %02x-%02x-%02x-%02x", data[14],data[15],data[16],data[17]);
+         mea_log_printf("      Smart Ack ClientID: %02x-%02x-%02x-%02x", data[18],data[19],data[20],data[21]);
 
          enocean_sa_confirm_learn_response(i003->ed, 1000 /* ms */, 0, &nerr);
 
@@ -236,7 +233,7 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
       }
    }
    else if(data[4]==ENOCEAN_RADIO_ERP1) {
-      fprintf(stderr,"ENOCEAN_RADIO_ERP1 (%08x ...\n", addr);
+      mea_log_printf("ENOCEAN_RADIO_ERP1 (%08x ...\n", addr);
       switch((unsigned char)data[6]) {
          case ENOCEAN_RPS_TELEGRAM: {
          /* Exemple "Trame d'un bouton F6"
@@ -262,8 +259,8 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
             19 0x00   0 Optionnal7 Security level
             20 0x38  56 CRC8D
          */
-            fprintf(stderr, "=== RPS Telegram (%x) ===\n", data[6]);
-            fprintf(stderr, "Adresse    : %02x-%02x-%02x-%02x\n", data[8], data[9], data[10], data[11]);
+            mea_log_printf("=== RPS Telegram (%x) ===\n", data[6]);
+            mea_log_printf("Adresse    : %02x-%02x-%02x-%02x\n", data[8], data[9], data[10], data[11]);
 
             eep[0]=data[6]; // (RORG)
             eep[1]=0;       // (FUNC)
@@ -334,10 +331,9 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
             data[025] = 0x00 (000)
             data[026] = 0x5a (090)
          */
-            fprintf(stderr, "=== UTE Telegram (D2) ===\n");
-            fprintf(stderr, "Adresse    : %02x-%02x-%02x-%02x\n", data[14], data[15], data[16], data[17]);
+            mea_log_printf("=== UTE Telegram (D2) ===\n");
+            mea_log_printf("Adresse    : %02x-%02x-%02x-%02x\n", data[14], data[15], data[16], data[17]);
 
-            int ret=0;
             if(data[7]!=0xd2)
                ret=enocean_teachinout(i003->ed, 0, data, l_data, eep, 1);
             else
@@ -349,12 +345,12 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
       } 
    }
    else {  // quand on ne sais pas analyser le packet, on le dump
-      for(int i=0; i<l_data; i++)       {
+      for(int i=0; i<l_data; i++) {
          if(i && (i % 10) == 0)
-            fprintf(stderr, "\n");
-         fprintf(stderr, "0x%02x ", data[i]);
+            fprintf(MEA_STDERR, "\n");
+         mea_log_printf("0x%02x ", data[i]);
       }
-      fprintf(stderr, "\n");
+      fprintf(MEA_STDERR, "\n");
       
       eep[0]=0; // (RORG)
       eep[1]=0; // (FUNC)
@@ -380,7 +376,6 @@ cJSON *enocean_pairing_start(void *context, void *parameters) /* TO TEST */
    interface_type_003_t *i003 = (interface_type_003_t *)context;
    int16_t nerr=0;
    cJSON *p=NULL;
-//   cJSON *result=NULL;
 
    if(parameters)
       p=(cJSON *)parameters;
@@ -391,13 +386,6 @@ cJSON *enocean_pairing_start(void *context, void *parameters) /* TO TEST */
    i003->pairing_startms=mea_now();
    
    return cJSON_CreateTrue();
-/*
-   result=cJSON_CreateObject();
-   if(result) {
-      cJSON_AddItemToObject(result, STATE_STR_C, cJSON_CreateNumber((double)ENOCEAN_PAIRING_ON));
-   }
-   return result;
-*/
 }
 
 
@@ -406,7 +394,6 @@ cJSON *enocean_pairing_end(void *context, void *parameters) /* TO TEST */
    interface_type_003_t *i003 = (interface_type_003_t *)context;
    int16_t nerr=0;
    cJSON *p=NULL;
-//   cJSON *result=NULL;
 
    if(parameters)
       p=(cJSON *)parameters;
@@ -417,13 +404,6 @@ cJSON *enocean_pairing_end(void *context, void *parameters) /* TO TEST */
    i003->pairing_startms=-1.0;
    
    return cJSON_CreateTrue();
-/*
-   result=cJSON_CreateObject();
-   if(result) {
-      cJSON_AddItemToObject(result, STATE_STR_C, cJSON_CreateNumber((double)ENOCEAN_PAIRING_OFF));
-   }
-   return result;
-*/
 }
 
 
@@ -446,14 +426,6 @@ void *enocean_pairingCtrl(int cmd, void *context, void *parameters)
 int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *addr, uint8_t *eep) /* TO TEST */
 {
    interface_type_003_t *i003 = (interface_type_003_t *)context;
-/*
-   "id_type":%d,
-   "description":"",
-   "dev":"%s",
-   "parameters":"",
-   "state":2,
-   "devices": { }
-*/
 
    cJSON *j=NULL, *_devices=NULL;
    cJSON *pairing_data=NULL;
@@ -499,15 +471,9 @@ int enocean_update_interfaces(void *context, char *interfaceDevName, uint8_t *ad
       }
    }
    else {
-//      _devices=python_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairing", jj);
       _devices=plugin_call_function_json_alloc(pluginParams->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_pairingDevices", jj);
    }
 
-//   char *s=cJSON_Print(_devices);
-//   mea_log_printf("%s\n", s);
-//   free(s);
-//   s=NULL;
-   
    addInterface(j);
    if(_devices->type==cJSON_Array) {
       cJSON *jsonDevice=_devices->child;

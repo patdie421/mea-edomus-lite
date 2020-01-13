@@ -314,6 +314,21 @@
 		4EAD8B4F2396F10A00C120A7 /* my_dht22.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = my_dht22.py; sourceTree = "<group>"; };
 		4EAD8B502396F51B00C120A7 /* mea_rest_api_pairing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mea_rest_api_pairing.h; sourceTree = "<group>"; };
 		4EAD8B512396F51B00C120A7 /* mea_rest_api_pairing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mea_rest_api_pairing.c; sourceTree = "<group>"; };
+		4EC97AB223CB13E7005504D7 /* task_device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = task_device.h; sourceTree = "<group>"; };
+		4EC97AB323CB13E7005504D7 /* rtos_simu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rtos_simu.c; sourceTree = "<group>"; };
+		4EC97AB423CB13E7005504D7 /* task_output.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = task_output.h; sourceTree = "<group>"; };
+		4EC97AB523CB13E7005504D7 /* task_input.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = task_input.c; sourceTree = "<group>"; };
+		4EC97AB623CB13E7005504D7 /* bleservers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bleservers.h; sourceTree = "<group>"; };
+		4EC97AB723CB13E7005504D7 /* arduino_simu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = arduino_simu.c; sourceTree = "<group>"; };
+		4EC97AB823CB13E7005504D7 /* rtos_simu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtos_simu.h; sourceTree = "<group>"; };
+		4EC97AB923CB13E7005504D7 /* build.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
+		4EC97ABA23CB13E7005504D7 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		4EC97ABB23CB13E7005504D7 /* task_device.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = task_device.c; sourceTree = "<group>"; };
+		4EC97ABC23CB13E7005504D7 /* task_input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = task_input.h; sourceTree = "<group>"; };
+		4EC97ABD23CB13E7005504D7 /* task_output.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = task_output.c; sourceTree = "<group>"; };
+		4EC97ABE23CB13E7005504D7 /* data.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = data.txt; sourceTree = "<group>"; };
+		4EC97ABF23CB13E7005504D7 /* arduino_simu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = arduino_simu.h; sourceTree = "<group>"; };
+		4EC97AC023CB13E7005504D7 /* bleservers.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bleservers.c; sourceTree = "<group>"; };
 		4ECEEB9A23BBE6FA0003C5C7 /* mea_plugins_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mea_plugins_utils.h; sourceTree = "<group>"; };
 		4ECEEB9B23BBE6FA0003C5C7 /* mea_python_json_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mea_python_json_utils.h; sourceTree = "<group>"; };
 		4ECEEB9C23BBE6FA0003C5C7 /* mea_python_json_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mea_python_json_utils.c; sourceTree = "<group>"; };
@@ -877,6 +892,28 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		4EC97AB123CB13E7005504D7 /* ESP32 */ = {
+			isa = PBXGroup;
+			children = (
+				4EC97AB223CB13E7005504D7 /* task_device.h */,
+				4EC97AB323CB13E7005504D7 /* rtos_simu.c */,
+				4EC97AB423CB13E7005504D7 /* task_output.h */,
+				4EC97AB523CB13E7005504D7 /* task_input.c */,
+				4EC97AB623CB13E7005504D7 /* bleservers.h */,
+				4EC97AB723CB13E7005504D7 /* arduino_simu.c */,
+				4EC97AB823CB13E7005504D7 /* rtos_simu.h */,
+				4EC97AB923CB13E7005504D7 /* build.sh */,
+				4EC97ABA23CB13E7005504D7 /* main.c */,
+				4EC97ABB23CB13E7005504D7 /* task_device.c */,
+				4EC97ABC23CB13E7005504D7 /* task_input.h */,
+				4EC97ABD23CB13E7005504D7 /* task_output.c */,
+				4EC97ABE23CB13E7005504D7 /* data.txt */,
+				4EC97ABF23CB13E7005504D7 /* arduino_simu.h */,
+				4EC97AC023CB13E7005504D7 /* bleservers.c */,
+			);
+			path = ESP32;
+			sourceTree = "<group>";
+		};
 		4EF6850E2369B0E10084B302 /* lib */ = {
 			isa = PBXGroup;
 			children = (
@@ -971,6 +1008,7 @@
 		4EF6853C2369B0E10084B302 /* arduino */ = {
 			isa = PBXGroup;
 			children = (
+				4EC97AB123CB13E7005504D7 /* ESP32 */,
 				4EF6853D2369B0E10084B302 /* Libraries */,
 				4EF6856A2369B0E10084B302 /* interface_type_001 */,
 				4EF6856C2369B0E10084B302 /* interface_SMS_SIM900 */,

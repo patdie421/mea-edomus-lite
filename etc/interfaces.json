@@ -1,44 +1,306 @@
 {
-   "I002" : {
-      "id_type":200,
-      "description":"",
-      "dev":"SERIAL://ttyUSB1:9600",
-      "parameters":"",
-      "state":1,
-      "devices": {
-      }
-   },
-   "I010" : {
-      "id_type":3010,
-      "description":"",
-      "dev":"PIPE:///tmp/meapipe",
-      "parameters":"PLUGIN=mea_text_inout;FSTARTSTR={{{;FENDSTR=}}};DIRECTION=BOTH",
-      "state":1,
-      "devices": {
-         "I010S001": {
-            "id_type":0,
-            "description":"Demo input 1",
-            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S001",
-            "state":1
-         },
-         "I010S002": {
-            "id_type":0,
-            "description":"Demo input 2",
-            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S002",
-            "state":1
-         },
-         "o02a": {
-            "id_type":0,
-            "description":"Demo input 3",
-            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:o02a",
-            "state":1
-         },
-         "I010A001": {
-            "id_type":1,
-            "description":"Demo actuator 1",
-            "parameters":"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010A001",
-            "state":1
-         }
-      }
-   }
+	"i001":	{
+		"id_type":	100,
+		"description":	"",
+		"dev":	"SERIAL://ttyAMA0:9600",
+		"parameters":	"",
+		"state":	1,
+		"devices":	{
+			"i001s01":	{
+				"description":	"D4 : digital input only",
+				"id_type":	0,
+				"state":	1,
+				"parameters":	"pin=d4;type=digital",
+				"id_sensor_actuator":	1000,
+				"id_interface":	100
+			},
+			"i001s02":	{
+				"description":	"D10 : digital input only",
+				"id_type":	0,
+				"state":	1,
+				"parameters":	"pin=d10;type=digital",
+				"id_sensor_actuator":	1001,
+				"id_interface":	100
+			},
+			"i001s03":	{
+				"description":	"D12 : digital input only",
+				"id_type":	0,
+				"state":	1,
+				"parameters":	"pin=d12;type=digital",
+				"id_sensor_actuator":	1002,
+				"id_interface":	100
+			},
+			"i001s04":	{
+				"description":	"AI3 : analog input only.\nCOMPUTE values : {TEMP,VOLTAGE,RAW}\nALGO values: {TMP36 if COMPUTE=TEMP, AREF5 or AREF11 if COMPUTE=VOLTAGE.}",
+				"id_type":	0,
+				"state":	1,
+				"parameters":	"pin=ai3;type=analog;COMPUTE=TEMP;ALGO=TMP36;POLLING_PERIODE=30",
+				"id_sensor_actuator":	1003,
+				"id_interface":	100
+			},
+			"i001c01":	{
+				"description":	"First power counter (COUNTER=0). POLLING_PERIODE (optional) in s, default=600",
+				"id_type":	1000,
+				"state":	1,
+				"parameters":	"counter=0;POLLING_PERIODE=600",
+				"id_sensor_actuator":	1004,
+				"id_interface":	100
+			},
+			"i001c02":	{
+				"description":	"Second power counter (COUNTER=1). POLLING_PERIDOE (optional) in s, default=600",
+				"id_type":	1000,
+				"state":	1,
+				"parameters":	"counter=1;POLLING_PERIODE=600",
+				"id_sensor_actuator":	1005,
+				"id_interface":	100
+			},
+			"i001a01":	{
+				"description":	"D5 : digital (type=digital) ou PWM output (type=analog). Entree (pulse 125)\n",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=d5;type=digital",
+				"id_sensor_actuator":	1006,
+				"id_interface":	100
+			},
+			"i001a02":	{
+				"description":	"D11 : digital (type=digital) ou PWM output (type=analog)\n",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=d11;type=digital",
+				"id_sensor_actuator":	1007,
+				"id_interface":	100
+			},
+			"i001a03":	{
+				"description":	"AI0 : digital output only (type=digital). Salle (pulse 125)",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=ai0;type=digital",
+				"id_sensor_actuator":	1008,
+				"id_interface":	100
+			},
+			"i001a04":	{
+				"description":	"AI1 : digital output only (type=digital). tele (pulse 125)",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=ai1;type=digital",
+				"id_sensor_actuator":	1009,
+				"id_interface":	100
+			},
+			"i001a05":	{
+				"description":	"AI2 : digital output only (type=digital)",
+				"id_type":	1,
+				"state":	1,
+				"parameters":	"pin=ai2;type=digital",
+				"id_sensor_actuator":	1010,
+				"id_interface":	100
+			}
+		},
+		"id_interface":	100
+	},
+	"i003":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"SERIAL://ttyUSB0:9600",
+		"parameters":	"PLUGIN=enocean",
+		"state":	1,
+		"devices":	{
+	},
+		"id_interface":	101
+	},
+	"i003_0029c689":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"I003://00-29-c6-89",
+		"parameters":	"",
+		"state":	2,
+		"devices":	{
+			"i003s001":	{
+				"id_type":	0,
+				"description":	"Demo enocean input 1",
+				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:A",
+				"state":	1,
+				"id_sensor_actuator":	1011,
+				"id_interface":	102
+			},
+			"i003s002":	{
+				"id_type":	0,
+				"description":	"Demo enocean input 1",
+				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:B",
+				"state":	1,
+				"id_sensor_actuator":	1012,
+				"id_interface":	102
+			}
+		},
+		"id_interface":	102
+	},
+	"i010":	{
+		"id_type":	3010,
+		"description":	"",
+		"dev":	"PIPE:///tmp/meapipe",
+		"parameters":	"PLUGIN=mea_text_inout;FSTARTSTR={{{;FENDSTR=}}};DIRECTION=BOTH",
+		"state":	0,
+		"devices":	{
+			"i010s001":	{
+				"id_type":	0,
+				"description":	"Demo input 1",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S001",
+				"state":	1,
+				"id_sensor_actuator":	1013,
+				"id_interface":	103
+			},
+			"i010s002":	{
+				"id_type":	0,
+				"description":	"Demo input 2",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010S002",
+				"state":	1,
+				"id_sensor_actuator":	1014,
+				"id_interface":	103
+			},
+			"i010a001":	{
+				"id_type":	1,
+				"description":	"Demo actuator 1",
+				"parameters":	"PLUGIN=mea_text_inout;PLUGIN_PARAMETERS=VALUE:I010A001",
+				"state":	1,
+				"id_sensor_actuator":	1015,
+				"id_interface":	103
+			}
+		},
+		"id_interface":	103
+	},
+	"i003_0194c940":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"i003://01-94-c9-40",
+		"parameters":	"",
+		"state":	2,
+		"devices":	{
+			"i0030194c940s01":	{
+				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:A",
+				"description":	"enocean f6 input 1",
+				"id_type":	0,
+				"state":	1,
+				"id_sensor_actuator":	1016,
+				"id_interface":	104
+			},
+			"i0030194c940s02":	{
+				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:B",
+				"description":	"enocean f6 input 2",
+				"id_type":	0,
+				"state":	1,
+				"id_sensor_actuator":	1017,
+				"id_interface":	104
+			}
+		},
+		"id_interface":	104
+	},
+	"i003_002cf451":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"i003://00-2c-f4-51",
+		"parameters":	"",
+		"state":	2,
+		"devices":	{
+			"i003002cf451s01":	{
+				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:A",
+				"description":	"enocean f6 input 1",
+				"id_type":	0,
+				"state":	1,
+				"id_sensor_actuator":	1018,
+				"id_interface":	105
+			},
+			"i003002cf451s02":	{
+				"parameters":	"PLUGIN=enocean_f6-02-01;PLUGIN_PARAMETERS=channel:B",
+				"description":	"enocean f6 input 2",
+				"id_type":	0,
+				"state":	1,
+				"id_sensor_actuator":	1019,
+				"id_interface":	105
+			}
+		},
+		"id_interface":	105
+	},
+	"i003_050e81d2":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"i003://05-0e-81-d2",
+		"parameters":	"",
+		"state":	2,
+		"devices":	{
+			"i003050e81d2a01":	{
+				"parameters":	"PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:A",
+				"description":	"enocean d2 output 1",
+				"id_type":	1,
+				"state":	1,
+				"id_sensor_actuator":	1020,
+				"id_interface":	106
+			},
+			"i003050e81d2a02":	{
+				"parameters":	"PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:B",
+				"description":	"enocean d2 output 2",
+				"id_type":	1,
+				"state":	1,
+				"id_sensor_actuator":	1021,
+				"id_interface":	106
+			},
+			"i003050e81d2s01":	{
+				"parameters":	"PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:A",
+				"description":	"enocean d2 status 1",
+				"id_type":	0,
+				"state":	1,
+				"id_sensor_actuator":	1022,
+				"id_interface":	106
+			},
+			"i003050e81d2s02":	{
+				"parameters":	"PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:B",
+				"description":	"enocean d2 status 2",
+				"id_type":	0,
+				"state":	1,
+				"id_sensor_actuator":	1023,
+				"id_interface":	106
+			}
+		},
+		"id_interface":	106
+	},
+	"i003_0194c940":	{
+		"id_type":	300,
+		"description":	"",
+		"dev":	"i003://01-94-c9-40",
+		"parameters":	"",
+		"state":	2,
+		"devices":	{
+			"i0030194c940a01":	{
+				"parameters":	"PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:A",
+				"description":	"enocean d2 output 1",
+				"id_type":	1,
+				"state":	1,
+				"id_sensor_actuator":	1020,
+				"id_interface":	106
+			},
+			"i0030194c940a02":	{
+				"parameters":	"PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:B",
+				"description":	"enocean d2 output 2",
+				"id_type":	1,
+				"state":	1,
+				"id_sensor_actuator":	1021,
+				"id_interface":	106
+			},
+			"i0030194c940s01":	{
+				"parameters":	"PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:A",
+				"description":	"enocean d2 status 1",
+				"id_type":	0,
+				"state":	1,
+				"id_sensor_actuator":	1022,
+				"id_interface":	106
+			},
+			"i0030194c940s02":	{
+				"parameters":	"PLUGIN=enocean_d2-01-xx;PLUGIN_PARAMETERS=channel:B",
+				"description":	"enocean d2 status 2",
+				"id_type":	0,
+				"state":	1,
+				"id_sensor_actuator":	1023,
+				"id_interface":	106
+			}
+		},
+		"id_interface":	106
+	}
 }

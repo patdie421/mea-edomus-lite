@@ -68,7 +68,6 @@ int interface_type_006_call_serialDataPre(struct genericserial_thread_params_s *
 {
    if(params->i006->interface_plugin_name) {
       cJSON *data=cJSON_CreateObject();
-      
       cJSON_AddItemToObject(data, DATA_STR_C, cJSON_CreateByteArray(_data, l_data));
       cJSON_AddNumberToObject(data, L_DATA_STR_C, (double)l_data);
       cJSON_AddNumberToObject(data, INTERFACE_ID_STR_C, params->i006->id_interface);
@@ -76,7 +75,7 @@ int interface_type_006_call_serialDataPre(struct genericserial_thread_params_s *
       if(params->i006->interface_plugin_parameters) {
          cJSON_AddStringToObject(data, PLUGIN_PARAMETERS_STR_C, params->i006->interface_plugin_parameters);
       }
-//      cJSON *result=python_call_function_json_alloc(params->i006->interface_plugin_name, "mea_dataPreprocessor", data);
+
       cJSON *result=plugin_call_function_json_alloc(params->i006->interface_plugin_name, "mea_dataPreprocessor", data);
       
       if(result) {
@@ -175,10 +174,9 @@ int16_t _interface_type_006_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    cJSON *msg=mea_xplMsgToJson_alloc(xplMsgJson);
    cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
    cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)i006->id_interface);
-   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
       cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
-
-//   python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
+   }
    plugin_fireandforget_function_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
 
    i006->indicators.senttoplugin++;
@@ -269,8 +267,9 @@ void *_thread_interface_type_006_genericserial_data(void *args)
             int ret = select(params->i006->fd+1, &input_set, NULL, NULL, &timeout);
             if (ret <= 0) {
                if(ret == 0) {
-                  if(buffer_ptr>0)
+                  if(buffer_ptr>0) {
                      break; // après un "blanc" de 200 ms, si on a des données, on les envoie au plugin
+                  }
                }
                else {
                   // erreur à traiter ...
@@ -293,8 +292,9 @@ void *_thread_interface_type_006_genericserial_data(void *args)
             }
             if(ret>0) {
                buffer[buffer_ptr++]=c;
-               if(buffer_ptr >= sizeof(buffer)-1)
+               if(buffer_ptr >= sizeof(buffer)-1) {
                   break;
+               }
             }
          }
 
@@ -322,9 +322,12 @@ void *_thread_interface_type_006_genericserial_data(void *args)
       else
       {
          err_counter++;
-         if(err_counter<5)
+         if(err_counter<5) {
             sleep(5);
-         else goto _thread_interface_type_006_genericserial_data_clean_exit;
+         }
+         else {
+            goto _thread_interface_type_006_genericserial_data_clean_exit;
+         }
       }
 
       pthread_testcancel();
@@ -335,7 +338,9 @@ _thread_interface_type_006_genericserial_data_clean_exit:
    pthread_cleanup_pop(1);
 
    process_async_stop(params->i006->monitoring_id);
-   for(;;) sleep(1);
+   for(;;) {
+      sleep(1);
+   }
    
    return NULL;
 }
@@ -386,13 +391,28 @@ start_interface_type_006_genericserial_data_thread_clean_exit:
       free(params);
       params=NULL;
    }
+
    return NULL;
 }
 
 
-int update_devices_type_006(void *ixxx)
+int update_devices_type_006(void *context)
 {
-   printf("update devices type 006\n");
+   interface_type_006_t *i006=(interface_type_006_t *)context;
+
+   if(i006->interface_plugin_name) {
+      cJSON *data=cJSON_CreateObject();
+      cJSON_AddNumberToObject(data, INTERFACE_ID_STR_C, i006->id_interface);
+      cJSON_AddNumberToObject(data, API_KEY_STR_C, i006->id_interface);
+      if(i006->interface_plugin_parameters) {
+         cJSON_AddStringToObject(data, PLUGIN_PARAMETERS_STR_C, i006->interface_plugin_parameters);
+      }
+      cJSON *result=plugin_call_function_json_alloc(i006->interface_plugin_name, "mea_updateDevices", data);
+      if(result) {
+         cJSON_Delete(result);
+         result=NULL;
+      }
+   }
 
    return 0;
 }
@@ -558,7 +578,6 @@ int16_t api_interface_type_006_json(void *ixxx, char *cmnd, void *args, int nb_a
    }
    else {
       strncpy(err, "unknown function", l_err);
-
       return -254;
    }
 }
@@ -651,8 +670,7 @@ int stop_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
       start_stop_params->i006->xPL_callback_data=NULL;
    }
    
-   if(start_stop_params->i006->thread)
-   {
+   if(start_stop_params->i006->thread) {
       pthread_cancel(*(start_stop_params->i006->thread));
       
       int counter=100;

@@ -184,13 +184,15 @@ cJSON *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int
    e->reload_flag=reload_flag;
 
    e->python_module=(char *)malloc(strlen(module)+1);
-   if(!e->python_module)
+   if(!e->python_module) {
       goto pythonPluginServer_exec_cmd_clean_exit;
+   }
    strcpy(e->python_module, module);
 
    e->python_function=(char *)malloc(strlen(function)+1);
-   if(!e->python_function)
+   if(!e->python_function) {
       goto pythonPluginServer_exec_cmd_clean_exit;
+   }
    strcpy(e->python_function, function);
    
    e->result=&result;
@@ -240,14 +242,16 @@ pythonPluginServer_exec_cmd_clean_exit:
       free(exec_cond);
       exec_cond=NULL;
    }
+
    if(exec_lock) {
       pthread_mutex_destroy(exec_lock);
       free(exec_lock);
       exec_lock=NULL;
    }
 
-   if(ret!=NOERROR)
+   if(ret!=NOERROR) {
       result=NULL;
+   }
    
    return result;
 }
@@ -772,8 +776,7 @@ int start_pythonPluginServer(int my_id, void *data, char *errmsg, int l_errmsg)
 
 int restart_pythonPluginServer(int my_id, void *data, char *errmsg, int l_errmsg)
 {
-   int ret=0;
-   ret=stop_pythonPluginServer(my_id, data, errmsg, l_errmsg);
+   int ret=stop_pythonPluginServer(my_id, data, errmsg, l_errmsg);
    if(ret==0) {
       return start_pythonPluginServer(my_id, data, errmsg, l_errmsg);
    }
