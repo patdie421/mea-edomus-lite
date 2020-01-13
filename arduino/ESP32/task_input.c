@@ -13,7 +13,8 @@
 
 TaskHandle_t inputTaskHandle;
 
-int readLine(char *buff, int l_buff)
+
+int receiveData(char *buff, int l_buff, int timeout)
 {
    int i=0;
    while(i<l_buff) {
@@ -43,7 +44,9 @@ bool serial_in()
    char characteristicUUID[36]="";
    char parameters[80]="";
 
-   readLine(buff, sizeof(buff)-1);
+   if(receiveData(buff, sizeof(buff)-1, 1000)<=0) {
+      return false;
+   }
 
    if(buff[1]==';') {
       switch(buff[0]) {

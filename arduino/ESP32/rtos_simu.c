@@ -20,7 +20,7 @@
 
 void vTaskDelay( const TickType_t xTicksToDelay )
 {
-   usleep(TICK*xTicksToDelay);  
+   usleep(TICK*xTicksToDelay);
 }
 
 
