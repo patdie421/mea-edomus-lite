@@ -1090,7 +1090,6 @@ void *_thread_interface_type_010(void *args)
       if(params->i010->interface_plugin_parameters) {
          cJSON_AddStringToObject(jsonData, INTERFACE_PARAMETERS_STR_C, params->i010->interface_plugin_parameters);
       }
-//      result=python_call_function_json_alloc(params->i010->interface_plugin_name, "mea_init", jsonData);
       result=plugin_call_function_json_alloc(params->i010->interface_plugin_name, "mea_init", jsonData);
       if(result) {
          cJSON_Delete(result);

@@ -58,6 +58,7 @@ struct mea_datetime_timer_s
    struct timespec end;
    datetime_timer_callback_f callback;
    void  *userdata;
+
    UT_hash_handle hh;
 };
 struct mea_datetime_timer_s *mea_datetime_timers_list = NULL;
@@ -107,18 +108,23 @@ void timespecDiff(struct timespec *t, struct timespec *t1, struct timespec *t2)
 int timespecCmp(struct timespec *a, struct timespec *b)
 {
    if (a->tv_sec != b->tv_sec) {
-      if (a->tv_sec > b->tv_sec)
+      if (a->tv_sec > b->tv_sec) {
          return 1;
-      else
+      }
+      else {
          return -1;
+      }
    }
    else {
-      if (a->tv_nsec > b->tv_nsec)
+      if (a->tv_nsec > b->tv_nsec) {
          return 1;
-      else if (a->tv_nsec < b->tv_nsec)
+      }
+      else if (a->tv_nsec < b->tv_nsec) {
          return -1;
-      else
+      }
+      else {
          return 0;
+      }
    }
 }
 
@@ -149,8 +155,9 @@ time_t mea_datetime_twilightend()
 
 time_t mea_datetime_time(time_t *v)
 {
-   if(v!=NULL)
+   if(v!=NULL) {
       *v=mea_time_value;
+   }
    return mea_time_value;
 }
 
@@ -182,8 +189,9 @@ int mea_timeFromStr(char *str, time_t *t)
       char *p=strptime(str, "%H:%M:%S", &tm); // va juste remplacer les heures, minutes et secondes dans tm
       if(p!=NULL && *p==0) {
          struct mea_datetime_value_s *newTime=(struct mea_datetime_value_s *)malloc(sizeof(struct mea_datetime_value_s));
-         if(newTime==NULL)
+         if(newTime==NULL) {
             return -1;
+         }
 
          strncpy(newTime->dateTimeStr, str, sizeof(newTime->dateTimeStr)-1);
          memcpy(&(newTime->tm), &tm, sizeof(struct tm));
@@ -256,10 +264,12 @@ static int getSunRiseSetOrTwilingStartEnd(double lon, double lat, time_t *_start
    month = tm_gmt.tm_mon+1;
    day   = tm_gmt.tm_mday;
 
-   if(twilight==0)
+   if(twilight==0) {
       rs = sun_rise_set(year, month, day, lon, lat, &start, &end);
-   else
+   }
+   else {
       rs = civil_twilight(year, month, day, lon, lat, &start, &end);
+   }
 
    int rh=0,rm=0,sh=0,sm=0;
 
@@ -326,8 +336,9 @@ static void updateTimersStates()
          if(current->state == TIMER_RUNNING) {
             if(timespecCmp(&(current->end), &now)==-1) {
                current->state = TIMER_FALLED;
-               if(current->callback)
+               if(current->callback) {
                   current->callback(current->name, current->userdata); 
+               }
             }
          }
       }
@@ -335,25 +346,28 @@ static void updateTimersStates()
 }
 
 
-static struct mea_datetime_timer_s * findNextTimerToFall()
+static struct mea_datetime_timer_s * findNextFallingTimer()
 {
    if(mea_datetime_timers_list!=NULL) {
       struct mea_datetime_timer_s  *current, *tmp, *last = NULL;
 
       HASH_ITER(hh, mea_datetime_timers_list, current, tmp) {
          if(current->state == TIMER_RUNNING) {
-            if(last == NULL)
+            if(last == NULL) {
                last = current;
+            }
             else {
-               if(timespecCmp(&(current->end), &(last->end))==1)
+               if(timespecCmp(&(current->end), &(last->end))==1) {
                   last = current;
+               }
             } 
          }
       }
       return last;
    }
-   else
+   else {
       return NULL;
+   }
 }
 
 
@@ -411,8 +425,9 @@ static int _startTimer(char *name, long duration, enum datetime_timer_unit_e uni
    struct timespec _duration;
    int retour = 0;
 
-   if(duration <= 0)
+   if(duration <= 0) {
       return -1;
+   }
 
    switch(unit)
    {
@@ -482,8 +497,9 @@ int mea_datetime_getTimerState(char *name)
    struct mea_datetime_timer_s *e = NULL;
 
    HASH_FIND_STR(mea_datetime_timers_list, name, e);
-   if(e)
+   if(e) {
       return e->state;
+   }
 
    return -1;
 }
@@ -553,8 +569,9 @@ int mea_datetime_removeTimer(char *name)
       free(e);
       e=NULL;
    }
-   else
+   else {
       ret=-1;
+   }
 
    pthread_mutex_unlock(&timeServer_startTimer_lock);
    pthread_cleanup_pop(0);
@@ -676,7 +693,7 @@ void *_timeServer_thread(void *data)
          sleep_time_ns=SLEEPTIME_NS - (ONESECONDNS + te.tv_nsec - chrono_ns);
 
       // un timer arrive-t-il a échéance avant le temps de sommeil calculé ?
-      nextTimer=findNextTimerToFall();
+      nextTimer=findNextFallingTimer();
       if(nextTimer) {
          timespecDiff(&t, &(nextTimer->end), &te);
          if(t.tv_sec == 0 && t.tv_nsec < sleep_time_ns) // oui, on ajuste le temps de sommeil en concéquence
@@ -732,8 +749,9 @@ pthread_t *timeServer()
    pthread_detach(*timeServer_thread);
    DEBUG_SECTION2(DEBUGFLAG) fprintf(stderr,"DATATIMESERVER : %x\n", (unsigned int)*timeServer_thread);
 
-   if(timeServer_thread)
+   if(timeServer_thread) {
       return timeServer_thread;
+   }
 
 timeServer_clean_exit:
    if(timeServer_thread) {
@@ -749,8 +767,9 @@ int start_timeServer()
 {
    _timerServer_thread_id=timeServer();
    
-   if(_timerServer_thread_id==NULL)
+   if(_timerServer_thread_id==NULL) {
       return -1;
+   }
 
    return 0;
 }

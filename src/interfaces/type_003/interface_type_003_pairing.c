@@ -94,6 +94,7 @@ int16_t enocean_teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, ui
       resp[5]=data[12]; // DB_1 (FUNC)
       resp[6]=data[13]; // DB_0 (RORG)
 
+      usleep(5000); // 0,5s
       int ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_UTE_TELEGRAM, ed->id, 0, device_addr, resp, 7, 0, &nerr);
 
       mea_log_printf("%s (%s) : enocean_teachinout - RESPONSE = %d\n", ERROR_STR, __func__, ret);
@@ -188,6 +189,7 @@ int16_t enocean_teachinout_reversed(enocean_ed_t *ed, int16_t addr_dec, uint8_t 
       resp[5]=data[12];  // (nb channel)
       resp[6]=resp_operation+resp_request+1 /* cmnd */; // DB_6
 
+      usleep(5000); // 0,5s
       int ret=enocean_send_radio_erp1_packet(ed, ENOCEAN_UTE_TELEGRAM, ed->id, addr_dec, device_addr, resp, 7, 0, &nerr);
 
       mea_log_printf("%s (%s) : enocean_teachinout_reversed - RESPONSE = %d\n", ERROR_STR, __func__, ret);

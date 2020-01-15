@@ -204,9 +204,7 @@ int16_t mea_xPLSendMessage(int fd, struct sockaddr_in *xPLBroadcastAddr, char *t
       VERBOSE(2) mea_log_printf("%s (%s) : unable to broadcast message, %s (%d)\n", ERROR_STR, __func__,strerror(errno), errno);
       return -1;
    }
-   //  VERBOSE(9) mea_log_printf("Broadcasted %d bytes (of %d attempted)\n", bytesSent, dataLen);
    
-   /* Okey dokey then */
    return 0;
 }
 

@@ -46,6 +46,7 @@ char *valid_genericserial_plugin_params[]={"S:PLUGIN","S:PARAMETERS", NULL};
 #define PLUGIN_PARAMS_PLUGIN      0
 #define PLUGIN_PARAMS_PARAMETERS  1
 
+
 struct callback_xpl_data_s
 {
    PyThreadState  *mainThreadState;
@@ -66,6 +67,8 @@ int16_t check_status_interface_type_006(interface_type_006_t *i006);
 
 int interface_type_006_call_serialDataPre(struct genericserial_thread_params_s *params, void *_data, int l_data)
 {
+   int ret=0;
+
    if(params->i006->interface_plugin_name) {
       cJSON *data=cJSON_CreateObject();
       cJSON_AddItemToObject(data, DATA_STR_C, cJSON_CreateByteArray(_data, l_data));
@@ -79,12 +82,15 @@ int interface_type_006_call_serialDataPre(struct genericserial_thread_params_s *
       cJSON *result=plugin_call_function_json_alloc(params->i006->interface_plugin_name, "mea_dataPreprocessor", data);
       
       if(result) {
+         if(result->type=cJSON_False) {
+            ret=-1;
+         }
          cJSON_Delete(result);
          result=NULL;
       }
    }
 
-   return 0;
+   return ret;
 }
 
 
@@ -262,7 +268,7 @@ void *_thread_interface_type_006_genericserial_data(void *args)
             FD_SET(params->i006->fd, &input_set);
 
             timeout.tv_sec  = 0; // timeout après
-            timeout.tv_usec = 200000; // 200ms
+            timeout.tv_usec = 10000; // 10ms TODO: à paramétrer
 
             int ret = select(params->i006->fd+1, &input_set, NULL, NULL, &timeout);
             if (ret <= 0) {
@@ -296,26 +302,27 @@ void *_thread_interface_type_006_genericserial_data(void *args)
                   break;
                }
             }
+            
+            // TODO autres conditions de sortie (cf. interface_type_010)
          }
 
          if(buffer_ptr>0) {
             params->i006->indicators.serialin+=buffer_ptr;
             buffer[buffer_ptr]=0;
-
-            interface_type_006_call_serialDataPre(params, (void *)buffer, buffer_ptr+1);
-
-            cJSON *jsonInterface = getInterfaceById_alloc(params->i006->id_interface);
-            if(jsonInterface) {
-               cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
-               if(jsonDevices) {
-                  cJSON *jsonDevice = jsonDevices->child;
-                  while(jsonDevice) {
-                     interface_type_006_data_to_plugin(jsonInterface, jsonDevice, (void *)buffer, buffer_ptr+1);
-                     jsonDevice=jsonDevice->next;
+            if(interface_type_006_call_serialDataPre(params, (void *)buffer, buffer_ptr+1)!=-1) {
+               cJSON *jsonInterface = getInterfaceById_alloc(params->i006->id_interface);
+               if(jsonInterface) {
+                  cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
+                  if(jsonDevices) {
+                     cJSON *jsonDevice = jsonDevices->child;
+                     while(jsonDevice) {
+                        interface_type_006_data_to_plugin(jsonInterface, jsonDevice, (void *)buffer, buffer_ptr+1);
+                        jsonDevice=jsonDevice->next;
+                     }
                   }
                }
+               cJSON_Delete(jsonInterface);
             }
-            cJSON_Delete(jsonInterface);
          }
          pthread_testcancel();
       }

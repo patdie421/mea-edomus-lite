@@ -109,8 +109,9 @@ uint32_t speeds[][3]={
 int32_t get_speed_from_speed_t(speed_t speed)
 {
    for(int16_t i=0;speeds[i][0];i++) {
-      if(speeds[i][1]==speed)
+      if(speeds[i][1]==speed) {
          return speeds[i][0];
+      }
    }
    return -1;
 }
@@ -129,9 +130,9 @@ int16_t get_dev_and_speed(char *device, char *dev, int16_t dev_l, speed_t *speed
    char *end=NULL;
 
    int16_t n=sscanf(device,"SERIAL://%40[^:]%40[^/r/n]",_dev,reste);
-   if(n<=0)
+   if(n<=0) {
       return -1;
-
+   }
    _dev_ptr=mea_strtrim(_dev);
 
    if(n==1) {
@@ -142,13 +143,15 @@ int16_t get_dev_and_speed(char *device, char *dev, int16_t dev_l, speed_t *speed
 
       reste_ptr=mea_strtrim(reste);
       n=sscanf(reste_ptr,":%40[^/n/r]",vitesse);
-      if(n!=1)
+      if(n!=1) {
          return -1;
+      }
 
       vitesse_ptr=mea_strtrim(vitesse);
       v=(uint32_t)strtol(vitesse_ptr,&end,10);
-      if(end==vitesse || *end!=0 || errno==ERANGE)
+      if(end==vitesse || *end!=0 || errno==ERANGE) {
          return -1;
+      }
 
       *speed=0;
       int i;
@@ -158,8 +161,9 @@ int16_t get_dev_and_speed(char *device, char *dev, int16_t dev_l, speed_t *speed
             break;
          }
       }
-      if(*speed==0)
+      if(*speed==0) {
          return -1;
+      }
    }
 
    strncpy(dev,_dev_ptr,dev_l-1);
