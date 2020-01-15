@@ -23,14 +23,16 @@ struct interface_type_007_indicators_s
 {
    uint32_t xplin;
    uint32_t senttoplugin;
-   uint32_t xplout;
+//   uint32_t xplout;
    uint32_t serialin;
    uint32_t serialout;
    
 };
 
 extern char *interface_type_007_xplin_str;
-
+extern char *interface_type_007_senttoplugin_str;
+extern char *interface_type_007_serialin_str;
+extern char *interface_type_007_serialout_str;
 
 typedef struct interface_type_007_s
 {

@@ -161,7 +161,7 @@ def mea_init(data):
 
 
 def is_number(s):
-    """ Returns True is string is a number. """
+    """ Returns True if string is a number. """
     try:
         float(s)
         return True
