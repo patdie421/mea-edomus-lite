@@ -349,7 +349,6 @@ static int process_interface_type_007_data(interface_type_007_t *i007)
    mea_init_timer(&timer, 10, 1);
    mea_start_timer(&timer);
 
-   /* Initialize the file descriptor set. */
    FD_ZERO(&set);
    FD_SET(i007->fd, &set);
    int ret = 0;
@@ -380,10 +379,11 @@ static int process_interface_type_007_data(interface_type_007_t *i007)
       if(ret < 0) {
          // erreur de select
          VERBOSE(5) {
-            mea_log_printf("%s (%s) : select error - ", ERROR_STR, __func__);
-            perror("");
-            return -1;
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : select error - %s\n", ERROR_STR, __func__, err_str);
          }
+         return -1;
       }
       else if(ret == 0) {
          if((i007->fduration > 0) && (i007->line_buffer_ptr)) {
@@ -398,8 +398,9 @@ static int process_interface_type_007_data(interface_type_007_t *i007)
          ret=(int)read(i007->fd, &c, 1);
          if(ret<0) {
             VERBOSE(5) {
-               mea_log_printf("%s (%s) : read error - ", ERROR_STR, __func__);
-               perror("");
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
+               mea_log_printf("%s (%s) : read error - %s\n", ERROR_STR, __func__,err_str);
             }
             close(i007->fd);
             i007->fd=-1;
@@ -415,11 +416,11 @@ static int process_interface_type_007_data(interface_type_007_t *i007)
             if(!tmp) {
                i007->line_buffer_ptr = 0;
                VERBOSE(5) {
-                  mea_log_printf("%s (%s) : realloc error - ", ERROR_STR, __func__);
-                  perror("");
-                  return -1;
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : realloc error - %s\n", ERROR_STR, __func__,err_str);
                }
-               break;
+               return -1;
             }
             else {
                i007->line_buffer = tmp;
@@ -641,8 +642,9 @@ static int api_write_data_json(interface_type_007_t *i007, cJSON *args, cJSON **
          ret=write(i007->fd, arg->valuestring, l);
          if(ret<0) {
             VERBOSE(5) {
-               mea_log_printf("%s (%s) : write error - ", ERROR_STR, __func__);
-               perror("");
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
+               mea_log_printf("%s (%s) : write error - %s\n", ERROR_STR, __func__, err_str);
             }
             close(i007->fd);
             i007->fd=-1;
@@ -730,8 +732,9 @@ interface_type_007_t *malloc_and_init2_interface_type_007(int id_driver, cJSON *
    i007=(interface_type_007_t *)malloc(sizeof(interface_type_007_t));
    if(!i007) {
       VERBOSE(2) {
-        mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-        perror("");
+        char err_str[256];
+        strerror_r(errno, err_str, sizeof(err_str)-1);
+        mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -743,8 +746,9 @@ interface_type_007_t *malloc_and_init2_interface_type_007(int id_driver, cJSON *
       i007=NULL;
 
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }  
       return NULL;
    }
@@ -767,8 +771,9 @@ interface_type_007_t *malloc_and_init2_interface_type_007(int id_driver, cJSON *
    }
    else {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }  
       goto clean_exit;
    }
@@ -807,7 +812,9 @@ interface_type_007_t *malloc_and_init2_interface_type_007(int id_driver, cJSON *
       }
    }
    else {
-      VERBOSE(2) mea_log_printf("%s (%s) : incorrect device/speed interface - %s\n", ERROR_STR, __func__, i007_start_stop_params->i007->dev);
+      VERBOSE(2) {
+         mea_log_printf("%s (%s) : incorrect device/speed interface - %s\n", ERROR_STR, __func__, i007_start_stop_params->i007->dev);
+      }
       goto clean_exit;
    }
 
@@ -972,8 +979,9 @@ void *_thread_interface_type_007(void *args)
       }
       else {
          VERBOSE(5) {
-            mea_log_printf("%s (%s) : can't open %s - ", ERROR_STR, __func__, i007->real_dev);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : can't open %s - %s\n", ERROR_STR, __func__, i007->real_dev,err_str);
          }
 
          err_counter++;
@@ -1000,8 +1008,9 @@ pthread_t *start_interface_type_007_thread(interface_type_007_t *i007, void *fd,
    thread_params=malloc(sizeof(struct thread_params_s));
    if(!thread_params) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       goto clean_exit;
    }
@@ -1010,7 +1019,9 @@ pthread_t *start_interface_type_007_thread(interface_type_007_t *i007, void *fd,
 
    thread=(pthread_t *)malloc(sizeof(pthread_t));
    if(!thread) {
-      VERBOSE(2) mea_log_printf("%s (%s) : %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR);
+      VERBOSE(2) {
+         mea_log_printf("%s (%s) : %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR);
+      }
       goto clean_exit;
    }
 
@@ -1043,7 +1054,9 @@ int stop_interface_type_007(int my_id, void *data, char *errmsg, int l_errmsg)
    struct interface_type_007_data_s *start_stop_params=(struct interface_type_007_data_s *)data;
    interface_type_007_t *i007=start_stop_params->i007;
 
-   VERBOSE(1) mea_log_printf("%s (%s) : %s shutdown thread ... ", INFO_STR, __func__, i007->name);
+   VERBOSE(1) {
+      mea_log_printf("%s (%s) : %s shutdown thread ... ", INFO_STR, __func__, i007->name);
+   }
 
    if(i007->xPL_callback2) {
       i007->xPL_callback2=NULL;
@@ -1087,7 +1100,7 @@ int restart_interface_type_007(int my_id, void *data, char *errmsg, int l_errmsg
 
 int start_interface_type_007(int my_id, void *data, char *errmsg, int l_errmsg)
 {
-   char err_str[128];
+   char err_str[256];
    struct callback_xpl_data_s *xpl_callback_params=NULL;
    struct interface_type_007_data_s *start_stop_params=(struct interface_type_007_data_s *)data;
    interface_type_007_t *i007=start_stop_params->i007;
@@ -1106,7 +1119,9 @@ int start_interface_type_007(int my_id, void *data, char *errmsg, int l_errmsg)
    i007->xPL_callback_data=xpl_callback_params;
    i007->xPL_callback2=_interface_type_007_xPL_callback2;
 
-   VERBOSE(2) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, i007->name, launched_successfully_str);
+   VERBOSE(2) {
+      mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, i007->name, launched_successfully_str);
+   }
 
    return 0;
 
