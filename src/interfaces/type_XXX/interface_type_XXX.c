@@ -221,9 +221,10 @@ interface_type_XXX_t *malloc_and_init_interface_type_XXX(sqlite3 *sqlite3_param_
                   
    iXXX=(interface_type_XXX_t *)malloc(sizeof(interface_type_XXX_t));
    if(!iXXX) {
-      VERBOSE(2) {
-        mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-        perror("");
+      VERBOSE(3) {
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -235,8 +236,9 @@ interface_type_XXX_t *malloc_and_init_interface_type_XXX(sqlite3 *sqlite3_param_
       iXXX=NULL;
 
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }  
       return NULL;
    }
@@ -308,8 +310,9 @@ pthread_t *start_interface_type_XXX_thread(interface_type_XXX_t *iXXX, void *fd,
    thread_params=malloc(sizeof(struct thread_params_s));
    if(!thread_params) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       goto clean_exit;
    }

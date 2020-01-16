@@ -2328,8 +2328,9 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
       iq=(interfaces_queue_elem_t *)malloc(sizeof(interfaces_queue_elem_t));
       if(iq==NULL) {
          VERBOSE(1) {
-            mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
          }
          return -1;
       }
@@ -2394,8 +2395,9 @@ int prepare_interface(mea_queue_t *interfaces_list, cJSON *params_list, cJSON *j
       iq=(interfaces_queue_elem_t *)malloc(sizeof(interfaces_queue_elem_t));
       if(iq==NULL) {
          VERBOSE(1) {
-            mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
          }
          return -1;
       }
@@ -2454,8 +2456,9 @@ mea_queue_t *start_interfaces(cJSON *params_list)
    _interfaces=(mea_queue_t *)malloc(sizeof(mea_queue_t));
    if(!_interfaces) {
       VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       goto start_interfaces_clean_exit_S2;
    }

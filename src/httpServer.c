@@ -83,8 +83,9 @@ int gethttp(char *server, int port, char *url, char *response, int l_response)
    
    if(mea_socket_connect(&sockfd, server, port)<0) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : mea_socket_connect - ", ERROR_STR,__func__);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : mea_socket_connect - %s\n", ERROR_STR,__func__,err_str);
       }
       return -1;
    }
@@ -98,8 +99,9 @@ int gethttp(char *server, int port, char *url, char *response, int l_response)
    int n=(int)recv(sockfd, response, l_response, 0);
    if(n == -1) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : recv - ", ERROR_STR,__func__);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : recv - %s\n", ERROR_STR,__func__,err_str);
       }
       close(sockfd);
       return -1;

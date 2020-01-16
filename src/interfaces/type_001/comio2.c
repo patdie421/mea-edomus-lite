@@ -490,8 +490,9 @@ int16_t _comio2_read_frame(int fd, char *cmd_data, uint16_t *l_cmd_data, int16_t
          else {
             *nerr=COMIO2_ERR_SELECT;
             DEBUG_SECTION {
-               mea_log_printf("%s (%s) : select - COMIO2_ERR_SELECT, ",DEBUG_STR,__func__);
-               perror("");
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
+               mea_log_printf("%s (%s) : select - COMIO2_ERR_SELECT, %s\n",DEBUG_STR,__func__,err_str);
             }
          }
          goto on_error_exit_comio2_read;
@@ -713,8 +714,9 @@ int _comio2_reopen(comio2_ad_t *ad)
       fd = _comio2_open(ad, dev, speed);
       if (fd == -1) {
          VERBOSE(1) {
-            mea_log_printf("%s (%s) : try #%d/%d, unable to open serial port (%s) - ",ERROR_STR,__func__, i+1, COMIO2_NB_RETRY, dev);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : try #%d/%d, unable to open serial port (%s) - %s\n",ERROR_STR,__func__, i+1, COMIO2_NB_RETRY, dev, err_str);
          }
       }
       else {
@@ -786,8 +788,9 @@ void *_comio2_thread(void *args)
             case COMIO2_ERR_READ:
             case COMIO2_ERR_SYS:
                VERBOSE(1) {
-                  mea_log_printf("%s (%s) : communication error (nerr=%d) - ", ERROR_STR,__func__,nerr);
-                  perror("");
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : communication error (nerr=%d) - %s\n", ERROR_STR,__func__,nerr,err_str);
                }
                if(_comio2_reopen(ad)<0) {
                   ad->signal_flag=1;

@@ -702,16 +702,18 @@ pthread_t *start_interface_type_002_xbeedata_thread(interface_type_002_t *i002, 
    params=malloc(sizeof(struct thread_params_s));
    if(!params) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       goto clean_exit;
    }
    params->queue=(mea_queue_t *)malloc(sizeof(mea_queue_t));
    if(!params->queue) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       goto clean_exit;
    }
@@ -838,8 +840,9 @@ interface_type_002_t *malloc_and_init2_interface_type_002(int id_driver, cJSON *
    i002=(interface_type_002_t *)malloc(sizeof(interface_type_002_t));
    if(!i002) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -850,8 +853,9 @@ interface_type_002_t *malloc_and_init2_interface_type_002(int id_driver, cJSON *
       DBG_FREE(i002);
       i002=NULL;
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }  
       return NULL;
    }

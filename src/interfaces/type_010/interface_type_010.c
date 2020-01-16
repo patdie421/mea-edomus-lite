@@ -137,16 +137,18 @@ static int init_interface_type_010_data_source_pipe(interface_type_010_t *i010)
       ret = mkfifo(fname, 0666);
       if(ret != 0) {
          VERBOSE(5) {
-            mea_log_printf("%s (%s) : mkfifo in - ", ERROR_STR, __func__);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : mkfifo in - %s\n", ERROR_STR, __func__,err_str);
          }
       }
       else {
          int p=open(fname, O_RDWR | O_NONBLOCK);
          if(p==-1) {
             VERBOSE(5) {
-               mea_log_printf("%s (%s) : open in - ", ERROR_STR, __func__);
-               perror("");
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
+               mea_log_printf("%s (%s) : open in - %s\n", ERROR_STR, __func__,err_str);
             }
 
             free(i010->line_buffer);
@@ -171,16 +173,18 @@ static int init_interface_type_010_data_source_pipe(interface_type_010_t *i010)
       ret = mkfifo(fname, 0666);
       if(ret != 0) {
          VERBOSE(5) {
-            mea_log_printf("%s (%s) : mkfifo out - ", ERROR_STR, __func__);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : mkfifo out - %s\n", ERROR_STR, __func__,err_str);
          }
       }
       else {
          int p=open(fname, O_RDWR | O_NONBLOCK);
          if(p==-1) {
             VERBOSE(5) {
-               mea_log_printf("%s (%s) : open out - ", ERROR_STR, __func__);
-               perror("");
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
+               mea_log_printf("%s (%s) : open out - %s\n", ERROR_STR, __func__,err_str);
             }
 
             if(i010->file_desc_in != -1) {
@@ -537,8 +541,9 @@ static int process_interface_type_010_data(interface_type_010_t *i010)
       else if(ret < 0) {
          // erreur de select
          VERBOSE(5) {
-            mea_log_printf("%s (%s) : select error - ", ERROR_STR, __func__);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : select error - %s\n", ERROR_STR, __func__,err_str);
          }
          break;
       }
@@ -549,8 +554,9 @@ static int process_interface_type_010_data(interface_type_010_t *i010)
          if(r<1) {
             if(r<0) {
                VERBOSE(5) {
-                  mea_log_printf("%s (%s) : select error - ", ERROR_STR, __func__);
-                  perror("");
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : select error - %s\n", ERROR_STR, __func__,err_str);
                }
             }
             break;
@@ -562,8 +568,9 @@ static int process_interface_type_010_data(interface_type_010_t *i010)
             if(!tmp) {
                i010->line_buffer_ptr = 0;
                VERBOSE(5) {
-                  mea_log_printf("%s (%s) : realloc error - ", ERROR_STR, __func__);
-                  perror("");
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : realloc error - %s\n", ERROR_STR, __func__,err_str);
                }
                break;
             }
@@ -874,8 +881,9 @@ interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *
    i010=(interface_type_010_t *)malloc(sizeof(interface_type_010_t));
    if(!i010) {
       VERBOSE(2) {
-        mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-        perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -889,8 +897,9 @@ interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *
       i010=NULL;
 
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }  
       return NULL;
    }
@@ -1124,8 +1133,9 @@ pthread_t *start_interface_type_010_thread(interface_type_010_t *i010, void *fd,
    thread_params=malloc(sizeof(struct thread_params_s));
    if(!thread_params) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       goto clean_exit;
    }

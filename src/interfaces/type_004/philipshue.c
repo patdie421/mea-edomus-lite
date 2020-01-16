@@ -432,8 +432,9 @@ cJSON *_getAll(char *template, char *server, int port, char *user)
    if(query == NULL)
    {
       DEBUG_SECTION {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }

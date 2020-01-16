@@ -399,8 +399,9 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
    parsed_parameters=malloc(sizeof(parsed_parameters_t));
    if(!parsed_parameters) {
       DEBUG_SECTION {
-         fprintf (MEA_STDERR, "%s (%s) : %s - ",DEBUG_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",DEBUG_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       if(err) {
          *err=1; // erreur système, voir errno
@@ -412,8 +413,9 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
    parsed_parameters->parameters=malloc(sizeof(parsed_parameter_t) * (*nb_params));
    if(!parsed_parameters->parameters) {
       DEBUG_SECTION {
-         fprintf (MEA_STDERR, "%s (%s) : %s - ",DEBUG_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",DEBUG_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       free(parsed_parameters);
       parsed_parameters=NULL;
@@ -470,8 +472,9 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
                      parsed_parameters->parameters[i].value.s=malloc(r+1);
                      if(!parsed_parameters->parameters[i].value.s) {
                         DEBUG_SECTION {
-                           fprintf (MEA_STDERR, "%s (%s) : %s - ", DEBUG_STR, __func__, MALLOC_ERROR_STR);
-                           perror("");
+                           char err_str[256];
+                           strerror_r(errno, err_str, sizeof(err_str)-1);
+                           mea_log_printf("%s (%s) : %s - %s\n", DEBUG_STR, __func__, MALLOC_ERROR_STR,err_str);
                         }
                         if(parsed_parameters) {
                            _clean_parsed_parameters(parsed_parameters);

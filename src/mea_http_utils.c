@@ -130,8 +130,9 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
       if(!requete) {
          *nerr = HTTPREQUEST_ERR_MALLOC;
          DEBUG_SECTION {
-            mea_log_printf("%s (%s) : malloc - n",ERROR_STR,__func__);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : malloc - %s\n",ERROR_STR,__func__,err_str);
          }
          goto httpRequest_clean_exit;
       }
@@ -142,8 +143,9 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
       if(!requete) {
          *nerr = HTTPREQUEST_ERR_MALLOC;
          DEBUG_SECTION {
-            mea_log_printf("%s (%s) : malloc - n",ERROR_STR,__func__);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : malloc - %s\n",ERROR_STR,__func__,err_str);
          }
          goto httpRequest_clean_exit;
       }
@@ -165,8 +167,7 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
    if(mea_socket_connect(&sockfd, server, port)<0) {
       *nerr = HTTPREQUEST_ERR_CONNECT;
       DEBUG_SECTION {
-         mea_log_printf("%s (%s) : mea_socket_connect\n",ERROR_STR,__func__);
-//         perror("");
+         mea_log_printf("%s (%s) : mea_socket_connect \n",ERROR_STR,__func__);
       }
       goto httpRequest_clean_exit;
    }
@@ -175,8 +176,9 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
    if(ret < 0) {
       *nerr = HTTPREQUEST_ERR_SEND;
       DEBUG_SECTION {
-         mea_log_printf("%s (%s) : send - can't send header : ",ERROR_STR,__func__);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : send - can't send header, %s\n",ERROR_STR,__func__,err_str);
       }
       goto httpRequest_clean_exit;
    }
@@ -191,8 +193,9 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
       if(ret < 0) {
          *nerr = HTTPREQUEST_ERR_SEND;
          DEBUG_SECTION {
-            mea_log_printf("%s (%s) : send - can't send body : ",ERROR_STR,__func__);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : send - can't send body, %s\n",ERROR_STR,__func__,err_str);
          }
          goto httpRequest_clean_exit;
       }
@@ -215,8 +218,9 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
          n=(int)recv(sockfd, ptr, l, 0);
          if(n == -1) {
             DEBUG_SECTION {
-               mea_log_printf("%s (%s) : recv - ",ERROR_STR,__func__);
-               perror("");
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
+               mea_log_printf("%s (%s) : recv - %s\n",ERROR_STR,__func__,err_str);
             }
             *nerr = HTTPREQUEST_ERR_SEND;
             goto httpRequest_clean_exit;
@@ -231,8 +235,9 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
          else {
             *nerr = HTTPREQUEST_ERR_SELECT;
             DEBUG_SECTION {
-               mea_log_printf("%s (%s) : select - ",ERROR_STR,__func__);
-               perror("");
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
+               mea_log_printf("%s (%s) : select - %s\n",ERROR_STR,__func__,err_str);
             }
             goto httpRequest_clean_exit;
          }

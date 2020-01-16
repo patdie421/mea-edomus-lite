@@ -227,7 +227,11 @@ void init_tokens()
       free(tokens_index);
    tokens_index=(struct tokens_index_s *)malloc(sizeof(struct tokens_index_s));
    if(tokens_index==NULL) {
-      perror("init_tokens_index: ");
+      VERBOSE(2) {
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
+      }
       return;
    }
    tokens_index->nb_tokens=0;

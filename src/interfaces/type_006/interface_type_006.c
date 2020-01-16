@@ -238,8 +238,9 @@ void *_thread_interface_type_006_genericserial_data(void *args)
          params->i006->fd=serial_open(params->i006->real_dev, params->i006->real_speed);
          if(params->i006->fd<0) {
             VERBOSE(5) {
-               mea_log_printf("%s (%s) : can't open %s - ", ERROR_STR, __func__, params->i006->real_dev);
-               perror("");
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
+               mea_log_printf("%s (%s) : can't open %s - %s\n", ERROR_STR, __func__, params->i006->real_dev,err_str);
             }
          }
       }
@@ -280,8 +281,9 @@ void *_thread_interface_type_006_genericserial_data(void *args)
                else {
                   // erreur à traiter ...
                   VERBOSE(5) {
-                     mea_log_printf("%s (%s) : select error - ", ERROR_STR, __func__);
-                     perror("");
+                     char err_str[256];
+                     strerror_r(errno, err_str, sizeof(err_str)-1);
+                     mea_log_printf("%s (%s) : select error - ", ERROR_STR, __func__,err_str);
                   }
                   close(params->i006->fd);
                   params->i006->fd=-1;
@@ -362,8 +364,9 @@ pthread_t *start_interface_type_006_genericserial_data_thread(interface_type_006
    params=malloc(sizeof(struct genericserial_thread_params_s));
    if(!params) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       goto start_interface_type_006_genericserial_data_thread_clean_exit;
    }
@@ -549,8 +552,9 @@ static int api_write_data_json(interface_type_006_t *i006, cJSON *args, cJSON **
       ret=write(i006->fd, arg->valuestring, l);
       if(ret<0) {
          VERBOSE(5) {
-            mea_log_printf("%s (%s) : write - ", ERROR_STR, __func__);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : write - ", ERROR_STR, __func__,err_str);
          }
       }
    }
@@ -597,8 +601,9 @@ interface_type_006_t *malloc_and_init2_interface_type_006(int id_driver, cJSON *
    i006=(interface_type_006_t *)malloc(sizeof(interface_type_006_t));
    if(!i006) {
       VERBOSE(2) {
-        mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-        perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -609,8 +614,9 @@ interface_type_006_t *malloc_and_init2_interface_type_006(int id_driver, cJSON *
       free(i006);
       i006=NULL;
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }  
       return NULL;
    }

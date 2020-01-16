@@ -247,8 +247,9 @@ void *_automator_thread(void *data)
                ++errcntr;
                // autres erreurs à traiter
                VERBOSE(2) {
-                  mea_log_printf("%s (%s) : pthread_cond_timedwait error (%d) - ", DEBUG_STR, __func__, ret);
-                  perror("");
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : pthread_cond_timedwait error (%d) - %s\n", DEBUG_STR, __func__, ret,err_str);
                }
 
                if(errcntr > 10) { // 10 erreurs d'affilé, on va pas s'en sortir => on s'arrête proprement
@@ -362,8 +363,9 @@ pthread_t *automatorServer()
    automator_msg_queue=(mea_queue_t *)malloc(sizeof(mea_queue_t));
    if(!automator_msg_queue) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -374,16 +376,18 @@ pthread_t *automatorServer()
    automator_thread=(pthread_t *)malloc(sizeof(pthread_t));
    if(!automator_thread) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",FATAL_ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",FATAL_ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
       goto automatorServer_clean_exit;
    }
    
    if(pthread_create (automator_thread, NULL, _automator_thread, NULL)) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : pthread_create - can't start thread - ", FATAL_ERROR_STR, __func__);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : pthread_create - can't start thread - %s\n", FATAL_ERROR_STR, __func__,err_str);
       }
       goto automatorServer_clean_exit;
    }

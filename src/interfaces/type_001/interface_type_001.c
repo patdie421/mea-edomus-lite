@@ -145,8 +145,9 @@ int load_interface_type_001(interface_type_001_t *i001, cJSON *jsonInterface)
    i001->counters_list=(mea_queue_t *)malloc(sizeof(mea_queue_t));
    if(!i001->counters_list) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       goto load_interface_type_001_clean_exit;
    }
@@ -157,8 +158,10 @@ int load_interface_type_001(interface_type_001_t *i001, cJSON *jsonInterface)
    i001->actuators_list=(mea_queue_t *)malloc(sizeof(mea_queue_t));
    if(!i001->actuators_list) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror(""); }
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
+      }
       goto load_interface_type_001_clean_exit;
    }
    mea_queue_init(i001->actuators_list);
@@ -168,8 +171,10 @@ int load_interface_type_001(interface_type_001_t *i001, cJSON *jsonInterface)
    i001->sensors_list=(mea_queue_t *)malloc(sizeof(mea_queue_t));
    if(!i001->sensors_list) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror(""); }
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
+      }
       goto load_interface_type_001_clean_exit;
    }
    mea_queue_init(i001->sensors_list);
@@ -314,8 +319,9 @@ interface_type_001_t *malloc_and_init2_interface_type_001(int id_driver, cJSON *
    i001=(interface_type_001_t *)malloc(sizeof(interface_type_001_t));
    if(!i001) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -327,8 +333,9 @@ interface_type_001_t *malloc_and_init2_interface_type_001(int id_driver, cJSON *
       free(i001);
       i001=NULL;
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -596,10 +603,10 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
       if(!ret) {
          int n=snprintf(dev,sizeof(buff)-1,"/dev/%s",buff);
          if( n<0 || n==(sizeof(buff)-1) ) {
-            strerror_r(errno, err_str, sizeof(err_str));
             VERBOSE(2) {
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
                mea_log_printf("%s (%s) : snprintf - %s\n", ERROR_STR, __func__, err_str);
-               perror("");
             }
             goto start_interface_type_001_clean_exit;
          }
@@ -611,10 +618,10 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
 
       ad=(comio2_ad_t *)malloc(sizeof(comio2_ad_t));
       if(!ad) {
-         strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(2) {
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
             mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
-            perror("");
          }
          goto start_interface_type_001_clean_exit;
       }
@@ -622,8 +629,9 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
       fd = comio2_init(ad, dev, speed);
       if (fd == -1) {
          VERBOSE(2) {
-            mea_log_printf("%s (%s) : init_arduino - Unable to open serial port (%s) - ",ERROR_STR,__func__,start_stop_params->dev);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : init_arduino - Unable to open serial port (%s) - %s\n",ERROR_STR,__func__,start_stop_params->dev,err_str);
          }
          fd=0;
          goto start_interface_type_001_clean_exit;

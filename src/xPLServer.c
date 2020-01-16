@@ -687,9 +687,12 @@ void *xPLServer_thread(void *data)
       }
       else {
          process_update_indicator(_xplServer_monitoring_id, xpl_server_readerr_str, ++xplreaderr_indicator);
-         perror("");
+         VERBOSE(2) {
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : mea_xPLReadMessage - %s\n", ERROR_STR, __func__,err_str);
+         }
       }
-      
       if(mea_test_timer(&xPLnoMsgReceivedTimer)==0) {
          // pas de message depuis X secondes
          VERBOSE(2) {
@@ -747,8 +750,9 @@ pthread_t *xPLServer()
    xplRespQueue=(mea_queue_t *)malloc(sizeof(mea_queue_t));
    if(!xplRespQueue) {
       VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
       return NULL;
    }
@@ -759,8 +763,9 @@ pthread_t *xPLServer()
    _xPLServer_thread_id=(pthread_t *)malloc(sizeof(pthread_t));
    if(!_xPLServer_thread_id) {
       VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
       free(xplRespQueue);
       xplRespQueue=NULL;

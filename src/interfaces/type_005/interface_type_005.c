@@ -600,8 +600,9 @@ int load_interface_type_005(interface_type_005_t *i005, cJSON *jsonInterface)
             d_elem=(struct type005_device_queue_elem_s *)malloc(sizeof(struct type005_device_queue_elem_s));
             if(d_elem==NULL) {
                VERBOSE(2) {
-                  mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-                  perror("");
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
                }
                release_parsed_parameters(&netatmo_sa_params);
                continue; // on à pas encore fait d'autre malloc on boucle direct
@@ -626,8 +627,9 @@ int load_interface_type_005(interface_type_005_t *i005, cJSON *jsonInterface)
             m_elem=(struct type005_module_queue_elem_s *)malloc(sizeof(struct type005_module_queue_elem_s));
             if(m_elem==NULL) {
                VERBOSE(2) {
-                  mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-                  perror("");
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
                }
                goto load_interface_type_005_clean_queues; // cette fois on a peut-être déjà fait un malloc, on branche sur la section de clean
             }
@@ -667,8 +669,9 @@ int load_interface_type_005(interface_type_005_t *i005, cJSON *jsonInterface)
          sa_elem=(struct type005_sensor_actuator_queue_elem_s *)malloc(sizeof(struct type005_sensor_actuator_queue_elem_s));
          if(sa_elem==NULL) {
             VERBOSE(2) {
-               mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-               perror("");
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
+               mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
             }
             goto load_interface_type_005_clean_queues;
          }
@@ -808,300 +811,6 @@ load_interface_type_005_clean_exit:
    clean_queues(&(i005->devices_list));
    return -1;
 }
-
-
-/*
-int load_interface_type_005(interface_type_005_t *i005, sqlite3 *db)
-{
-   sqlite3_stmt * stmt = NULL;
-   char sql_request[255];
-   parsed_parameters_t *netatmo_sa_params=NULL;
-   int nb_netatmo_sa_params=0;
-   int nerr=0;
-   int ret;
-
-   if(mea_queue_nb_elem(&(i005->devices_list))!=0) {
-      clean_queues(&(i005->devices_list));
-   }
-
-   sprintf(sql_request,"SELECT * FROM sensors_actuators WHERE id_interface=%d AND sensors_actuators.deleted_flag <> 1 AND sensors_actuators.state='1'", i005->id_interface);
-
-   ret = sqlite3_prepare_v2(db,sql_request,(int)(strlen(sql_request)+1),&stmt,NULL);
-   if(ret) {
-      VERBOSE(2) mea_log_printf("%s (%s) : sqlite3_prepare_v2 - %s\n", ERROR_STR,__func__,sqlite3_errmsg (db));
-      goto load_interface_type_005_clean_exit;
-   }
-
-   struct type005_device_queue_elem_s *d_elem=NULL;
-   struct type005_module_queue_elem_s *m_elem=NULL;
-   struct type005_sensor_actuator_queue_elem_s *sa_elem=NULL;
-   
-   // récupération des parametrages des capteurs dans la base
-   while (1) { // boucle de traitement du résultat de la requete
-      int new_d_elem_flag=0;
-      int new_m_elem_flag=0;
-      int s=sqlite3_step(stmt);
-      if (s==SQLITE_ROW) {
-         // les valeurs dont on a besoin
-         int id_sensor_actuator=sqlite3_column_int(stmt, 1);
-         int id_type=sqlite3_column_int(stmt, 2);
-         const unsigned char *name=sqlite3_column_text(stmt, 4);
-         const unsigned char *parameters=sqlite3_column_text(stmt, 7);
-         int todbflag=sqlite3_column_int(stmt, 9);
-
-         netatmo_sa_params=alloc_parsed_parameters((char *)parameters, valid_netatmo_sa_params, &nb_netatmo_sa_params, &nerr, 0);
-         if(netatmo_sa_params &&
-            netatmo_sa_params->parameters[PARAMS_DEVICE_ID].value.s &&
-            netatmo_sa_params->parameters[PARAMS_MODULE_ID].value.s &&
-            netatmo_sa_params->parameters[PARAMS_DEVICE_TYPE].value.s)
-         { // les trois parametres sont obligatoires
-            char *device_id=netatmo_sa_params->parameters[PARAMS_DEVICE_ID].value.s;
-            char *module_id=netatmo_sa_params->parameters[PARAMS_MODULE_ID].value.s;
-            char *devicetype = netatmo_sa_params->parameters[PARAMS_DEVICE_TYPE].value.s;
-            enum device_type_e device_type = -1;
-
-            if(mea_strcmplower(devicetype, "thermostat") == 0)
-               device_type = THERMOSTAT;
-            else if(mea_strcmplower(devicetype, "station") == 0)
-               device_type = STATION;
-            else {
-               VERBOSE(2) mea_log_printf("%s (%s) : %s, configuration error - DEVICE_TYPE is not THERMOSTAT or STATION\n", ERROR_STR, __func__, name);
-               release_parsed_parameters(&netatmo_sa_params);
-               continue;
-            }
-
-            d_elem=NULL;
-            mea_queue_first(&(i005->devices_list));
-            for(int i=0; i<i005->devices_list.nb_elem; i++) { // on commence par chercher si le device existe déjà
-               mea_queue_current(&(i005->devices_list), (void **)&d_elem);
-               if(strcmp(d_elem->device_id, device_id)==0)
-                  break;
-               else
-                  d_elem=NULL;
-               mea_queue_next(&(i005->devices_list));
-            }
-            if(d_elem==NULL) { // il n'existe pas, on va le créer
-               d_elem=(struct type005_device_queue_elem_s *)malloc(sizeof(struct type005_device_queue_elem_s));
-               if(d_elem==NULL) {
-                  VERBOSE(2) {
-                     mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-                     perror("");
-                  }
-                  release_parsed_parameters(&netatmo_sa_params);
-                  continue; // on à pas encore fait d'autre malloc on boucle direct
-               }
-               strncpy(d_elem->device_id, device_id, sizeof(d_elem->device_id)-1);
-               d_elem->device_type = device_type;
-               mea_queue_init(&(d_elem->modules_list));
-               new_d_elem_flag=1; // on signale qu'on a créé un device
-            }
-
-            m_elem=NULL;
-            mea_queue_first(&(d_elem->modules_list));
-            for(int i=0; i<d_elem->modules_list.nb_elem; i++) { // on cherche si le module est déjà associé au device
-               mea_queue_current(&(d_elem->modules_list), (void **)&m_elem);
-               if(strcmp(m_elem->module_id, module_id)==0)
-                  break;
-               else
-                  m_elem=NULL;
-               mea_queue_next(&(d_elem->modules_list));
-            }
-            if(m_elem==NULL) { // pas encore associé on le créé
-               m_elem=(struct type005_module_queue_elem_s *)malloc(sizeof(struct type005_module_queue_elem_s));
-               if(m_elem==NULL) {
-                  VERBOSE(2) {
-                     mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-                     perror("");
-                  }
-                  goto load_interface_type_005_clean_queues; // cette fois on a peut-être déjà fait un malloc, on branche sur la section de clean
-               }
-               strncpy(m_elem->module_id, module_id, sizeof(m_elem->module_id)-1);
-               mea_queue_init(&(m_elem->sensors_actuators_list));
-              
-               // initialisation des données associées au module 
-               switch(device_type)
-               {
-                  case THERMOSTAT:
-                     m_elem->d1.thermostat.battery_vp=-1;
-                     m_elem->d1.thermostat.setpoint=-1;
-                     m_elem->d1.thermostat.setpoint_temp=0.0;
-                     m_elem->d1.thermostat.temperature=0.0;
-                     m_elem->d1.thermostat.therm_relay_cmd=-1;
-
-                     m_elem->d2.thermostat.battery_vp=-1;
-                     m_elem->d2.thermostat.setpoint=-1;
-                     m_elem->d2.thermostat.setpoint_temp=0.0;
-                     m_elem->d2.thermostat.temperature=0.0;
-                     m_elem->d2.thermostat.therm_relay_cmd=-1;
-                     break;
-                  case STATION:
-                     memset(&(m_elem->d1.station), 0, sizeof(struct netatmo_data_s));
-                     memset(&(m_elem->d2.station), 0, sizeof(struct netatmo_data_s));
-                     break;
-               }
- 
-               m_elem->last=&(m_elem->d1);
-               m_elem->current=&(m_elem->d2);
-
-               m_elem->device=d_elem;
-
-               new_m_elem_flag=1; // on signale qu'on a créé un module
-            }
-
-            sa_elem=(struct type005_sensor_actuator_queue_elem_s *)malloc(sizeof(struct type005_sensor_actuator_queue_elem_s));
-            if(sa_elem==NULL) {
-               VERBOSE(2) {
-                  mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-                  perror("");
-               }
-               goto load_interface_type_005_clean_queues;
-            }
-   
-            char *sensor=netatmo_sa_params->parameters[PARAMS_SENSOR].value.s;
-            char *actuator=netatmo_sa_params->parameters[PARAMS_ACTUATOR].value.s;
-
-            if(sensor && actuator) {
-               VERBOSE(2) mea_log_printf("%s (%s) : parameter errors - SENSOR and ACUTATOR are incompatible\n", ERROR_STR,__func__,sensor);
-               goto load_interface_type_005_clean_queues;
-            }
-
-            sa_elem->sensor=-1;
-            sa_elem->actuator=-1;
-            if(id_type==500) {
-               if(sensor) {
-                  mea_strtolower(sensor);
-                  switch(device_type)
-                  {
-                     case THERMOSTAT:
-                        if(strcmp(sensor, "temperature")==0)
-                           sa_elem->sensor=_TEMP;
-                        else if(strcmp(sensor, "relay_cmd")==0)
-                           sa_elem->sensor=_RELAY_CMD;
-                        else if(strcmp(sensor, "battery")==0)
-                           sa_elem->sensor=_BATTERY;
-                        else if(strcmp(sensor, "setpoint")==0)
-                           sa_elem->sensor=_SETPOINT;
-                        else if(strcmp(sensor, "mode")==0)
-                           sa_elem->sensor=_MODE;
-                        else {
-                           VERBOSE(2) mea_log_printf("%s (%s) : %s, incorrect sensor type error - %s\n", ERROR_STR, __func__, name, sensor);
-                           goto load_interface_type_005_clean_queues;
-                        }
-                        break;
-                   
-                     case STATION:
-                        if(strcmp(sensor, "temperature")==0)
-                           sa_elem->sensor=_TEMPERATURE;
-                        else if(strcmp(sensor, "co2")==0)
-                           sa_elem->sensor=_CO2;
-                        else if(strcmp(sensor, "humidity")==0)
-                           sa_elem->sensor=_HUMIDITY;
-                        else if(strcmp(sensor, "noise")==0)
-                           sa_elem->sensor=_NOISE;
-                        else if(strcmp(sensor, "pressure")==0)
-                           sa_elem->sensor=_PRESSURE;
-                        else if(strcmp(sensor, "rain")==0)
-                           sa_elem->sensor=_RAIN;
-                        else if(strcmp(sensor, "windangle")==0)
-                           sa_elem->sensor=_WINDANGLE;
-                        else if(strcmp(sensor, "windstrength")==0)
-                           sa_elem->sensor=_WINDSTRENGTH;
-                        else {
-                           VERBOSE(2) mea_log_printf("%s (%s) : %s, incorrect sensor type error - %s\n", ERROR_STR, __func__, name, sensor);
-                           goto load_interface_type_005_clean_queues;
-                        }
-                        break;
-                  }
-               }
-               else {
-                  VERBOSE(2) mea_log_printf("%s (%s) : %s, INPUT type need SENSOR parameter - %s\n", ERROR_STR, __func__, name, sensor);
-                  goto load_interface_type_005_clean_queues;
-               }
-            }
-            else if(id_type==501) {
-               if(device_type == STATION) {
-                  VERBOSE(2) mea_log_printf("%s (%s) : %s, no actuator available for station - %s\n", ERROR_STR, __func__, name, actuator);
-                  goto load_interface_type_005_clean_queues;
-               }
-               if(actuator) {
-                  mea_strtolower(actuator);
-                  if(strcmp(actuator, "setpoint")==0)
-                     sa_elem->actuator=1;
-                  else {
-                     VERBOSE(2) mea_log_printf("%s (%s) : %s, incorrect actuator type error - %s\n", ERROR_STR, __func__, name, actuator);
-                     goto load_interface_type_005_clean_queues;
-                  }
-               }
-               else {
-                  VERBOSE(2) mea_log_printf("%s (%s) : %s, OUTPUT type need ACTUATOR parameter - %s\n", ERROR_STR, __func__, name, sensor);
-                  goto load_interface_type_005_clean_queues;
-               }
-            }
-            else {
-               VERBOSE(2) mea_log_printf("%s (%s) : %s, configuration error - incorrect (INPUT or OUPUT only allowed) type\n", ERROR_STR,__func__, name);
-               goto load_interface_type_005_clean_queues;
-            }
-
-            sa_elem->id=id_sensor_actuator;
-            sa_elem->type=id_type;
-            strncpy(sa_elem->name, (const char *)name, sizeof(sa_elem->name)-1);
-            mea_strtolower(sa_elem->name);
-            sa_elem->todbflag=todbflag;
-            sa_elem->module=m_elem;
-
-            mea_queue_in_elem(&(m_elem->sensors_actuators_list), (void *)sa_elem);
-            if(new_m_elem_flag==1) {
-               mea_queue_in_elem(&(d_elem->modules_list), (void *)m_elem);
-            }
-            if(new_d_elem_flag==1) {
-               mea_queue_in_elem(&(i005->devices_list), (void *)d_elem);
-            }
-
-            release_parsed_parameters(&netatmo_sa_params);
-            continue;
-
-load_interface_type_005_clean_queues:
-            if(netatmo_sa_params)
-               release_parsed_parameters(&netatmo_sa_params);
-            if(sa_elem) {
-               free(sa_elem);
-               sa_elem=NULL;
-            }
-            if(new_d_elem_flag==1) {
-               if(d_elem) {
-                  free(d_elem);
-                  d_elem=NULL;
-               }
-            }
-            if(new_m_elem_flag==1) {
-               if(m_elem) {
-                  free(m_elem);
-                  m_elem=NULL;
-               }
-            }
-         }
-         else {
-            VERBOSE(2) mea_log_printf("%s (%s) : %s, configuration error - DEVICE_ID, MODULE_ID and DEVICE_TYPE parameters are mandatory\n", ERROR_STR, __func__, name);
-            release_parsed_parameters(&netatmo_sa_params);
-         }
-      }
-      else if (s==SQLITE_DONE) {
-         sqlite3_finalize(stmt);
-         break;
-      }
-      else {
-         // traitement d'erreur à faire ici
-         sqlite3_finalize(stmt);
-         goto load_interface_type_005_clean_exit;
-      }
-   }
-   return 0;
-
-load_interface_type_005_clean_exit:
-   clean_queues(&(i005->devices_list));
-   return -1;
-}
-*/
 
 
 void set_interface_type_005_isnt_running(void *data)
@@ -1405,8 +1114,9 @@ interface_type_005_t *malloc_and_init2_interface_type_005(int id_driver, cJSON *
    i005=(interface_type_005_t *)calloc(1, sizeof(interface_type_005_t));
    if(!i005) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -1417,8 +1127,9 @@ interface_type_005_t *malloc_and_init2_interface_type_005(int id_driver, cJSON *
       free(i005);
       i005=NULL;
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -1437,8 +1148,9 @@ interface_type_005_t *malloc_and_init2_interface_type_005(int id_driver, cJSON *
       i005_start_stop_params=NULL;
 
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -1576,8 +1288,11 @@ int start_interface_type_005(int driver_id, void *data, char *errmsg, int l_errm
  
    interface_type_005_thread_args=malloc(sizeof(struct thread_interface_type_005_args_s));
    if(!interface_type_005_thread_args) {
-      VERBOSE(2) mea_log_printf("%s (%s) : malloc - %s\n", ERROR_STR,__func__);
-      perror("");
+      VERBOSE(2) {
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         VERBOSE(2) mea_log_printf("%s (%s) : malloc - %s\n", ERROR_STR,__func__,err_str);
+      }
       goto start_interface_type_005_clean_exit;
    }
    interface_type_005_thread_args->i005=start_stop_params->i005;

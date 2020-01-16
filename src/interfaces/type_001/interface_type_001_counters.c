@@ -126,8 +126,9 @@ struct electricity_counter_s *interface_type_001_sensors_valid_and_malloc_counte
    struct electricity_counter_s *counter=(struct electricity_counter_s *)malloc(sizeof(struct electricity_counter_s));
    if(!counter) {
       VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       goto valid_and_malloc_counter_clean_exit;
    }

@@ -1072,8 +1072,9 @@ int _enocean_reopen(enocean_ed_t *ed)
       fd = _enocean_open(ed, dev);
       if (fd == -1) {
          VERBOSE(1) {
-            mea_log_printf("%s (%s) : try #%d/%d, unable to open serial port (%s) - ",ERROR_STR,__func__, i+1, ENOCEAN_NB_RETRY, dev);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : try #%d/%d, unable to open serial port (%s) - %s\n",ERROR_STR,__func__, i+1, ENOCEAN_NB_RETRY, dev, err_str);
          }
       }
       else {
@@ -1192,8 +1193,9 @@ void *_enocean_thread(void *args)
             case ENOCEAN_ERR_READ:
             case ENOCEAN_ERR_SYS:
                VERBOSE(1) {
-                  mea_log_printf("%s (%s) : communication error (nerr=%d) - ", ERROR_STR, __func__, nerr);
-                  perror("");
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : communication error (nerr=%d) - %s\n", ERROR_STR, __func__, nerr,err_str);
                }
                if(_enocean_reopen(ed)<0) {
                   ed->signal_flag=1;

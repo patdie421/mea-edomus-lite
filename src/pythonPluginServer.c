@@ -222,8 +222,11 @@ cJSON *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int
          DEBUG_SECTION mea_log_printf("%s (%s) : pthread_cond_timedwait timeout\n",WARNING_STR, __func__);
       }
       else {
-         DEBUG_SECTION mea_log_printf("%s (%s) : pthread_cond_timedwait error - ",ERROR_STR, __func__);
-         perror("");
+         DEBUG_SECTION {
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : pthread_cond_timedwait error - %s\n",ERROR_STR, __func__,err_str);
+         }
       }
    }
    
@@ -355,7 +358,11 @@ cJSON *call_pythonPlugin(char *module, char *function, int type, PyObject *data_
       }
       else {
          if(errno!=ENOENT) {
-            perror("");
+            VERBOSE(1) {
+               char err_str[256];
+               strerror_r(errno, err_str, sizeof(err_str)-1);
+               mea_log_printf("%s (%s) : unlink - %s\n", FATAL_ERROR_STR, __func__, err_str);
+            }
          }
       }
    }
@@ -525,8 +532,11 @@ void *_pythonPlugin_thread(void *data)
             }
             else {
                // autres erreurs à traiter
-               DEBUG_SECTION mea_log_printf("%s (%s) : pthread_cond_timedwait error - ",DEBUG_STR, __func__);
-               perror("");
+               DEBUG_SECTION {
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : pthread_cond_timedwait error - %s\n",DEBUG_STR, __func__,err_str);
+               }
                pass=1;
             }
          }
@@ -630,8 +640,9 @@ pthread_t *pythonPluginServer()
    pythonPluginCmd_queue=(mea_queue_t *)malloc(sizeof(mea_queue_t));
    if(!pythonPluginCmd_queue) {
       VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -642,8 +653,9 @@ pthread_t *pythonPluginServer()
    pythonPlugin_thread=(pthread_t *)malloc(sizeof(pthread_t));
    if(!pythonPlugin_thread) {
       VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s - ",FATAL_ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",FATAL_ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
       goto pythonPluginServer_clean_exit;
    }
@@ -654,8 +666,11 @@ pthread_t *pythonPluginServer()
    py_init_flag=1;
 
    if(pthread_create (pythonPlugin_thread, NULL, _pythonPlugin_thread, NULL)) {
-      VERBOSE(1) mea_log_printf("%s (%s) : pthread_create - can't start thread - ", FATAL_ERROR_STR, __func__);
-      perror("");
+      VERBOSE(1) {
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : pthread_create - can't start thread - %s\n", FATAL_ERROR_STR, __func__, err_str);
+      }
       goto pythonPluginServer_clean_exit;
    }
    fprintf(stderr,"PYTHONPLUGINSERVER : %x\n", (unsigned int)*pythonPlugin_thread);

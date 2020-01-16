@@ -114,8 +114,9 @@ int mea_socket_connect(int *s, char *hostname, int port)
    sock = socket(AF_INET, SOCK_STREAM, 0);
    if(sock < 0) {
       DEBUG_SECTION {
-         mea_log_printf("%s (%s) :  socket - can't create : ", ERROR_STR, __func__);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) :  socket - can't create, %s\n", ERROR_STR, __func__,err_str);
       }
       return -1;
    }
@@ -123,8 +124,9 @@ int mea_socket_connect(int *s, char *hostname, int port)
    serv_info = gethostbyname(hostname); // on récupère les informations de l'hôte auquel on veut se connecter
    if(serv_info == NULL) {
       DEBUG_SECTION {
-         mea_log_printf("%s (%s) :  gethostbyname - can't get information : ", ERROR_STR, __func__);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) :  gethostbyname - can't get information, %s\n", ERROR_STR, __func__, err_str);
       }
       return -1;
    }
@@ -155,8 +157,9 @@ int mea_socket_send(int *s, char *message, int l_message)
 
    if(ret < 0) {
       DEBUG_SECTION {
-         mea_log_printf("%s (%s) :  send - can't send : ",ERROR_STR,__func__);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) :  send - can't send, %s\n",ERROR_STR,__func__,err_str);
       }
       return -1;
    }

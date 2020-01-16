@@ -1307,8 +1307,9 @@ int _xbee_reopen(xbee_xd_t *xd)
       fd = _xbee_open(xd, dev, speed);
       if (fd == -1) {
          VERBOSE(2) {
-            mea_log_printf("%s (%s) : try #%d/%d, unable to open serial port (%s) - ",ERROR_STR,__func__, i+1, XBEE_NB_RETRY, dev);
-            perror("");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            mea_log_printf("%s (%s) : try #%d/%d, unable to open serial port (%s) - %s\n",ERROR_STR,__func__, i+1, XBEE_NB_RETRY, dev,err_str);
          }
       }
       else {
@@ -1450,8 +1451,9 @@ void *_xbee_thread(void *args)
             case XBEE_ERR_READ:
             case XBEE_ERR_SYS:
                VERBOSE(1) {
-                  mea_log_printf("%s (%s) : communication error (nerr=%d).\n", ERROR_STR,__func__,nerr);
-                  perror("");
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : communication error (nerr=%d) - %s\n", ERROR_STR,__func__,nerr,err_str);
                }
                if(_xbee_reopen(xd)<0) {
                   VERBOSE(1) {

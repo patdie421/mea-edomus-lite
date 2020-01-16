@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 #define __USE_XOPEN
 #include <time.h>
 #undef __USE_XOPEN
@@ -733,16 +734,18 @@ pthread_t *timeServer()
    timeServer_thread=(pthread_t *)malloc(sizeof(pthread_t));
    if(!timeServer_thread) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",FATAL_ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",FATAL_ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       goto timeServer_clean_exit;
    }
    
    if(pthread_create (timeServer_thread, NULL, _timeServer_thread, NULL)) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : pthread_create - can't start thread - ", FATAL_ERROR_STR, __func__);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : pthread_create - can't start thread - %s\n", FATAL_ERROR_STR, __func__,err_str);
       }
       goto timeServer_clean_exit;
    }

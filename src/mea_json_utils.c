@@ -28,7 +28,9 @@ int writeJson(char *file, cJSON *j)
       ret=0;
    }
    else {
-      perror(file);
+      char err_str[256];
+      strerror_r(errno, err_str, sizeof(err_str)-1);
+      fprintf(stderr,"%s (%s) : fopen error - %s, %s\n", ERROR_STR, __func__, file, err_str);
    }
 
    free(s);

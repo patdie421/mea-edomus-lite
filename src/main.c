@@ -111,8 +111,11 @@ int logfile_rotation_job(int my_id, void *data, char *errmsg, int l_errmsg)
       mea_log_printf("%s (%s) : log file rotation job start\n", INFO_STR, __func__);
 
       if(mea_rotate_open_log_file(log_file_name, 6)<0) {
-         VERBOSE(2) fprintf (MEA_STDERR, "%s (%s) : can't rotate %s - ", ERROR_STR, __func__, log_file_name);
-         perror("");
+         VERBOSE(2) {
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            fprintf (MEA_STDERR, "%s (%s) : can't rotate %s - %s\n", ERROR_STR, __func__, log_file_name,err_str);
+         }
          return -1;
       }
 
@@ -385,16 +388,20 @@ int main(int argc, const char * argv[])
    n=snprintf(log_file,sizeof(log_file),"%s/mea-edomus.log", appParameters_get("LOGPATH",NULL));
    if(n<0 || n==sizeof(log_file)) {
       VERBOSE(1) {
-         mea_log_printf("%s (%s) : snprintf - ", ERROR_STR,__func__);
-         perror("");
-         clean_all_and_exit(1);
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : snprintf - %s\n", ERROR_STR,__func__,err_str);
       }
+      clean_all_and_exit(1);
    }
 
    int fd=open(log_file, O_CREAT | O_APPEND | O_RDWR,  S_IWUSR | S_IRUSR);
    if(fd<0) {
-      VERBOSE(1) mea_log_printf("%s (%s) : can't open log file (%s) - ",ERROR_STR,__func__,log_file);
-      perror("");
+      VERBOSE(1) {
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : can't open log file (%s) - %s\n",ERROR_STR,__func__,log_file, err_str);
+      }
       clean_all_and_exit(1);
    }
    

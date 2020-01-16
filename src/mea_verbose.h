@@ -4,6 +4,8 @@
 #include <pthread.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <errno.h>
+#include <string.h>
 
 #ifndef DEBUGFLAG
 #define DEBUGFLAG 1
@@ -34,7 +36,7 @@ extern const char *_fatal_error_str;
 extern const char *_warning_str;
 extern const char *_malloc_error_str;
 
-#define PRINT_MALLOC_ERROR { mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR); perror(""); }
+#define PRINT_MALLOC_ERROR { char err_str[256]; strerror_r(errno, err_str, sizeof(err_str)-1); mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str); }
 
 void set_verbose_level(int level);
 void debug_on(void);

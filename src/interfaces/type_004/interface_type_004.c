@@ -828,8 +828,9 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
                char *_huename=malloc(_l_huename);
                if(_huename==NULL) {
                   VERBOSE(2) {
-                     mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-                     perror("");
+                     char err_str[256];
+                     strerror_r(errno, err_str, sizeof(err_str)-1);
+                     mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
                   }
                   goto load_interface_type_004_clean_exit;
                }
@@ -851,8 +852,9 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
             _name=malloc(_l_name);
             if(_name==NULL) {
                VERBOSE(2) {
-                  mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-                  perror("");
+                  char err_str[256];
+                  strerror_r(errno, err_str, sizeof(err_str)-1);
+                  mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
                }
                goto load_interface_type_004_clean_exit;
             }
@@ -910,8 +912,9 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
                char *_groupname=malloc(_l_groupname);
                if(_groupname==NULL) {
                   VERBOSE(2) {
+                     char err_str[256];
+                     strerror_r(errno, err_str, sizeof(err_str)-1);
                      mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-                     perror("");
                   }
                   free(g);
                   goto load_interface_type_004_clean_exit;
@@ -922,8 +925,9 @@ int load_interface_type_004(interface_type_004_t *i004, cJSON *jsonInterface)
                char *_huegroupname=malloc(strlen(hue_params->parameters[PARAMS_HUEGROUP].value.s)+1);
                if(_huegroupname==NULL) {
                   VERBOSE(2) {
-                     mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-                     perror("");
+                     char err_str[256];
+                     strerror_r(errno, err_str, sizeof(err_str)-1);
+                     mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
                   }
                   free(_groupname);
                   _groupname=NULL;
@@ -1061,8 +1065,9 @@ interface_type_004_t *malloc_and_init2_interface_type_004(int id_driver, cJSON *
    i004=(interface_type_004_t *)malloc(sizeof(interface_type_004_t));
    if(!i004) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -1073,8 +1078,9 @@ interface_type_004_t *malloc_and_init2_interface_type_004(int id_driver, cJSON *
       free(i004);
       i004=NULL;
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -1090,8 +1096,9 @@ interface_type_004_t *malloc_and_init2_interface_type_004(int id_driver, cJSON *
       i004_start_stop_params=NULL;
       
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -1277,8 +1284,11 @@ int start_interface_type_004(int my_id, void *data, char *errmsg, int l_errmsg)
    
    interface_type_004_thread_args=malloc(sizeof(struct thread_interface_type_004_args_s));
    if(!interface_type_004_thread_args) {
-      VERBOSE(2) mea_log_printf("%s (%s) : malloc - %s\n", ERROR_STR,__func__);
-      perror("");
+      VERBOSE(2) {
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         VERBOSE(2) mea_log_printf("%s (%s) : malloc - %s\n", ERROR_STR,__func__,err_str);
+      }
       goto start_interface_type_004_clean_exit;
    }
    interface_type_004_thread_args->i004=start_stop_params->i004;

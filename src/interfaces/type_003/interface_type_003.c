@@ -388,16 +388,18 @@ pthread_t *start_interface_type_003_enocean_data_thread(interface_type_003_t *i0
    udata=malloc(sizeof(struct enocean_thread_data_s));
    if(!udata) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       goto clean_exit;
    }
    udata->queue=(mea_queue_t *)malloc(sizeof(mea_queue_t));
    if(!udata->queue) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ", ERROR_STR, __func__, MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR,err_str);
       }
       goto clean_exit;
    }
@@ -670,8 +672,9 @@ interface_type_003_t *malloc_and_init_interface_type_003(int id_driver, cJSON *j
    i003=(interface_type_003_t *)malloc(sizeof(interface_type_003_t));
    if(!i003) {
       VERBOSE(2) {
-        mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-        perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+        mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }
@@ -682,8 +685,9 @@ interface_type_003_t *malloc_and_init_interface_type_003(int id_driver, cJSON *j
       free(i003);
       i003=NULL;
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       return NULL;
    }

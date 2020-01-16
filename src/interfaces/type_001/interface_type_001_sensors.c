@@ -229,8 +229,9 @@ struct sensor_s *interface_type_001_sensors_valid_and_malloc_sensor(int16_t id_s
    struct sensor_s *sensor=(struct sensor_s *)malloc(sizeof(struct sensor_s));
    if(!sensor) {
       VERBOSE(1) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror("");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
       }
       goto interface_type_001_sensors_valid_and_malloc_sensor_clean_exit;
    }

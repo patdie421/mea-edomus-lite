@@ -86,7 +86,9 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
    if(access( name_old, W_OK ) != -1) {
       ret=unlink(name_old);
       if(ret<0) {
-         perror("unlink: ");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         fprintf(stderr,"%s (%s) : unkink error - %s\n", ERROR_STR, __func__, err_str);
          ret_code=-1;
          goto mea_rotate_open_log_file_clean_exit;
       }
@@ -106,7 +108,9 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
       if(access( name_old, W_OK ) != -1) {
          ret=rename(name_old, name_new);
          if(ret<0) {
-            perror("rename: ");
+            char err_str[256];
+            strerror_r(errno, err_str, sizeof(err_str)-1);
+            fprintf(stderr,"%s (%s) : rename error - %s\n", ERROR_STR, __func__, err_str);
             ret_code=-1;
             goto mea_rotate_open_log_file_clean_exit;
          }
@@ -116,7 +120,9 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
    sprintf(name_new,"%s.%d", name, 0);
    int fd_dest=open(name_new, O_CREAT | O_WRONLY, S_IWUSR | S_IRUSR);
    if(fd_dest<0) {
-      perror("open: ");
+      char err_str[256];
+      strerror_r(errno, err_str, sizeof(err_str)-1);
+      fprintf(stderr,"%s (%s) : open error - %s\n", ERROR_STR, __func__, err_str);
       ret_code=-1;
       goto mea_rotate_open_log_file_clean_exit;
    }
@@ -129,11 +135,15 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
    while(!feof(fd)) {
       size_t nb=fread(buf, 1, sizeof(buf), fd);
       if(write(fd_dest, buf, nb)==-1) {
-         perror("write: ");
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         fprintf(stderr,"%s (%s) : write error - %s\n", ERROR_STR, __func__, err_str);
       }
    }
    if(!ftruncate(fileno(fd), 0)) {
-      perror("ftruncate: ");
+      char err_str[256];
+      strerror_r(errno, err_str, sizeof(err_str)-1);
+      fprintf(stderr,"%s (%s) : ftruncate error - %s\n", ERROR_STR, __func__, err_str);
    } 
 
    flock(fileno(fd), LOCK_UN);

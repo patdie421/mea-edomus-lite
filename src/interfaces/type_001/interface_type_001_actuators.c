@@ -107,8 +107,10 @@ struct actuator_s *interface_type_001_valid_and_malloc_actuator(int16_t id_senso
    struct actuator_s *actuator=(struct actuator_s *)malloc(sizeof(struct actuator_s));
    if(!actuator) {
       VERBOSE(2) {
-         mea_log_printf("%s (%s) : %s - ",ERROR_STR,__func__,MALLOC_ERROR_STR);
-         perror(""); }
+         char err_str[256];
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : %s - %s\n",ERROR_STR,__func__,MALLOC_ERROR_STR,err_str);
+      }
       goto valid_and_malloc_relay_clean_exit;
    }
 
