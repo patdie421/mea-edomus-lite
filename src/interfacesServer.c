@@ -1706,8 +1706,8 @@ int16_t init_statics_interfaces_fns(struct interfacesServer_interfaceFns_s *ifns
 
 #ifdef ASPLUGIN
 struct plugin_info_s {
-   char   *name=NULL;
-   int     type=-1;
+   char   *name;
+   int     type;
    int16_t free_flag;
 };
 struct plugin_info_s *plugins_list = NULL;
