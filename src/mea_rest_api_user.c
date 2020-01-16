@@ -109,12 +109,14 @@ int _userUpdatePassword(char *user, cJSON *parameters)
 
 int _userUpdate(char *username, cJSON *jsonData)
 {
-   if(!jsonData || jsonData->type!=cJSON_Object)
+   if(!jsonData || jsonData->type!=cJSON_Object) {
       return 1;
+   }
 
    cJSON *user=cJSON_GetObjectItem(users2, username);
-   if(!user || user->type!=cJSON_Object)
+   if(!user || user->type!=cJSON_Object) {
       return 2;
+   }
 
    cJSON *profile=cJSON_GetObjectItem(jsonData, PROFILE_STR_C);
    cJSON *fullname=cJSON_GetObjectItem(jsonData, FULLNAME_STR_C);
@@ -129,8 +131,9 @@ int _userUpdate(char *username, cJSON *jsonData)
          cJSON_DeleteItemFromObject(user,PROFILE_STR_C);
          cJSON_AddNumberToObject(user,PROFILE_STR_C,profile->valuedouble);
       }
-      else
+      else {
          return 4;
+      }
    }
 
    if(fullname) {
@@ -138,8 +141,9 @@ int _userUpdate(char *username, cJSON *jsonData)
          cJSON_DeleteItemFromObject(user,FULLNAME_STR_C);
          cJSON_AddStringToObject(user, FULLNAME_STR_C, fullname->valuestring);
       }
-      else
+      else {
          return 5;
+      }
    }
    
    if(password) {
@@ -147,8 +151,9 @@ int _userUpdate(char *username, cJSON *jsonData)
          cJSON_DeleteItemFromObject(user,PASSWORD_STR_C);
          cJSON_AddStringToObject(user, PASSWORD_STR_C, fullname->valuestring);
       }
-      else
+      else {
          return 6;
+      }
    }
 
    return 0;
@@ -157,12 +162,14 @@ int _userUpdate(char *username, cJSON *jsonData)
 
 int _userCreate(cJSON *jsonData)
 {
-   if(!jsonData || jsonData->type!=cJSON_Object)
+   if(!jsonData || jsonData->type!=cJSON_Object) {
       return 1;
+   }
 
    cJSON *username=cJSON_GetObjectItem(jsonData, USERNAME_STR_C);
-   if(!username || username->type!=cJSON_String)
+   if(!username || username->type!=cJSON_String) {
       return 2;
+   }
       
    cJSON *user=cJSON_GetObjectItem(users2, username->valuestring);
    if(user) {
@@ -170,14 +177,17 @@ int _userCreate(cJSON *jsonData)
    }
 
    cJSON *profile=cJSON_GetObjectItem(jsonData, PROFILE_STR_C);
-   if(!profile || profile->type!=cJSON_Number)
+   if(!profile || profile->type!=cJSON_Number) {
       return 4;
+   }
    cJSON *fullname=cJSON_GetObjectItem(jsonData, FULLNAME_STR_C);
-   if(fullname && fullname->type!=cJSON_String)
+   if(fullname && fullname->type!=cJSON_String) {
       return 5;
+   }
    cJSON *password=cJSON_GetObjectItem(jsonData, PASSWORD_STR_C);
-   if(!password || password->type!=cJSON_String)
+   if(!password || password->type!=cJSON_String) {
       return 6;
+   }
       
    user=cJSON_CreateObject();
    cJSON_AddItemToObject(user, PROFILE_STR_C,  cJSON_CreateNumber(profile->valuedouble));
@@ -234,24 +244,30 @@ int mea_rest_api_user_POST(struct mg_connection *conn, int method, char *tokens[
                   return 1;
                }
                ret=_userCreate(parameters);
-               if(ret==0)
+               if(ret==0) {
                   return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
-               else
+               }
+               else {
                   return returnResponseAndDeleteJsonData(conn, 400, ret, "user not created", jsonData);
+               }
 
             case COMMIT_ID:
                ret=_usersCommit();
-               if(ret==0)
+               if(ret==0) {
                   return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
-               else
+               }
+               else {
                   return returnResponseAndDeleteJsonData(conn, 400, ret, "commit not done", jsonData);
+               }
 
             case ROLLBACK_ID:
                ret=_usersRollback();
-               if(ret==0)
+               if(ret==0) {
                   return returnResponseAndDeleteJsonData(conn, 200, 0, SUCCESS, jsonData);
-               else
+               }
+               else {
                   return returnResponseAndDeleteJsonData(conn, 400, ret, "rollback not done", jsonData);
+               }
 
                default: return returnResponse(conn, 400, 1, "unknown action");
          }

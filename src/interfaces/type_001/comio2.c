@@ -65,7 +65,7 @@ uint16_t _comio2_get_frame_data_id(comio2_ad_t *ad)
  * \return    id     entre 1 et COMIO2_MAX_USER_FRAME_ID
  */
 {
-   uint16_t ret;
+   uint16_t ret=-1;
    
    pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&(ad->ad_lock) );
    pthread_mutex_lock(&(ad->ad_lock));
@@ -165,7 +165,7 @@ void comio2_clean_ad(comio2_ad_t *ad)
  * \param     ad   descripteur de communication comio
  */
 {
-   if(ad)    {
+   if(ad) {
       if(ad->queue) {
          mea_queue_cleanup(ad->queue,_comio2_free_queue_elem);
          free(ad->queue);
@@ -228,8 +228,8 @@ int16_t comio2_cmdSend(comio2_ad_t *ad,
    }
    
    uint16_t frame_data_id=0; // 0 = pas de réponse attendues
-   char cmd_data[255];
-   uint16_t l_cmd_data;
+   char cmd_data[255]="";
+   uint16_t l_cmd_data=0;
    
    cmd_data[0]=cmd;
    for(int i=0;i<l_data;i++) {
@@ -237,7 +237,7 @@ int16_t comio2_cmdSend(comio2_ad_t *ad,
    }
    l_cmd_data=l_data+1;
    
-   int ret;
+   int ret=-1;
    pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&(ad->write_lock) );
    pthread_mutex_lock(&ad->write_lock);
    ret=_comio2_write_frame(ad->fd, frame_data_id, cmd_data, l_cmd_data, comio2_err);
@@ -267,7 +267,7 @@ int16_t comio2_cmdSendAndWaitResp(comio2_ad_t *ad,
  * \return    0 = OK, -1 = KO, voir nerr pour le type d'erreur.
  */
 {
-   comio2_queue_elem_t *e;
+   comio2_queue_elem_t *e=NULL;
    int16_t return_val=1;
 
    if(ad->signal_flag==1) { // le thread est down, pas la peine d'aller plus loin
@@ -292,8 +292,8 @@ int16_t comio2_cmdSendAndWaitResp(comio2_ad_t *ad,
    }
    
    // consolidation des données
-   char cmd_data[255];
-   uint16_t l_cmd_data;
+   char cmd_data[255]="";
+   uint16_t l_cmd_data=0;
    
    cmd_data[0]=cmd;
    for(uint16_t i=0;i<l_data;i++) {
@@ -305,7 +305,7 @@ int16_t comio2_cmdSendAndWaitResp(comio2_ad_t *ad,
    int16_t frame_data_id=_comio2_get_frame_data_id(ad);
    
    // on envoie la demande
-   int ret;
+   int ret=-1;
    pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)&(ad->write_lock) );
    pthread_mutex_lock(&ad->write_lock);
    ret=_comio2_write_frame(ad->fd, frame_data_id, cmd_data, l_cmd_data, comio2_err);
@@ -313,7 +313,7 @@ int16_t comio2_cmdSendAndWaitResp(comio2_ad_t *ad,
    pthread_cleanup_pop(0);
 
    if(ret==0) { // envoie de l'ordre
-      int16_t ret;
+      int16_t ret=-1;
       int16_t boucle=COMIO2_NB_RETRY; // 5 tentatives de 1 secondes
       uint16_t notfound=0;
       do {
@@ -322,8 +322,8 @@ int16_t comio2_cmdSendAndWaitResp(comio2_ad_t *ad,
          pthread_mutex_lock(&(ad->sync_lock));
          if(ad->queue->nb_elem==0 || notfound==1) {
             // rien a lire => on va attendre que quelque chose soit mis dans la file
-            struct timeval tv;
-            struct timespec ts;
+            struct timeval tv={0,0};
+            struct timespec ts={0,0};
             gettimeofday(&tv, NULL);
             ts.tv_sec = tv.tv_sec + COMIO2_TIMEOUT_DELAY;
             ts.tv_nsec = 0;
@@ -609,7 +609,7 @@ int16_t _comio2_write_frame(int fd, char id, char *cmd_data, uint16_t l_cmd_data
 {
    uint16_t l_frame=0;
    char *frame=NULL;
-   int16_t ret;
+   int16_t ret=-1;
    
    *nerr=0;
    
@@ -649,11 +649,13 @@ void _comio2_flush_old_responses_queue(comio2_ad_t *ad)
                _comio2_free_queue_elem(e);
                mea_queue_remove_current(ad->queue); // remove current passe sur le suivant
             }
-            else
-            mea_queue_next(ad->queue);
+            else {
+               mea_queue_next(ad->queue);
+            }
          }
-         else
-         break;
+         else {
+            break;
+         }
       }
    }
    
@@ -666,8 +668,9 @@ int16_t _comio2_add_response_to_queue(comio2_ad_t *ad, char *frame, uint16_t l_f
 {
    comio2_queue_elem_t *e;
    
-   if(!ad)
+   if(!ad) {
       return -1;
+   }
    
    e=malloc(sizeof(comio2_queue_elem_t));
    if(e) {
@@ -695,13 +698,14 @@ int16_t _comio2_add_response_to_queue(comio2_ad_t *ad, char *frame, uint16_t l_f
 
 int _comio2_reopen(comio2_ad_t *ad)
 {
-   int fd; /* File descriptor for the port */
+   int fd=-1; /* File descriptor for the port */
    uint8_t flag=0;
-   char dev[255];
+   char dev[255]="";
    int speed=0;
    
-   if(!ad)
+   if(!ad) {
       return -1;
+   }
 
    strncpy(dev, ad->serial_dev_name, sizeof(dev));
    speed=(int)ad->speed;
@@ -745,10 +749,10 @@ uint32_t _comio2_get_timestamp()
 
 void *_comio2_thread(void *args)
 {
-   unsigned char frame[255];
-   uint16_t l_frame;
-   int16_t nerr;
-   int16_t ret;
+   unsigned char frame[255]="";
+   uint16_t l_frame=0;
+   int16_t nerr=-1;
+   int16_t ret=-1;
    
    comio2_ad_t *ad=(comio2_ad_t *)args;
    
@@ -882,9 +886,9 @@ int comio2_call_fn(comio2_ad_t *ad, uint16_t fn, char *data, uint16_t l_data, in
 
 int comio2_call_proc(comio2_ad_t *ad, uint16_t fn, char *data, uint16_t l_data, int16_t *comio2_err)
 {
-   unsigned char buffer[COMIO2_MAX_FRAME_SIZE];
-   uint16_t l_buffer;
-   int ret;
+   unsigned char buffer[COMIO2_MAX_FRAME_SIZE]="";
+   uint16_t l_buffer=0;
+   int ret=-1;
 
    if(ad->signal_flag==1) { // le thread est down, pas la peine d'aller plus loin
       if(comio2_err) {

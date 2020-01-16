@@ -510,6 +510,8 @@ void *_thread_interface_type_001(void *args)
    }
    
    pthread_cleanup_pop(1);
+   
+   return NULL;
 }
 
 
@@ -575,7 +577,6 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
    speed_t speed;
    int fd = 0;
    comio2_ad_t *ad=NULL;
-   char err_str[256];
 
    pthread_t *interface_type_001_thread_id=NULL; // descripteur du thread
    
@@ -652,8 +653,9 @@ int start_interface_type_001(int my_id, void *data, char *errmsg, int l_errmsg)
    interface_type_001_thread_params->it001=start_stop_params->i001;
    
    interface_type_001_thread_id=(pthread_t *)malloc(sizeof(pthread_t));
-   if(!interface_type_001_thread_id)
+   if(!interface_type_001_thread_id) {
       goto start_interface_type_001_clean_exit;
+   }
    
    start_stop_params->i001->xPL_callback2=interface_type_001_xPL_callback2;
 

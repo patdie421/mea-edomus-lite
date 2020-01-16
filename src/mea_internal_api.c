@@ -76,15 +76,16 @@ void mea_api_init()
 void mea_api_release()
 {
 // /!\ a ecrire pour librérer tous le contenu de la mémoire partagé ...
-   if(mea_memory)
+   if(mea_memory) {
       Py_DECREF(mea_memory);
+   }
 }
 
 
 PyObject *mea_getMemory(PyObject *self, PyObject *args, PyObject *mea_memory)
 {
-   PyObject *key;
-   PyObject *mem;
+   PyObject *key=NULL;
+   PyObject *mem=NULL;
    
    if(PyTuple_Size(args)!=1) {
       DEBUG_SECTION mea_log_printf("%s (%s) :  arguments error.\n", DEBUG_STR ,__func__);
@@ -122,7 +123,7 @@ static PyObject *mea_api_getMemory(PyObject *self, PyObject *args)
 
 static PyObject *mea_get_interface(PyObject *self, PyObject *args)
 {
-   PyObject *arg;
+   PyObject *arg=NULL;
 
    int id_interface=-1;
    int nb_args=0;
@@ -159,31 +160,36 @@ static PyObject *mea_get_interface(PyObject *self, PyObject *args)
 
 static PyObject *mea_interface_api(PyObject *self, PyObject *args)
 {
-   PyObject *arg;
+   PyObject *arg=NULL;
 
    int id_interface=-1;
    int nb_args=0;
    
    // récupération des paramètres et contrôle des types
    nb_args=(int)PyTuple_Size(args);
-   if(nb_args<2)
+   if(nb_args<2) {
       goto mea_interface_api_arg_err;
+   }
 
    arg=PyTuple_GetItem(args, 0);
-   if(PyNumber_Check(arg))
+   if(PyNumber_Check(arg)) {
       id_interface=(int)PyLong_AsLong(arg);
-   else
+   }
+   else {
       goto mea_interface_api_arg_err;
+   }
 
    char *cmnd = NULL;
    arg=PyTuple_GetItem(args, 1);
-   if(PYSTRING_CHECK(arg))
+   if(PYSTRING_CHECK(arg)) {
       cmnd=(char *)PYSTRING_ASSTRING(arg);
-   else
+   }
+   else {
       goto mea_interface_api_arg_err;
+   }
 
-   char err[255];
-   int16_t nerr;
+   char err[255]="";
+   int16_t nerr=0;
    cJSON *_res = NULL;
    cJSON *_args = mea_PyObjectToJson(args);
 
@@ -215,8 +221,9 @@ static PyObject *mea_interface_api(PyObject *self, PyObject *args)
       res=mea_jsonToPyObject(_res);
       cJSON_Delete(_res);
    }
-   if(res == NULL)
+   if(res == NULL) {
       res = PyLong_FromLong(0L);
+   }
 
    PyObject *t=PyTuple_New(3);
    PyTuple_SetItem(t, 0, PyLong_FromLong(ret));
@@ -349,8 +356,9 @@ static PyObject *mea_xplSendMsg(PyObject *self, PyObject *args)
    return PyLong_FromLong(1L); // return True
    
 mea_xplSendMsg_clean_exit:
-   if(xplMsgJson)
+   if(xplMsgJson) {
       cJSON_Delete(xplMsgJson);
+   }
    
    return NULL; // retour un exception python
 }

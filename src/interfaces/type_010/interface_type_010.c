@@ -220,8 +220,9 @@ static int init_interface_type_010_data_source(interface_type_010_t *i010)
    if(!i010->file_name)
       return -1;
 
-   if(i010->line_buffer)
+   if(i010->line_buffer) {
       free(i010->line_buffer);
+   }
    i010->line_buffer_l = INIT_LINE_BUFFER_SIZE;
    i010->line_buffer_ptr = 0;
    i010->line_buffer = (char *)malloc(i010->line_buffer_l);
@@ -239,8 +240,9 @@ static int init_interface_type_010_data_source(interface_type_010_t *i010)
          if(p>=0) {
             return 0;
          }
-         else
+         else {
             return -1;
+         }
       }
       default:
          return -1;
@@ -378,12 +380,13 @@ static int _interface_type_010_data_to_plugin(interface_type_010_t *i010,  struc
    }
 */
    parsed_parameters_t *plugin_params=NULL;
-   int nb_plugin_params;
+   int nb_plugin_params = -1;
 
    plugin_params=alloc_parsed_parameters((char *)device_info->parameters, valid_plugin_010_params, &nb_plugin_params, &err, 0);
    if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
-      if(plugin_params)
+      if(plugin_params) {
          release_parsed_parameters(&plugin_params);
+      }
       return -1;
    }
 
@@ -457,10 +460,11 @@ static int interface_type_010_data_to_plugin(interface_type_010_t *i010)
 }
 
 
-int haveFrameStartStr(interface_type_010_t *i010)
+static int haveFrameStartStr(interface_type_010_t *i010)
 {
-   if(!i010->fstartstr || !i010->fstartstr[0])
+   if(!i010->fstartstr || !i010->fstartstr[0]) {
       return -1;
+   }
    int l=(int)strlen(i010->fstartstr);
    char *s=&(i010->line_buffer[i010->line_buffer_ptr-l]);
    if(strncmp(s, i010->fstartstr, l) == 0) {
@@ -472,7 +476,7 @@ int haveFrameStartStr(interface_type_010_t *i010)
 }
 
 
-int haveFrameEndStr(interface_type_010_t *i010)
+static int haveFrameEndStr(interface_type_010_t *i010)
 {
    if(!i010->fendstr || !i010->fendstr[0]) {
       return -1;
@@ -491,13 +495,14 @@ int haveFrameEndStr(interface_type_010_t *i010)
 
 static int process_interface_type_010_data(interface_type_010_t *i010)
 {
-   if(i010->file_desc_in == -1)
+   if(i010->file_desc_in == -1) {
       return -1;
+   }
 
    fd_set set;
-   struct timeval timeout;
+   struct timeval timeout={0,0};
 
-   mea_timer_t timer;
+   mea_timer_t timer = MEA_TIMER_S_INIT;
    mea_init_timer(&timer, 10, 1);
    mea_start_timer(&timer);
 
@@ -548,8 +553,7 @@ static int process_interface_type_010_data(interface_type_010_t *i010)
          break;
       }
       else {
-         char c;
-
+         char c=0;
          int r=(int)read(i010->file_desc_in, &c, 1);
          if(r<1) {
             if(r<0) {
@@ -628,22 +632,25 @@ int update_devices_type_010(void *ixxx)
 
 static int clean_interface_type_010_data_source(interface_type_010_t *i010)
 {
-   if(i010->file_desc_in >= 0)
+   if(i010->file_desc_in >= 0) {
       close(i010->file_desc_in);
+   }
    char *fname = alloca(strlen(i010->file_name)+strlen(i010->in_ext)+1);
    sprintf(fname,"%s%s", i010->file_name, i010->in_ext);
    unlink(fname);
 
-   if(i010->file_desc_out >= 0)
+   if(i010->file_desc_out >= 0) {
       close(i010->file_desc_out);
+   }
    fname = alloca(strlen(i010->file_name)+strlen(i010->out_ext)+1);
    sprintf(fname,"%s%s", i010->file_name, i010->out_ext);
    unlink(fname);
 
    i010->line_buffer_l = 0;
    i010->line_buffer_ptr = 0;
-   if(i010->line_buffer)
+   if(i010->line_buffer) {
       free(i010->line_buffer);
+   }
    i010->line_buffer = NULL;
 
    return 0;
@@ -862,13 +869,10 @@ int16_t api_interface_type_010_json(void *ixxx, char *cmnd, void *args, int nb_a
       *jsonRes = cJSON_CreateString("New style Api call OK !!!");
       *nerr=0;
       strncpy(err, "no error", l_err);
-
       return 0;
    }
-
    else {
       strncpy(err, "unknown function", l_err);
-
       return -254;
    }
 }
@@ -915,9 +919,9 @@ interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *
    i010->id_interface=id_interface;
    i010->id_driver=id_driver;
    i010->parameters=(char *)malloc(strlen((char *)parameters)+1);
-   if(i010->parameters)
+   if(i010->parameters) {
       strcpy(i010->parameters,(char *)parameters);
-
+   }
    i010->indicators.xplin=0;
    i010->indicators.senttoplugin=0;
 
@@ -930,8 +934,9 @@ interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *
    i010->fsize = 0;
    i010->direction = DIR_IN;
    i010->in_ext = malloc(4);
-   if(i010->in_ext)
+   if(i010->in_ext) {
       strcpy(i010->in_ext,"-in");
+   }
    i010->out_ext = malloc(5);
    if(i010->out_ext)
       strcpy(i010->out_ext,"-out");
@@ -965,8 +970,9 @@ interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *
       }
 
       if(interface_params->parameters[INTERFACE_PARAMS_FSIZE].label) {
-         if(interface_params->parameters[INTERFACE_PARAMS_FSIZE].value.i>0)
+         if(interface_params->parameters[INTERFACE_PARAMS_FSIZE].value.i>0) {
             i010->fsize=interface_params->parameters[INTERFACE_PARAMS_FSIZE].value.i;
+         }
       }
 
       if(interface_params->parameters[INTERFACE_PARAMS_DIRECTION].label) {
@@ -989,10 +995,12 @@ interface_type_010_t *malloc_and_init2_interface_type_010(int id_driver, cJSON *
       if(interface_params->parameters[INTERFACE_PARAMS_FDURATION].label) {
          if(interface_params->parameters[INTERFACE_PARAMS_FDURATION].value.i>0) {
             i010->fduration=interface_params->parameters[INTERFACE_PARAMS_FDURATION].value.i;
-            if(i010->fduration<0)
+            if(i010->fduration<0) {
                i010->fduration=0;
-            if(i010->fduration>5000)
+            }
+            if(i010->fduration>5000) {
                i010->fduration=5000; // 5 secondes max
+            }
          }
       }
 
@@ -1112,16 +1120,20 @@ void *_thread_interface_type_010(void *args)
       process_update_indicator(params->i010->monitoring_id, interface_type_010_senttoplugin_str, params->i010->indicators.senttoplugin);
 
       // traiter les données en provenance des périphériques
-      if(params->i010->file_desc_in != -1)
+      if(params->i010->file_desc_in != -1) {
          process_interface_type_010_data(params->i010);
-      else
+      }
+      else {
          sleep(1);
+      }
 
       pthread_testcancel();
    }
 
    pthread_cleanup_pop(1);
    pthread_cleanup_pop(1);
+   
+   return NULL;
 }
 
 
@@ -1148,8 +1160,9 @@ pthread_t *start_interface_type_010_thread(interface_type_010_t *i010, void *fd,
       goto clean_exit;
    }
 
-   if(pthread_create (thread, NULL, (void *)thread_function, (void *)thread_params))
+   if(pthread_create (thread, NULL, (void *)thread_function, (void *)thread_params)) {
       goto clean_exit;
+   }
 
    pthread_detach(*thread);
 
@@ -1171,8 +1184,9 @@ clean_exit:
 
 int stop_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
 {
-   if(!data)
+   if(!data) {
       return -1;
+   }
 
    struct interface_type_010_data_s *start_stop_params=(struct interface_type_010_data_s *)data;
 

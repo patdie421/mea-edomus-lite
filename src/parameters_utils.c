@@ -54,8 +54,9 @@ static int16_t _parsed_parameters_clean_cache(time_t t, int force)
 {
    time_t now=time(NULL);
 
-   if(_parsed_parameters_cache_rwlock==NULL)
+   if(_parsed_parameters_cache_rwlock==NULL) {
       return 0;
+   }
 
    pthread_cleanup_push( (void *)pthread_rwlock_unlock, (void *)_parsed_parameters_cache_rwlock );
    pthread_rwlock_wrlock(_parsed_parameters_cache_rwlock);
@@ -277,19 +278,22 @@ char *getToken(char *str)
    char *end=NULL;
    
    // suppression des blancs avant
-   while(isspace(*str) && str)
+   while(isspace(*str) && str) {
       str++;
+   }
    
    if(*str!=0) { // si la chaine n'est pas vide
       end=str+strlen(str) - 1;
       
       // suppression des blancs après
-      while(end > str && isspace(*end))
+      while(end > str && isspace(*end)) {
          end--;
+      }
       *(end+1)=0;
    }
-   else
+   else {
       return NULL;
+   }
    
    // vérification des caractères
    for(int i=0;str[i];i++) {
@@ -346,11 +350,11 @@ parsed_parameters_t *alloc_parsed_parameters(char *parameters_string, char *para
  */
    char *ptr = parameters_string;
    char label[21];
-   char *label_token;
-   char *value;
-   char *value_token;
-   int n;
-   int ret;
+   char *label_token=NULL;
+   char *value=NULL;
+   char *value_token=NULL;
+   int n=-1;
+   int ret=-1;
    parsed_parameters_t *parsed_parameters;
    
    if(err) {
@@ -651,7 +655,7 @@ cJSON *parsed_parameters_json_alloc(char *parameters_string, char *parameters_to
 
 double millis()
 {
-   struct timeval te;
+   struct timeval te = {0,0};
    gettimeofday(&te, NULL);
 
    double milliseconds = (double)te.tv_sec*1000.0 + (double)te.tv_usec/1000.0;
@@ -673,7 +677,7 @@ int main(int argc, char *argv[])
    char *test1_str="P2=1;P1=2";
    char *test2_str="P2=3;P1=4";
    char *test3_str="P3=5;P4=5";
-   int err;
+   int err=-1;
 
    parsed_parameters_t *params1_1,*params1_2;
    parsed_parameters_t *params2;

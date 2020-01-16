@@ -76,21 +76,23 @@ cJSON *getJsonDataParameters(struct mg_connection *conn, cJSON *jsonData)
 int returnResponseAndDeleteJsonData(struct mg_connection *conn, int httperr, int errnum, char *msg, cJSON *jsonData)
 {
    int ret=returnResponse(conn, httperr, errnum, msg);
-   if(jsonData)
+   if(jsonData) {
       cJSON_Delete(jsonData);
+   }
    return ret;
 }
 
 
 int returnResponse(struct mg_connection *conn, int httperr, int errnum, char *msg)
 {
-   char buff[2048];
+   char buff[2048]="";
 
-   if(msg!=NULL)
-      snprintf(buff, sizeof(buff)-1, "{\"errno\":%d, \"msg\":\"%s\"}", errnum, msg); 
-   else
-      snprintf(buff, sizeof(buff)-1, "{\"errno\":%d}", errnum); 
-
+   if(msg!=NULL) {
+      snprintf(buff, sizeof(buff)-1, "{\"errno\":%d, \"msg\":\"%s\"}", errnum, msg);
+   }
+   else {
+      snprintf(buff, sizeof(buff)-1, "{\"errno\":%d}", errnum);
+   }
    httpResponse(conn, httperr, NULL, buff);
 
    return 1;
@@ -99,14 +101,16 @@ int returnResponse(struct mg_connection *conn, int httperr, int errnum, char *ms
 
 int16_t httpGetResponseStatusCode(char *response, uint32_t l_response)
 {
-   char httpVersion[4], httpCodeText[33];
-   int httpCodeNum;
+   char httpVersion[4]="", httpCodeText[33]="";
+   int httpCodeNum=0;
    
    int n=sscanf(response,"HTTP/%3s %d %32[^\r]\r\n", httpVersion, &httpCodeNum, httpCodeText);
-   if(n!=3)
+   if(n!=3) {
       return -1;
-   else
+   }
+   else {
       return httpCodeNum;
+   }
 }
 
 
@@ -121,8 +125,6 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
    
    // creation de la requete
    char *requete = NULL;
-
-//   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
    if(type==HTTP_GET || type==HTTP_DELETE) {
 
@@ -158,11 +160,6 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
       }
       goto httpRequest_clean_exit;
    }
-
-//   pthread_cleanup_push( (void *)_free, (void *)requete );
-
-//   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-//   pthread_testcancel();
 
    if(mea_socket_connect(&sockfd, server, port)<0) {
       *nerr = HTTPREQUEST_ERR_CONNECT;
@@ -203,11 +200,12 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
    
    // reception de la reponse HTTP
    int s=0,n=0;
-   char *ptr=response;
+   char *ptr=response=NULL;
    int l=*l_response;
    do {
       fd_set input_set;
-      struct timeval timeout;
+      struct timeval timeout = {0,0};
+
       timeout.tv_sec = 1;
       timeout.tv_usec = 0;
    
@@ -266,8 +264,9 @@ char *httpRequest(uint8_t type, char *server, int port, char *url, char *data, u
    close(sockfd);
    sockfd=0;
    ptr = strstr(response, "\r\n\r\n");
-   if(ptr)
+   if(ptr) {
       ptr+=4;
+   }
    return ptr; // on retourne 1 pointeur sur la zone de données de la requete http
   
 //   pthread_cleanup_pop(1);

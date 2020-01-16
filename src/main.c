@@ -355,8 +355,9 @@ int main(int argc, const char * argv[])
    //
    // Contrôle des parametres
    //
-   if(_v > 0 && _v < 10)
-         set_verbose_level(_v);
+   if(_v > 0 && _v < 10) {
+      set_verbose_level(_v);
+   }
 
    // lecture de tous les paramètres de l'application
 #ifdef __linux__
@@ -365,7 +366,7 @@ int main(int argc, const char * argv[])
    appParameters_set("INTERFACE", "en0", NULL);
 #endif
 
-   char cfgfile[1024];
+   char cfgfile[1024]="";
    snprintf(cfgfile,sizeof(cfgfile)-1, "%s/etc/mea-edomus.json", appParameters_get(MEAPATH_STR_C, NULL));
    ret = read_all_application_parameters(cfgfile);
 
@@ -378,7 +379,7 @@ int main(int argc, const char * argv[])
    //
    // stdout et stderr vers fichier log
    //
-   char log_file[256];
+   char log_file[256]="";
 
    if(!appParameters_get("LOGPATH",NULL) || !strlen(appParameters_get("LOGPATH",NULL))) {
       appParameters_set("LOGPATH","/var/log",NULL);
@@ -548,15 +549,14 @@ int main(int argc, const char * argv[])
    VERBOSE(1) mea_log_printf("%s (%s) : MEA-EDOMUS %s starded\n", INFO_STR, __func__, __MEA_EDOMUS_VERSION__);
 
 
-   time_t start_time;
+   time_t start_time=time(NULL);
    long uptime = 0;
-   start_time = time(NULL);
    int apiport = atoi(appParameters_get("HTTPPORT",NULL));
 
    while(1) { // boucle principale
       // supervision "externe" des process
       if(process_is_running(httpServer_monitoring_id)==RUNNING) {
-         char response[512];
+         char response[512]="";
          // interrogation du serveur HTTP Interne pour heartbeat ... (voir le passage d'un parametre pour sécuriser ...)
          gethttp(localhost_const, apiport, "/CMD/ping", response, sizeof(response)); 
       }

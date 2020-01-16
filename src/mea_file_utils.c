@@ -18,8 +18,8 @@
 
 int mea_filebackup(char *filename)
 {
-   char _time[256];
-   char filenamebak[1024];
+   char _time[256]="";
+   char filenamebak[1024]="";
    
    time_t timestamp = time(NULL); 
    
@@ -34,7 +34,7 @@ int mea_filebackup(char *filename)
 
 int mea_filecopy(const char* source, const char* destination)
 {
-   int input, output;
+   int input=-1, output=-1;
    
    if ((input = open(source, O_RDONLY)) == -1) {
       return -1;

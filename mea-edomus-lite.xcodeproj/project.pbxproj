@@ -48,7 +48,6 @@
 		4E026F91238DC560000D62C2 /* enocean.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686DE2369B0E20084B302 /* enocean.c */; };
 		4E026F92238DC56B000D62C2 /* interface_type_003.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686D92369B0E20084B302 /* interface_type_003.c */; };
 		4E026F93238DC58E000D62C2 /* interface_type_010.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686B92369B0E20084B302 /* interface_type_010.c */; };
-		4E12DA48236DAEA500B35CAF /* interface_type_003.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686D92369B0E20084B302 /* interface_type_003.c */; };
 		4E12DA49236DAEB200B35CAF /* enocean.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686DE2369B0E20084B302 /* enocean.c */; };
 		4E1EC650236AD112004E3F63 /* mea_string_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6867B2369B0E20084B302 /* mea_string_utils.c */; };
 		4E1EC651236AD11C004E3F63 /* sunriset.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6867E2369B0E20084B302 /* sunriset.c */; };
@@ -143,13 +142,11 @@
 		4E4199C4236AF414004237D0 /* interface_type_003.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686D92369B0E20084B302 /* interface_type_003.c */; };
 		4E4199C5236AF417004237D0 /* enocean.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF686DA2369B0E20084B302 /* enocean.h */; };
 		4E4199C6236AF41B004237D0 /* plugin.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686DC2369B0E20084B302 /* plugin.c */; };
-		4E4199C7236AF41E004237D0 /* interface_type_003.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF686DD2369B0E20084B302 /* interface_type_003.h */; };
 		4E4199C8236AF421004237D0 /* enocean.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686DE2369B0E20084B302 /* enocean.c */; };
 		4E4199CC236AF4A2004237D0 /* cJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF686862369B0E20084B302 /* cJSON.h */; };
 		4E4199D0236AF4A2004237D0 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686A22369B0E20084B302 /* cJSON.c */; };
 		4E4199D8236AF4DD004237D0 /* interface_type_010.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686B92369B0E20084B302 /* interface_type_010.c */; };
 		4E4199D9236AF4E0004237D0 /* plugin.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686BB2369B0E20084B302 /* plugin.c */; };
-		4E4199DA236AF4E3004237D0 /* interface_type_010.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF686BC2369B0E20084B302 /* interface_type_010.h */; };
 		4E4EECA0236B059600D9658E /* cJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = 4EF686862369B0E20084B302 /* cJSON.h */; };
 		4E4EECA4236B059600D9658E /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686A22369B0E20084B302 /* cJSON.c */; };
 		4E4EECAC236B05BC00D9658E /* interface_type_004.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF686D02369B0E20084B302 /* interface_type_004.c */; };
@@ -218,6 +215,8 @@
 		4ECEEBA323BBE7270003C5C7 /* mea_python_json_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ECEEB9C23BBE6FA0003C5C7 /* mea_python_json_utils.c */; };
 		4ECEEBA423BBE7290003C5C7 /* mea_plugins_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ECEEB9D23BBE6FA0003C5C7 /* mea_plugins_utils.c */; };
 		4ECEEBA523BBE7290003C5C7 /* mea_python_json_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ECEEB9C23BBE6FA0003C5C7 /* mea_python_json_utils.c */; };
+		4EF402E623D0E49800B7D0C8 /* plugin.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF402E323D0E49800B7D0C8 /* plugin.c */; };
+		4EF402E723D0E4A900B7D0C8 /* interface_type_007.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF402E123D0E49800B7D0C8 /* interface_type_007.c */; };
 		4EF687862369E0410084B302 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EF685912369B0E10084B302 /* cJSON.c */; };
 		4EF687872369E1180084B302 /* mea-compilr2.yacc in Sources */ = {isa = PBXBuildFile; fileRef = 4EF6858F2369B0E10084B302 /* mea-compilr2.yacc */; };
 		4EF687882369E12D0084B302 /* mea-compilr2.lex in Sources */ = {isa = PBXBuildFile; fileRef = 4EF685902369B0E10084B302 /* mea-compilr2.lex */; };
@@ -333,6 +332,10 @@
 		4ECEEB9B23BBE6FA0003C5C7 /* mea_python_json_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mea_python_json_utils.h; sourceTree = "<group>"; };
 		4ECEEB9C23BBE6FA0003C5C7 /* mea_python_json_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mea_python_json_utils.c; sourceTree = "<group>"; };
 		4ECEEB9D23BBE6FA0003C5C7 /* mea_plugins_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mea_plugins_utils.c; sourceTree = "<group>"; };
+		4EF402E123D0E49800B7D0C8 /* interface_type_007.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = interface_type_007.c; sourceTree = "<group>"; };
+		4EF402E223D0E49800B7D0C8 /* build.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = build.mk; sourceTree = "<group>"; };
+		4EF402E323D0E49800B7D0C8 /* plugin.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = plugin.c; sourceTree = "<group>"; };
+		4EF402E423D0E49800B7D0C8 /* interface_type_007.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interface_type_007.h; sourceTree = "<group>"; };
 		4EF6850C2369B0E10084B302 /* Makefile.ubuntu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile.ubuntu; sourceTree = "<group>"; };
 		4EF6850D2369B0E10084B302 /* sonar-project.properties */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "sonar-project.properties"; sourceTree = "<group>"; };
 		4EF6850F2369B0E10084B302 /* xPLLib.tgz */ = {isa = PBXFileReference; lastKnownFileType = file; path = xPLLib.tgz; sourceTree = "<group>"; };
@@ -912,6 +915,17 @@
 				4EC97AC023CB13E7005504D7 /* bleservers.c */,
 			);
 			path = ESP32;
+			sourceTree = "<group>";
+		};
+		4EF402E023D0E49800B7D0C8 /* type_007 */ = {
+			isa = PBXGroup;
+			children = (
+				4EF402E123D0E49800B7D0C8 /* interface_type_007.c */,
+				4EF402E223D0E49800B7D0C8 /* build.mk */,
+				4EF402E323D0E49800B7D0C8 /* plugin.c */,
+				4EF402E423D0E49800B7D0C8 /* interface_type_007.h */,
+			);
+			path = type_007;
 			sourceTree = "<group>";
 		};
 		4EF6850E2369B0E10084B302 /* lib */ = {
@@ -1978,6 +1992,7 @@
 		4EF686B72369B0E20084B302 /* interfaces */ = {
 			isa = PBXGroup;
 			children = (
+				4EF402E023D0E49800B7D0C8 /* type_007 */,
 				4EF686B82369B0E20084B302 /* type_010 */,
 				4EF686CF2369B0E20084B302 /* type_004 */,
 				4EF686D82369B0E20084B302 /* type_003 */,
@@ -2116,7 +2131,6 @@
 			files = (
 				4E4199C5236AF417004237D0 /* enocean.h in Headers */,
 				4E4199B8236AF3D7004237D0 /* cJSON.h in Headers */,
-				4E4199C7236AF41E004237D0 /* interface_type_003.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2124,7 +2138,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4E4199DA236AF4E3004237D0 /* interface_type_010.h in Headers */,
 				4E4199CC236AF4A2004237D0 /* cJSON.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2443,6 +2456,7 @@
 				4E81D91723A188D800A68BCD /* mea_file_utils.c in Sources */,
 				4E026F82238DC4DC000D62C2 /* sunriset.c in Sources */,
 				4E026F84238DC4DC000D62C2 /* tokens.c in Sources */,
+				4EF402E723D0E4A900B7D0C8 /* interface_type_007.c in Sources */,
 				4ECEEBA423BBE7290003C5C7 /* mea_plugins_utils.c in Sources */,
 				4E026F87238DC4DC000D62C2 /* cJSON.c in Sources */,
 			);
@@ -2489,7 +2503,6 @@
 				4ECEEBA023BBE7270003C5C7 /* mea_plugins_utils.c in Sources */,
 				4E1EC67E236AD1F6004E3F63 /* xPLServer.c in Sources */,
 				4E1EC662236AD144004E3F63 /* mea_json_utils.c in Sources */,
-				4E12DA48236DAEA500B35CAF /* interface_type_003.c in Sources */,
 				4E1EC67B236AD1C5004E3F63 /* netatmo.c in Sources */,
 				4E12DA49236DAEB200B35CAF /* enocean.c in Sources */,
 				4E1EC654236AD122004E3F63 /* consts.c in Sources */,
@@ -2642,6 +2655,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4EF402E623D0E49800B7D0C8 /* plugin.c in Sources */,
 				4EF687872369E1180084B302 /* mea-compilr2.yacc in Sources */,
 				4EF687862369E0410084B302 /* cJSON.c in Sources */,
 				4E52DCBC23AD456300789CF6 /* mea_rest_api_metric.c in Sources */,
@@ -3018,7 +3032,7 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = NO;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -3073,7 +3087,7 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = NO;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;

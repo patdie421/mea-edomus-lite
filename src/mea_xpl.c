@@ -36,9 +36,9 @@
 
 /* Create a socket for broadcasting messages */
 int mea_xPLConnectBroadcast(char *xPLInterfaceName, char *ip, int l_ip, struct sockaddr_in *xPLBroadcastAddr) {
-   int sockfd;
+   int sockfd = 0;
    int flag = 1;
-   struct protoent *ppe;
+   struct protoent *ppe = NULL;
    struct ifreq interfaceInfo;
    struct in_addr interfaceNetmask;
    struct in_addr xPLInterfaceAddr; // Address associated with interface
@@ -126,10 +126,10 @@ int mea_xPLConnectBroadcast(char *xPLInterfaceName, char *ip, int l_ip, struct s
 /* Attempt to make a hub based connection */
 int mea_xPLConnectHub(int *xPLPort)
 {
-   int sockfd;
+   int sockfd = -1;
    int flag = 1;
    int sockSize = (int)sizeof(struct sockaddr_in);
-   struct protoent *ppe;
+   struct protoent *ppe = NULL;
    struct sockaddr_in theSockInfo;
    
    *xPLPort = 0;
@@ -195,8 +195,9 @@ int mea_xPLConnectHub(int *xPLPort)
 }
 
 
-int16_t mea_xPLSendMessage(int fd, struct sockaddr_in *xPLBroadcastAddr, char *theData, int dataLen) {
-   int bytesSent;
+int16_t mea_xPLSendMessage(int fd, struct sockaddr_in *xPLBroadcastAddr, char *theData, int dataLen)
+{
+   int bytesSent = 0;
    
    /* Try to send the message */
    if ((bytesSent = (int)sendto(fd, theData, (size_t)dataLen, 0,
@@ -212,7 +213,7 @@ int16_t mea_xPLSendMessage(int fd, struct sockaddr_in *xPLBroadcastAddr, char *t
 int16_t mea_xPLReadMessage(int16_t fd, int32_t timeoutms, char *data, int *l_data, int16_t *nerr)
 {
    fd_set input_set;
-   struct timeval timeout;
+   struct timeval timeout = {0,0};
    
    FD_ZERO(&input_set);
    FD_SET(fd, &input_set);
@@ -284,8 +285,9 @@ void mea_xPLSendHbeat(int fd, struct sockaddr_in *xPLBroadcastAddr, char *remote
 
 cJSON *mea_xplMsgToJson_alloc(cJSON *xplMsgJson)
 {
-   if(xplMsgJson == NULL)
+   if(xplMsgJson == NULL) {
       return NULL;
+   }
 
    cJSON *jsonXplMsg = NULL;
    cJSON *jsonBody= NULL;

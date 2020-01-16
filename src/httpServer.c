@@ -67,7 +67,7 @@ struct mg_context* g_mongooseContext = 0;
 
 int gethttp(char *server, int port, char *url, char *response, int l_response)
 {
-   int sockfd; // descripteur de socket
+   int sockfd=-1; // descripteur de socket
    
    // creation de la requete
    char requete[REQUETE_SIZE]="GET ";
@@ -194,18 +194,22 @@ void _httpResponse(struct mg_connection *conn, char *response)
 
 void _httpErrno(struct mg_connection *conn, int n, char *msg)
 {
-   char errno_str[100];
-   char *iserror;
+   char errno_str[256]="";
+   char *iserror=NULL;
 
-   if(n!=0)
+   if(n!=0) {
       iserror=TRUE_STR_C;
-   else
+   }
+   else {
       iserror=FALSE_STR_C;
+   }
       
-   if(msg)
+   if(msg) {
       snprintf(errno_str, sizeof(errno_str)-1, "{ \"iserror\" : %s, \"errno\" : %d, \"errMsg\" : \"%s\" }",iserror, n, msg);
-   else
+   }
+   else {
       snprintf(errno_str, sizeof(errno_str)-1, "{ \"iserror\" : %s, \"errno\" : %d }", iserror, n);
+   }
    
    _httpResponse(conn, errno_str);
 }
@@ -265,9 +269,7 @@ static int _begin_request_handler(struct mg_connection *conn)
          if(strcmp(tokens[1],"PING")==0 && method==HTTP_GET_ID) {
             return http_ping(conn);
          }
-
       }
-
    }
 
 
@@ -288,11 +290,13 @@ int _stop_httpServer()
 
 mea_error_t _start_httpServer(uint16_t port, char *home)
 {
-   if(port==0)
+   if(port==0) {
       port=8083;
+   }
    
-   if(!home)
+   if(!home) {
       return ERROR;
+   }
    
    val_listening_ports=(char *)malloc(6);
    val_listening_ports[5]=0;
@@ -323,10 +327,12 @@ mea_error_t _start_httpServer(uint16_t port, char *home)
    //   callbacks.open_file = open_file_handler;
    
    g_mongooseContext = mg_start(&callbacks, NULL, options);
-   if (g_mongooseContext == NULL)
+   if (g_mongooseContext == NULL) {
       return ERROR;
-   else
+   }
+   else {
       return NOERROR;
+   }
 }
 
 

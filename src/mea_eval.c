@@ -63,7 +63,9 @@ union mea_eval_token_data_u {
 
 static void mea_eval_getSpace(char *p, char **newptr)
 {
-   while(*p && isspace(*p)) p++;
+   while(*p && isspace(*p)) {
+      p++;
+   }
    *newptr=p;
 }
 
@@ -290,7 +292,7 @@ static int pushToEvalStack(int type, void *value, struct mea_eval_stack_s **stac
 #ifndef ONFLYEVAL
 static int mea_eval_calcOperationN(int op, struct mea_eval_stack_s *stack, int *stack_size, int *stack_index)
 {
-   double d, d1, d2;
+   double d=0.0, d1=0.0, d2=0.0;
 
    if(op<128) { // c'est un opérateur
       d2=stack[(*stack_index)--].val.value;
@@ -337,7 +339,7 @@ static int _evalCalcN(char *str, char **newptr, int16_t *lvl, struct mea_eval_st
    }
 
    char *p=str;
-   char *s;
+   char *s=NULL;
 
    do {
       s=p;
@@ -522,7 +524,7 @@ int16_t mea_eval_setGetVarCallBacks(getVarId_f fid, getVarVal_f fval, void *user
 struct mea_eval_stack_s *mea_eval_buildStack_alloc(char *str, char **p, int16_t *err, int32_t *stack_ptr)
 {
    int16_t lvl=0;
-   struct mea_eval_stack_s *stack, *tmp;
+   struct mea_eval_stack_s *stack=NULL, *tmp=NULL;
    int32_t stack_index=-1;
    int stack_size = DEFAULT_STACK_SIZE;
 
@@ -578,7 +580,7 @@ static int16_t mea_eval_calcn(struct mea_eval_stack_s *stack, int32_t stack_ptr,
 {
    struct mea_eval_stack_s exec_stack[EXEC_STACK_SIZE];
    int32_t exec_stack_index=-1;
-   double d, d1, d2;
+   double d=0.0, d1=0.0, d2=0.0;
 
    for(int i=0;i<=stack_ptr;++i) {
       if(stack[i].type==1)
@@ -636,7 +638,7 @@ static int16_t mea_eval_calcn(struct mea_eval_stack_s *stack, int32_t stack_ptr,
 static int16_t mea_eval_calcn(char *str, char **p, double *r, int16_t *err)
 {
    int16_t lvl=0;
-   struct mea_eval_stack_s *stack;
+   struct mea_eval_stack_s *stack=NULL;
    int32_t stack_index=-1;
    int32_t stack_size = DEFAULT_STACK_SIZE;
  
@@ -668,8 +670,8 @@ static int16_t mea_eval_calcn(char *str, char **p, double *r, int16_t *err)
 #if ONFLYEVAL==0
 int16_t mea_eval_calc_numeric(char *str, double *r)
 {
-   char *p;
-   int16_t err;
+   char *p=NULL;
+   int16_t err=0;
    double d = 0.0;
 
    int32_t stack_ptr=0;
@@ -690,9 +692,9 @@ int16_t mea_eval_calc_numeric(char *str, double *r)
 #else
 int16_t mea_eval_calc_numeric(char *str, double *r)
 {
-   char *p;
-   int16_t err;
-   double d;
+   char *p=NULL;
+   int16_t err=0;
+   double d=0.0;
 
    int ret=mea_eval_calcn(str, &p, &d, &err);
 
@@ -827,7 +829,7 @@ int mea_eval_calc_numeric_by_cache(char *expr, double *d)
 #ifdef MEA_EVAL_MODULE_TEST
 double millis()
 {
-   struct timeval te;
+   struct timeval te={0,0};
    gettimeofday(&te, NULL);
 
    double milliseconds = (double)te.tv_sec*1000.0 + (double)te.tv_usec/1000.0;
@@ -854,9 +856,9 @@ int main(int argc, char *argv[])
 {
    char *expr = "int(#2 + #1 + {tata} * #12) - #123.4 * (#567.8 + #10) * (#1 / (#2 + #3))";
 
-   char *p;
-   int16_t err;
-   double d;
+   char *p=NULL;
+   int16_t err=0;
+   double d=0.0;
   
  
    mea_eval_setGetVarCallBacks(&myGetVarId, &myGetVarVal, NULL);

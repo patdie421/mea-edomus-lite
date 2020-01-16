@@ -127,8 +127,9 @@ int16_t _interface_type_003_xPL_callback2(cJSON *xplMsgJson, struct device_info_
 
    plugin_params=alloc_parsed_parameters(device_info->parameters, valid_enocean_plugin_params, &nb_plugin_params, &err, 0);
    if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
-      if(plugin_params)
+      if(plugin_params) {
          release_parsed_parameters(&plugin_params);
+      }
       return -1;
    }
    
@@ -138,8 +139,9 @@ int16_t _interface_type_003_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
    cJSON_AddNumberToObject(data, XPL_ENOCEAN_ADDR_STR_C, (double)enocean_addr);
    cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)i003->id_interface);
-   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
       cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
+   }
 
    //python_cmd_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
    plugin_fireandforget_function_json(plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, XPLMSG_JSON, data);
@@ -173,8 +175,9 @@ int16_t _inteface_type_003_enocean_data_callback(uint8_t *data, uint16_t l_data,
    pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)(&callback_data->callback_lock) );
    pthread_mutex_lock(callback_data->callback_lock);
    mea_queue_in_elem(callback_data->queue, e);
-   if(callback_data->queue->nb_elem>=1)
+   if(callback_data->queue->nb_elem>=1) {
       pthread_cond_broadcast(callback_data->callback_cond);
+   }
    pthread_mutex_unlock(callback_data->callback_lock);
    pthread_cleanup_pop(0);
 
@@ -186,11 +189,13 @@ void *_thread_interface_type_003_enocean_data_cleanup(void *args)
 {
    struct enocean_thread_data_s *udata=(struct enocean_thread_data_s *)args;
 
-   if(!udata)
+   if(!udata) {
       return NULL;
+   }
 
-   if(udata->queue && udata->queue->nb_elem>0) // on vide s'il y a quelque chose avant de partir
+   if(udata->queue && udata->queue->nb_elem>0) { // on vide s'il y a quelque chose avant de partir
       mea_queue_cleanup(udata->queue, _enocean_data_free_queue_elem);
+   }
 
    if(udata->queue) {
       free(udata->queue);
@@ -230,8 +235,9 @@ void *_thread_interface_type_003_enocean_data(void *args)
    int ret;
 
    while(1) {
-      if(ed->signal_flag==1)
+      if(ed->signal_flag==1) {
          goto _thread_interface_type_003_enocean_data_clean_exit;
+      }
 
       process_heartbeat(udata->i003->monitoring_id);
       process_update_indicator(udata->i003->monitoring_id, interface_type_003_senttoplugin_str, udata->i003->indicators.senttoplugin);
@@ -331,8 +337,9 @@ void *_thread_interface_type_003_enocean_data(void *args)
                   cJSON_AddItemToObject(data, DATA_STR_C, cJSON_CreateByteArray((char *)e->data, e->l_data));
                   cJSON_AddNumberToObject(data, L_DATA_STR_C, (double)e->l_data);
                   cJSON_AddNumberToObject(data, API_KEY_STR_C, (double)(long)udata->i003->id_interface);
-                  if(udata->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+                  if(udata->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
                      cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, udata->plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
+                  }
 //                  python_cmd_json(udata->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
                   plugin_fireandforget_function_json(udata->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s, DATAFROMSENSOR_JSON, data);
                   udata->i003->indicators.senttoplugin++;
@@ -366,7 +373,9 @@ _thread_interface_type_003_enocean_data_clean_exit:
    pthread_cleanup_pop(1);
 
    process_async_stop(udata->i003->monitoring_id);
-   for(;;) sleep(1);
+   for(;;) {
+      sleep(1);
+   }
 
    return NULL;
 }
@@ -429,8 +438,9 @@ pthread_t *start_interface_type_003_enocean_data_thread(interface_type_003_t *i0
       goto clean_exit;
    }
 
-   if(pthread_create (thread, NULL, (void *)function, (void *)udata))
+   if(pthread_create (thread, NULL, (void *)function, (void *)udata)) {
       goto clean_exit;
+   }
    pthread_detach(*thread);
 
    return thread;
@@ -478,12 +488,13 @@ int clean_interface_type_003(void *ixxx)
       i003->parameters=NULL;
    }
 
-   if(i003->xPL_callback2)
+   if(i003->xPL_callback2) {
       i003->xPL_callback2=NULL;
+   }
 
    if(i003->ed && i003->ed->enocean_callback_data) {
-         free(i003->ed->enocean_callback_data);
-         i003->ed->enocean_callback_data=NULL;
+      free(i003->ed->enocean_callback_data);
+      i003->ed->enocean_callback_data=NULL;
    }
 
    if(i003->ed) {
@@ -504,10 +515,12 @@ xpl2_f get_xPLCallback_interface_type_003(void *ixxx)
 {
    interface_type_003_t *i003 = (interface_type_003_t *)ixxx;
 
-   if(i003 == NULL)
+   if(i003 == NULL) {
       return NULL;
-   else
+   }
+   else {
       return i003->xPL_callback2;
+   }
 }
 
 
@@ -515,10 +528,12 @@ int get_monitoring_id_interface_type_003(void *ixxx)
 {
    interface_type_003_t *i003 = (interface_type_003_t *)ixxx;
 
-   if(i003 == NULL)
+   if(i003 == NULL) {
       return -1;
-   else
+   }
+   else {
       return i003->monitoring_id;
+   }
 }
 
 
@@ -526,8 +541,9 @@ int set_xPLCallback_interface_type_003(void *ixxx, xpl2_f cb)
 {
    interface_type_003_t *i003 = (interface_type_003_t *)ixxx;
 
-   if(i003 == NULL)
+   if(i003 == NULL) {
       return -1;
+   }
    else {
       i003->xPL_callback2 = cb;
       return 0;
@@ -539,8 +555,9 @@ int set_monitoring_id_interface_type_003(void *ixxx, int id)
 {
    interface_type_003_t *i003 = (interface_type_003_t *)ixxx;
 
-   if(i003 == NULL)
+   if(i003 == NULL) {
       return -1;
+   }
    else {
       i003->monitoring_id = id;
       return 0;
@@ -558,17 +575,19 @@ int get_interface_id_interface_type_003(void *ixxx)
 {
    interface_type_003_t *i003 = (interface_type_003_t *)ixxx;
 
-   if(i003 == NULL)
+   if(i003 == NULL) {
       return -1;
-   else
+   }
+   else {
       return i003->id_interface;
+   }
 }
 
 
 int api_sendEnoceanRadioErp1Packet_json(interface_type_003_t *i003, cJSON *args, cJSON **res, int16_t *nerr, char *err, int l_err)
 {
-   cJSON *arg;
-   int16_t ret;
+   cJSON *arg=NULL;
+   int16_t ret=-1;
 
    *nerr=255;
    
@@ -584,8 +603,9 @@ int api_sendEnoceanRadioErp1Packet_json(interface_type_003_t *i003, cJSON *args,
    if(arg->type==cJSON_Number) {
       rorg=(uint32_t)arg->valuedouble;
    }
-   else
+   else {
       return -255;
+   }
 
    // sub_id
    uint32_t sub_id;
@@ -593,8 +613,9 @@ int api_sendEnoceanRadioErp1Packet_json(interface_type_003_t *i003, cJSON *args,
    if(arg->type==cJSON_Number) {
       sub_id=(uint32_t)arg->valuedouble;
    }
-   else
+   else {
       return -255;
+   }
 
    // dest addr
    uint32_t dest_addr;
@@ -602,8 +623,9 @@ int api_sendEnoceanRadioErp1Packet_json(interface_type_003_t *i003, cJSON *args,
    if(arg->type==cJSON_Number) {
       dest_addr=(uint32_t)arg->valuedouble;
    }
-   else
+   else {
       return -255;
+   }
 
    arg=cJSON_GetArrayItem(args, 5);
    int l=0;
@@ -615,15 +637,18 @@ int api_sendEnoceanRadioErp1Packet_json(interface_type_003_t *i003, cJSON *args,
          l=arg->valueint;
       }
    }
-   else
+   else {
       return -255;
+   }
 
    *nerr = 0;
    ret = enocean_send_radio_erp1_packet(i003->ed, rorg, i003->ed->id, sub_id, dest_addr, (uint8_t *)arg->valuestring, l, 0, nerr);
-   if(ret<0)
+   if(ret<0) {
       strncpy(err, "error", l_err);
-   else
+   }
+   else {
       strncpy(err, "no error", l_err);
+   }
 
    *res = NULL;
 
@@ -744,8 +769,9 @@ int stop_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
  * \return    0 pas d'erreur ou -1 sinon
  **/
 {
-   if(!data)
+   if(!data) {
       return -1;
+   }
 
    struct interface_type_003_data_s *start_stop_params=(struct interface_type_003_data_s *)data;
 
@@ -773,8 +799,9 @@ int stop_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
             // pour éviter une attente "trop" active
             usleep(100); // will sleep for 10 ms
          }
-         else
+         else {
             break;
+         }
       }
       DEBUG_SECTION mea_log_printf("%s (%s) : %s, fin après %d itération(s)\n",DEBUG_STR, __func__,start_stop_params->i003->name,100-counter);
 
@@ -909,13 +936,13 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
             char *s=cJSON_Print(result);
             DEBUG_SECTION mea_log_printf("%s (%s) : Result of call of mea_init : %s\n", DEBUG_STR, __func__, s);
             free(s);
-
             cJSON_Delete(result);
          }
       }
 
-      if(interface_parameters)
+      if(interface_parameters) {
          release_parsed_parameters(&interface_parameters);
+      }
       interface_nb_parameters=0;
    }
 
@@ -946,11 +973,13 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
    return 0;
 
 clean_exit:
-   if(ed)
+   if(ed) {
       enocean_remove_data_callback(ed);
+   }
 
-   if(start_stop_params->i003->thread)
+   if(start_stop_params->i003->thread) {
       stop_interface_type_003(start_stop_params->i003->monitoring_id, start_stop_params, NULL, 0);
+   }
 
    if(interface_parameters) {
       release_parsed_parameters(&interface_parameters);
@@ -963,8 +992,9 @@ clean_exit:
    }
 
    if(ed) {
-      if(fd>=0)
+      if(fd>=0) {
          enocean_close(ed);
+      }
       enocean_free_ed(ed);
       ed=NULL;
    }

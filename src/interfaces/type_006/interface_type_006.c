@@ -82,7 +82,7 @@ int interface_type_006_call_serialDataPre(struct genericserial_thread_params_s *
       cJSON *result=plugin_call_function_json_alloc(params->i006->interface_plugin_name, "mea_dataPreprocessor", data);
       
       if(result) {
-         if(result->type=cJSON_False) {
+         if(result->type==cJSON_False) {
             ret=-1;
          }
          cJSON_Delete(result);
@@ -328,8 +328,7 @@ void *_thread_interface_type_006_genericserial_data(void *args)
          }
          pthread_testcancel();
       }
-      else
-      {
+      else {
          err_counter++;
          if(err_counter<5) {
             sleep(5);
@@ -717,8 +716,8 @@ int restart_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg
 
 int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
 {
-   char dev[256];
-   char buff[256];
+   char dev[256]="";
+   char buff[256]="";
    speed_t speed;
    int err=0;
    char err_str[128];

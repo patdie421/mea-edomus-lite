@@ -23,7 +23,7 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
 {
    int ret=0;
    int id=0;
-   char json[2048];
+   char json[2048]="";
 
    if(l_tokens==0) {
       char buff[256]="";
@@ -55,10 +55,12 @@ int mea_rest_api_service_GET(struct mg_connection *conn, int method, char *token
          }
       }
 
-      if(detail_flag==0) 
+      if(detail_flag==0) {
          ret=managed_processes_processes_to_json_mini(json, sizeof(json)-1, type);
-      else
+      }
+      else {
          ret=managed_processes_processes_to_json(json, sizeof(json)-1, type);
+      }
 
       if(ret==0) {
          httpResponse(conn, 200, NULL, json);
@@ -131,10 +133,12 @@ int mea_rest_api_service_PUT(struct mg_connection *conn, int method, char *token
                }
 
                char *_msg;
-               if(strlen(msg)==0)
+               if(strlen(msg)==0) {
                   _msg=NULL;
-               else
+               }
+               else {
                   _msg=msg;
+               }
                if(ret<0) {
                   return returnResponseAndDeleteJsonData(conn, 400, 1, _msg, jsonData);
                }

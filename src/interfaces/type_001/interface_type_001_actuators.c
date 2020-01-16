@@ -158,10 +158,10 @@ valid_and_malloc_relay_clean_exit:
 
 mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *device, char *type)
 {
-   int ret;
-   int type_id;
-   unsigned char sval[2];
-   int16_t comio2_err;
+   int ret=-1;
+   int type_id=-1;
+   unsigned char sval[2]="";
+   int16_t comio2_err=-1;
 
    (i001->indicators.nbactuatorsxplrecv)++;
 
@@ -174,7 +174,7 @@ mea_error_t xpl_actuator2(interface_type_001_t *i001, cJSON *xplMsgJson, char *d
       return ERROR;
    }
    
-   struct actuator_s *iq;
+   struct actuator_s *iq=NULL;
    while(1) {
       mea_queue_current(i001->actuators_list, (void **)&iq);
       if(mea_strcmplower(iq->name, device)==0) {  // OK, c'est bien pour moi ...

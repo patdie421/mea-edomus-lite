@@ -313,8 +313,9 @@ char *mea_strtrim_alloc(char *s)
 {
    char *s_trimed;
    
-   if(!s)
+   if(!s) {
       return NULL;
+   }
 
    s_trimed=mea_strltrim(s);
    if(s_trimed) {
@@ -395,8 +396,9 @@ int16_t mea_strcmplower(char *str1, char *str2)
    
    int i=0;
    for(;str1[i] && str2[i];i++) {
-      if(tolower(str1[i]) - tolower(str2[i])!=0)
+      if(tolower(str1[i]) - tolower(str2[i])!=0) {
          break;
+      }
    }
    return tolower(str1[i]) - tolower(str2[i]);
 }
@@ -456,8 +458,9 @@ int16_t mea_strncmplower(char *str1, char *str2, int n)
  */
 {
    int i;
-   if(n<1)
+   if(n<1) {
       return 0;
+   }
    
    if(!str1 || !str2) {
       return 0;
@@ -497,8 +500,7 @@ int16_t mea_strsplit(char str[], char separator, char *tokens[], uint16_t l_toke
    int j=0;
    tokens[j]=str;
    int i=0;
-   for(;str[i];i++)
-   {
+   for(;str[i];i++) {
       if(str[i]==separator) {
          str[i]=0;
          j++;
@@ -524,7 +526,7 @@ size_t mea_snprintfcat(char* buf, size_t bufSize, char const* fmt, ...)
  * \return    taille de la nouvelle chaine.
  */
 {
-   size_t result;
+   size_t result=0;
    va_list args;
    size_t len = strnlen(buf, bufSize);
 
@@ -572,9 +574,8 @@ int mea_strncat(char *dest, int max_test, char *source)
  */
 void mea_strremovespaces(char *str)
 {
-   char c, *p;
-
-   p = str;
+   char c=0;
+   char *p = str;
    do {
       while ((c = *p++) == ' ');
    }
@@ -736,10 +737,10 @@ int mea_strlen_escaped(char *s)
 
 char *mea_unescape(char *result, char *data)
 {
-   int ch;
+   int ch = 0;
    int result_ptr = 0;
-   int oval;
-   int i;
+   int oval = 0;
+   int i = 0;
 
    result[0]=0;
 
@@ -799,7 +800,7 @@ int main(int argc, char *argv[])
    char s2[80]="   HIJKLMN   ";
    char s3[80]="\\\"TO\\\\TO\\\"";
 
-   char *str1, *str2, *str1bis, *str2bis = NULL;
+   char *str1 = NULL, *str2 = NULL, *str1bis = NULL, *str2bis = NULL;
 
    str1bis=mea_strtrim_alloc(s1);
    if(str1bis) {
@@ -834,7 +835,7 @@ int main(int argc, char *argv[])
       fprintf(stderr,"str2bis=NULL\n");
    }
 
-   char d1[80],d2[80];
+   char d1[80]="", d2[80]="";
 
    mea_strcpy_escs(d1,s3);
    fprintf(stderr,"escs=%s (%s)\n",d1, s3);
@@ -847,7 +848,7 @@ int main(int argc, char *argv[])
    free(str2);
    free(str2bis);
 
-   char s4[80];
+   char s4[80] = "";
 
    mea_strcpytrim(s4, "A");
    fprintf(stderr,"s4 = [%s]\n", s4);

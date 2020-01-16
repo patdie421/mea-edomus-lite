@@ -27,11 +27,11 @@
 
 int mea_connect(int soc, const struct sockaddr *addr, socklen_t addr_l)
 {
-   int res;
-   long arg;
+   int res=0;
+   long arg=0;
    fd_set myset;
-   struct timeval tv;
-   int valopt;
+   struct timeval tv = {0,0};
+   int valopt = 0;
    
    // Set non-blocking
    if( (arg = fcntl(soc, F_GETFL, NULL)) < 0) {
@@ -105,7 +105,7 @@ int mea_connect(int soc, const struct sockaddr *addr, socklen_t addr_l)
 
 int mea_socket_connect(int *s, char *hostname, int port)
 {
-   int sock;
+   int sock = 0;
    struct sockaddr_in serv_addr;
    struct hostent *serv_info = NULL;
 
@@ -151,7 +151,7 @@ int mea_socket_connect(int *s, char *hostname, int port)
 
 int mea_socket_send(int *s, char *message, int l_message)
 {
-   int ret;
+   int ret = -1;
    
    ret=(int)send(*s, message, l_message, 0);
 
@@ -171,8 +171,8 @@ int mea_socket_send(int *s, char *message, int l_message)
 int mea_socket_read(int *s, char *message, int l_message, int t)
 {
    fd_set input_set;
-   struct timeval timeout;
-   char buff[80];
+   struct timeval timeout = {0,0};
+   char buff[80]="";
    ssize_t l=0;
    
    int16_t ret=0;
@@ -205,12 +205,4 @@ int mea_socket_read(int *s, char *message, int l_message, int t)
       memcpy(message, buff, (int)l);
       return (int)l;
    }
-}
-
-
-void *_free(void *r)
-{
-   if(r)
-      free(r);
-   return NULL;
 }

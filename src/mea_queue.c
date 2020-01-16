@@ -61,7 +61,7 @@ mea_error_t mea_queue_in_elem(mea_queue_t *queue, void *data)
 
 mea_error_t mea_queue_out_elem(mea_queue_t *queue, void **data)
 {
-   struct mea_queue_elem *ptr;
+   struct mea_queue_elem *ptr=NULL;
    
    if(!queue) {
       return ERROR;
@@ -196,7 +196,7 @@ mea_error_t mea_queue_prev(mea_queue_t *queue)
 
 mea_error_t mea_queue_cleanup(mea_queue_t *queue, mea_queue_free_data_f f)
 {
-   struct mea_queue_elem *ptr;
+   struct mea_queue_elem *ptr=NULL;
    
    if(!queue) {
       return ERROR;
@@ -264,8 +264,9 @@ mea_error_t mea_queue_remove_current(mea_queue_t *queue)
       return ERROR;
    }
 
-   if(queue->nb_elem==0)
+   if(queue->nb_elem==0) {
       return ERROR;
+   }
    
    if(queue->nb_elem==1) {
       free(queue->current);
@@ -276,9 +277,9 @@ mea_error_t mea_queue_remove_current(mea_queue_t *queue)
       return NOERROR;
    }
    
-   struct mea_queue_elem *prev;
-   struct mea_queue_elem *next;
-   struct mea_queue_elem *old;
+   struct mea_queue_elem *prev=NULL;
+   struct mea_queue_elem *next=NULL;
+   struct mea_queue_elem *old=NULL;
 
    prev=queue->current->prev;
    next=queue->current->next;
@@ -316,7 +317,7 @@ mea_error_t mea_queue_remove_current(mea_queue_t *queue)
 
 mea_error_t mea_queue_process_all_elem_data(mea_queue_t *queue, void (*f)(void *))
 {
-   struct mea_queue_elem *ptr;
+   struct mea_queue_elem *ptr=NULL;
    
    if(!queue) {
       return ERROR;
@@ -338,7 +339,7 @@ mea_error_t mea_queue_process_all_elem_data(mea_queue_t *queue, void (*f)(void *
 
 mea_error_t mea_queue_find_elem(mea_queue_t *queue, mea_queue_compare_data_f cmpf, void *data_to_find, void **data)
 {
-   struct mea_queue_elem *ptr;
+   struct mea_queue_elem *ptr=NULL;
    
    *data=NULL;
    if(!queue) {
@@ -394,7 +395,7 @@ static int _create_index(mea_queue_t *queue)
    }
 
    int i=0;
-   struct mea_queue_elem *ptr;
+   struct mea_queue_elem *ptr=NULL;
    ptr=queue->first;
    do {
       queue->index[i++]=ptr->d;
@@ -518,7 +519,7 @@ mea_error_t mea_queue_find_elem_using_index(mea_queue_t *queue, void *data_to_fi
    unsigned long start = 0;
    unsigned long end = queue->nb_elem - 1;
    unsigned long middle = 0;
-   int _cmpres;
+   int _cmpres = 0;
 
    *data=NULL;
 
@@ -577,11 +578,8 @@ void clnf(void *data)
 
 int cmpf(void **p1, void **p2)
 {
-   char *_p1, *_p2;
-
-   _p1 = (char *)*p1;
-   _p2 = (char *)*p2;
-
+   char *_p1 = (char *)*p1;
+   char *_p2 = (char *)*p2;
 
    return strcmp(_p1, _p2);
 }
@@ -593,9 +591,9 @@ char *d3="toto";
 
 int main(int argc, char *argv[])
 {
-   mea_queue_t q;
-   char *str;
-   int ret;
+   mea_queue_t q=MEA_QUEUE_ELEM_INIT;
+   char *str=NULL;
+   int ret=-1;
 
    mea_queue_init(&q);
 

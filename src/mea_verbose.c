@@ -72,8 +72,9 @@ int mea_rotate_open_log_file(char *name, uint16_t max_index)
    FILE *fd=NULL;
 
    fd=fopen(name, "r+");
-   if(!fd)
-       return -1;
+   if(!fd) {
+      return -1;
+   }
 
    name_old = (char *)malloc(strlen(name)+7); // 7 => '.' + 5 digits + 1
    if(name_old == NULL) {
@@ -181,8 +182,8 @@ void mea_log_printf(char const* fmt, ...)
    static char *date_format="[%Y-%m-%d %H:%M:%S]";
 
    char date_str[256];
-   time_t t;
-   struct tm t_tm;
+   time_t t = 0;
+   struct tm t_tm = {0,0};
 
    t=time(NULL);
 

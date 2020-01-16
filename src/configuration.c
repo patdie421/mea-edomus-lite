@@ -50,8 +50,9 @@ char *getAppParametersAsString_alloc()
 
 cJSON *filterByJson_alloc(cJSON *j, cJSON *f)
 {
-   if(j==NULL || f==NULL)
+   if(j==NULL || f==NULL) {
       return NULL;
+   }
 
    cJSON *_j=cJSON_CreateObject();
    cJSON *e = j->child;
@@ -94,8 +95,9 @@ int updateAppParameters(cJSON *jsonData)
 
 int updateAppParameter(char *name, cJSON *jsonData)
 {
-   if(!jsonData || jsonData->type!=cJSON_String)
+   if(!jsonData || jsonData->type!=cJSON_String) {
       return -1;
+   }
    
    cJSON *filter=cJSON_Parse(appParameters_defaults);
    if(!filter) {
@@ -139,8 +141,9 @@ void appParameters_clean() {
 
 
 void appParameters_print(cJSON *p) {
-   if(p==NULL)
+   if(p==NULL) {
       p=appParameters;
+   }
    char *s = cJSON_Print(p);
    printf("%s\n", s);
    free(s);
@@ -149,8 +152,9 @@ void appParameters_print(cJSON *p) {
 
 void appParameters_display()
 {
-   if(appParameters)
+   if(appParameters) {
       appParameters_print(appParameters);
+   }
 }
 
 
@@ -166,8 +170,9 @@ cJSON *appParameters_create(void) {
 
 char *appParameters_get(char *key, cJSON *d)
 {
-   if(d==NULL)
+   if(d==NULL) {
       d=appParameters;
+   }
 
    cJSON *v=cJSON_GetObjectItem(d, key);
    if(v) {
@@ -182,8 +187,9 @@ char *appParameters_get(char *key, cJSON *d)
 
 int appParameters_set(char *key, char *value, cJSON *d)
 {
-   if(d==NULL)
+   if(d==NULL) {
       d=appParameters;
+   }
 
    cJSON *prevValue = cJSON_GetObjectItem(d, key);
    cJSON *newValue = cJSON_CreateString((const char *)value); 

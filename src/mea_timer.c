@@ -7,7 +7,7 @@
 
 double mea_now()
 {
-    struct timeval te;
+    struct timeval te = {0,0};
     gettimeofday(&te, NULL); // get current time
     double milliseconds = (double)te.tv_sec*1000.0 + (double)te.tv_usec/1000.0; // caculate milliseconds
 
@@ -17,7 +17,7 @@ double mea_now()
 
 void mea_nanosleep(uint32_t ns)
 {
-   struct timespec req,res;
+   struct timespec req = {0,0}, res = {0,0};
 
    req.tv_sec=0;
    req.tv_nsec=ns;
@@ -36,7 +36,7 @@ void mea_nanosleep(uint32_t ns)
 
 void mea_microsleep(uint32_t usecs)
 {
-   struct timespec delay_time,remaining;
+   struct timespec delay_time = {0,0}, remaining = {0,0};
 
    delay_time.tv_sec = 0;
    delay_time.tv_nsec = usecs * 1000;
@@ -109,8 +109,8 @@ int16_t mea_test_timer(mea_timer_t *aTimer)
  */
 {
    if(aTimer->stat==1) {
-      time_t now;
-      double diff_time;
+      time_t now = 0;
+      double diff_time =0.0;
 	  
       time(&now);
 	    

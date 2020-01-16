@@ -32,7 +32,7 @@ time_t mea_sunrise_value = 0;
 time_t mea_sunset_value = 0;
 time_t mea_twilightstart_value = 0;
 time_t mea_twilightend_value = 0;
-struct tm mea_tm;
+struct tm mea_tm = {0,0};
 
 // gestion des dates et heures
 enum datetime_type_e { DATETIME_TIME, DATETIME_DATE };
@@ -73,7 +73,7 @@ inline void mea_getTime(struct timespec *t)
 //   clock_gettime(CLOCK_MONOTONIC, t);
 //   clock_gettime(CLOCK_MONOTONIC_COARSE, t);
 #else
-   struct timeval _t;
+   struct timeval _t = {0,0};
    gettimeofday(&_t, NULL);
    t->tv_sec = _t.tv_sec;
    t->tv_nsec = _t.tv_usec * 1000L;
@@ -168,14 +168,13 @@ struct tm *mea_localtime_r(const time_t *timep, struct tm *result)
    if(result) {
       memcpy(result, &mea_tm, sizeof(struct tm));
    }
-
    return &mea_tm;
 }
 
 
 int mea_timeFromStr(char *str, time_t *t)
 {
-   struct tm tm;
+   struct tm tm = {0,0};
    struct mea_datetime_value_s *e = NULL;
 
    HASH_FIND_STR(mea_datetime_values_cache, str, e);
@@ -229,7 +228,7 @@ static int mea_clean_datetime_values_cache()
 
 static int update_datetime_values_cache()
 {
-   struct tm tm;
+   struct tm tm={0,0};
 
    if(mea_datetime_values_cache) {
       struct mea_datetime_value_s  *current, *tmp;
@@ -251,11 +250,11 @@ static int update_datetime_values_cache()
 
 static int getSunRiseSetOrTwilingStartEnd(double lon, double lat, time_t *_start, time_t *_end, int twilight)
 {
-   int year,month,day;
-   double start, end;
-   int  rs;
+   int year=-1,month=-1,day=-1;
+   double start=0.0, end=0.0;
+   int  rs=-1;
 
-   struct tm tm_gmt;
+   struct tm tm_gmt={0,0};
 
    time_t t = mea_time_value;
    localtime_r(&t, &tm_gmt); // pour récupérer la date du jour (les h, m et s ne nous intéressent pas);
@@ -328,10 +327,10 @@ static int getSunRiseSetOrTwilingStartEnd(double lon, double lat, time_t *_start
 static void updateTimersStates()
 {
    if(mea_datetime_timers_list!=NULL) {
-      struct timespec now;
+      struct timespec now={0,0};
       mea_getTime(&now);
 
-      struct mea_datetime_timer_s  *current, *tmp = NULL;
+      struct mea_datetime_timer_s  *current=NULL, *tmp = NULL;
 
       HASH_ITER(hh, mea_datetime_timers_list, current, tmp) {
          if(current->state == TIMER_RUNNING) {
@@ -350,7 +349,7 @@ static void updateTimersStates()
 static struct mea_datetime_timer_s * findNextFallingTimer()
 {
    if(mea_datetime_timers_list!=NULL) {
-      struct mea_datetime_timer_s  *current, *tmp, *last = NULL;
+      struct mea_datetime_timer_s *current=NULL, *tmp=NULL, *last=NULL;
 
       HASH_ITER(hh, mea_datetime_timers_list, current, tmp) {
          if(current->state == TIMER_RUNNING) {
@@ -374,8 +373,8 @@ static struct mea_datetime_timer_s * findNextFallingTimer()
 
 static int _startAlarm(char *name, time_t date, datetime_timer_callback_f f, void *userdata)
 {
-   struct timespec now;
-   struct mea_datetime_timer_s *e;
+   struct timespec now={0,0};
+   struct mea_datetime_timer_s *e=NULL;
    int retour = 0;
 
    pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&timeServer_startTimer_lock);
@@ -421,9 +420,9 @@ startAlarm_clean_exit:
 
 static int _startTimer(char *name, long duration, enum datetime_timer_unit_e unit, datetime_timer_callback_f f, void *userdata)
 {
-   struct mea_datetime_timer_s *e;
-   struct timespec now;
-   struct timespec _duration;
+   struct mea_datetime_timer_s *e=NULL;
+   struct timespec now={0,0};
+   struct timespec _duration={0,0};
    int retour = 0;
 
    if(duration <= 0) {
@@ -559,7 +558,7 @@ stopTimer_clean_exit:
 
 int mea_datetime_removeTimer(char *name)
 {
-   struct mea_datetime_timer_s *e;
+   struct mea_datetime_timer_s *e=NULL;
    int ret = 0;
    pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&timeServer_startTimer_lock);
    pthread_mutex_lock(&timeServer_startTimer_lock);
@@ -584,7 +583,7 @@ int mea_datetime_removeTimer(char *name)
 int mea_datetime_stopTimer(char *name)
 {
    int retour = 0;
-   struct mea_datetime_timer_s *e;
+   struct mea_datetime_timer_s *e=NULL;
 
    pthread_cleanup_push((void *)pthread_mutex_unlock, (void *)&timeServer_startTimer_lock);
    pthread_mutex_lock(&timeServer_startTimer_lock);
@@ -608,15 +607,15 @@ stopTimer_clean_exit:
 
 void *_timeServer_thread(void *data)
 {
-   struct timespec te;
-   struct timespec req;
+   struct timespec te={0,0};
+   struct timespec req={0,0};
    mea_time_value = time(NULL);
    int current_day = -1;
 
    time_t last_te_tv_sec = 0;
    long chrono_ns = 0;
    long sleep_time_ns = 0;
-   struct timespec t;
+   struct timespec t = {0,0};
 
    struct mea_datetime_timer_s *nextTimer = NULL;
 
@@ -646,16 +645,12 @@ void *_timeServer_thread(void *data)
                mea_log_printf("%s (%s) : Traitement heure\n", INFO_STR, __func__);
             }
             mea_clean_datetime_values_cache(); // on fait le ménage dans le cache
-/* DBSERVER
-            start_consolidation_batch();
-            start_purge_batch();
-            start_resync_batch();
-*/
             hour_job_done = 1;
          }
       }
-      else
+      else {
          hour_job_done=0;
+      }
 
       if(mea_tm.tm_wday != current_day) { // 1x par jour
          DEBUG_SECTION2(DEBUGFLAG) {
@@ -688,10 +683,12 @@ void *_timeServer_thread(void *data)
 
       #define SLEEPTIME_NS 1000000000L // une seconde
       // calcul du temps de sommeil
-      if(chrono_ns <= te.tv_nsec)
+      if(chrono_ns <= te.tv_nsec) {
          sleep_time_ns=SLEEPTIME_NS - (te.tv_nsec - chrono_ns);
-      else
+      }
+      else {
          sleep_time_ns=SLEEPTIME_NS - (ONESECONDNS + te.tv_nsec - chrono_ns);
+      }
 
       // un timer arrive-t-il a échéance avant le temps de sommeil calculé ?
       nextTimer=findNextFallingTimer();

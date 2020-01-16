@@ -62,7 +62,7 @@ char *xpl_instanceID=NULL;
 char  xpl_my_addr[36]="";
 
 // gestion du thread et des indicateurs
-pthread_t *_xPLServer_thread_id;
+pthread_t *_xPLServer_thread_id=NULL;
 jmp_buf    xPLServer_JumpBuffer;
 int        xPLServer_longjmp_flag = 0;
 int       _xplServer_monitoring_id = -1;
@@ -84,7 +84,7 @@ long xplreaderr_indicator = 0;
 // gestion de des messages xpl internes
 uint32_t requestId = 1;
 pthread_mutex_t requestId_lock;
-mea_queue_t    *xplRespQueue;
+mea_queue_t    *xplRespQueue=NULL;
 pthread_cond_t  xplRespQueue_sync_cond;
 pthread_mutex_t xplRespQueue_sync_lock;
 int             _xPLServer_mutex_initialized=0;
@@ -119,8 +119,9 @@ uint32_t mea_getXplRequestId() // rajouter un verrou ...
    id=requestId;
 
    requestId++;
-   if(requestId>20000)
+   if(requestId>20000) {
       requestId=1;
+   }
 
    pthread_mutex_unlock(&requestId_lock);
    pthread_cleanup_pop(0);
@@ -173,12 +174,14 @@ char *mea_getXPLVendorID()
 
 int mea_sendXplMsgJson(cJSON *xplMsgJson)
 {
-   if(xplMsgJson==NULL)
+   if(xplMsgJson==NULL) {
       return -1;
+   }
 
    cJSON *e=xplMsgJson->child;
-   if(e==NULL)
+   if(e==NULL) {
       return -1;
+   }
 
 //   int retour=0;
 
@@ -221,8 +224,9 @@ int mea_sendXplMsgJson(cJSON *xplMsgJson)
 
    if(n>0) {
       int ret=mea_xPLSendMessage(xpl_sdb, xpl_broadcastAddr, msg, n);
-      if(ret<0)
-         process_update_indicator(_xplServer_monitoring_id, xpl_server_senderr_str, ++xplsenderr_indicator); 
+      if(ret<0) {
+         process_update_indicator(_xplServer_monitoring_id, xpl_server_senderr_str, ++xplsenderr_indicator);
+      }
       return 0;
    }
    return -1;
@@ -233,7 +237,7 @@ uint16_t mea_sendXPLMessage2(cJSON *xplMsgJson)
 {
    char *str = NULL;
    char deviceID[17]="";
-   xplRespQueue_elem_t *e;
+   xplRespQueue_elem_t *e=NULL;
    cJSON *j = NULL;
 
    process_update_indicator(_xplServer_monitoring_id, xpl_server_xplout_str, ++xplout_indicator);
@@ -264,7 +268,7 @@ uint16_t mea_sendXPLMessage2(cJSON *xplMsgJson)
    }
 
    if(deviceID[0]!=0 && strcmp(str,INTERNAL_STR_C)==0) { // destination interne, retour à mettre dans une file (avec timestamp) ...
-      int id;
+      int id=-1;
 
       sscanf(str, "%*[^.].%d", &id);
       cJSON *xplMsgJson_new = cJSON_Duplicate(xplMsgJson, 1);
@@ -280,8 +284,9 @@ uint16_t mea_sendXPLMessage2(cJSON *xplMsgJson)
 
          mea_queue_in_elem(xplRespQueue, e);
 
-         if(xplRespQueue->nb_elem>=1)
+         if(xplRespQueue->nb_elem>=1) {
             pthread_cond_broadcast(&xplRespQueue_sync_cond);
+         }
       }
 
       pthread_mutex_unlock(&xplRespQueue_sync_lock);
@@ -308,19 +313,21 @@ cJSON *mea_readXPLResponse2(int id)
 
    if((xplRespQueue && xplRespQueue->nb_elem==0) || notfound==1) {
       // rien a lire => on va attendre que quelque chose soit mis dans la file
-      struct timeval tv;
-      struct timespec ts;
+      struct timeval tv = {0,0};
+      struct timespec ts = {0,0};
       gettimeofday(&tv, NULL);
       ts.tv_sec = tv.tv_sec + 2; // timeout de deux secondes
       ts.tv_nsec = 0;
       ret=pthread_cond_timedwait(&xplRespQueue_sync_cond, &xplRespQueue_sync_lock, &ts);
       if(ret) {
-         if(ret!=ETIMEDOUT)
+         if(ret!=ETIMEDOUT) {
             goto readFromQueue_return;
+         }
       } 
    }
-   else
+   else {
       goto readFromQueue_return;
+   }
 
    // a ce point il devrait y avoir quelque chose dans la file.
    if(mea_queue_first(xplRespQueue)==0) {
@@ -378,11 +385,13 @@ void _flushExpiredXPLResponses()
                mea_queue_remove_current(xplRespQueue); // remove current passe au le suivant
                DEBUG_SECTION mea_log_printf("%s (%s) : a response queue was flushed\n", DEBUG_STR, __func__);
             }
-            else
+            else {
                mea_queue_next(xplRespQueue);
+            }
          }
-         else
+         else {
             break;
+         }
       }
    }
    
@@ -419,11 +428,11 @@ void _xplRespQueue_free_queue_elem(void *d)
 
 cJSON *xPLParser(const char* xplmsg, char *xpl_type, char *xpl_schema, char *xpl_source, char *xpl_target)
 {
-   int y, z, c;
-   int w;
-   char xpl_section[35];
-   char xpl_name[17];
-   char xpl_value[129];
+   int y=0, z=0, c=0;
+   int w=0;
+   char xpl_section[35]="";
+   char xpl_name[17]="";
+   char xpl_value[129]="";
 
 #define XPL_IN_SECTION 0
 #define XPL_IN_NAME 1
@@ -449,13 +458,15 @@ cJSON *xPLParser(const char* xplmsg, char *xpl_type, char *xpl_schema, char *xpl
                ++w;
                xpl_section[z]='\0';
                if(s1==0) {
-                  if(xpl_type)
+                  if(xpl_type) {
                      strcpy(xpl_type, xpl_section);
+                  }
                   cJSON_AddItemToObject(msg_json, XPLMSGTYPE_STR_C, cJSON_CreateString(xpl_section));
                }
                else if(s1==1) {
-                  if(xpl_schema)
-                  strcpy(xpl_schema, xpl_section);
+                  if(xpl_schema) {
+                     strcpy(xpl_schema, xpl_section);
+                  }
                   cJSON_AddItemToObject(msg_json, XPLSCHEMA_STR_C, cJSON_CreateString(xpl_section));
                }
                ++s1;
@@ -488,8 +499,9 @@ cJSON *xPLParser(const char* xplmsg, char *xpl_type, char *xpl_schema, char *xpl
                z=0;
                if(s1==1) {
                   if(strcmp(xpl_name, "source") == 0) {
-                     if(xpl_source)
+                     if(xpl_source) {
                         strcpy(xpl_source, xpl_value);
+                     }
                      cJSON_AddItemToObject(msg_json, XPLSOURCE_STR_C, cJSON_CreateString(xpl_value));
                   }
                   else if(strcmp(xpl_name, "target") == 0) {
@@ -520,10 +532,10 @@ cJSON *xPLParser(const char* xplmsg, char *xpl_type, char *xpl_schema, char *xpl
 
 void _rawXPLMessageHandler(char *s, int l)
 {
-   char type[35];
-   char schema[35];
-   char source[35];
-   char target[35];
+   char type[35]="";
+   char schema[35]="";
+   char source[35]="";
+   char target[35]="";
 
    process_update_indicator(_xplServer_monitoring_id, xpl_server_xplin_str, ++xplin_indicator);
 
@@ -533,8 +545,9 @@ void _rawXPLMessageHandler(char *s, int l)
 
       DEBUG_SECTION {
          int fromMe=-1;
-         if(strcmp(source, xpl_my_addr) == 0)
+         if(strcmp(source, xpl_my_addr) == 0) {
             fromMe=0;
+         }
 
          if(strcmp(schema,"watchdog.basic")== 0 && fromMe == 0) {
             mea_log_printf("%s (%s) : watchdog xpl\n", DEBUG_STR, __func__);
@@ -596,8 +609,9 @@ int16_t mea_xPLSendMessage2(char *data, int l_data)
    }
 
    int ret=mea_xPLSendMessage(xpl_sdb, xpl_broadcastAddr, data, l_data);
-   if(ret<0)
+   if(ret<0) {
       process_update_indicator(_xplServer_monitoring_id, xpl_server_senderr_str, ++xplsenderr_indicator);
+   }
    
    return 0;
 }
@@ -605,20 +619,23 @@ int16_t mea_xPLSendMessage2(char *data, int l_data)
 
 void *xPLServer_thread(void *data)
 {
-   int16_t nerr;
+   int16_t nerr=-1;
 
    pthread_cleanup_push( (void *)set_xPLServer_isnt_running, (void *)NULL );
    pthread_cleanup_push( (void *)clean_xPLServer, (void *)NULL);
    
    xPLServer_longjmp_flag = 0;
    
-   if(strlen(xpl_interface)==0)
+   if(strlen(xpl_interface)==0) {
       return NULL;
+   }
 
    // ouverture des communications udp
    xpl_sd=mea_xPLConnectHub(&xpl_port);
-   if(xpl_sd<0)
+   if(xpl_sd<0) {
       return NULL;
+   }
+
    xpl_broadcastAddr=(struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
    if(!xpl_broadcastAddr) {
       close(xpl_sd);
@@ -654,9 +671,9 @@ void *xPLServer_thread(void *data)
    mea_init_timer(&xPLnoMsgReceivedTimer, 30, 1);
    mea_start_timer(&xPLnoMsgReceivedTimer);
 
-   char data[0xFFFF];
-   int l_data;
-   mea_timer_t hbTimer;
+   char data[0xFFFF]="";
+   int l_data=0;
+   mea_timer_t hbTimer=MEA_TIMER_S_INIT;
 
 #ifdef XPL_WD
    mea_init_timer(&hbTimer, xpl_interval*60, 1);
@@ -682,13 +699,14 @@ void *xPLServer_thread(void *data)
       int ret=mea_xPLReadMessage(xpl_sd, 500, data, &l_data, &nerr);
       data[l_data]=0;
       if(ret>=0) {
-         if(l_data>0)
+         if(l_data>0) {
             _rawXPLMessageHandler(data, l_data);
+         }
       }
       else {
          process_update_indicator(_xplServer_monitoring_id, xpl_server_readerr_str, ++xplreaderr_indicator);
          VERBOSE(2) {
-            char err_str[256];
+            char err_str[256]="";
             strerror_r(errno, err_str, sizeof(err_str)-1);
             mea_log_printf("%s (%s) : mea_xPLReadMessage - %s\n", ERROR_STR, __func__,err_str);
          }
@@ -713,16 +731,18 @@ void *xPLServer_thread(void *data)
             compteur=0;
             mea_log_printf("%s (%s) : %s thread is running\n", INFO_STR, __func__, xpl_server_name_str);
          }
-         else
+         else {
             compteur++;
+         }
       }
 
       _flushExpiredXPLResponses();
    }
    while (1);
 
-   if(xPLServer_longjmp_flag > 1)
+   if(xPLServer_longjmp_flag > 1) {
       abort();
+   }
 
    pthread_cleanup_pop(1);
    pthread_cleanup_pop(1);
@@ -750,7 +770,7 @@ pthread_t *xPLServer()
    xplRespQueue=(mea_queue_t *)malloc(sizeof(mea_queue_t));
    if(!xplRespQueue) {
       VERBOSE(1) {
-         char err_str[256];
+         char err_str[256]="";
          strerror_r(errno, err_str, sizeof(err_str)-1);
          mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
@@ -763,7 +783,7 @@ pthread_t *xPLServer()
    _xPLServer_thread_id=(pthread_t *)malloc(sizeof(pthread_t));
    if(!_xPLServer_thread_id) {
       VERBOSE(1) {
-         char err_str[256];
+         char err_str[256]="";
          strerror_r(errno, err_str, sizeof(err_str)-1);
          mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
@@ -848,7 +868,7 @@ int stop_xPLServer(int my_id, void *data,  char *errmsg, int l_errmsg)
 int start_xPLServer(int my_id, void *data, char *errmsg, int l_errmsg)
 {
    struct xplServer_start_stop_params_s *xplServer_params = (struct xplServer_start_stop_params_s *)data;
-   char err_str[256];
+   char err_str[256]="";
    
    if(!set_xpl_address(xplServer_params->params_list)) {
       strcpy(xpl_interface, appParameters_get("INTERFACE", xplServer_params->params_list));

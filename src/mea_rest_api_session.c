@@ -64,11 +64,11 @@ int closeSession(struct mg_connection *conn, char *id)
 
    if(json_id) {
       cJSON_DeleteItemFromObject(sessions, id);
-
       VERBOSE(9) mea_log_printf("%s (%s) : session closed\n",INFO_STR,__func__);
    }
-   else
+   else {
       VERBOSE(0) mea_log_printf("%s (%s) : unknown session\n",WARNING_STR,__func__);
+   }
 
    return 1;
 }
@@ -100,10 +100,11 @@ int openSession(struct mg_connection *conn)
 
                      if(p && p->type==cJSON_String && strcmp(password->valuestring, p->valuestring)==0) {
 
-                        char id[21];
+                        char id[21]="";
 
-                        for(int i=0;i<20;i++)
+                        for(int i=0;i<20;i++) {
                            id[i]='A'+ rand() % ('Z'-'A');
+                        }
                         id[20]=0;
 
                         double _profile=0.0;
@@ -117,7 +118,7 @@ int openSession(struct mg_connection *conn)
                         cJSON_AddItemToObject(idData, PROFILE_STR_C, cJSON_CreateNumber(_profile));
                         cJSON_AddItemToObject(idData, USER_STR_C, cJSON_CreateString(user->valuestring));
                         cJSON_AddItemToObject(sessions, id, idData);
-                        char jsonSessionId[256];
+                        char jsonSessionId[256]="";
                         snprintf(jsonSessionId, sizeof(jsonSessionId), "{\"%s\":\"%s\"}", MEA_SESSIONID_STR_C, id);
                         httpResponse(conn, 200, NULL, jsonSessionId);
                      }

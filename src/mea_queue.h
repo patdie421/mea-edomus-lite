@@ -19,6 +19,7 @@ struct mea_queue_elem
    struct mea_queue_elem *next;
    struct mea_queue_elem *prev;
 };
+#define MEA_QUEUE_ELEM_INIT { .d=NULL, .next=NULL, .prev=NULL }
 
 typedef void (*mea_queue_free_data_f)(void *);
 typedef int (*mea_queue_compare_data_f)(void **, void **);
@@ -36,8 +37,11 @@ typedef struct
    mea_queue_compare_data_f index_order_f;
 #endif
 } mea_queue_t;
-
-
+#ifndef QUEUE_ENABLE_INDEX
+#define MEA_QUEUE_T_INIT { .clone_flag=0, .first=NULL, .last=NULL, .current=NULL, .nb_elem=0 }
+#else
+#define MEA_QUEUE_T_INIT { .clone_flag=0, .first=NULL, .last=NULL, .current=NULL, .nb_elem=0, .index=NULL, .index_status=0, .index_order_f=NULL }
+#endif
 mea_error_t mea_queue_init(mea_queue_t *queue);
 mea_error_t mea_queue_clone(mea_queue_t *n, mea_queue_t *s);
 mea_error_t mea_queue_out_elem(mea_queue_t *queue, void **data);

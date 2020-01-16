@@ -23,7 +23,7 @@ int mea_rest_api_metric(struct mg_connection *conn, int method, char *tokens[], 
    switch(method) {
       case HTTP_GET_ID:
          if(l_tokens==0) {
-            char s[4096];
+            char s[4096]="";
             int ret=managed_processes_processes_to_json(s, sizeof(s), -1);
             if(ret==0) {
                httpResponse(conn, 200, NULL, s);
@@ -44,7 +44,7 @@ int mea_rest_api_metric(struct mg_connection *conn, int method, char *tokens[], 
                }
             }
 
-            char s[4096];
+            char s[4096]="";
             int ret=managed_processes_process_to_json(id, s, sizeof(s));
             if(ret==0) {
                httpResponse(conn, 200, NULL, s);

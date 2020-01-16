@@ -94,8 +94,9 @@ int _sensor_pin_type_i001(int token_type_id, int pin_id)
 
 int _sensor_type_compute_i001(int token_type_id, int token_compute_id)
 {
-   if(token_compute_id==-1)
+   if(token_compute_id==-1) {
       return 1;
+   }
    
    return is_in_assocs_list(type_compute_assocs_i001_sensors, token_type_id, token_compute_id);
 }
@@ -144,8 +145,7 @@ int _valide_sensor_i001(int token_type_id, int pin_id, int token_compute_id, int
          }
       }
    }
-   else
-   {
+   else {
       if(token_algo_id!=-1) {
          *err=4;
          VERBOSE(5) mea_log_printf("%s (%s) : aglo set (%d) but non compute set\n",ERROR_STR,__func__,token_algo_id);
@@ -217,14 +217,14 @@ int16_t interface_type_001_sensors_process_traps2(int16_t numTrap, char *data, i
 
 struct sensor_s *interface_type_001_sensors_valid_and_malloc_sensor(int16_t id_sensor_actuator, char *name, char *parameters)
 {
-   int pin_id;
-   int type_id;
-   int compute_id;
-   int algo_id;
+   int pin_id=-1;
+   int type_id=-1;
+   int compute_id=-1;
+   int algo_id=-1;
    
    parsed_parameters_t *sensor_params=NULL;
-   int nb_sensor_params;
-   int err;
+   int nb_sensor_params=0;
+   int err=-1;
    
    struct sensor_s *sensor=(struct sensor_s *)malloc(sizeof(struct sensor_s));
    if(!sensor) {
@@ -339,7 +339,7 @@ mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i0
   * \return    ERROR en cas d'erreur, NOERROR sinon  */  
 {
    mea_queue_t *sensors_list=i001->sensors_list;
-   struct sensor_s *sensor;
+   struct sensor_s *sensor=NULL;
    int type_id=0;
    uint16_t send_xpl_flag=0;
    int16_t no_type=0;
@@ -359,7 +359,7 @@ mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i0
    for(int i=0; i<sensors_list->nb_elem; i++) {
       mea_queue_current(sensors_list, (void **)&sensor);
       if(!device || mea_strcmplower(device,sensor->name)==0) { // pas de device, on transmettra le statut de tous les capteurs du type demandé (si précisé)
-         char value[20];
+         char value[20]="";
          value[sizeof(value)-1]=0;
          char *unit=NULL;
          if(no_type==1) {  // pas de type demandé, on "calcule" le type du capteur
@@ -443,7 +443,7 @@ mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i0
          }
          
          if(send_xpl_flag) {
-            char str[256];
+            char str[256]="";
             str[sizeof(str)-1]=0;
             cJSON *j = NULL;
             cJSON *msg_json = cJSON_CreateObject();
@@ -487,9 +487,9 @@ mea_error_t interface_type_001_sensors_process_xpl_msg2(interface_type_001_t *i0
 int16_t interface_type_001_sensors_poll_inputs2(interface_type_001_t *i001)
 {
    mea_queue_t *sensors_list=i001->sensors_list;
-   struct sensor_s *sensor;
+   struct sensor_s *sensor=NULL;
 
-   int16_t comio2_err;
+   int16_t comio2_err=-1;
    int unit=0;
 
    mea_queue_first(sensors_list);
@@ -498,10 +498,10 @@ int16_t interface_type_001_sensors_poll_inputs2(interface_type_001_t *i001)
       mea_queue_current(sensors_list, (void **)&sensor);
       if(!mea_test_timer(&(sensor->timer))) {
          if(sensor->arduino_pin_type==ANALOG_ID) {
-            int v;
+            int v=-1;
 
-            unsigned char buffer[8], resp[8];
-            uint16_t l_resp;
+            unsigned char buffer[8]="", resp[8]="";
+            uint16_t l_resp=0;
             buffer[0]=sensor->arduino_pin;
 
             int ret=comio2_call_fn(i001->ad, (uint16_t)sensor->arduino_function, (char *)buffer, 1, &v, resp, &l_resp, &comio2_err);
@@ -526,7 +526,7 @@ int16_t interface_type_001_sensors_poll_inputs2(interface_type_001_t *i001)
             i001->indicators.nbsensorsread++;
             if(sensor->val!=v) {
                int16_t last=sensor->val;
-               float computed_last;
+               float computed_last=0.0;
                
                sensor->val=v;
                if(sensor->compute_fn==NULL) {
@@ -551,7 +551,7 @@ int16_t interface_type_001_sensors_poll_inputs2(interface_type_001_t *i001)
                   VERBOSE(9) mea_log_printf("%s (%s) : raw sensor %s = %d\n", INFO_STR, __func__, sensor->name, sensor->val);
                }
                   
-               char str[256];
+               char str[256]="";
                str[sizeof(str)-1]=0;
 
                cJSON *xplMsgJson = cJSON_CreateObject();

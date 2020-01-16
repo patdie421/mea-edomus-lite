@@ -14,7 +14,7 @@
 
 int writeJson(char *file, cJSON *j)
 {
-   FILE *fp;
+   FILE *fp=NULL;
    int ret=-1;
 
    char *s = cJSON_Print(j);
@@ -41,19 +41,21 @@ int writeJson(char *file, cJSON *j)
 
 cJSON *loadJson_alloc(char *file)
 {
-   FILE *fp;
-   char *data;
+   FILE *fp=NULL;
+   char *data=NULL;
 
    fp = fopen(file,"r");
-   if(!fp)
+   if(!fp) {
       return NULL;
+   }
 
    fseek(fp, 0L, SEEK_END);
    int32_t sz = (uint32_t)ftell(fp);
    if(sz>=0) {
       data=(char *)malloc(sz);
-      if(!data)
+      if(!data) {
          return NULL;
+      }
          
       fseek(fp, 0L, SEEK_SET);
       uint32_t l=(uint32_t)fread(data, sz, 1, fp);

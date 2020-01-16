@@ -126,8 +126,9 @@ mea_error_t display_frame(int ret, unsigned char *resp, uint16_t l_resp)
 {
    DEBUG_SECTION {
       if(!ret) {
-         for(int i=0;i<l_resp;i++)
+         for(int i=0;i<l_resp;i++) {
             fprintf(MEA_STDERR, "%02x-[%c](%03d)\n",resp[i],resp[i],resp[i]);
+         }
          fprintf(MEA_STDERR, "\n");
       }
    }
@@ -138,8 +139,9 @@ mea_error_t display_frame(int ret, unsigned char *resp, uint16_t l_resp)
 mea_error_t print_frame(int ret, unsigned char *resp, uint16_t l_resp)
 {
    DEBUG_SECTION {
-      for(int i=0;i<l_resp;i++)
+      for(int i=0;i<l_resp;i++) {
          fprintf(MEA_STDERR, "[%03x - %c]", resp[i], resp[i]);
+      }
       fprintf(MEA_STDERR, "\n");
    }
    return NOERROR;
@@ -149,8 +151,9 @@ mea_error_t print_frame(int ret, unsigned char *resp, uint16_t l_resp)
 void display_addr(char *a)
 {
    DEBUG_SECTION {
-      for(int i=0;i<4;i++)
+      for(int i=0;i<4;i++) {
          fprintf(MEA_STDERR, "%02x",a[i]);
+      }
    }
 }
 
@@ -198,18 +201,20 @@ int at_set_16bits_reg_from_int(xbee_xd_t *xd, xbee_host_t *host, char at_cmd[2],
    uint16_t l_at;
    int16_t ret;
    
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
    
-   struct xbee_remote_cmd_response_s *map_resp;
+   struct xbee_remote_cmd_response_s *map_resp=NULL;
    
    at[0]=at_cmd[0];at[1]=at_cmd[1];
    
    l_at=add_16bits_to_at_uchar_cmd_from_int(at, reg_val);
    ret=xbee_atCmdSendAndWaitResp(xd, host, at, l_at, resp, &l_resp, nerr);
    
-   if(ret)
+   if(ret) {
       return ERROR;
+   }
    map_resp=(struct xbee_remote_cmd_response_s *)resp;
    
    return (int)map_resp->cmd_status;
@@ -224,26 +229,30 @@ int at_get_local_char_array_reg(xbee_xd_t *xd, unsigned char at_cmd[2], char *re
    uint16_t     l_at;
    int16_t ret;
    
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
 
-   struct xbee_cmd_response_s *map_resp;
+   struct xbee_cmd_response_s *map_resp=NULL;
    
    at[0]=at_cmd[0];at[1]=at_cmd[1];l_at=2;
    
-   int16_t err;
+   int16_t err=-1;
    
    ret=xbee_atCmdSendAndWaitResp(xd,NULL,at,l_at,resp,&l_resp, &err);
-   if(ret<0)
+   if(ret<0) {
       return ERROR;
+   }
    
    map_resp=(struct xbee_cmd_response_s *)resp;
-   if(l_reg_val)
+   if(l_reg_val) {
       *l_reg_val=l_resp-5;
+   }
    
    if(reg_val) {
-      for(int i=0;i<(l_resp-5);i++)
+      for(int i=0;i<(l_resp-5);i++) {
          reg_val[i]=map_resp->at_cmd_data[i];
+      }
    }
    
    return (int)map_resp->cmd_status;
@@ -253,12 +262,14 @@ int at_get_local_char_array_reg(xbee_xd_t *xd, unsigned char at_cmd[2], char *re
 void addr_64_char_array_to_int(char *h, char *l, uint32_t *addr_64_h, uint32_t *addr_64_l)
 {
    *addr_64_h=0;
-   for(int i=0;i<4;i++)
+   for(int i=0;i<4;i++) {
       *addr_64_h=(*addr_64_h) | (int32_t)((unsigned char)h[i])<<((3-i)*8);
+   }
    
    *addr_64_l=0;
-   for(int i=0;i<4;i++)
+   for(int i=0;i<4;i++) {
       *addr_64_l=*addr_64_l | (int32_t)((unsigned char)l[i])<<((3-i)*8);
+   }
 }
 
 
@@ -295,8 +306,9 @@ int get_local_xbee_addr(xbee_xd_t *xd, xbee_host_t *local_xbee)
       VERBOSE(9) mea_log_printf("%s  (%s) : can't get local xbee address (try %d/5)\n", INFO_STR, __func__, i+1);
       sleep(1);
    }
-   if(localAddrFound)
+   if(localAddrFound) {
       addr_64_char_array_to_int(addr_h, addr_l, &addr_64_h, &addr_64_l);
+   }
    else {
       VERBOSE(9) mea_log_printf("%s  (%s) : can't read local xbee address. Device probably not an xbee, check it.\n", INFO_STR, __func__);
       return -1;
@@ -312,7 +324,7 @@ int get_local_xbee_addr(xbee_xd_t *xd, xbee_host_t *local_xbee)
 cJSON *data_from_json_interface(cJSON *jsonInterface)
 {
    cJSON *data=cJSON_CreateObject();
-   uint32_t addr_h, addr_l;
+   uint32_t addr_h=0, addr_l=0;
 
    cJSON_AddNumberToObject(data, INTERFACE_ID_STR_C, cJSON_GetObjectItem(jsonInterface, "id_interface")->valuedouble);
    cJSON_AddNumberToObject(data, INTERFACE_TYPE_ID_STR_C, cJSON_GetObjectItem(jsonInterface, "id_type")->valuedouble);
@@ -330,27 +342,30 @@ cJSON *data_from_json_interface(cJSON *jsonInterface)
 
 int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_s *device_info, void *userValue)
 {
-   char *device;
-   int err;
+   char *device=NULL;
+   int err=-1;
    
    interface_type_002_t *interface=(interface_type_002_t *)userValue;
    
    interface->indicators.xplin++;
    cJSON *j = NULL;
    j = cJSON_GetObjectItem(xplMsgJson, get_token_string_by_id(XPL_DEVICE_ID));
-   if(!j)
+   if(!j) {
       return ERROR;
+   }
    device = j->valuestring;
-   if(!device || device[0]==0)
+   if(!device || device[0]==0) {
       return ERROR;
+   }
    
    parsed_parameters_t *plugin_params=NULL;
    int nb_plugin_params;
        
    plugin_params=alloc_parsed_parameters(device_info->parameters, valid_xbee_plugin_params, &nb_plugin_params, &err, 0);
    if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
-      if(plugin_params)
-          release_parsed_parameters(&plugin_params);
+      if(plugin_params) {
+         release_parsed_parameters(&plugin_params);
+      }
       return ERROR; // si pas de parametre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin pour ce capteur
    }
    
@@ -358,8 +373,9 @@ int16_t _interface_type_002_xPL_callback2(cJSON *xplMsgJson, struct device_info_
    data=device_info_to_json_alloc(device_info);
    cJSON *msg=mea_xplMsgToJson_alloc(xplMsgJson);
    cJSON_AddItemToObject(data, XPLMSG_STR_C, msg);
-   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s)
+   if(plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s) {
       cJSON_AddStringToObject(data, DEVICE_PARAMETERS_STR_C, plugin_params->parameters[PLUGIN_PARAMS_PARAMETERS].value.s);
+   }
    cJSON_AddNumberToObject(data, DEVICE_TYPE_ID_STR_C, (double)device_info->type_id);
    cJSON_AddNumberToObject(data, get_token_string_by_id(ID_XBEE_ID), (double)((long)interface->xd));
    cJSON_AddNumberToObject(data, API_KEY_STR_C, interface->id_interface);
@@ -398,8 +414,9 @@ mea_error_t _inteface_type_002_xbeedata_callback(int id, unsigned char *cmd, uin
    pthread_cleanup_push( (void *)pthread_mutex_unlock, (void *)(&callback_data->callback_lock) );
    pthread_mutex_lock(callback_data->callback_lock);
    mea_queue_in_elem(callback_data->queue, e);
-   if(callback_data->queue->nb_elem>=1)
+   if(callback_data->queue->nb_elem>=1) {
       pthread_cond_broadcast(callback_data->callback_cond);
+   }
    pthread_mutex_unlock(callback_data->callback_lock);
    pthread_cleanup_pop(0);
    
@@ -435,8 +452,9 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
    char devName[256];
    snprintf(devName, sizeof(devName)-1, "%s://%s", callback_commissionning->i002->name, addr);
    cJSON *jsonInterface = getInterfaceByDevName_alloc(devName);
-   if(jsonInterface == NULL)
+   if(jsonInterface == NULL) {
       return ERROR;
+   }
 
    char *parameters=cJSON_GetObjectItem(jsonInterface,PARAMETERS_STR_C)->valuestring;
 
@@ -445,8 +463,9 @@ mea_error_t _interface_type_002_commissionning_callback(int id, unsigned char *c
       
    plugin_params=alloc_parsed_parameters(parameters, valid_xbee_plugin_params, &nb_plugin_params, &err, 0);
    if(!plugin_params || !plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
-      if(plugin_params)
+      if(plugin_params) {
          release_parsed_parameters(&plugin_params);
+      }
       return ERROR;
    }
 
@@ -480,8 +499,9 @@ void *_thread_interface_type_002_xbeedata_cleanup(void *args)
    struct thread_params_s *params=(struct thread_params_s *)args;
 
    mea_log_printf("%s (%s)  : stop.\n", INFO_STR, __func__);
-   if(!params)
+   if(!params) {
       return NULL;
+   }
    
    if(params->e) {
       DBG_FREE(params->e->cmd);
@@ -490,11 +510,13 @@ void *_thread_interface_type_002_xbeedata_cleanup(void *args)
       params->e=NULL;
    }
 
-   if(params->plugin_params)
+   if(params->plugin_params) {
       release_parsed_parameters(&(params->plugin_params));
+   }
    
-   if(params->queue && params->queue->nb_elem>0) // on vide s'il y a quelque chose avant de partir
+   if(params->queue && params->queue->nb_elem>0) { // on vide s'il y a quelque chose avant de partir
       mea_queue_cleanup(params->queue, _iodata_free_queue_elem);
+   }
    
    if(params->queue) {
       DBG_FREE(params->queue);
@@ -514,8 +536,9 @@ mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, st
 {
    cJSON *jsonDevices = cJSON_GetObjectItem(jsonInterface, DEVICES_STR_C);
 
-   if(jsonDevices == NULL)
+   if(jsonDevices == NULL) {
       return -1;
+   }
    cJSON *jsonDevice=jsonDevices->child;
 
    while(jsonDevice) {
@@ -531,8 +554,9 @@ mea_error_t _thread_interface_type_002_xbeedata_devices(cJSON *jsonInterface, st
 
       params->plugin_params=alloc_parsed_parameters(parameters, valid_xbee_plugin_params, &(params->nb_plugin_params), &err, 0);
       if(!params->plugin_params || !params->plugin_params->parameters[PLUGIN_PARAMS_PLUGIN].value.s) {
-         if(params->plugin_params)
+         if(params->plugin_params) {
             release_parsed_parameters(&(params->plugin_params));
+         }
          continue; // si pas de paramètre (=> pas de plugin) ou pas de fonction ... pas la peine d'aller plus loin
       }
                
@@ -588,9 +612,9 @@ void *_thread_interface_type_002_xbeedata(void *args)
    params->i002->thread_is_running=1;
    process_heartbeat(params->i002->monitoring_id);
    
-   data_queue_elem_t *e;
+   data_queue_elem_t *e=NULL;
    xbee_xd_t *xd=params->xd;
-   int ret;
+   int ret=-1;
    
    params->plugin_params=NULL;
    params->nb_plugin_params=0;
@@ -610,8 +634,8 @@ void *_thread_interface_type_002_xbeedata(void *args)
       pthread_mutex_lock(&params->callback_lock);
       
       if(params->queue->nb_elem==0) {
-         struct timeval tv;
-         struct timespec ts;
+         struct timeval tv = {0,0};
+         struct timespec ts = {0,0};
          gettimeofday(&tv, NULL);
          ts.tv_sec = tv.tv_sec + 10; // timeout de 10 secondes
          ts.tv_nsec = 0;
@@ -633,8 +657,8 @@ void *_thread_interface_type_002_xbeedata(void *args)
       pthread_cleanup_pop(0);
       
       if(!ret) {
-         char devName[256];
-         char addr[18];
+         char devName[256]="";
+         char addr[18]="";
          
          params->i002->indicators.xbeedatain++;
          
@@ -677,7 +701,9 @@ _thread_interface_type_002_xbeedata_clean_exit:
    pthread_cleanup_pop(1);
 
    process_async_stop(params->i002->monitoring_id);
-   for(;;) sleep(1);
+   for(;;) {
+      sleep(1);
+   }
   
    return NULL;
 }
@@ -746,8 +772,9 @@ pthread_t *start_interface_type_002_xbeedata_thread(interface_type_002_t *i002, 
       goto clean_exit;
    }
    
-   if(pthread_create (thread, NULL, (void *)function, (void *)params))
+   if(pthread_create (thread, NULL, (void *)function, (void *)params)) {
       goto clean_exit;
+   }
    fprintf(stderr,"INTERFACE_TYPE_002 : %x\n", (unsigned int)*thread);
    pthread_detach(*thread);
 
@@ -783,10 +810,12 @@ xpl2_f get_xPLCallback_interface_type_002(void *ixxx)
 {
    interface_type_002_t *i002 = (interface_type_002_t *)ixxx;
 
-   if(i002 == NULL)
+   if(i002 == NULL) {
       return NULL;
-   else
+   }
+   else {
       return i002->xPL_callback2;
+   }
 }
 
 
@@ -794,10 +823,12 @@ int get_monitoring_id_interface_type_002(void *ixxx)
 {
    interface_type_002_t *i002 = (interface_type_002_t *)ixxx;
 
-   if(i002 == NULL)
+   if(i002 == NULL) {
       return -1;
-   else
+   }
+   else {
       return i002->monitoring_id;
+   }
 }
 
 
@@ -805,8 +836,9 @@ int set_xPLCallback_interface_type_002(void *ixxx, xpl2_f cb)
 {
    interface_type_002_t *i002 = (interface_type_002_t *)ixxx;
 
-   if(i002 == NULL)
+   if(i002 == NULL) {
       return -1;
+   }
    else {
       i002->xPL_callback2 = cb;
       return 0;
@@ -818,8 +850,9 @@ int set_monitoring_id_interface_type_002(void *ixxx, int id)
 {
    interface_type_002_t *i002 = (interface_type_002_t *)ixxx;
 
-   if(i002 == NULL)
+   if(i002 == NULL) {
       return -1;
+   }
    else {
       i002->monitoring_id = id;
       return 0;
@@ -835,9 +868,7 @@ int get_type_interface_type_002()
 
 interface_type_002_t *malloc_and_init2_interface_type_002(int id_driver, cJSON *jsonInterface)
 {
-   interface_type_002_t *i002;
-                  
-   i002=(interface_type_002_t *)malloc(sizeof(interface_type_002_t));
+   interface_type_002_t *i002=(interface_type_002_t *)malloc(sizeof(interface_type_002_t));
    if(!i002) {
       VERBOSE(2) {
          char err_str[256];
@@ -906,16 +937,14 @@ interface_type_002_t *malloc_and_init2_interface_type_002(int id_driver, cJSON *
 
 static uint32_t _indianConvertion(uint32_t val_x86)
 {
-   uint32_t val_xbee;
-   char *val_x86_ptr;
-   char *val_xbee_ptr;
-   
-   val_x86_ptr = (char *)&val_x86;
-   val_xbee_ptr = (char *)&val_xbee;
+   uint32_t val_xbee=0;
+   char *val_x86_ptr = (char *)&val_x86;
+   char *val_xbee_ptr = (char *)&val_xbee;
    
    // conversion little vers big indian
-   for(int16_t i=0,j=3;i<sizeof(uint32_t);i++)
+   for(int16_t i=0,j=3;i<sizeof(uint32_t);i++) {
       val_xbee_ptr[i]=val_x86_ptr[j-i];
+   }
 
    return val_xbee;
 }
@@ -924,12 +953,12 @@ static uint32_t _indianConvertion(uint32_t val_x86)
 int mea_sendAtCmdAndWaitResp_json(interface_type_002_t *i002, cJSON *args, cJSON **res, int16_t *_nerr, char *_err, int l_err)
 //cJSON *mea_sendAtCmdAndWaitResp_json(PyObject *self, PyObject *args)
 {
-   unsigned char at_cmd[256];
-   uint16_t l_at_cmd;
-   unsigned char resp[256];
-   uint16_t l_resp;
-   int16_t ret;
-   cJSON *arg;
+   unsigned char at_cmd[256]="";
+   uint16_t l_at_cmd=0;
+   unsigned char resp[256]="";
+   uint16_t l_resp=0;
+   int16_t ret=-1;
+   cJSON *arg=NULL;
    xbee_host_t *host=NULL;
    xbee_xd_t *xd=i002->xd;
 
@@ -958,7 +987,7 @@ int mea_sendAtCmdAndWaitResp_json(interface_type_002_t *i002, cJSON *args, cJSON
       return -255;
    }
 
-   char *at;
+   char *at=NULL;
    arg=cJSON_GetArrayItem(args, 4);
    if(arg->type==cJSON_String || arg->type==cJSON_ByteArray) {
       at=arg->valuestring;
@@ -978,8 +1007,9 @@ int mea_sendAtCmdAndWaitResp_json(interface_type_002_t *i002, cJSON *args, cJSON
       uint32_t val_xbee=_indianConvertion(val);
       char *val_xbee_ptr=(char *)&val_xbee;
       
-      for(int16_t i=0;i<sizeof(uint32_t);i++)
+      for(int16_t i=0;i<sizeof(uint32_t);i++) {
          at_cmd[2+i]=val_xbee_ptr[i];
+      }
       l_at_cmd=6;
    }
    else if(arg->type==cJSON_String || arg->type==cJSON_ByteArray) {
@@ -992,12 +1022,15 @@ int mea_sendAtCmdAndWaitResp_json(interface_type_002_t *i002, cJSON *args, cJSON
          l=arg->valueint;
       }
       uint16_t i;
-      for(i=0;i<l;i++)
+      for(i=0;i<l;i++) {
          at_cmd[2+i]=at_arg[i];
-      if(i>0)
+      }
+      if(i>0) {
          l_at_cmd=2+i;
-      else
+      }
+      else {
          l_at_cmd=2;
+      }
    }
    else {
       return -255;
@@ -1098,8 +1131,9 @@ static int mea_sendAtCmd_json(interface_type_002_t *i002, cJSON *args)
       uint32_t val_xbee=_indianConvertion(val);
       char *val_xbee_ptr=(char *)&val_xbee;
       
-      for(int16_t i=0;i<sizeof(uint32_t);i++)
+      for(int16_t i=0;i<sizeof(uint32_t);i++) {
          at_cmd[2+i]=val_xbee_ptr[i];
+      }
       l_at_cmd=6;
    }
    else if(arg->type==cJSON_String || arg->type==cJSON_ByteArray) {
@@ -1112,12 +1146,15 @@ static int mea_sendAtCmd_json(interface_type_002_t *i002, cJSON *args)
          l=arg->valueint;
       }
       uint16_t i;
-      for(i=0;i<l;i++)
+      for(i=0;i<l;i++) {
          at_cmd[2+i]=at_arg[i];
-      if(i>0)
+      }
+      if(i>0) {
          l_at_cmd=2+i;
-      else
+      }
+      else {
          l_at_cmd=2;
+      }
    }
    else {
       return -255;
@@ -1133,10 +1170,11 @@ static int mea_sendAtCmd_json(interface_type_002_t *i002, cJSON *args)
          return -254;
       }
    }
-   else
+   else {
       host=NULL;
+   }
    
-   int16_t nerr;
+   int16_t nerr=-1;
    // ret=
    xbee_atCmdSend(xd, host, at_cmd, l_at_cmd, &nerr);
    
@@ -1183,7 +1221,6 @@ int16_t api_interface_type_002_json(void *ixxx, char *cmnd, void *args, int nb_a
    }
    else {
       strncpy(err, "unknown function", l_err);
-
       return -254;
    }
 }
@@ -1209,8 +1246,9 @@ int clean_interface_type_002(interface_type_002_t *i002)
       i002->xPL_callback_data=NULL;
    }
    
-   if(i002->xPL_callback2)
+   if(i002->xPL_callback2) {
       i002->xPL_callback2=NULL;
+   }
    
    if(i002->xd && i002->xd->dataflow_callback_data &&
      (i002->xd->dataflow_callback_data == i002->xd->io_callback_data)) {
@@ -1261,8 +1299,9 @@ int stop_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
  * \return    ERROR ou NOERROR
  **/ 
 {
-   if(!data)
+   if(!data) {
       return -1;
+   }
 
    struct interface_type_002_data_s *start_stop_params=(struct interface_type_002_data_s *)data;
 
@@ -1351,9 +1390,12 @@ int16_t check_status_interface_type_002(interface_type_002_t *i002)
  * \return    ERROR signal émis ou NOERROR sinon
  **/ 
 {
-   if(i002->xd->signal_flag!=0)
+   if(i002->xd->signal_flag!=0) {
       return -1;
-   return 0;
+   }
+   else {
+      return 0;
+   }
 }
 
 
@@ -1364,14 +1406,14 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
  * \return    ERROR ou NOERROR
  **/ 
 {
-   char dev[256];
-   char buff[256];
+   char dev[256]="";
+   char buff[256]="";
    speed_t speed;
 
    int fd=-1;
-   int16_t nerr;
-   int err;
-   int ret;
+   int16_t nerr=-1;
+   int err=-1;
+   int ret=-1;
   
    xbee_xd_t *xd=NULL;
    xbee_host_t *local_xbee=NULL;
@@ -1393,7 +1435,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
       int n=snprintf(dev,sizeof(buff)-1,"/dev/%s",buff);
       if(n<0 || n==(sizeof(buff)-1)) {
 #ifdef _POSIX_SOURCE
-         char *ret;
+         char *ret=NULL;
 #else
          int ret;
 #endif
@@ -1412,7 +1454,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    xd=(xbee_xd_t *)malloc(sizeof(xbee_xd_t));
    if(!xd) {
 #ifdef _POSIX_SOURCE
-      char *ret;
+      char *ret=NULL;
 #else
       int ret;
 #endif
@@ -1426,7 +1468,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    fd=xbee_init(xd, dev, (int)speed);
    if (fd == -1) {
 #ifdef _POSIX_SOURCE
-      char *ret;
+      char *ret=NULL;
 #else
       int ret;
 #endif
@@ -1444,7 +1486,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    local_xbee=(xbee_host_t *)malloc(sizeof(xbee_host_t)); // description de l'xbee directement connecté
    if(!local_xbee) {
 #ifdef _POSIX_SOURCE
-      char *ret;
+      char *ret=NULL;
 #else
       int ret;
 #endif
@@ -1460,8 +1502,9 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
 //   uint32_t addr_64_l;
       
    ret=get_local_xbee_addr(xd, local_xbee);
-   if(ret==-1)
+   if(ret==-1) {
       goto clean_exit;
+   }
 
    start_stop_params->i002->local_xbee=local_xbee;
  
@@ -1492,8 +1535,9 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
       //python_call_function_json_alloc(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
       plugin_call_function_json_alloc(interface_parameters->parameters[PLUGIN_PARAMS_PLUGIN].value.s, "mea_init", data);
 
-      if(interface_parameters)
+      if(interface_parameters) {
          release_parsed_parameters(&interface_parameters);
+      }
       interface_nb_parameters=0;
    }
 
@@ -1514,7 +1558,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    commissionning_callback_params=(struct callback_commissionning_data_s *)malloc(sizeof(struct callback_commissionning_data_s));
    if(!commissionning_callback_params) {
 #ifdef _POSIX_SOURCE
-      char *ret;
+      char *ret=NULL;
 #else
       int ret;
 #endif
@@ -1535,7 +1579,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    xpl_callback_params=(struct callback_xpl_data_s *)malloc(sizeof(struct callback_xpl_data_s));
    if(!xpl_callback_params) {
 #ifdef _POSIX_SOURCE
-      char *ret;
+      char *ret=NULL;
 #else
       int ret;
 #endif
@@ -1568,7 +1612,6 @@ clean_exit:
    if(interface_parameters) {
       release_parsed_parameters(&interface_parameters);
       interface_nb_parameters=0;
-
    }
    
    if(commissionning_callback_params) {
@@ -1587,8 +1630,9 @@ clean_exit:
    }
    
    if(xd) {
-      if(fd>=0)
+      if(fd>=0) {
          xbee_close(xd);
+      }
       xbee_clean_xd(xd);
       DBG_FREE(xd);
       xd=NULL;

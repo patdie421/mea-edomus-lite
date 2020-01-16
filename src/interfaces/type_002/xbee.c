@@ -117,12 +117,13 @@ int   xbee_init(xbee_xd_t *xd, char *dev, int speed)
  * \return    -1 en cas d'erreur, 0 sinon
  */
 {
-   int16_t nerr;
+   int16_t nerr=-1;
 
    memset (xd,0,sizeof(xbee_xd_t));
 
-   if(_xbee_open(xd, dev, speed)<0)
+   if(_xbee_open(xd, dev, speed)<0) {
      return -1;
+   }
      
    // préparation synchro consommateur / producteur
    pthread_cond_init(&xd->sync_cond, NULL);
@@ -187,8 +188,9 @@ uint16_t _xbee_get_frame_data_id(xbee_xd_t *xd)
    ret=xd->frame_id;
    
    xd->frame_id++;
-   if (xd->frame_id>XBEE_MAX_USER_FRAME_ID)
+   if (xd->frame_id>XBEE_MAX_USER_FRAME_ID) {
       xd->frame_id=1;
+   }
    
    pthread_mutex_unlock(&(xd->xd_lock));
    pthread_cleanup_pop(0);
@@ -212,8 +214,9 @@ int _xbee_build_at_cmd(unsigned char *frame, uint8_t id, unsigned char *at_cmd, 
    
    frame[i++]=0x08;
    frame[i++]=id;
-   for(uint16_t j=0;j<l_at_cmd;j++)
+   for(uint16_t j=0;j<l_at_cmd;j++) {
       frame[i++]=at_cmd[j];
+   }
    return i;
 }
 
@@ -235,19 +238,22 @@ int _xbee_build_at_remote_cmd(unsigned char *frame, uint8_t id, xbee_host_t *add
    frame[i++]=0x17;
    frame[i++]=id;
    
-   for(uint16_t j=0;j<4;j++)
+   for(uint16_t j=0;j<4;j++) {
       frame[i++]=addr->addr_64_h[j];
+   }
    
-   for(uint16_t j=0;j<4;j++)
+   for(uint16_t j=0;j<4;j++) {
       frame[i++]=addr->addr_64_l[j];
+   }
    
    frame[i++]=addr->addr_16[0];
    frame[i++]=addr->addr_16[1];
    
    frame[i++]=0x02; // apply change
    
-   for(uint16_t j=0;j<l_at_cmd;j++)
+   for(uint16_t j=0;j<l_at_cmd;j++) {
       frame[i++]=at_cmd[j];
+   }
    
    return i;
 }
@@ -262,8 +268,9 @@ mea_error_t xbee_set_iodata_callback(xbee_xd_t *xd, callback_f f)
  * \return    -1 si xd n'est pas initialisé (ie=NULL) 0 sinon
  */
 {
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
    
    xd->io_callback=f;
    xd->io_callback_data=NULL;
@@ -282,8 +289,9 @@ mea_error_t xbee_set_iodata_callback2(xbee_xd_t *xd, callback_f f, void *data)
  * \return    toujours 0
  */
 {
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
 
    xd->io_callback=f;
    xd->io_callback_data=data;
@@ -300,8 +308,9 @@ mea_error_t xbee_remove_iodata_callback(xbee_xd_t *xd)
  * \return    toujours 0
  */
 {
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
 
    xd->io_callback=NULL;
    xd->io_callback_data=NULL;
@@ -319,8 +328,9 @@ mea_error_t xbee_set_dataflow_callback(xbee_xd_t *xd, callback_f f)
  * \return    toujours 0
  */
 {
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
 
    xd->dataflow_callback=f;
    xd->dataflow_callback_data=NULL;
@@ -339,8 +349,9 @@ mea_error_t xbee_set_dataflow_callback2(xbee_xd_t *xd, callback_f f, void *data)
  * \return    toujours 0
  */
 {
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
 
    xd->dataflow_callback=f;
    xd->dataflow_callback_data=data;
@@ -357,8 +368,9 @@ mea_error_t xbee_remove_dataflow_callback(xbee_xd_t *xd)
  * \return    toujours 0
  */
 {
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
 
    xd->dataflow_callback=NULL;
    xd->dataflow_callback_data=NULL;
@@ -376,8 +388,9 @@ mea_error_t xbee_set_commissionning_callback(xbee_xd_t *xd, callback_f f)
  * \return    toujours 0
  */
 {
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
 
    xd->commissionning_callback=f;
    xd->commissionning_callback_data=NULL;
@@ -396,8 +409,9 @@ mea_error_t xbee_set_commissionning_callback2(xbee_xd_t *xd, callback_f f, void 
  * \return    toujours 0
  */
 {
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
 
    xd->commissionning_callback=f;
    xd->commissionning_callback_data=data;
@@ -414,8 +428,9 @@ mea_error_t xbee_remove_commissionning_callback(xbee_xd_t *xd)
  * \return    toujours 0
  */
 {
-   if(!xd)
+   if(!xd) {
       return ERROR;
+   }
 
    xd->commissionning_callback=NULL;
    xd->commissionning_callback_data=NULL;
@@ -436,8 +451,9 @@ xbee_host_t *_xbee_host_find_host_by_addr64(xbee_hosts_table_t *table, uint32_t 
 {
    uint16_t nb=0;
    
-   if(!table)
+   if(!table) {
       return NULL;
+   }
    
    for(uint16_t i=0;i<table->max_hosts;i++) {
       if(nb<table->nb_hosts && table->hosts_table[i]) {
@@ -446,8 +462,9 @@ xbee_host_t *_xbee_host_find_host_by_addr64(xbee_hosts_table_t *table, uint32_t 
          }
          nb++;
       }
-      else
+      else {
          break;
+      }
    }
    
    return NULL;
@@ -465,8 +482,9 @@ xbee_host_t *_xbee_host_find_host_by_name(xbee_hosts_table_t *table, char *name)
 {
    uint16_t nb=0;
    
-   if(!table)
+   if(!table) {
       return NULL;
+   }
 
    for(uint16_t i=0;i<table->max_hosts;i++) {
       if(nb<table->nb_hosts && table->hosts_table[i]) {
@@ -475,8 +493,9 @@ xbee_host_t *_xbee_host_find_host_by_name(xbee_hosts_table_t *table, char *name)
          }
          nb++;
       }
-      else
+      else {
          break;
+      }
    }
    
    return NULL;
@@ -563,8 +582,9 @@ mea_error_t xbee_get_host_by_name(xbee_xd_t *xd, xbee_host_t *host, char *name, 
    xbee_host_t *h;
    
    h=_xbee_host_find_host_by_name(xd->hosts, name);
-   if(h)
+   if(h) {
       memcpy(host,h,sizeof(xbee_host_t));
+   }
    else {
       DEBUG_SECTION mea_log_printf("%s (%s) : %s not found in xbee hosts table.\n",DEBUG_STR,__func__,name);
       
@@ -591,8 +611,9 @@ mea_error_t xbee_get_host_by_addr_64(xbee_xd_t *xd, xbee_host_t *host, uint32_t 
    xbee_host_t *h;
    
    h=_xbee_host_find_host_by_addr64(xd->hosts, addr_64_h, addr_64_l);
-   if(h)
+   if(h) {
       memcpy(host,h,sizeof(xbee_host_t));
+   }
    else {
       _xbee_host_init_addr_64(host, addr_64_h, addr_64_l);
       
@@ -655,8 +676,9 @@ void _hosts_table_delete(xbee_hosts_table_t *table)
          free(table->hosts_table[i]);
          table->hosts_table[i]=NULL;
       }
-      else
+      else {
          break;
+      }
       nb++;
    }
    
@@ -678,8 +700,9 @@ mea_error_t hosts_table_display(xbee_hosts_table_t *table)
    DEBUG_SECTION {
       uint16_t nb=0;
       
-      if(!table)
+      if(!table) {
          return ERROR;
+      }
 
       for(uint16_t i=0;i<table->max_hosts;i++) {
          if(nb<table->nb_hosts && table->hosts_table[i]) {
@@ -690,8 +713,9 @@ mea_error_t hosts_table_display(xbee_hosts_table_t *table)
                    (long unsigned int)table->hosts_table[i]->l_addr_16);
             nb++;
          }
-         else
+         else {
             break;
+         }
       }
    }
    return NOERROR;
@@ -757,24 +781,28 @@ mea_error_t _xbee_update_hosts_tables(xbee_hosts_table_t *table, char *addr_64_h
    int16_t nerr;
    xbee_host_t *host;
    
-   if(!table)
+   if(!table) {
       return ERROR;
+   }
    
    l_addr_16=addr_16[0]*256+addr_16[1];
    
    l_addr_64_l=0;
    l_addr_64_h=0;
-   for(int i=0;i<4;i++)
+   for(int i=0;i<4;i++) {
       l_addr_64_h=l_addr_64_h+((unsigned char)addr_64_h[i] << (3-i)*8);
+   }
    
-   for(int i=0;i<4;i++)
+   for(int i=0;i<4;i++) {
       l_addr_64_l=l_addr_64_l+((unsigned char)addr_64_l[i] << (3-i)*8);
+   }
    
    host=_xbee_host_find_host_by_addr64(table, l_addr_64_h, l_addr_64_l);
    if(!host) {
       host=_xbee_add_new_to_hosts_table_with_addr64(table, l_addr_64_h, l_addr_64_l, &nerr);
-      if(!host)
+      if(!host) {
          return ERROR;
+      }
    }
    
    host->l_addr_16=l_addr_16;
@@ -833,8 +861,7 @@ int16_t xbee_atCmdSend(xbee_xd_t *xd,
    }
    
    if(pthread_self()==xd->read_thread) { // risque de dead lock si appeler par un call back => on interdit
-      if(xbee_err)
-      {
+      if(xbee_err) {
          *xbee_err=XBEE_ERR_IN_CALLBACK;
          return -1;
       }
@@ -842,17 +869,20 @@ int16_t xbee_atCmdSend(xbee_xd_t *xd,
    
    // construction de la trame xbee a partir de la la destination, la zone data transmise et d'un identifiant de trame "unique"
    unsigned int frame_data_id=0; // 0 = pas de réponse attendues
-   if(destination)
+   if(destination) {
       l_xbee_frame=_xbee_build_at_remote_cmd(xbee_frame, frame_data_id, destination, frame_data, l_frame_data);
-   else
+   }
+   else {
       l_xbee_frame=_xbee_build_at_cmd(xbee_frame, frame_data_id, frame_data, l_frame_data);
+   }
    
    if(_xbee_write_cmd(xd->fd, xbee_frame, l_xbee_frame, &nerr)==0) { // envoie de l'ordre
       return 0;
    }
 
-   if(xbee_err)
+   if(xbee_err) {
       *xbee_err=nerr;
+   }
    return 1;
 }
 
@@ -876,10 +906,10 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
  * \return    0 = OK, -1 = KO, voir nerr pour le type d'erreur.
  */
 {
-   unsigned char xbee_frame[XBEE_MAX_FRAME_SIZE];
-   uint16_t l_xbee_frame;
-   xbee_queue_elem_t *e;
-   int16_t nerr;
+   unsigned char xbee_frame[XBEE_MAX_FRAME_SIZE]="";
+   uint16_t l_xbee_frame=0;
+   xbee_queue_elem_t *e=NULL;
+   int16_t nerr=-1;
    int16_t return_val=1;
 
    if(xd->signal_flag<0) {
@@ -898,10 +928,12 @@ int16_t xbee_atCmdSendAndWaitResp(xbee_xd_t *xd,
    
    // construction de la trame xbee a partir de la la destination, la zone data transmise et d'un identifiant de trame "unique"
    unsigned int frame_data_id=_xbee_get_frame_data_id(xd);
-   if(destination)
+   if(destination) {
       l_xbee_frame=_xbee_build_at_remote_cmd(xbee_frame, frame_data_id, destination, frame_data, l_frame_data);
-   else
+   }
+   else {
       l_xbee_frame=_xbee_build_at_cmd(xbee_frame, frame_data_id, frame_data, l_frame_data);
+   }
 
    if(_xbee_write_cmd(xd->fd, xbee_frame, l_xbee_frame, &nerr)==0) {  // envoie de l'ordre
       int16_t ret;
@@ -987,8 +1019,9 @@ next_or_return:
          pthread_mutex_unlock(&(xd->sync_lock));
          pthread_cleanup_pop(0);
          
-         if(return_val ==0 || return_val==-1)
+         if(return_val ==0 || return_val==-1) {
             return return_val;
+         }
       }
       while (--boucle);
    }
@@ -1071,11 +1104,13 @@ int _xbee_build_frame(unsigned char *frame, unsigned char *cmd, uint16_t l_cmd)
    frame[i++]=0x7E;
    frame[i++]=l_cmd/256;
    frame[i++]=l_cmd%256;
-   for(uint16_t j=0;j<l_cmd;j++)
+   for(uint16_t j=0;j<l_cmd;j++) {
       frame[i++]=cmd[j];
+   }
    
-   for(uint16_t j=3;j<(3+l_cmd);j++)
+   for(uint16_t j=3;j<(3+l_cmd);j++) {
       checksum=checksum+frame[j];
+   }
    
    frame[i++]=0xFF - (checksum & 0xFF);
    
@@ -1108,10 +1143,12 @@ int _xbee_read_cmd(int fd, char unsigned *frame, uint16_t *l_frame, int16_t *ner
 
       ret = select(fd+1, &input_set, NULL, NULL, &timeout);
       if (ret <= 0) {
-         if(ret == 0)
+         if(ret == 0) {
             *nerr=XBEE_ERR_TIMEOUT;
-         else
+         }
+         else {
             *nerr=XBEE_ERR_SELECT;
+         }
          goto on_error_exit_xbee_read;
       }
       
@@ -1185,8 +1222,7 @@ int _xbee_write_cmd(int fd, unsigned char *cmd, uint16_t l_cmd, int16_t *nerr)
    *nerr=0;
    
    frame=malloc(l_cmd+4);
-   if(!frame)
-   {
+   if(!frame) {
       *nerr=XBEE_ERR_SYS;
       return -1;
    }
@@ -1198,8 +1234,7 @@ int _xbee_write_cmd(int fd, unsigned char *cmd, uint16_t l_cmd, int16_t *nerr)
    free(frame);
    frame=NULL;
    
-   if(ret<0)
-   {
+   if(ret<0) {
       *nerr=XBEE_ERR_SYS;
       return -1;
    }
@@ -1212,8 +1247,9 @@ int _xbee_network_discovery_resp(xbee_xd_t *xd, char *data, uint16_t l_data)
    
    struct xbee_map_nd_resp_data *map;
    
-   if(l_data==0)
+   if(l_data==0) {
       return 0; // fin de transmission OK, on traite pas
+   }
    
    map=(struct xbee_map_nd_resp_data *)data; // -1 pour corriger l'alignement			
    
@@ -1243,11 +1279,13 @@ void _xbee_flush_old_responses_queue(xbee_xd_t *xd)
                _xbee_free_queue_elem(e);
                mea_queue_remove_current(xd->queue); // remove current passe sur le suivant
             }
-            else
+            else {
                mea_queue_next(xd->queue);
+            }
          }
-         else
+         else {
             break;
+         }
       }
    }
    
@@ -1260,8 +1298,9 @@ int16_t _xbee_add_response_to_queue(xbee_xd_t *xd, unsigned char *cmd, uint16_t 
 {
    xbee_queue_elem_t *e;
    
-   if(!xd)
+   if(!xd) {
       return -1;
+   }
 
    e=malloc(sizeof(xbee_queue_elem_t));
    if(e) {
@@ -1275,8 +1314,9 @@ int16_t _xbee_add_response_to_queue(xbee_xd_t *xd, unsigned char *cmd, uint16_t 
 
       mea_queue_in_elem(xd->queue, e);
       
-      if(xd->queue->nb_elem>=1)
+      if(xd->queue->nb_elem>=1) {
          pthread_cond_broadcast(&xd->sync_cond);
+      }
       
       pthread_mutex_unlock(&xd->sync_lock);
       pthread_cleanup_pop(0);
@@ -1288,13 +1328,14 @@ int16_t _xbee_add_response_to_queue(xbee_xd_t *xd, unsigned char *cmd, uint16_t 
 
 int _xbee_reopen(xbee_xd_t *xd)
 {
-   int fd; /* File descriptor for the port */
+   int fd=0; /* File descriptor for the port */
    uint8_t flag=0;
-   char dev[255];
+   char dev[255]="";
    int speed=0;
    
-   if(!xd)
+   if(!xd) {
       return -1;
+   }
 
    strncpy(dev, xd->serial_dev_name, sizeof(dev));
    speed=xd->speed;
@@ -1347,12 +1388,12 @@ void *_xbee_thread(void *args)
  * \param     args   pointeur sur la structure contenant les informations nécessaires au fonctionnement du thread. Args est ici simplement un pointeur sur une structure du type xbee_xd_t
  */
 {
-   unsigned char cmd[255];
-   uint16_t l_cmd;
+   unsigned char cmd[255]="";
+   uint16_t l_cmd=0;
    
    uint8_t status=0;
-   int16_t nerr;
-   int16_t ret;
+   int16_t nerr=-1;
+   int16_t ret=-1;
    
    xbee_xd_t *xd=(xbee_xd_t *)args;
    
@@ -1370,8 +1411,9 @@ void *_xbee_thread(void *args)
                if(mcmd->frame_id>XBEE_MAX_USER_FRAME_ID) { // la requete est interne elle ne sera pas retransmise{ // la requete est interne elle ne sera pas retransmise
                   switch (mcmd->frame_id) {
                      case XBEE_ND_FRAME_ID:
-                        if(status==0)
+                        if(status==0) {
                            _xbee_network_discovery_resp(xd, (char *)mcmd->at_cmd_data,l_cmd-5);
+                        }
                         break;
                      default:
                         break;
@@ -1406,9 +1448,9 @@ void *_xbee_thread(void *args)
             {
                struct xbee_map_io_data_s *mcmd=(struct xbee_map_io_data_s *)cmd;
                
-               if(xd->io_callback)
+               if(xd->io_callback) {
                   xd->io_callback(0,cmd,l_cmd, xd->io_callback_data, (char *)mcmd->addr_64_h, (char *)mcmd->addr_64_l);
-               
+               }
                ret=_xbee_update_hosts_tables(xd->hosts,(char *)mcmd->addr_64_h,(char *)mcmd->addr_64_l,(char *)mcmd->addr_16,NULL);
                break;
             }
@@ -1417,9 +1459,9 @@ void *_xbee_thread(void *args)
             {
                struct xbee_node_identification_response_s *mcmd=(struct xbee_node_identification_response_s *)cmd;
                
-               if(xd->commissionning_callback)
+               if(xd->commissionning_callback) {
                   xd->commissionning_callback(0,cmd,l_cmd, xd->commissionning_callback_data, (char *)mcmd->remote_addr_64_h, (char *)mcmd->remote_addr_64_l);
-               
+               }
                ret=_xbee_update_hosts_tables(xd->hosts,(char *)mcmd->remote_addr_64_h, (char *)mcmd->remote_addr_64_l, (char *)mcmd->remote_addr_16,(char *)(mcmd->nd_data));
                break;
             }
@@ -1430,9 +1472,9 @@ void *_xbee_thread(void *args)
                
 //               DEBUG_SECTION mea_log_printf("_xbee_thread : frame recept : cmd=%s, size=%d\n",cmd,l_cmd);
 
-               if(xd->dataflow_callback)
+               if(xd->dataflow_callback) {
                      xd->dataflow_callback(0,cmd,l_cmd, xd->dataflow_callback_data, (char *)mcmd->addr_64_h, (char *)mcmd->addr_64_l);
-                  
+               }
                ret=_xbee_update_hosts_tables(xd->hosts,(char *)mcmd->addr_64_h,(char *)mcmd->addr_64_l,(char *)mcmd->addr_16,NULL);
                break;
             }
@@ -1481,4 +1523,3 @@ void *_xbee_thread(void *args)
    
 //   pthread_exit(NULL);
 }
-

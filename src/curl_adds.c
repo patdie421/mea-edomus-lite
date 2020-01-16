@@ -31,7 +31,7 @@ int curl_result_release(struct curl_result_s *cr)
 
 size_t curl_result_get(void *ptr, size_t size, size_t nmemb, struct curl_result_s *cr)
 {
-   char *tmp;
+   char *tmp=NULL;
    size_t new_len = cr->l + size*nmemb;
 
    tmp = realloc(cr->p, new_len+1);
@@ -40,8 +40,9 @@ size_t curl_result_get(void *ptr, size_t size, size_t nmemb, struct curl_result_
       DEBUG_SECTION mea_log_printf("%s (%s) : realloc() failed\n", DEBUG_STR, __func__);
       return -1;
    }
-   else
+   else {
       cr->p=tmp;
+   }
 
   memcpy(cr->p+cr->l, ptr, size*nmemb);
   cr->p[new_len] = '\0';

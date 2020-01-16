@@ -56,14 +56,15 @@ int mea_rest_api_exit()
 
 int mea_rest_api(struct mg_connection *conn, int method, char *tokens[], int l_tokens)
 {
-   if(sessions==NULL)
+   if(sessions==NULL) {
       mea_rest_api_init();
+   }
 
    purgeSessions();
 
    int ressource=get_token_id_by_string((char *)tokens[0]);
 
-   char **_tokens;
+   char **_tokens=NULL;
    int _l_tokens=l_tokens-1;
 
    if(_l_tokens<=0) {

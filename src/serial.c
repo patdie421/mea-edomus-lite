@@ -22,10 +22,10 @@
 int serial_open(char *dev, int speed)
 {
    struct termios options, options_old;
-   int fd;
+   int fd=-1;
 
    // ouverture du port
-   int flags;
+   int flags=-1;
 
    flags=O_RDWR | O_NOCTTY | O_NDELAY | O_EXCL;
 #ifdef O_CLOEXEC
@@ -120,13 +120,13 @@ int32_t get_speed_from_speed_t(speed_t speed)
 int16_t get_dev_and_speed(char *device, char *dev, int16_t dev_l, speed_t *speed)
 {
    *speed=0;
-   char _dev[256];
-   char reste[256];
-   char vitesse[256];
+   char _dev[256]="";
+   char reste[256]="";
+   char vitesse[256]="";
 
-   char *_dev_ptr;
-   char *reste_ptr;
-   char *vitesse_ptr;
+   char *_dev_ptr=NULL;
+   char *reste_ptr=NULL;
+   char *vitesse_ptr=NULL;
    char *end=NULL;
 
    int16_t n=sscanf(device,"SERIAL://%40[^:]%40[^/r/n]",_dev,reste);
@@ -139,7 +139,7 @@ int16_t get_dev_and_speed(char *device, char *dev, int16_t dev_l, speed_t *speed
       *speed=B9600;
    }
    else {
-      uint32_t v;
+      uint32_t v=0;
 
       reste_ptr=mea_strtrim(reste);
       n=sscanf(reste_ptr,":%40[^/n/r]",vitesse);
@@ -154,8 +154,8 @@ int16_t get_dev_and_speed(char *device, char *dev, int16_t dev_l, speed_t *speed
       }
 
       *speed=0;
-      int i;
-      for(i=0;speeds[i][0];i++) {
+      int i=0;
+      for(;speeds[i][0];i++) {
          if(speeds[i][0]==v) {
             *speed=speeds[i][1];
             break;

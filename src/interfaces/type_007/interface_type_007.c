@@ -303,7 +303,7 @@ static int interface_type_007_data_to_plugin(interface_type_007_t *i007)
 }
 
 
-int haveFrameStartStr(interface_type_007_t *i007)
+static int haveFrameStartStr(interface_type_007_t *i007)
 {
    if(!i007->fstartstr || !i007->fstartstr[0]) {
       return -1;
@@ -319,7 +319,7 @@ int haveFrameStartStr(interface_type_007_t *i007)
 }
 
 
-int haveFrameEndStr(interface_type_007_t *i007)
+static int haveFrameEndStr(interface_type_007_t *i007)
 {
    if(!i007->fendstr || !i007->fendstr[0]) {
       return -1;
@@ -997,6 +997,8 @@ void *_thread_interface_type_007(void *args)
 _thread_interface_type_007_clean_exit:   
    pthread_cleanup_pop(1);
    pthread_cleanup_pop(1);
+   
+   return NULL;
 }
 
 

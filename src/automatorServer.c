@@ -58,8 +58,8 @@ int _automatorServer_thread_is_running=0;
 int _automatorServer_monitoring_id=-1;
 
 mea_queue_t *automator_msg_queue;
-pthread_cond_t automator_msg_queue_cond;
-pthread_mutex_t automator_msg_queue_lock;
+pthread_cond_t automator_msg_queue_cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t automator_msg_queue_lock = PTHREAD_MUTEX_INITIALIZER;
 
 
 void set_automatorServer_isnt_running(void *data)
@@ -182,9 +182,9 @@ automatorServer_add_msg_clean_exit:
 
 void *_automator_thread(void *data)
 {
-   int ret;
+   int ret=0;
    
-   automator_msg_t *e;
+   automator_msg_t *e=NULL;
    
    pthread_cleanup_push( (void *)set_automatorServer_isnt_running, (void *)NULL );
    _automatorServer_thread_is_running=1;
@@ -193,14 +193,14 @@ void *_automator_thread(void *data)
    automator_xplin_indicator=0;
    automator_xplout_indicator=0;
 
-   mea_timer_t indicator_timer;
+   mea_timer_t indicator_timer=MEA_TIMER_S_INIT;
    mea_init_timer(&indicator_timer, 5, 1);
    mea_start_timer(&indicator_timer);
 
    automator_init(rules_file);
    int16_t errcntr = 0;
    int err_indicator = 0;
-   int16_t timeout;
+   int16_t timeout = 0;
   
    while(1) {
       ret=0;
@@ -216,8 +216,8 @@ void *_automator_thread(void *data)
    
       timeout=0;
       if(automator_msg_queue && automator_msg_queue->nb_elem==0) {
-         struct timeval tv;
-         struct timespec ts;
+         struct timeval tv={0,0};
+         struct timespec ts={0,0};
          gettimeofday(&tv, NULL);
 
          long ns_timeout=1000 * 1000 * 250; // 250 ms en nanoseconde
@@ -370,8 +370,8 @@ pthread_t *automatorServer()
       return NULL;
    }
    mea_queue_init(automator_msg_queue);
-   pthread_mutex_init(&automator_msg_queue_lock, NULL);
-   pthread_cond_init(&automator_msg_queue_cond, NULL);
+//   pthread_mutex_init(&automator_msg_queue_lock, NULL);
+//   pthread_cond_init(&automator_msg_queue_cond, NULL);
  
    automator_thread=(pthread_t *)malloc(sizeof(pthread_t));
    if(!automator_thread) {
@@ -467,7 +467,7 @@ int start_automatorServer(int my_id, void *data, char *errmsg, int l_errmsg)
 {
    struct automatorServer_start_stop_params_s *automatorServer_start_stop_params = (struct automatorServer_start_stop_params_s *)data;
 
-   char err_str[80], notify_str[256];
+   char err_str[256]="", notify_str[256]="";
 
    if(appParameters_get("RULESFILE", automatorServer_start_stop_params->params_list)) {
       setAutomatorRulesFile(appParameters_get("RULESFILE", automatorServer_start_stop_params->params_list));

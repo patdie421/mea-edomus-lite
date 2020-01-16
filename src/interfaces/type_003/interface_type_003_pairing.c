@@ -61,10 +61,12 @@ int16_t enocean_teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, ui
         break;
       case 2:
         requestStr = "Teach-in or deletion of teach-in, not specified";
-        if(teach==0)
+        if(teach==0) {
            resp_request = 0b01;
-        else
+         }
+        else {
            resp_request = 0b10;
+         }
         break;
       case 3:
         requestStr = "Not used";
@@ -156,10 +158,12 @@ int16_t enocean_teachinout_reversed(enocean_ed_t *ed, int16_t addr_dec, uint8_t 
         break;
       case 2:
         requestStr = "Teach-in or deletion of teach-in, not specified";
-        if(teach==0)
+        if(teach==0) {
            resp_request = 0b01;
-        else
+         }
+        else {
            resp_request = 0b10;
+         }
         break;
       case 3:
         requestStr = "Not used";
@@ -348,8 +352,9 @@ int enocean_pairing(interface_type_003_t *i003, enocean_data_queue_elem_t *e, ui
    }
    else {  // quand on ne sais pas analyser le packet, on le dump
       for(int i=0; i<l_data; i++) {
-         if(i && (i % 10) == 0)
+         if(i && (i % 10) == 0) {
             fprintf(MEA_STDERR, "\n");
+         }
          mea_log_printf("0x%02x ", data[i]);
       }
       fprintf(MEA_STDERR, "\n");
@@ -379,8 +384,9 @@ cJSON *enocean_pairing_start(void *context, void *parameters) /* TO TEST */
    int16_t nerr=0;
    cJSON *p=NULL;
 
-   if(parameters)
+   if(parameters) {
       p=(cJSON *)parameters;
+   }
 
    enocean_sa_learning_onoff(i003->ed, 1, &nerr);
    
@@ -397,8 +403,9 @@ cJSON *enocean_pairing_end(void *context, void *parameters) /* TO TEST */
    int16_t nerr=0;
    cJSON *p=NULL;
 
-   if(parameters)
+   if(parameters) {
       p=(cJSON *)parameters;
+   }
 
    enocean_sa_learning_onoff(i003->ed, 0, &nerr);
 

@@ -62,9 +62,9 @@ void interface_type_001_free_counters_queue_elem(void *d)
 
 int16_t interface_type_001_counters_process_traps2(int16_t numTrap, char *buff, int16_t l_buff, void * args)
  {
-   double t_old;
-   struct timeval tv;
-   struct electricity_counter_s *counter;
+   double t_old=0.0;
+   struct timeval tv={0,0};
+   struct electricity_counter_s *counter=NULL;
    counter=(struct electricity_counter_s *)args;
 
    *(counter->nbtrap)=*(counter->nbtrap)+1;
@@ -85,8 +85,8 @@ int16_t interface_type_001_counters_process_traps2(int16_t numTrap, char *buff, 
       counter->power=3600/(counter->t-t_old);
       mea_start_timer(&(counter->trap_timer)); // réinitialisation du timer à chaque trap
 
-      char value[20];
-      char str[256];
+      char value[20]="";
+      char str[256]="";
       cJSON *xplMsgJson = cJSON_CreateObject();
       cJSON_AddItemToObject(xplMsgJson, XPLMSGTYPE_STR_C, cJSON_CreateString(XPL_TRIG_STR_C));
       snprintf(str, sizeof(str)-1, "%s.%s", get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
@@ -134,19 +134,21 @@ struct electricity_counter_s *interface_type_001_sensors_valid_and_malloc_counte
    }
    
    // récupération des paramètres et contrôle de validité
-   int nb_counter_params;
-   int err;
+   int nb_counter_params=-1;
+   int err=-1;
    
    int16_t num_counter=-1;
    counter_params=alloc_parsed_parameters(parameters, valid_counter_params, &nb_counter_params, &err,1);
    if(counter_params) {
       // VERBOSE(9) display_parsed_parameters(counter_params, nb_counter_params);
       num_counter=counter_params->parameters[COUNTER_PARAMS_COUNTER].value.i;
-      if(num_counter<0 || num_counter>1)
+      if(num_counter<0 || num_counter>1) {
          goto valid_and_malloc_counter_clean_exit;
+      }
       
-      for(int16_t i=0;i<4;i++)
+      for(int16_t i=0;i<4;i++) {
          counter->sensor_mem_addr[i]=counters_mem[num_counter][i];
+      }
       counter->trap=counters_trap[num_counter];
       
       if(counter_params->parameters[COUNTER_PARAMS_POLLING_PERIODE].value.i>0) {
@@ -195,7 +197,7 @@ valid_and_malloc_counter_clean_exit:
 
 void counter_to_xpl2(interface_type_001_t *i001, struct electricity_counter_s *counter)
 {
-   char str[256];
+   char str[256]="";
    str[sizeof(str)-1]=0;
 
    cJSON *xplMsgJson = cJSON_CreateObject();
@@ -220,16 +222,17 @@ int16_t counter_read(interface_type_001_t *i001, struct electricity_counter_s *c
 {
    uint32_t c=0;
 
-   char buffer[4];
+   char buffer[4]="";
 
-   char resp[5];
-   uint16_t l_resp;
-   int16_t comio2_err;
+   char resp[5]="";
+   uint16_t l_resp=0;
+   int16_t comio2_err=-1;
    int ret=0;
 
    int retry = 0;
-   for(int i=0;i<4;i++)
+   for(int i=0;i<4;i++) {
       buffer[i]=(char)counter->sensor_mem_addr[i];
+   }
    do {
       ret=comio2_cmdSendAndWaitResp(i001->ad, COMIO2_CMD_READMEMORY, buffer, 4, resp, &l_resp, &comio2_err);
       if(ret==0) {
@@ -270,8 +273,8 @@ int16_t counter_read(interface_type_001_t *i001, struct electricity_counter_s *c
 mea_error_t interface_type_001_counters_process_xpl_msg2(interface_type_001_t *i001, cJSON *xplMsgJson, char *device, char *type)
 {
    mea_queue_t *counters_list=i001->counters_list;
-   struct electricity_counter_s *counter;
-   int type_id;
+   struct electricity_counter_s *counter=NULL;
+   int type_id=-1;
 
    (i001->indicators.nbcountersxplrecv)++;
    if(type) {
@@ -287,9 +290,9 @@ mea_error_t interface_type_001_counters_process_xpl_msg2(interface_type_001_t *i
       mea_queue_current(counters_list, (void **)&counter);
 
       if(!device || mea_strcmplower(device,counter->name)==0) {
-         char value[20];
+         char value[20]="";
          value[sizeof(value)-1]=0;
-         char *unit;
+         char *unit=NULL;
          
          if(type_id==XPL_ENERGY_ID) {
             snprintf(value, sizeof(value)-1, "%d", counter->kwh_counter);
@@ -299,10 +302,11 @@ mea_error_t interface_type_001_counters_process_xpl_msg2(interface_type_001_t *i
             snprintf(value, sizeof(value)-1, "%f", counter->power);
             unit="W";
          }
-         else
+         else {
             break;
+         }
         
-         char str[256]; 
+         char str[256]="";
          cJSON *j = NULL;
          cJSON *msg_json = cJSON_CreateObject();
          
@@ -334,7 +338,7 @@ mea_error_t interface_type_001_counters_process_xpl_msg2(interface_type_001_t *i
 int16_t interface_type_001_counters_poll_inputs2(interface_type_001_t *i001)
 {
    mea_queue_t *counters_list=i001->counters_list;
-   struct electricity_counter_s *counter;
+   struct electricity_counter_s *counter=NULL;
 
    mea_queue_first(counters_list);
    for(int16_t i=0; i<counters_list->nb_elem; i++) {
@@ -344,7 +348,7 @@ int16_t interface_type_001_counters_poll_inputs2(interface_type_001_t *i001)
       pthread_mutex_lock(&(counter->lock));
       
       if(!mea_test_timer(&(counter->trap_timer))) {  // traitement delai trop long entre 2 traps.
-         struct timeval tv;
+         struct timeval tv = {0,0};
 
          gettimeofday(&tv, NULL);
          
@@ -353,7 +357,7 @@ int16_t interface_type_001_counters_poll_inputs2(interface_type_001_t *i001)
          counter->power=0;
 
          // envoyer un message xpl 
-         char str[256];
+         char str[256]="";
          cJSON *xplMsgJson = cJSON_CreateObject();
          cJSON_AddItemToObject(xplMsgJson, XPLMSGTYPE_STR_C, cJSON_CreateString(XPL_TRIG_STR_C));
          snprintf(str, sizeof(str)-1, "%s.%s", get_token_string_by_id(XPL_SENSOR_ID), get_token_string_by_id(XPL_BASIC_ID));
