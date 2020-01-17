@@ -22,7 +22,7 @@
 #include "mea_python_json_utils.h"
 #include "interfacesServer.h"
 
-#include "mea_internal_api.h"
+#include "mea_python_api.h"
 
 
 PyObject *mea_memory=NULL;

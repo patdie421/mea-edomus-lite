@@ -28,11 +28,8 @@
 
 #include "pythonPluginServer.h"
 #include "mea_python_json_utils.h"
+#include "mea_python_api.h"
 #include "processManager.h"
-
-// #define free(x) free(x);
-
-#include "mea_internal_api.h"
 
 char *pythonPlugin_server_name_str="PYTHONPLUGINSERVER";
 
@@ -47,7 +44,7 @@ mea_queue_t *pythonPluginCmd_queue;
 pthread_cond_t pythonPluginCmd_queue_cond;
 pthread_mutex_t pythonPluginCmd_queue_lock;
 
-PyObject *known_modules = NULL;
+PyObject *known_modules;
 
 long nbpycall_indicator = 0;
 long nbpycallerr_indicator = 0;
@@ -55,7 +52,7 @@ long nbpycallerr_indicator = 0;
 
 static unsigned long _millis()
 {
-  struct timeval tv = {0,0};
+  struct timeval tv;
   gettimeofday(&tv,NULL);
 
   return 1000 * tv.tv_sec + tv.tv_usec/1000;
@@ -160,8 +157,8 @@ cJSON *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int
    int ret=-1;
    cJSON *result=NULL;
 
-   pthread_cond_t *exec_cond = NULL;
-   pthread_mutex_t *exec_lock = NULL;
+   pthread_cond_t *exec_cond;
+   pthread_mutex_t *exec_lock;
    
    exec_cond=malloc(sizeof(pthread_cond_t));
    exec_lock=malloc(sizeof(pthread_mutex_t));
@@ -207,8 +204,8 @@ cJSON *pythonPluginServer_exec_cmd(char *module, char *function, void *data, int
    ret=_pythonPluginServer_add_to_cmd_queue(e);
    e=NULL;
 
-   struct timeval tv = {0,0};
-   struct timespec ts = {0,0};
+   struct timeval tv;
+   struct timespec ts;
    gettimeofday(&tv, NULL);
    ts.tv_sec = tv.tv_sec + 10; // timeout de 10 secondes
    ts.tv_nsec = 0;
@@ -265,9 +262,8 @@ mea_error_t pythonPluginServer_add_cmd(char *module, void *data, int l_data)
    pythonPlugin_cmd_t *e=NULL;
    int ret=ERROR;
    e=(pythonPlugin_cmd_t *)malloc(sizeof(pythonPlugin_cmd_t));
-   if(!e) {
+   if(!e)
       return ERROR;
-   }
    e->python_module=NULL;
    e->python_function=NULL;
    e->data=NULL;
@@ -306,8 +302,8 @@ pythonPluginServer_add_cmd_clean_exit:
 
 cJSON *call_pythonPlugin(char *module, char *function, int type, PyObject *data_dict, int reload_flag)
 {
-   PyObject *pName=NULL, *pModule=NULL, *pFunc=NULL;
-   PyObject *pArgs=NULL, *pValue=NULL;
+   PyObject *pName, *pModule=NULL, *pFunc;
+   PyObject *pArgs, *pValue;
 
    PyErr_Clear();
 
@@ -333,7 +329,7 @@ cJSON *call_pythonPlugin(char *module, char *function, int type, PyObject *data_
    else {
       Py_INCREF(pModule);
       
-      char str_module_py[255]="";
+      char str_module_py[255];
       
       strcpy(str_module_py,plugin_path);
       strcat(str_module_py,"/");
@@ -477,7 +473,7 @@ void _pythonPluginServer_clean_threadState(void *data)
 
 void *_pythonPlugin_thread(void *data)
 {
-   int ret=0;
+   int ret;
    
    pythonPlugin_cmd_t *e=NULL;
    PyThreadState *mainThreadState, *myThreadState=NULL;
@@ -510,7 +506,7 @@ void *_pythonPlugin_thread(void *data)
    
    mea_api_init(); // initialisation du module mea mis à disposition du plugin
 
-   int16_t pass=0;
+   int16_t pass;
    
    while(1) {
       process_heartbeat(_pythonPluginServer_monitoring_id);
@@ -756,7 +752,7 @@ int start_pythonPluginServer(int my_id, void *data, char *errmsg, int l_errmsg)
 {
    struct pythonPluginServer_start_stop_params_s *pythonPluginServer_start_stop_params = (struct pythonPluginServer_start_stop_params_s *)data;
 
-   char err_str[256]="", notify_str[256]="";
+   char err_str[256], notify_str[256];
 
    if(appParameters_get("PLUGINPATH", pythonPluginServer_start_stop_params->params_list)) {
       setPythonPluginPath(appParameters_get("PLUGINPATH", pythonPluginServer_start_stop_params->params_list));
@@ -764,7 +760,7 @@ int start_pythonPluginServer(int my_id, void *data, char *errmsg, int l_errmsg)
       _pythonPluginServer_thread_id=pythonPluginServer();
       if(_pythonPluginServer_thread_id==NULL) {
 #ifdef _POSIX_SOURCE
-         char *ret=NULL;
+         char *ret;
 #else
          int ret;
 #endif

@@ -5,8 +5,8 @@
 //
 //
 
-#ifndef mea_internal_api_h
-#define mea_internal_api_h
+#ifndef mea_python_api_h
+#define mea_python_api_h
 
 #ifdef __APPLE__
 #include <Python/Python.h>
