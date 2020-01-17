@@ -5,9 +5,18 @@
 //  Created by Patrice Dietsch on 04/06/13.
 //
 //
-#include "pythonPluginServer.h"
-#include "cJSON.h"
+#ifdef __APPLE__
+#include <Python/Python.h>
+#else
+#include <Python.h>
+#endif
+
+#include <stdio.h>
+
 #include "mea_plugins_utils.h"
+
+#include "cJSON.h"
+#include "pythonPluginServer.h"
 
 
 int plugin_fireandforget_function_json(char *module, int type, cJSON *data)

@@ -9,19 +9,12 @@
 #define __interface_type_002_h
 
 #include <signal.h>
-/*
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
-*/
+
 #include "mea_verbose.h"
 #include "xbee.h"
 
 #include "interfacesServer.h"
 #include "xPLServer.h"
-#include "pythonPluginServer.h"
 
 #define INTERFACE_TYPE_002 200
 
@@ -85,7 +78,7 @@ struct interface_type_002_data_s
 
 typedef struct plugin_commissionning_queue_elem_s
 {
-   PyObject      *parameters;
+//   PyObject      *parameters;
 } plugin_commissionning_queue_elem_t;
 
 

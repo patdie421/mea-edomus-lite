@@ -5,12 +5,6 @@
 //  Created by Patrice Dietsch on 04/11/2013.
 //
 //
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
-
 #include <stdio.h>
 #include <termios.h>
 #include <inttypes.h>
@@ -20,7 +14,6 @@
 #include <signal.h>
 #include <dlfcn.h>
 
-#include "globals.h"
 #include "configuration.h"
 
 #include "tokens_da.h"

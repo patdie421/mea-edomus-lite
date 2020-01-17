@@ -58,8 +58,6 @@ struct enocean_callback_data_s // donnee "userdata" pour les callbacks
 
 struct xpl_callback_data_s
 {
-   PyThreadState  *mainThreadState;
-   PyThreadState  *myThreadState;
 };
 
 
@@ -961,8 +959,6 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
       }
       goto clean_exit;
    }
-   xpl_callback_data->mainThreadState=NULL;
-   xpl_callback_data->myThreadState=NULL;
 
    start_stop_params->i003->xPL_callback_data=xpl_callback_data;
    start_stop_params->i003->xPL_callback2=_interface_type_003_xPL_callback2;

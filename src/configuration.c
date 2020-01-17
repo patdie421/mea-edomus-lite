@@ -5,8 +5,9 @@
 #include <string.h>
 
 #include "configuration.h"
+
 #include "cJSON.h"
-#include "mea_verbose.h"
+
 
 cJSON *appParameters = NULL;
 

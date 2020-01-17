@@ -4,6 +4,7 @@
 //  Created by Patrice DIETSCH on 08/07/12.
 //  Copyright (c) 2012 -. All rights reserved.
 //
+
 #ifdef __APPLE__
 #include <Python/Python.h>
 #else
@@ -29,8 +30,8 @@
 #include <execinfo.h>
 #include <sys/resource.h>
 
-#include "globals.h"
 #include "macros.h"
+#include "globals.h"
 
 #include "tokens.h"
 #include "tokens_da.h"

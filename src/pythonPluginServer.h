@@ -6,32 +6,13 @@
 //
 #ifndef __pythonPluginServer_h
 #define __pythonPluginServer_h
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
 
 #include <pthread.h>
 
+#include "mea_plugins_utils.h"
+
 #include "cJSON.h"
 #include "mea_error.h"
-
-/*
-#define DEBUG_PyEval_AcquireLock(id, last_time) { \
-   printf("CHRONO : Demande Lock par %s a %u ms\n",(id),start_chrono((last_time))); \
-   PyEval_AcquireLock(); \
-   fprintf(stderr,"CHRONO : Lock obtenu par %s apres %u ms\n",(id),take_chrono((last_time))); \
-}
-
-#define DEBUG_PyEval_ReleaseLock(id, last_time) { \
-   PyEval_ReleaseLock(); \
-   fprintf(stderr,"CHRONO : Liberation Lock par %s apres %u\n",(id), take_chrono((last_time))); \
-}
-*/
-
-//typedef enum {XBEEDATA=1, XPLMSG=2, COMMISSIONNING=3, ENOCEANDATA=4, GENERICSERIALDATA=5, DATAFROMSENSOR=6 } pythonPlugin_type;
-typedef enum {XBEEDATA=1, XPLMSG=2, COMMISSIONNING=3, DATAFROMSENSOR=6, XPLMSG_JSON=12, DATAFROMSENSOR_JSON=16, CUSTOM_JSON=30 } pythonPlugin_type;
 
 
 struct pythonPluginServer_start_stop_params_s

@@ -22,21 +22,22 @@
 #include <sys/wait.h>
 #include <errno.h>
 
-#include "globals.h"
+#include "httpServer.h"
 
 #include "mea_verbose.h"
-#include "configuration.h"
-#include "httpServer.h"
-#include "mongoose.h"
 #include "mea_string_utils.h"
 #include "mea_queue.h"
-#include "xPLServer.h"
+#include "mea_rest_api.h"
+#include "mea_sockets_utils.h"
+
+#include "configuration.h"
+
 #include "tokens.h"
 #include "tokens_da.h"
-#include "mea_sockets_utils.h"
 #include "cJSON.h"
-#include "mea_rest_api.h"
 
+#include "mongoose.h"
+#include "xPLServer.h"
 #include "processManager.h"
 #include "automator.h"
 #include "automatorServer.h"

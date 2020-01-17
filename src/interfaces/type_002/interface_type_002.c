@@ -4,12 +4,6 @@
  *  Copyright 2012 -. All rights reserved.
  *
  */
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
-
 #include "interface_type_002.h"
 
 #include <stdio.h>
@@ -1433,12 +1427,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    if(!ret) {
       int n=snprintf(dev,sizeof(buff)-1,"/dev/%s",buff);
       if(n<0 || n==(sizeof(buff)-1)) {
-#ifdef _POSIX_SOURCE
-         char *ret=NULL;
-#else
-         int ret;
-#endif
-         ret=strerror_r(errno, err_str, sizeof(err_str));
+         strerror_r(errno, err_str, sizeof(err_str));
          VERBOSE(2) {
             mea_log_printf("%s (%s) : snprintf - %s\n", ERROR_STR, __func__, err_str);
          }
@@ -1452,12 +1441,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
 
    xd=(xbee_xd_t *)malloc(sizeof(xbee_xd_t));
    if(!xd) {
-#ifdef _POSIX_SOURCE
-      char *ret=NULL;
-#else
-      int ret;
-#endif
-      ret=strerror_r(errno, err_str, sizeof(err_str));
+      strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
@@ -1466,12 +1450,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    
    fd=xbee_init(xd, dev, (int)speed);
    if (fd == -1) {
-#ifdef _POSIX_SOURCE
-      char *ret=NULL;
-#else
-      int ret;
-#endif
-      ret=strerror_r(errno, err_str, sizeof(err_str));
+      strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : init_xbee - Unable to open serial port (%s).\n", ERROR_STR, __func__, dev);
       }
@@ -1484,12 +1463,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
     */
    local_xbee=(xbee_host_t *)malloc(sizeof(xbee_host_t)); // description de l'xbee directement connecté
    if(!local_xbee) {
-#ifdef _POSIX_SOURCE
-      char *ret=NULL;
-#else
-      int ret;
-#endif
-      ret=strerror_r(errno, err_str, sizeof(err_str));
+      strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - %s.\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
@@ -1556,12 +1530,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    //
    commissionning_callback_params=(struct callback_commissionning_data_s *)malloc(sizeof(struct callback_commissionning_data_s));
    if(!commissionning_callback_params) {
-#ifdef _POSIX_SOURCE
-      char *ret=NULL;
-#else
-      int ret;
-#endif
-      ret=strerror_r(errno, err_str, sizeof(err_str));
+      strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - %s", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }
@@ -1577,12 +1546,7 @@ int start_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    //
    xpl_callback_params=(struct callback_xpl_data_s *)malloc(sizeof(struct callback_xpl_data_s));
    if(!xpl_callback_params) {
-#ifdef _POSIX_SOURCE
-      char *ret=NULL;
-#else
-      int ret;
-#endif
-      ret=strerror_r(errno, err_str, sizeof(err_str));
+      strerror_r(errno, err_str, sizeof(err_str));
       VERBOSE(2) {
          mea_log_printf("%s (%s) : %s - %s\n", ERROR_STR, __func__, MALLOC_ERROR_STR, err_str);
       }

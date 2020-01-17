@@ -49,8 +49,6 @@ char *valid_genericserial_plugin_params[]={"S:PLUGIN","S:PARAMETERS", NULL};
 
 struct callback_xpl_data_s
 {
-   PyThreadState  *mainThreadState;
-   PyThreadState  *myThreadState;
 };
 
 struct genericserial_thread_params_s
@@ -789,8 +787,6 @@ int start_interface_type_006(int my_id, void *data, char *errmsg, int l_errmsg)
       }
       goto clean_exit;
    }
-   xpl_callback_params->mainThreadState=NULL;
-   xpl_callback_params->myThreadState=NULL;
 
    start_stop_params->i006->xPL_callback_data=xpl_callback_params;
    start_stop_params->i006->xPL_callback2=_interface_type_006_xPL_callback2;

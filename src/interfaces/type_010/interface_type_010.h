@@ -7,7 +7,6 @@
 //
 #ifndef __interface_type_010_h
 #define __interface_type_010_h
-#include "pythonPluginServer.h"
 
 #include <signal.h>
 

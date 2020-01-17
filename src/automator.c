@@ -24,15 +24,9 @@
 #include <ctype.h>
 
 #include "automator.h"
-#include "automatorServer.h"
-#include "processManager.h"
-#include "datetimeServer.h"
-#include "xPLServer.h"
 
-#include "globals.h"
-
-#include "tokens.h"
-#include "tokens_da.h"
+#include "cJSON.h"
+#include "uthash.h"
 
 #include "mea_verbose.h"
 #include "mea_queue.h"
@@ -42,12 +36,17 @@
 #include "mea_sockets_utils.h"
 #include "mea_xpl.h"
 
-#include "cJSON.h"
-#include "uthash.h"
+#include "tokens.h"
+#include "tokens_da.h"
+
+#include "automatorServer.h"
+#include "processManager.h"
+#include "datetimeServer.h"
+#include "xPLServer.h"
+
 
 #define DEBUG_AUTOMATOR
 #define USEALLOCA
-
 
 /*
 # les règles sont évaluées dans l'ordre. Par defaut toutes les règles sont évaluées l'une après l'autre
@@ -218,7 +217,6 @@ static int startupStatus = 1;
 static int automator_print_inputs_table(void);
 static struct inputs_table_s *automator_add_to_inputs_table(char *name, struct value_s *v, struct timespec *t);
 static struct inputs_table_s *_automator_add_to_inputs_table(char *name, struct value_s *v, struct timespec *t, int16_t updatestate, int16_t forcestate);
-//static int reset_inputs_table_change_flag();
 static int automator_evalStr(char *str, struct value_s *v, cJSON *xplMsgJson);
 
 static void automator_printRuleDebugInfo(cJSON *rule, char *msg);
@@ -833,7 +831,7 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
       break;
       case F_DATE: {
          // date pour comparaison : $date['2001-11-12 18:31:01'] 
-         struct tm tm={0,0,0,0,0,0,0,0,0,0,NULL};
+         struct tm tm = {0,0,0,0,0,0,0,0,0,0,NULL};
          struct value_s r=VAULE_S_INIT_UNDEF;
          int ret=automator_evalStr(params, &r, xplMsgJson);
          if(ret==0 && r.type==1 && r.val.strval[19]) {
@@ -1863,7 +1861,7 @@ int timespec2str(char *buf, uint len, struct timespec *ts) {
    // 2016-02-29 15:37:15.699650549
    int ret;
    int l;
-   struct tm t;
+   struct tm t = {0,0,0,0,0,0,0,0,0,0,NULL};
 
    if (localtime_r(&(ts->tv_sec), &t) == NULL) {
       return -1;

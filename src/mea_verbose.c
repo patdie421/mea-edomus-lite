@@ -186,7 +186,7 @@ void mea_log_printf(char const* fmt, ...)
 
    char date_str[256];
    time_t t = 0;
-   struct tm t_tm = {0,0};
+   struct tm t_tm = {0,0,0,0,0,0,0,0,0,0,NULL};
 
    t=time(NULL);
 

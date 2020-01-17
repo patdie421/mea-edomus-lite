@@ -13,12 +13,13 @@
 
 #define DEBUGFLAG 1
 
+#include "datetimeServer.h"
+
 #include "mea_verbose.h"
 #include "mea_string_utils.h"
 #include "uthash.h"
 #include "sunriset.h"
-//DBSERVER #include "dbServer.h"
-#include "datetimeServer.h"
+
 
 #define ONESECONDNS 1000000000L
 
@@ -32,7 +33,7 @@ time_t mea_sunrise_value = 0;
 time_t mea_sunset_value = 0;
 time_t mea_twilightstart_value = 0;
 time_t mea_twilightend_value = 0;
-struct tm mea_tm = {0,0};
+struct tm mea_tm = {0,0,0,0,0,0,0,0,0,0,NULL};
 
 // gestion des dates et heures
 enum datetime_type_e { DATETIME_TIME, DATETIME_DATE };
@@ -174,7 +175,7 @@ struct tm *mea_localtime_r(const time_t *timep, struct tm *result)
 
 int mea_timeFromStr(char *str, time_t *t)
 {
-   struct tm tm = {0,0};
+   struct tm tm = {0,0,0,0,0,0,0,0,0,0,NULL};
    struct mea_datetime_value_s *e = NULL;
 
    HASH_FIND_STR(mea_datetime_values_cache, str, e);
@@ -228,7 +229,7 @@ static int mea_clean_datetime_values_cache()
 
 static int update_datetime_values_cache()
 {
-   struct tm tm={0,0};
+   struct tm tm = {0,0,0,0,0,0,0,0,0,0,NULL};
 
    if(mea_datetime_values_cache) {
       struct mea_datetime_value_s  *current, *tmp;
@@ -254,7 +255,7 @@ static int getSunRiseSetOrTwilingStartEnd(double lon, double lat, time_t *_start
    double start=0.0, end=0.0;
    int  rs=-1;
 
-   struct tm tm_gmt={0,0};
+   struct tm tm_gmt = {0,0,0,0,0,0,0,0,0,0,NULL};
 
    time_t t = mea_time_value;
    localtime_r(&t, &tm_gmt); // pour récupérer la date du jour (les h, m et s ne nous intéressent pas);
@@ -287,7 +288,7 @@ static int getSunRiseSetOrTwilingStartEnd(double lon, double lat, time_t *_start
          *_start = t;
  
          DEBUG_SECTION {
-            struct tm tm_local;
+            struct tm tm_local = {0,0,0,0,0,0,0,0,0,0,NULL};
             localtime_r(&t, &tm_local);
             fprintf(stderr,"start(%d) : %02d:%02d\n", twilight, tm_local.tm_hour, tm_local.tm_min);
          }
@@ -304,7 +305,7 @@ static int getSunRiseSetOrTwilingStartEnd(double lon, double lat, time_t *_start
          *_end = t;
          
          DEBUG_SECTION {
-            struct tm tm_local;
+            struct tm tm_local = {0,0,0,0,0,0,0,0,0,0,NULL};
             localtime_r(&t, &tm_local);
             fprintf(stderr,"end(%d) :  %02d:%02d\n", twilight, tm_local.tm_hour, tm_local.tm_min);
          }
@@ -717,8 +718,6 @@ void *_timeServer_thread(void *data)
 
       pthread_testcancel();
    }
-   
-//   pthread_exit(NULL);
 
    return NULL;
 }

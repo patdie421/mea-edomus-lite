@@ -266,13 +266,13 @@ void _managed_processes_process_jobs_scheduling()
       return;
    }
 
-   time_t cur_time;
-   struct tm *tm;
+   time_t cur_time=0;
+   struct tm *tm=NULL;
 
    time(&cur_time);
    tm = localtime(&cur_time);
-   char errmsg[256];
-   int16_t l_errormsg=80;
+   char errmsg[256]="";
+   int16_t l_errormsg=0;
   
    int i=0; 
    for(;i<managed_processes.max_processes;i++) {
@@ -286,7 +286,7 @@ void _managed_processes_process_jobs_scheduling()
             _match_scheduling_number(mps->schedule_command_strings_ptr[3], tm->tm_mon) >=0 && // MM
             _match_scheduling_number(mps->schedule_command_strings_ptr[4], tm->tm_wday)>=0 ) { // DayOfWeek
             if(managed_processes.processes_table[i]->status != RUNNING) {
-               l_errormsg=80;
+               l_errormsg=sizeof(errmsg)-1;
                process_run_task(i, errmsg, l_errormsg);
             }
          }
@@ -1286,7 +1286,7 @@ int _managed_processes_processes_check_heartbeats(int doRecovery)
             managed_processes.processes_table[i]->heartbeat_status=0;
             if(doRecovery) {
                if(managed_processes.processes_table[i]->heartbeat_counter<=5) {
-                  char errmsg[256];
+                  char errmsg[256]="";
                   if(managed_processes.processes_table[i]->heartbeat_recovery) {
                      int ret=0;
                      
@@ -1297,7 +1297,7 @@ int _managed_processes_processes_check_heartbeats(int doRecovery)
                      
                      VERBOSE(5) mea_log_printf("%s (%s) : watchdog recovery started for %s\n", INFO_STR, __func__, managed_processes.processes_table[i]->name);
 
-                     ret=managed_processes.processes_table[i]->heartbeat_recovery(i, managed_processes.processes_table[i]->heartbeat_recovery_data, errmsg, sizeof(errmsg));
+                     ret=managed_processes.processes_table[i]->heartbeat_recovery(i, managed_processes.processes_table[i]->heartbeat_recovery_data, errmsg, sizeof(errmsg)-1);
 
                      VERBOSE(5) mea_log_printf("%s (%s) : watchdog recovery done for %s (ret=%d)\n", INFO_STR, __func__, managed_processes.processes_table[i]->name, ret);
 

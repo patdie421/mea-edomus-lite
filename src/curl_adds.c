@@ -35,9 +35,12 @@ size_t curl_result_get(void *ptr, size_t size, size_t nmemb, struct curl_result_
    size_t new_len = cr->l + size*nmemb;
 
    tmp = realloc(cr->p, new_len+1);
-
    if (tmp == NULL) {
-      DEBUG_SECTION mea_log_printf("%s (%s) : realloc() failed\n", DEBUG_STR, __func__);
+      DEBUG_SECTION {
+         char err_str[256]="";
+         strerror_r(errno, err_str, sizeof(err_str)-1);
+         mea_log_printf("%s (%s) : realloc() failed - %s\n", DEBUG_STR, __func__, err_str);
+      }
       return -1;
    }
    else {

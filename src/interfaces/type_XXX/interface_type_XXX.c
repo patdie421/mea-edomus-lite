@@ -20,8 +20,6 @@
 #include <errno.h>
 #include <pthread.h>
 
-#include "globals.h"
-#include "consts.h"
 #include "tokens.h"
 #include "tokens_da.h"
 #include "cJSON.h"

@@ -5,12 +5,6 @@
 //  Created by Patrice DIETSCH on 29/11/12.
 //
 //
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

@@ -21,10 +21,13 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-#include "mea_string_utils.h"
-#include "automator.h"
 #include "mea_eval.h"
+
+#include "mea_string_utils.h"
 #include "uthash.h"
+
+#include "automator.h"
+
 
 static void *mea_eval_userdata = NULL;
 static getVarVal_f _getVarVal = NULL;

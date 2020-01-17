@@ -3,13 +3,6 @@
 //  Created by Patrice DIETSCH on 17/10/12.
 //
 //
-/*
-#ifdef __APPLE__
-#include <Python/Python.h>
-#else
-#include <Python.h>
-#endif
-*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -708,7 +701,7 @@ void *xPLServer_thread(void *data)
          VERBOSE(2) {
             char err_str[256]="";
             strerror_r(errno, err_str, sizeof(err_str)-1);
-            mea_log_printf("%s (%s) : mea_xPLReadMessage - %s\n", ERROR_STR, __func__,err_str);
+            mea_log_printf("%s (%s) : mea_xPLReadMessage - %s\n", ERROR_STR, __func__, err_str);
          }
       }
       if(mea_test_timer(&xPLnoMsgReceivedTimer)==0) {
@@ -880,7 +873,6 @@ int start_xPLServer(int my_id, void *data, char *errmsg, int l_errmsg)
          VERBOSE(1) {
             mea_log_printf("%s (%s) : can't start xpl server - %s\n",ERROR_STR,__func__,err_str);
          }
-
          return -1;
       }
       else {

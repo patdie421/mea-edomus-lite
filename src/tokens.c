@@ -25,7 +25,6 @@ struct token_s
    const char *str;          /*!< pointeur sur la chaine du token */
    const enum token_id_e id; /*!< identifiant du token   */
 };
-#define TOKEN_S_INIT  { .str="", .id=_UNKNOWN }
 
 static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le dernier élément doit être {NULL, 0}
 
@@ -207,7 +206,6 @@ struct tokens_index_s
    int16_t *index_by_string;
    int16_t *index_by_id;
 };
-#define TOKEN_INDEX_S_INIT { .nb_tokens=0, .index_by_string=NULL, .index_by_id=NULL }
 
 struct tokens_index_s *tokens_index=NULL;
 
@@ -301,7 +299,7 @@ char *get_token_string_by_id(enum token_id_e id)
    
    int16_t start = 0;
    int16_t end = tokens_index->nb_tokens - 1;
-   int16_t _cmpres = 0;
+   int16_t _cmpres;
    do {
       int16_t middle=(end + start) / 2;
       if(middle<0)
@@ -324,16 +322,14 @@ char *get_token_string_by_id(enum token_id_e id)
 
 enum token_id_e get_token_id_by_string(char *str)
 {
-   if(!str) {
+   if(!str)
       return _UNKNOWN;
-   }
 
    if(tokens_index==NULL) {
 #if TOKENS_AUTOINIT == 1
       init_tokens();
-      if(tokens_index==NULL) {
+      if(tokens_index==NULL)
          return _UNKNOWN;
-      }
 #else
       return _UNKNOWN;
 #endif
@@ -349,20 +345,16 @@ enum token_id_e get_token_id_by_string(char *str)
    do {
       int16_t middle = (end + start) / 2;
       
-      if(middle<0) {
+      if(middle<0)
          return -1;
-      }
       
       _cmpres=mea_strcmplower2((char *)tokens_list[tokens_index->index_by_string[middle]].str, str);
-      if(_cmpres==0) {
+      if(_cmpres==0)
          return tokens_list[tokens_index->index_by_string[middle]].id;
-      }
-      if(_cmpres<0) {
+      if(_cmpres<0)
          start=middle+1;
-      }
-      if(_cmpres>0) {
+      if(_cmpres>0)
          end=middle-1;
-      }
    }
    while(start<=end);
    
@@ -430,9 +422,8 @@ void init_tokens()
       HASH_ADD_KEYPTR( hh_token_by_id, tokens_hash_by_id, &(s->token->id), sizeof(s->token->id), s );
    }
 
-   if(_token_max_string_size>0) {
+   if(_token_max_string_size>0)
       _token_string_buf=(char *)malloc(_token_max_string_size+1);
-   }
 }
 
 
@@ -507,9 +498,8 @@ enum token_id_e get_token_id_by_string(char *str)
 {
    struct tokens_hash_s *s = NULL;
 
-   if(!str) {
+   if(!str)
       return _UNKNOWN;
-   }
       
    if(tokens_hash_by_id == NULL) {
 #if TOKENS_AUTOINIT == 1
@@ -519,9 +509,8 @@ enum token_id_e get_token_id_by_string(char *str)
 #endif
    }
 
-   if(_token_string_buf == NULL) {
+   if(_token_string_buf == NULL)
       return _UNKNOWN;
-   }
 
 //   strncpy(_token_string_buf, str, _token_max_string_size-1);
    strncpy(_token_string_buf, str, _token_max_string_size);
@@ -530,9 +519,8 @@ enum token_id_e get_token_id_by_string(char *str)
 
    HASH_FIND(hh_token_by_string, tokens_hash_by_string, _token_string_buf, strlen(_token_string_buf), s);
 
-   if(s) {
+   if(s)
       return s->token->id;
-   }
 
    return _UNKNOWN;
 }

@@ -1,20 +1,23 @@
-#include "interface_type_003_pairing.h"
-#include "interfacesServer.h"
-#include "interface_type_003.h"
-
+#include <stdio.h>
 #include <signal.h>
 #include <stdint.h>
 
-#include "enocean.h"
-#include "cJSON.h"
+#include "interface_type_003_pairing.h"
+
+#include "interface_type_003.h"
+
 #include "mea_verbose.h"
 #include "mea_timer.h"
+#include "mea_verbose.h"
+#include "mea_plugins_utils.h"
 #include "parameters_utils.h"
 #include "tokens.h"
 #include "tokens_da.h"
-#include "mea_verbose.h"
-#include "mea_plugins_utils.h"
 
+#include "enocean.h"
+#include "cJSON.h"
+
+#include "interfacesServer.h"
 
 int16_t enocean_teachinout(enocean_ed_t *ed, int16_t addr_dec, uint8_t *data, uint16_t l_data, uint8_t *eep, int16_t teach) /* TO TEST */
 {

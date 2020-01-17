@@ -12,6 +12,8 @@
 #endif
 #include <stdio.h>
 
+#include "mea_python_json_utils.h"
+
 #include "cJSON.h"
 #include "interfacesServer.h"
 
@@ -20,7 +22,7 @@
 #include "tokens_da.h"
 
 #include "pythonPluginServer.h"
-#include "mea_python_json_utils.h"
+
 
 
 static PyObject *mea_jsonObjectToPyDict(cJSON *j)

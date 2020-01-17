@@ -20,13 +20,13 @@
 #include <string.h>
 #include <pthread.h>
 
-#include "globals.h"
+#include "pythonPluginServer.h"
+#include "mea_plugins_utils.h"
 
 #include "mea_queue.h"
 #include "tokens.h"
 #include "configuration.h"
 
-#include "pythonPluginServer.h"
 #include "mea_python_json_utils.h"
 #include "mea_python_api.h"
 #include "processManager.h"

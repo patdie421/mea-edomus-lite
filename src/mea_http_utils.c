@@ -11,8 +11,8 @@
 #include <termios.h>
 
 #include "mea_http_utils.h"
-#include "mea_sockets_utils.h"
 
+#include "mea_sockets_utils.h"
 #include "mea_verbose.h"
 #include "cJSON.h"
 #include "tokens.h"

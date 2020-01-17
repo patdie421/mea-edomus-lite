@@ -11,18 +11,19 @@
 #endif
 #include <stdio.h>
 
-#include "globals.h"
-#include "xPLServer.h"
+#include "mea_python_api.h"
+
 #include "tokens.h"
 #include "tokens_da.h"
 #include "xbee.h"
 #include "enocean.h"
 #include "mea_verbose.h"
-
 #include "mea_python_json_utils.h"
+
+#include "xPLServer.h"
 #include "interfacesServer.h"
 
-#include "mea_python_api.h"
+
 
 
 PyObject *mea_memory=NULL;

@@ -1,5 +1,4 @@
 #ifdef ASPLUGIN
-#include <Python.h>
 #include <stdio.h>
 #include <dlfcn.h>
 
