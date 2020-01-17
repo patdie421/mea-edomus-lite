@@ -24,6 +24,9 @@ const char *_fatal_error_str="FATAL ERROR";
 const char *_warning_str="WARNING";
 const char *_malloc_error_str="malloc error";
 
+char *stopped_successfully_str="stopped successfully";
+char *launched_successfully_str="launched successfully";
+
 
 void set_verbose_level(int level)
 /**

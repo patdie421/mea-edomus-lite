@@ -20,7 +20,7 @@
 #include "xPLServer.h"
 #include "mea_verbose.h"
 #include "globals.h"
-#include "consts.h"
+
 #include "mea_queue.h"
 #include "tokens.h"
 #include "configuration.h"

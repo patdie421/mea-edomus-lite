@@ -30,7 +30,7 @@
 #include "xPLServer.h"
 
 #include "globals.h"
-#include "consts.h"
+
 #include "tokens.h"
 #include "tokens_da.h"
 
@@ -234,14 +234,14 @@ static int getBoolean(char *s, char *b)
    *b=-1;
 
    if((s[0]=='1' && s[1]==0)   ||
-      strcmp(s, c_true_str)==0 ||
-      strcmp(s, c_high_str)==0) {
+      strcmp(s, TRUE_STR_C)==0 ||
+      strcmp(s, HIGH_STR_C)==0) {
       *b=1;
       return 0;
    }
    else if((s[0]=='0' && s[1]==0)    ||
-           strcmp(s, c_false_str)==0 ||
-           strcmp(s, c_low_str)==0) {
+           strcmp(s, FALSE_STR_C)==0 ||
+           strcmp(s, LOW_STR_C)==0) {
       *b=0;
       return 0;
    }
@@ -353,18 +353,18 @@ static int value_toStr(struct value_s *v, char *str, int l_str, enum conversion_
    else {
       if(flag & HIGHLOW) {
          if(v->val.booleanval==0) {
-            strncpy(str, c_low_str, l_str-1);
+            strncpy(str, LOW_STR_C, l_str-1);
          }
          else {
-            strncpy(str, c_high_str, l_str-1);
+            strncpy(str, HIGH_STR_C, l_str-1);
          }
       }
       else if(flag & TRUEFALSE) {
          if(v->val.booleanval==0) {
-            strncpy(str, c_false_str,l_str-1);
+            strncpy(str, FALSE_STR_C,l_str-1);
          }
          else {
-            strncpy(str, c_true_str,l_str-1);
+            strncpy(str, TRUE_STR_C,l_str-1);
          }
       }
       else {
@@ -857,18 +857,18 @@ static int function_call(char *str, struct value_s *v, cJSON *xplMsgJson)
             switch(fn) {
                case F_TOHLSTR:
                   if(r.val.booleanval==0) {
-                     strncpy(v->val.strval, c_low_str, sizeof(v->val.strval)-1);
+                     strncpy(v->val.strval, LOW_STR_C, sizeof(v->val.strval)-1);
                   } 
                   else {
-                     strncpy(v->val.strval, c_high_str, sizeof(v->val.strval)-1);
+                     strncpy(v->val.strval, HIGH_STR_C, sizeof(v->val.strval)-1);
                   } 
                   break;
                case F_TOTFSTR:
                   if(r.val.booleanval==0) {
-                     strncpy(v->val.strval, c_false_str, sizeof(v->val.strval)-1);
+                     strncpy(v->val.strval, FALSE_STR_C, sizeof(v->val.strval)-1);
                   }
                   else {
-                     strncpy(v->val.strval, c_true_str, sizeof(v->val.strval)-1);
+                     strncpy(v->val.strval, TRUE_STR_C, sizeof(v->val.strval)-1);
                   }
                   break;
             }

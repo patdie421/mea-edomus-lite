@@ -18,7 +18,6 @@
 #include <termios.h>
 
 #include "globals.h"
-#include "consts.h"
 #include "macros.h"
 #include "tokens.h"
 #include "tokens_da.h"

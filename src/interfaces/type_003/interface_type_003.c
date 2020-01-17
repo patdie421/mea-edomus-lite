@@ -22,7 +22,6 @@
 
 #include "macros.h"
 #include "globals.h"
-#include "consts.h"
 #include "tokens.h"
 #include "tokens_da.h"
 #include "mea_verbose.h"

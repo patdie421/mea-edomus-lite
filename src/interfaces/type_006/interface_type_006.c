@@ -18,7 +18,7 @@
 #include <pthread.h>
 
 #include "globals.h"
-#include "consts.h"
+
 #include "serial.h"
 #include "tokens.h"
 #include "tokens_da.h"

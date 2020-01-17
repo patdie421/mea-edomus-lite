@@ -26,7 +26,6 @@
 
 #include "macros.h"
 #include "globals.h"
-#include "consts.h"
 
 #include "mea_string_utils.h"
 #include "mea_verbose.h"

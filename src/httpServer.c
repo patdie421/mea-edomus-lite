@@ -23,7 +23,7 @@
 #include <errno.h>
 
 #include "globals.h"
-#include "consts.h"
+
 #include "mea_verbose.h"
 #include "configuration.h"
 #include "httpServer.h"

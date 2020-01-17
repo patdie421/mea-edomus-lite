@@ -31,7 +31,6 @@
 
 #include "globals.h"
 #include "macros.h"
-#include "consts.h"
 
 #include "tokens.h"
 #include "tokens_da.h"
@@ -558,7 +557,7 @@ int main(int argc, const char * argv[])
       if(process_is_running(httpServer_monitoring_id)==RUNNING) {
          char response[512]="";
          // interrogation du serveur HTTP Interne pour heartbeat ... (voir le passage d'un parametre pour sécuriser ...)
-         gethttp(localhost_const, apiport, "/CMD/ping", response, sizeof(response)); 
+         gethttp("localhost", apiport, "/CMD/ping", response, sizeof(response)); 
       }
 
       // indicateur de fonctionnement de mea-edomus
