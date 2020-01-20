@@ -176,8 +176,6 @@ int mea_sendXplMsgJson(cJSON *xplMsgJson)
       return -1;
    }
 
-//   int retour=0;
-
    char *schema=NULL;
    char *target=NULL;
    char *source=NULL;
@@ -229,7 +227,7 @@ int mea_sendXplMsgJson(cJSON *xplMsgJson)
 uint16_t mea_sendXPLMessage2(cJSON *xplMsgJson)
 {
    char *str = NULL;
-   char deviceID[17]="";
+   char deviceID[256]="";
    xplRespQueue_elem_t *e=NULL;
    cJSON *j = NULL;
 
@@ -423,9 +421,9 @@ cJSON *xPLParser(const char* xplmsg, char *xpl_type, char *xpl_schema, char *xpl
 {
    int y=0, z=0, c=0;
    int w=0;
-   char xpl_section[35]="";
-   char xpl_name[17]="";
-   char xpl_value[129]="";
+   char xpl_section[256]="";
+   char xpl_name[256]="";
+   char xpl_value[256]="";
 
 #define XPL_IN_SECTION 0
 #define XPL_IN_NAME 1
@@ -525,10 +523,10 @@ cJSON *xPLParser(const char* xplmsg, char *xpl_type, char *xpl_schema, char *xpl
 
 void _rawXPLMessageHandler(char *s, int l)
 {
-   char type[35]="";
-   char schema[35]="";
-   char source[35]="";
-   char target[35]="";
+   char type[256]="";
+   char schema[256]="";
+   char source[256]="";
+   char target[256]="";
 
    process_update_indicator(_xplServer_monitoring_id, xpl_server_xplin_str, ++xplin_indicator);
 
@@ -565,31 +563,6 @@ void _rawXPLMessageHandler(char *s, int l)
       if(msg_json) {
          dispatchXPLMessageToInterfaces2(msg_json);
       }
-      
-/*
-      // on envoie tous les messages à l'automate (à lui de filtrer ...)
-      cJSON *xplMsgJson_automator = cJSON_Duplicate(msg_json, 1);
-      if(xplMsgJson_automator) {
-         if(automatorServer_add_msg(xplMsgJson_automator)==ERROR) {
-            DEBUG_SECTION mea_log_printf("%s (%s) : to automator error\n", DEBUG_STR, __func__);
-         }
-         else {
-            cJSON_Delete(xplMsgJson_automator);
-         }
-      }
-      else {
-         DEBUG_SECTION mea_log_printf("%s (%s) : can't duplicate json xpl message\n", DEBUG_STR, __func__);
-      }
-
-      // pour les autres on filtre un peu avant de transmettre pour traitement
-      // on ne traite que les cmnd au niveau des interfaces
-      if(strcmp(type, XPL_CMND_STR_C) != 0) {
-         cJSON_Delete(msg_json);
-         return;
-      }
-
-      dispatchXPLMessageToInterfaces2(msg_json);
-*/
    }
 }
 
@@ -654,7 +627,6 @@ void *xPLServer_thread(void *data)
    char *_xplWDMsg = "xpl-trig\n{\nhop=1\nsource=%s\ntarget=%s\n}\nwatchdog.basic\n{\ninterval=10\n}\n";
 
    mea_timer_t xPLWDSendMsgTimer;
-//   mea_init_timer(&xPLnoMsgReceivedTimer, 30, 1);
    mea_init_timer(&xPLWDSendMsgTimer, 10, 1);
 
    xplWDMsg=malloc(strlen(_xplWDMsg)-4 + 2*strlen(xpl_my_addr) + 1);
@@ -864,7 +836,7 @@ int start_xPLServer(int my_id, void *data, char *errmsg, int l_errmsg)
    char err_str[256]="";
    
    if(!set_xpl_address(xplServer_params->params_list)) {
-      strcpy(xpl_interface, appParameters_get("INTERFACE", xplServer_params->params_list));
+      strcpy(xpl_interface, appParameters_get(INTERNAL_STR_C, xplServer_params->params_list));
       _xplServer_monitoring_id=my_id;
       _xPLServer_thread_id=xPLServer();
 

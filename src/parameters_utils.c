@@ -14,7 +14,6 @@
 
 #include "uthash.h"
 #include "cJSON.h"
-#include "macros.h"
 #include "mea_verbose.h"
 
 #include "parameters_utils.h"

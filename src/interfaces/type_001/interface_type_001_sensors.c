@@ -15,7 +15,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include "globals.h"
 #include "mea_verbose.h"
 #include "mea_queue.h"
 #include "xPLServer.h"

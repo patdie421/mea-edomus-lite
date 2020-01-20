@@ -24,7 +24,7 @@
 #include "tokens_da.h"
 #include "cJSON.h"
 #include "mea_verbose.h"
-#include "macros.h"
+
 #include "mea_string_utils.h"
 #include "parameters_utils.h"
 #include "cJSON.h"

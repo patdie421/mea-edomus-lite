@@ -23,9 +23,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include "macros.h"
-#include "globals.h"
-
 #include "serial.h"
 #include "tokens.h"
 #include "tokens_da.h"
@@ -303,7 +300,7 @@ static int interface_type_007_data_to_plugin(interface_type_007_t *i007)
 }
 
 
-int haveFrameStartStr(interface_type_007_t *i007)
+static int haveFrameStartStr(interface_type_007_t *i007)
 {
    if(!i007->fstartstr || !i007->fstartstr[0]) {
       return -1;
@@ -319,7 +316,7 @@ int haveFrameStartStr(interface_type_007_t *i007)
 }
 
 
-int haveFrameEndStr(interface_type_007_t *i007)
+static int haveFrameEndStr(interface_type_007_t *i007)
 {
    if(!i007->fendstr || !i007->fendstr[0]) {
       return -1;
@@ -1048,8 +1045,9 @@ clean_exit:
 
 int stop_interface_type_007(int my_id, void *data, char *errmsg, int l_errmsg)
 {
-   if(!data)
+   if(!data) {
       return -1;
+   }
 
    struct interface_type_007_data_s *start_stop_params=(struct interface_type_007_data_s *)data;
    interface_type_007_t *i007=start_stop_params->i007;
@@ -1069,6 +1067,7 @@ int stop_interface_type_007(int my_id, void *data, char *errmsg, int l_errmsg)
 
    clean_interface_type_007_data_source(i007);
 
+   int ret=-1;
    if(i007->thread) {
       pthread_cancel(*(i007->thread));
 
@@ -1077,13 +1076,23 @@ int stop_interface_type_007(int my_id, void *data, char *errmsg, int l_errmsg)
          if(i007->thread_is_running) {
             usleep(100);
          }
-         else
+         else {
+            ret=0;
             break;
+         }
       }
       DEBUG_SECTION mea_log_printf("%s (%s) : %s, end after %d loop(s)\n", DEBUG_STR, __func__, i007->name, 100-counter);
 
       free(i007->thread);
       i007->thread=NULL;
+      
+      if(ret==0) {
+         VERBOSE(2) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, i007->name, stopped_successfully_str);
+      }
+      else {
+         VERBOSE(2) mea_log_printf("%s (%s) : %s can't cancel thread.\n", INFO_STR, __func__, i007->name);
+      }
+      return ret;
    }
 
    return 0;

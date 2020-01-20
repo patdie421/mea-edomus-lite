@@ -17,7 +17,6 @@
 #include <pthread.h>
 
 #include "mea_verbose.h"
-#include "globals.h"
 #include "comio2.h"
 #include "mea_queue.h"
 #include "arduino_pins.h"

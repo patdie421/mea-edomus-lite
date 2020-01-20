@@ -20,12 +20,10 @@
 #include "cJSON.h"
 #include "uthash.h"
 
-#include "globals.h"
 
 #include "tokens.h"
 #include "tokens_da.h"
 
-#include "macros.h"
 #include "parameters_utils.h"
 #include "processManager.h"
 

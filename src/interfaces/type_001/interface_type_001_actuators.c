@@ -15,8 +15,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include "globals.h"
-
 #include "mea_verbose.h"
 #include "arduino_pins.h"
 #include "parameters_utils.h"

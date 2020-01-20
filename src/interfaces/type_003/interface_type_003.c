@@ -20,8 +20,6 @@
 #include <errno.h>
 #include <pthread.h>
 
-#include "macros.h"
-#include "globals.h"
 #include "tokens.h"
 #include "tokens_da.h"
 #include "mea_verbose.h"
@@ -771,48 +769,59 @@ int stop_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
    }
 
    struct interface_type_003_data_s *start_stop_params=(struct interface_type_003_data_s *)data;
+   interface_type_003_t *i003=start_stop_params->i003;
 
-   VERBOSE(1) mea_log_printf("%s (%s) : %s shutdown thread ... ", INFO_STR, __func__, start_stop_params->i003->name);
+   VERBOSE(1) mea_log_printf("%s (%s) : %s shutdown thread ... ", INFO_STR, __func__, i003->name);
 
-   if(start_stop_params->i003->xPL_callback_data) {
-      free(start_stop_params->i003->xPL_callback_data);
-      start_stop_params->i003->xPL_callback_data=NULL;
+   if(i003->xPL_callback_data) {
+      free(i003->xPL_callback_data);
+      i003->xPL_callback_data=NULL;
    }
 
-   if(start_stop_params->i003->xPL_callback2)
-      start_stop_params->i003->xPL_callback2=NULL;
+   if(i003->xPL_callback2)
+      i003->xPL_callback2=NULL;
 
-   if(start_stop_params->i003->ed->enocean_callback_data) {
-      free(start_stop_params->i003->ed->enocean_callback_data);
-      start_stop_params->i003->ed->enocean_callback_data=NULL;
+   if(i003->ed->enocean_callback_data) {
+      free(i003->ed->enocean_callback_data);
+      i003->ed->enocean_callback_data=NULL;
    }
 
-   if(start_stop_params->i003->thread) {
-      pthread_cancel(*(start_stop_params->i003->thread));
+   int ret=-1;
+   if(i003->thread) {
+      pthread_cancel(*(i003->thread));
 
       int counter=100;
       while(counter--) {
-         if(start_stop_params->i003->thread_is_running) {
+         if(i003->thread_is_running) {
             // pour éviter une attente "trop" active
             usleep(100); // will sleep for 10 ms
          }
          else {
+            ret=0;
             break;
          }
       }
-      DEBUG_SECTION mea_log_printf("%s (%s) : %s, fin après %d itération(s)\n",DEBUG_STR, __func__,start_stop_params->i003->name,100-counter);
+      DEBUG_SECTION mea_log_printf("%s (%s) : %s, fin après %d itération(s)\n",DEBUG_STR, __func__,i003->name,100-counter);
 
-      free(start_stop_params->i003->thread);
-      start_stop_params->i003->thread=NULL;
+      free(i003->thread);
+      i003->thread=NULL;
    }
 
-   enocean_close(start_stop_params->i003->ed);
-   enocean_clean_ed(start_stop_params->i003->ed);
+   enocean_close(i003->ed);
+   enocean_clean_ed(i003->ed);
 
-   if(start_stop_params->i003->ed) {
-      free(start_stop_params->i003->ed);
-      start_stop_params->i003->ed=NULL;
+   if(i003->ed) {
+      free(i003->ed);
+      i003->ed=NULL;
    }
+
+   if(ret==0) {
+      VERBOSE(2) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, i003->name, stopped_successfully_str);
+   }
+   else {
+      VERBOSE(2) mea_log_printf("%s (%s) : %s can't cancel thread.\n", INFO_STR, __func__, i003->name);
+   }
+   return ret;
 
    return 0;
 }
@@ -847,13 +856,13 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
  * \return    0 = Ok ou -1 = KO
  **/
 {
-   char dev[256];
-   char buff[256];
+   char dev[256]="";
+   char buff[256]="";
    speed_t speed;
 
    int fd=-1;
-   int err;
-   int ret;
+   int err=-1;
+   int ret=-1;
 
    enocean_ed_t *ed=NULL;
 
@@ -866,7 +875,7 @@ int start_interface_type_003(int my_id, void *data, char *errmsg, int l_errmsg)
    int interface_nb_parameters=0;
    parsed_parameters_t *interface_parameters=NULL;
 
-   char err_str[128];
+   char err_str[128]="";
 
    ret=get_dev_and_speed((char *)start_stop_params->i003->dev, buff, sizeof(buff), &speed);
    if(!ret) {

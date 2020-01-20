@@ -30,7 +30,6 @@
 #include <execinfo.h>
 #include <sys/resource.h>
 
-#include "macros.h"
 #include "globals.h"
 
 #include "tokens.h"

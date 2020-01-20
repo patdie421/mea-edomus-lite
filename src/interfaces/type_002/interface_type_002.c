@@ -18,9 +18,6 @@
 #include <errno.h>
 #include <pthread.h>
 
-#include "macros.h"
-#include "globals.h"
-
 #include "mea_string_utils.h"
 #include "mea_verbose.h"
 #include "mea_queue.h"
@@ -1297,74 +1294,83 @@ int stop_interface_type_002(int my_id, void *data, char *errmsg, int l_errmsg)
    }
 
    struct interface_type_002_data_s *start_stop_params=(struct interface_type_002_data_s *)data;
+   interface_type_002_t *i002=start_stop_params->i002;
 
    VERBOSE(1) mea_log_printf("%s  (%s) : %s shutdown thread ... ", INFO_STR, __func__, start_stop_params->i002->name);
 
-   if(start_stop_params->i002->xPL_callback_data) {
-      DBG_FREE(start_stop_params->i002->xPL_callback_data);
-      start_stop_params->i002->xPL_callback_data=NULL;
+   if(i002->xPL_callback_data) {
+      DBG_FREE(i002->xPL_callback_data);
+      i002->xPL_callback_data=NULL;
    }
    
-   if(start_stop_params->i002->xPL_callback2) {
-      start_stop_params->i002->xPL_callback2=NULL;
+   if(i002->xPL_callback2) {
+      i002->xPL_callback2=NULL;
    }
 
-   if(start_stop_params->i002->xd &&
-      start_stop_params->i002->xd->dataflow_callback_data &&
-     (start_stop_params->i002->xd->dataflow_callback_data == start_stop_params->i002->xd->io_callback_data)) {
-      DBG_FREE(start_stop_params->i002->xd->dataflow_callback_data);
-      start_stop_params->i002->xd->io_callback_data=NULL;
-      start_stop_params->i002->xd->dataflow_callback_data=NULL;
+   if(i002->xd &&
+      i002->xd->dataflow_callback_data &&
+     (i002->xd->dataflow_callback_data == i002->xd->io_callback_data)) {
+      DBG_FREE(i002->xd->dataflow_callback_data);
+      i002->xd->io_callback_data=NULL;
+      i002->xd->dataflow_callback_data=NULL;
    }
    else {
-      if(start_stop_params->i002->xd && start_stop_params->i002->xd->dataflow_callback_data) {
-         DBG_FREE(start_stop_params->i002->xd->dataflow_callback_data);
-         start_stop_params->i002->xd->dataflow_callback_data=NULL;
+      if(i002->xd && i002->xd->dataflow_callback_data) {
+         DBG_FREE(i002->xd->dataflow_callback_data);
+         i002->xd->dataflow_callback_data=NULL;
       }
-      if(start_stop_params->i002->xd && start_stop_params->i002->xd->io_callback_data) {
-         DBG_FREE(start_stop_params->i002->xd->io_callback_data);
-         start_stop_params->i002->xd->io_callback_data=NULL;
+      if(i002->xd && i002->xd->io_callback_data) {
+         DBG_FREE(i002->xd->io_callback_data);
+         i002->xd->io_callback_data=NULL;
       }
    }
 
-   if(start_stop_params->i002->thread) {
-      pthread_cancel(*(start_stop_params->i002->thread));
+   int ret=-1;
+   if(i002->thread) {
+      pthread_cancel(*(i002->thread));
 
       int counter=100;
       while(counter--) {
-         if(start_stop_params->i002->thread_is_running) {  // pour éviter une attente "trop" active
+         if(i002->thread_is_running) {  // pour éviter une attente "trop" active
             usleep(100); // will sleep for 10 ms
          }
          else {
+            ret=0;
             break;
          }
       }
       DEBUG_SECTION mea_log_printf("%s (%s) : %s, fin après %d itération(s)\n",DEBUG_STR, __func__,start_stop_params->i002->name,100-counter);
 
-      DBG_FREE(start_stop_params->i002->thread);
-      start_stop_params->i002->thread=NULL;
+      DBG_FREE(i002->thread);
+      i002->thread=NULL;
    }
 
-   xbee_remove_commissionning_callback(start_stop_params->i002->xd);
+   xbee_remove_commissionning_callback(i002->xd);
 
-   if(start_stop_params->i002->xd && start_stop_params->i002->xd->commissionning_callback_data) {
-      DBG_FREE(start_stop_params->i002->xd->commissionning_callback_data);
-      start_stop_params->i002->xd->commissionning_callback_data=NULL;
+   if(i002->xd && i002->xd->commissionning_callback_data) {
+      DBG_FREE(i002->xd->commissionning_callback_data);
+      i002->xd->commissionning_callback_data=NULL;
    }
 
-   xbee_close(start_stop_params->i002->xd);
+   xbee_close(i002->xd);
 
-   if(start_stop_params->i002->xd) {
-      DBG_FREE(start_stop_params->i002->xd);
-      start_stop_params->i002->xd=NULL;
+   if(i002->xd) {
+      DBG_FREE(i002->xd);
+      i002->xd=NULL;
    }
 
-   if(start_stop_params->i002->local_xbee) {
-      DBG_FREE(start_stop_params->i002->local_xbee);
-      start_stop_params->i002->local_xbee=NULL;
+   if(i002->local_xbee) {
+      DBG_FREE(i002->local_xbee);
+      i002->local_xbee=NULL;
    }
 
-   return 0;
+   if(ret==0) {
+      VERBOSE(2) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, i002->name, stopped_successfully_str);
+   }
+   else {
+      VERBOSE(2) mea_log_printf("%s (%s) : %s can't cancel thread.\n", INFO_STR, __func__, i002->name);
+   }
+   return ret;
 }
 
 

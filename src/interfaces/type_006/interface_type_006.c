@@ -17,14 +17,11 @@
 #include <errno.h>
 #include <pthread.h>
 
-#include "globals.h"
-
 #include "serial.h"
 #include "tokens.h"
 #include "tokens_da.h"
 #include "mea_string_utils.h"
 #include "mea_verbose.h"
-#include "macros.h"
 #include "parameters_utils.h"
 
 #include "mea_plugins_utils.h"

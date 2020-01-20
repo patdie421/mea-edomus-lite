@@ -25,9 +25,6 @@
 #include <sys/stat.h>
 #include <netinet/in.h>
 
-#include "macros.h"
-#include "globals.h"
-
 #include "tokens.h"
 #include "tokens_da.h"
 #include "mea_verbose.h"
@@ -1191,37 +1188,47 @@ int stop_interface_type_010(int my_id, void *data, char *errmsg, int l_errmsg)
    }
 
    struct interface_type_010_data_s *start_stop_params=(struct interface_type_010_data_s *)data;
+   interface_type_010_t *i010=start_stop_params->i010;
 
    VERBOSE(1) mea_log_printf("%s (%s) : %s shutdown thread ... ", INFO_STR, __func__, start_stop_params->i010->name);
 
-   if(start_stop_params->i010->xPL_callback2)
-      start_stop_params->i010->xPL_callback2=NULL;
+   if(i010->xPL_callback2)
+      i010->xPL_callback2=NULL;
       
-   if(start_stop_params->i010->xPL_callback_data) {
-      free(start_stop_params->i010->xPL_callback_data);
-      start_stop_params->i010->xPL_callback_data=NULL;
+   if(i010->xPL_callback_data) {
+      free(i010->xPL_callback_data);
+      i010->xPL_callback_data=NULL;
    }
 
-   clean_interface_type_010_data_source(start_stop_params->i010);
+   clean_interface_type_010_data_source(i010);
 
-   if(start_stop_params->i010->thread) {
-      pthread_cancel(*(start_stop_params->i010->thread));
+   int ret=-1;
+   if(i010->thread) {
+      pthread_cancel(*(i010->thread));
 
       int counter=100;
       while(counter--) {
-         if(start_stop_params->i010->thread_is_running) {
+         if(i010->thread_is_running) {
             usleep(100);
          }
-         else
+         else {
+            ret=0;
             break;
+         }
       }
-      DEBUG_SECTION mea_log_printf("%s (%s) : %s, end after %d loop(s)\n", DEBUG_STR, __func__, start_stop_params->i010->name, 100-counter);
+      DEBUG_SECTION mea_log_printf("%s (%s) : %s, end after %d loop(s)\n", DEBUG_STR, __func__, i010->name, 100-counter);
 
-      free(start_stop_params->i010->thread);
-      start_stop_params->i010->thread=NULL;
+      free(i010->thread);
+      i010->thread=NULL;
    }
 
-   return 0;
+   if(ret==0) {
+      VERBOSE(2) mea_log_printf("%s (%s) : %s %s.\n", INFO_STR, __func__, i010->name, stopped_successfully_str);
+   }
+   else {
+      VERBOSE(2) mea_log_printf("%s (%s) : %s can't cancel thread.\n", INFO_STR, __func__, i010->name);
+   }
+   return ret;
 }
 
 

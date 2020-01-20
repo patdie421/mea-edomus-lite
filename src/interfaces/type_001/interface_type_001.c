@@ -17,8 +17,6 @@
 #include <getopt.h>
 #include <termios.h>
 
-#include "globals.h"
-#include "macros.h"
 #include "tokens.h"
 #include "tokens_da.h"
 
