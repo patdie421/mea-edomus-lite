@@ -1200,7 +1200,7 @@ static int automator_setinputvalue(cJSON *parameters)
       return -1;
    }
 
-   cJSON *name = cJSON_GetObjectItem(parameters, "name");
+   cJSON *name = cJSON_GetObjectItem(parameters, NAME_STR_C);
    if(!name) {
       return -1;
    }

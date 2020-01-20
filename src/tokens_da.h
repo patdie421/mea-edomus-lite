@@ -113,6 +113,7 @@ struct tokens_strings_da_s
    char *api_metric_str_c;
    char *plugin_parameters_str_c;
    char *meapath_str_c;
+   char *usersfile_str_c;
 };
 
 extern struct tokens_strings_da_s *tokens_string_da;
@@ -214,6 +215,7 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define TODBFLAG_STR_C                   tokens_string_da->todbflag_str_c
 #define PLUGIN_PARAMETERS_STR_C          tokens_string_da->plugin_parameters_str_c
 #define MEAPATH_STR_C                    tokens_string_da->meapath_str_c
+#define USERSFILE_STR_C                  tokens_string_da->usersfile_str_c
 
 #else
 
@@ -314,7 +316,7 @@ extern struct tokens_strings_da_s *tokens_string_da;
 #define TODBFLAG_STR_C                   get_token_string_by_id(TODBFLAG_ID)
 #define PLUGIN_PARAMETERS_STR_C          get_token_string_by_id(PLUGIN_PARAMETERS_ID)
 #define MEAPATH_STR_C                    get_token_string_by_id(MEAPATH_ID)
-
+#define USERSFILE_STR_C                  get_token_string_by_id(USERSFILE_ID)
 #endif
 
 int16_t init_strings_da(void);

@@ -149,6 +149,7 @@ static struct token_s tokens_list[]={ /// liste de tous les tokens connus. Le de
    {"METRIC",                     API_METRIC_ID},
    {"plugin_paramters",           PLUGIN_PARAMETERS_ID},
    {"MEAPATH",                    MEAPATH_ID},
+   {"USERSFILE",                  USERSFILE_ID},
 
    {NULL,0}
 };

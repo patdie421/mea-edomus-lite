@@ -127,6 +127,7 @@ int16_t init_strings_da()
    tokens_string_da->todbflag_str_c                   = get_token_string_by_id(TODBFLAG_ID);
    tokens_string_da->plugin_parameters_str_c          = get_token_string_by_id(PLUGIN_PARAMETERS_ID);
    tokens_string_da->meapath_str_c                    = get_token_string_by_id(MEAPATH_ID);
+   tokens_string_da->usersfile_str_c                  = get_token_string_by_id(USERSFILE_ID);
 
 #endif
    return 0;
